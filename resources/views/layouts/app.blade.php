@@ -4,7 +4,7 @@
         modeGelap: localStorage.getItem('tema') === 'gelap',
         sidebarTerlipat: false,
         kunciRbac: true,
-        jabatanAktif: localStorage.getItem('jabatan_aktif') || '{{ session('kode_jabatan', 'SPV_KEUANGAN') }}',
+        jabatanAktif: localStorage.getItem('jabatan_aktif') || '{{ session('kode_jabatan', 'SPV_OPERASIONAL') }}',
         
         get labelJabatan() {
           const peta = {
@@ -22,7 +22,7 @@
           return peta[this.jabatanAktif] || this.jabatanAktif;
         },
 
-        // Matriks Hak Akses RBAC Sesuai PRD 1.1
+        // Matriks Hak Akses RBAC Sesuai PRD 1.1 & Diagram Alur Peran
         matriksAkses: {
           SUPER_ADMIN: ['dashboard', 'admin_akun'],
           DIREKTUR_MANAGER: ['dashboard', 'laporan_neraca', 'laporan_laba_rugi'],
@@ -39,11 +39,10 @@
             'dashboard', 'ap_pengeluaran', 'ap_rilisan', 'ap_pembelian', 'list_so', 'gudang_so', 'gudang_stok'
           ],
           SPV_OPERASIONAL: [
-            'dashboard', 'kirim_sj', 'kirim_ongkos', 'gudang_stok', 'gudang_opname',
-            'armada_truk', 'armada_driver', 'bengkel_servis'
+            'dashboard', 'kirim_ongkos', 'gudang_opname', 'armada_driver', 'armada_truk', 'kirim_sj', 'ops_kso'
           ],
           DISPATCHER: [
-            'dashboard', 'kirim_sj', 'kirim_ongkos', 'armada_truk', 'armada_driver'
+            'dashboard', 'armada_truk', 'kirim_sj', 'armada_driver'
           ],
           PENGAWAS_DRIVER: [
             'dashboard', 'armada_driver'
@@ -52,7 +51,7 @@
             'dashboard', 'gudang_stok', 'gudang_opname'
           ],
           PENGAWAS_KENDARAAN: [
-            'dashboard', 'bengkel_servis'
+            'dashboard', 'bengkel_perbaikan', 'bengkel_pembelian_sparepart', 'bengkel_sparepart'
           ]
         },
 

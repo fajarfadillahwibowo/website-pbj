@@ -138,38 +138,52 @@
         </div>
 
         <!-- 5. Operasional, Logistik & Armada -->
-        <div x-show="bisaAkses('kirim_sj') || bisaAkses('kirim_ongkos') || bisaAkses('gudang_stok') || bisaAkses('gudang_opname') || bisaAkses('armada_truk') || bisaAkses('armada_driver') || bisaAkses('bengkel_servis')">
+        <div x-show="bisaAkses('kirim_sj') || bisaAkses('kirim_ongkos') || bisaAkses('gudang_stok') || bisaAkses('gudang_opname') || bisaAkses('armada_truk') || bisaAkses('armada_driver') || bisaAkses('ops_kso') || bisaAkses('bengkel_perbaikan') || bisaAkses('bengkel_pembelian_sparepart') || bisaAkses('bengkel_sparepart')">
             <div x-show="!sidebarTerlipat" class="px-2 mb-1.5 flex items-center justify-between">
                 <span class="text-[10px] font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-widest">Operasional & Logistik</span>
             </div>
             <div class="space-y-0.5">
-                <a x-show="bisaAkses('kirim_sj')" href="{{ route('operasional.pengiriman.surat_jalan') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
-                    <svg class="w-4 h-4 shrink-0 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate">Surat Jalan Dispatcher</span>
-                </a>
                 <a x-show="bisaAkses('kirim_ongkos')" href="{{ route('operasional.pengiriman.ongkos_angkut') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate">Tarif Ongkos Angkut</span>
+                    <span x-show="!sidebarTerlipat" class="truncate">Data Ongkos Angkut</span>
+                </a>
+                <a x-show="bisaAkses('gudang_opname')" href="{{ route('operasional.gudang.opname') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+                    <svg class="w-4 h-4 shrink-0 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                    <span x-show="!sidebarTerlipat" class="truncate">Opname Gudang</span>
                 </a>
                 <a x-show="bisaAkses('gudang_stok')" href="{{ route('operasional.gudang.stok') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/></svg>
                     <span x-show="!sidebarTerlipat" class="truncate" x-text="jabatanAktif === 'STAFF_AP' ? 'List Gudang SO' : 'Gudang & Stok Semen'">Gudang & Stok Semen</span>
                 </a>
-                <a x-show="bisaAkses('gudang_opname')" href="{{ route('operasional.gudang.opname') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
-                    <svg class="w-4 h-4 shrink-0 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate">Modul Stock Opname</span>
+                <a x-show="bisaAkses('armada_driver')" href="{{ route('operasional.armada.driver') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+                    <svg class="w-4 h-4 shrink-0 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    <span x-show="!sidebarTerlipat" class="truncate">Data Karyawan (Driver)</span>
                 </a>
                 <a x-show="bisaAkses('armada_truk')" href="{{ route('operasional.armada.kendaraan') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate">Armada Truk Kendaraan</span>
+                    <span x-show="!sidebarTerlipat" class="truncate">Data Kendaraan</span>
                 </a>
-                <a x-show="bisaAkses('armada_driver')" href="{{ route('operasional.armada.driver') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
-                    <svg class="w-4 h-4 shrink-0 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate">Data Driver & Kesiapan</span>
+                <a x-show="bisaAkses('kirim_sj')" href="{{ route('operasional.pengiriman.surat_jalan') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+                    <svg class="w-4 h-4 shrink-0 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1"/></svg>
+                    <span x-show="!sidebarTerlipat" class="truncate">Pengiriman (Surat Jalan)</span>
                 </a>
-                <a x-show="bisaAkses('bengkel_servis')" href="{{ route('operasional.bengkel.perbaikan') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+                <a x-show="bisaAkses('ops_kso')" href="{{ route('operasional.kso') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+                    <svg class="w-4 h-4 shrink-0 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    <span x-show="!sidebarTerlipat" class="truncate">Data KSO (Kerja Sama)</span>
+                </a>
+
+                <!-- Sub-Modul Khusus Bengkel -->
+                <a x-show="bisaAkses('bengkel_perbaikan')" href="{{ route('operasional.bengkel.perbaikan') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate">SPK Perbaikan & Bengkel</span>
+                    <span x-show="!sidebarTerlipat" class="truncate">Perbaikan Kendaraan (SPK)</span>
+                </a>
+                <a x-show="bisaAkses('bengkel_pembelian_sparepart')" href="{{ route('operasional.bengkel.pembelian_sparepart') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+                    <svg class="w-4 h-4 shrink-0 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                    <span x-show="!sidebarTerlipat" class="truncate">Pembelian Sparepart</span>
+                </a>
+                <a x-show="bisaAkses('bengkel_sparepart')" href="{{ route('operasional.bengkel.sparepart') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+                    <svg class="w-4 h-4 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7c-2 0-3 1-3 3zm0 5h16"/></svg>
+                    <span x-show="!sidebarTerlipat" class="truncate">List Sparepart</span>
                 </a>
             </div>
         </div>
