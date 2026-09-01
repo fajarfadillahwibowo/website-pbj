@@ -54,11 +54,15 @@ class AutentikasiSeeder extends Seeder
             ['kode' => 'KRY-002', 'nama' => 'Dewi Anggraeni', 'id_jabatan' => 3, 'kategori' => 'staf', 'ktp' => '3216010000000002', 'telp' => '0812-9876-0002'],
             ['kode' => 'KRY-003', 'nama' => 'Rian Hidayat', 'id_jabatan' => 4, 'kategori' => 'staf', 'ktp' => '3216010000000003', 'telp' => '0812-9876-0003'],
             ['kode' => 'KRY-004', 'nama' => 'Bambang Wijaya', 'id_jabatan' => 5, 'kategori' => 'staf', 'ktp' => '3216010000000004', 'telp' => '0812-9876-0004'],
-            ['kode' => 'KRY-005', 'nama' => 'Agus Suryanto', 'id_jabatan' => 6, 'kategori' => 'driver', 'ktp' => '3216010000000005', 'telp' => '0812-9876-0005'],
+            ['kode' => 'KRY-005', 'nama' => 'Agus Suryanto', 'id_jabatan' => 6, 'kategori' => 'staf', 'ktp' => '3216010000000005', 'telp' => '0812-9876-0005'],
             ['kode' => 'KRY-006', 'nama' => 'Hendra Gunawan', 'id_jabatan' => 7, 'kategori' => 'gudang', 'ktp' => '3216010000000006', 'telp' => '0812-9876-0006'],
             ['kode' => 'KRY-007', 'nama' => 'Ahmad Supriyadi', 'id_jabatan' => 8, 'kategori' => 'manajemen', 'ktp' => '3216010000000007', 'telp' => '0812-9876-0007'],
             ['kode' => 'KRY-008', 'nama' => 'Wahyu Pratama', 'id_jabatan' => 9, 'kategori' => 'staf', 'ktp' => '3216010000000008', 'telp' => '0812-9876-0008'],
             ['kode' => 'KRY-009', 'nama' => 'Doni Kurniawan', 'id_jabatan' => 10, 'kategori' => 'teknisi', 'ktp' => '3216010000000009', 'telp' => '0812-9876-0009'],
+            // Data Driver Khusus
+            ['kode' => 'DRV-001', 'nama' => 'Joko Susanto', 'id_jabatan' => 6, 'kategori' => 'driver', 'ktp' => '3216010000000010', 'telp' => '0813-1122-3344'],
+            ['kode' => 'DRV-002', 'nama' => 'Rahmat Hidayat', 'id_jabatan' => 6, 'kategori' => 'driver', 'ktp' => '3216010000000011', 'telp' => '0813-5566-7788'],
+            ['kode' => 'DRV-003', 'nama' => 'Sugeng Supriyadi', 'id_jabatan' => 6, 'kategori' => 'driver', 'ktp' => '3216010000000012', 'telp' => '0813-9988-1122'],
         ];
 
         foreach ($karyawanList as $k) {
@@ -69,10 +73,10 @@ class AutentikasiSeeder extends Seeder
                     'id_jabatan' => $k['id_jabatan'],
                     'kategori_karyawan' => $k['kategori'],
                     'no_identitas' => $k['ktp'],
-                    'alamat' => 'Jl. Kawasan Industri No. 1, Cikarang',
+                    'alamat' => 'Jl. Logistik Cikarang Blok B4',
                     'no_hp' => $k['telp'],
                     'status_karyawan' => 'aktif',
-                    'tanggal_mulai_kerja' => '2023-01-01'
+                    'tanggal_mulai_kerja' => '2024-01-01'
                 ]
             );
         }
