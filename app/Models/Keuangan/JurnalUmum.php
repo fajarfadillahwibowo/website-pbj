@@ -10,12 +10,22 @@ class JurnalUmum extends Model
     use HasFactory;
 
     protected $table = 'jurnal_umum';
+    protected $primaryKey = 'id_jurnal';
+
+    const CREATED_AT = 'dibuat_pada';
+    const UPDATED_AT = null;
 
     protected $fillable = [
-        'nomor_jurnal',
+        'no_referensi',
         'tanggal_jurnal',
+        'kode_akun',
+        'posisi',
+        'nominal',
         'keterangan',
-        'total_debit',
-        'total_kredit',
     ];
+
+    public function akun()
+    {
+        return $this->belongsTo(KodeAkun::class, 'kode_akun', 'kode_akun');
+    }
 }

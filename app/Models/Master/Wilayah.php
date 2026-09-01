@@ -9,11 +9,21 @@ class Wilayah extends Model
 {
     use HasFactory;
 
-    protected $table = 'wilayah';
+    protected $table = 'data_wilayah';
+    protected $primaryKey = 'id_wilayah';
+
+    const CREATED_AT = 'dibuat_pada';
+    const UPDATED_AT = null;
 
     protected $fillable = [
+        'kode_wilayah',
         'nama_wilayah',
-        'kode_area',
-        'keterangan',
+        'provinsi',
+        'kota_kabupaten',
     ];
+
+    public function daftarCustomer()
+    {
+        return $this->hasMany(Customer::class, 'id_wilayah', 'id_wilayah');
+    }
 }

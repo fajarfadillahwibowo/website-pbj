@@ -74,8 +74,23 @@
       <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Masukkan kredensial akun untuk mengakses ruang kerja Anda.</p>
     </div>
 
+    <!-- Pesan Kesalahan Validasi Login -->
+    @if ($errors->any())
+      <div class="mb-5 p-3.5 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-xs text-red-600 dark:text-red-400 flex items-start gap-2.5">
+        <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <div>
+          @foreach ($errors->all() as $error)
+            <div>{{ $error }}</div>
+          @endforeach
+        </div>
+      </div>
+    @endif
+
     <!-- Form Input Autentikasi -->
-    <form action="{{ route('dashboard') }}" method="GET" class="space-y-4">
+    <form action="{{ route('auth.proses_login') }}" method="POST" class="space-y-4">
+      @csrf
       
       <!-- Input Nama Pengguna -->
       <div>

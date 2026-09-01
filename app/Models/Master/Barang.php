@@ -9,13 +9,22 @@ class Barang extends Model
 {
     use HasFactory;
 
-    protected $table = 'barang';
+    protected $table = 'data_semen';
+    protected $primaryKey = 'kode_semen';
+    public $incrementing = false;
+    protected $keyType = 'string';
+
+    const CREATED_AT = 'dibuat_pada';
+    const UPDATED_AT = 'diperbarui_pada';
 
     protected $fillable = [
-        'kode_barang',
-        'nama_barang',
-        'kategori', // Semen Zak / Curah
-        'satuan',
-        'harga_jual_dasar',
+        'kode_semen',
+        'nama_produk',
+        'jenis_semen',
+        'kemasan',
+        'berat_kg',
+        'harga_jual_default',
+        'harga_beli_default',
+        'stok_total',
     ];
 }

@@ -10,25 +10,34 @@ class HakAksesJabatan extends Model
     use HasFactory;
 
     protected $table = 'hak_akses_jabatan';
+    protected $primaryKey = 'id_hak_akses';
+
+    const CREATED_AT = 'dibuat_pada';
+    const UPDATED_AT = 'diperbarui_pada';
 
     protected $fillable = [
-        'jabatan_id',
-        'nama_modul',
-        'bisa_baca',
-        'bisa_tambah',
-        'bisa_ubah',
-        'bisa_hapus',
+        'id_jabatan',
+        'id_modul',
+        'boleh_lihat',
+        'boleh_tambah',
+        'boleh_edit',
+        'boleh_hapus',
     ];
 
     protected $casts = [
-        'bisa_baca' => 'boolean',
-        'bisa_tambah' => 'boolean',
-        'bisa_ubah' => 'boolean',
-        'bisa_hapus' => 'boolean',
+        'boleh_lihat' => 'boolean',
+        'boleh_tambah' => 'boolean',
+        'boleh_edit' => 'boolean',
+        'boleh_hapus' => 'boolean',
     ];
 
     public function jabatan()
     {
-        return $this->belongsTo(Jabatan::class, 'jabatan_id');
+        return $this->belongsTo(Jabatan::class, 'id_jabatan', 'id_jabatan');
+    }
+
+    public function modul()
+    {
+        return $this->belongsTo(Modul::class, 'id_modul', 'id_modul');
     }
 }
