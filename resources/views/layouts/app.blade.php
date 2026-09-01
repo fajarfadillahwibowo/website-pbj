@@ -4,7 +4,7 @@
         modeGelap: localStorage.getItem('tema') === 'gelap',
         sidebarTerlipat: false,
         kunciRbac: true,
-        jabatanAktif: localStorage.getItem('jabatan_aktif') || '{{ session('kode_jabatan', 'SPV_KEUANGAN') }}',
+        jabatanAktif: localStorage.getItem('jabatan_aktif') || '{{ session('kode_jabatan', 'SPV_OPERASIONAL') }}',
         
         get labelJabatan() {
           const peta = {
@@ -39,8 +39,7 @@
             'dashboard', 'ap_pembelian', 'ap_pengeluaran', 'ap_rilisan', 'gudang_stok'
           ],
           SPV_OPERASIONAL: [
-            'dashboard', 'kirim_sj', 'kirim_ongkos', 'gudang_stok', 'gudang_opname',
-            'armada_truk', 'armada_driver', 'bengkel_perbaikan', 'bengkel_pembelian_sparepart', 'bengkel_sparepart'
+            'dashboard', 'kirim_ongkos', 'gudang_opname', 'armada_driver', 'armada_truk', 'kirim_sj', 'ops_kso'
           ],
           DISPATCHER: [
             'dashboard', 'kirim_sj', 'kirim_ongkos', 'armada_truk', 'armada_driver'
