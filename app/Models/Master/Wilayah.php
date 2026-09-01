@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Models\Master;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Wilayah extends Model
+{
+    use HasFactory;
+
+    protected $table = 'wilayah';
+
+    protected $fillable = [
+        'nama_wilayah',
+        'kode_area',
+        'keterangan',
+    ];
+}
