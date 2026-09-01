@@ -186,13 +186,18 @@
 
     <!-- Daftar Akun Demo Cepat -->
     <div class="mt-6 pt-5 border-t border-[#EEF0F4] dark:border-[#252837]">
-      <div class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-2.5">Akun Demo Pengujian:</div>
+      <div class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-2.5">Akun Demo Masuk (Sandi: password123):</div>
       <div class="flex flex-wrap gap-1.5">
-        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400">superadmin</span>
-        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400">spv_keuangan</span>
-        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400">staff_ar</span>
-        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400">direktur</span>
-        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400">dispatcher</span>
+        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium">superadmin</span>
+        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium">spv_keuangan</span>
+        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium">staff_ar</span>
+        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium">staff_ap</span>
+        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium">dispatcher</span>
+        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium">pengawas_driver</span>
+        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium">spv_gudang</span>
+        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium">direktur</span>
+        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium">spv_operasional</span>
+        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium">pengawas_kendaraan</span>
       </div>
     </div>
 
