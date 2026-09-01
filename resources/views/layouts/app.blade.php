@@ -26,7 +26,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('judul', @yield('title', 'Sistem Informasi Akuntansi & Distribusi Semen'))</title>
+    <title>@yield('judul', 'Sistem Informasi Akuntansi & Distribusi Semen')</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
