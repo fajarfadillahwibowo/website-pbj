@@ -27,16 +27,16 @@
           SUPER_ADMIN: ['dashboard', 'admin_akun'],
           DIREKTUR_MANAGER: ['dashboard', 'laporan_neraca', 'laporan_laba_rugi'],
           SPV_KEUANGAN: [
-            'dashboard', 'master_customer', 'master_barang', 'master_wilayah', 'master_karyawan',
-            'ar_faktur', 'ar_piutang', 'ar_deposit', 'ap_pembelian', 'ap_pengeluaran', 'ap_rilisan',
-            'akun_coa', 'akun_jurnal', 'akun_aset', 'laporan_neraca', 'laporan_laba_rugi'
+            'dashboard', 'ar_faktur', 'master_customer', 'ar_piutang', 'ar_deposit',
+            'master_barang', 'akun_coa', 'akun_aset', 'master_wilayah', 'jenis_aset',
+            'list_so', 'ap_pembelian', 'master_karyawan'
           ],
           STAFF_AR: [
             'dashboard', 'master_customer', 'master_barang',
             'ar_faktur', 'ar_piutang', 'ar_deposit'
           ],
           STAFF_AP: [
-            'dashboard', 'ap_pembelian', 'ap_pengeluaran', 'ap_rilisan', 'gudang_stok'
+            'dashboard', 'ap_pengeluaran', 'ap_rilisan', 'ap_pembelian', 'list_so', 'gudang_so', 'gudang_stok'
           ],
           SPV_OPERASIONAL: [
             'dashboard', 'kirim_sj', 'kirim_ongkos', 'gudang_stok', 'gudang_opname',

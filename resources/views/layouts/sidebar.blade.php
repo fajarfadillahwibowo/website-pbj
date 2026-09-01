@@ -62,16 +62,20 @@
             </div>
             <div class="space-y-0.5">
                 <a x-show="bisaAkses('master_customer')" href="{{ route('master.customer.index') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
-                    <svg class="w-4 h-4 shrink-0 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate">Customer & Toko</span>
+                    <svg class="w-4 h-4 shrink-0 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    <span x-show="!sidebarTerlipat" class="truncate">Data Toko Bangunan</span>
                 </a>
                 <a x-show="bisaAkses('master_barang')" href="{{ route('master.barang.index') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate">Data Semen / Barang</span>
+                    <span x-show="!sidebarTerlipat" class="truncate">Data Barang</span>
                 </a>
                 <a x-show="bisaAkses('master_wilayah')" href="{{ route('master.wilayah.index') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate">Wilayah & Zonasi</span>
+                    <span x-show="!sidebarTerlipat" class="truncate">Data Wilayah</span>
+                </a>
+                <a x-show="bisaAkses('master_customer')" href="{{ route('master.customer.index') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+                    <svg class="w-4 h-4 shrink-0 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span x-show="!sidebarTerlipat" class="truncate">Data Customer</span>
                 </a>
                 <a x-show="bisaAkses('master_karyawan')" href="{{ route('master.karyawan.index') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2H9.17A3.001 3.001 0 0112 14z"/></svg>
@@ -81,38 +85,42 @@
         </div>
 
         <!-- 4. Keuangan & AR/AP -->
-        <div x-show="bisaAkses('ar_faktur') || bisaAkses('ar_piutang') || bisaAkses('ar_deposit') || bisaAkses('ap_pembelian') || bisaAkses('ap_pengeluaran') || bisaAkses('akun_coa') || bisaAkses('akun_jurnal')">
+        <div x-show="bisaAkses('ar_faktur') || bisaAkses('ar_piutang') || bisaAkses('ar_deposit') || bisaAkses('ap_pembelian') || bisaAkses('list_so') || bisaAkses('ap_pengeluaran') || bisaAkses('akun_coa') || bisaAkses('akun_jurnal') || bisaAkses('akun_aset') || bisaAkses('jenis_aset')">
             <div x-show="!sidebarTerlipat" class="px-2 mb-1.5 flex items-center justify-between">
                 <span class="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Keuangan & AR/AP</span>
             </div>
             <div class="space-y-0.5">
                 <a x-show="bisaAkses('ar_faktur')" href="{{ route('keuangan.ar.faktur') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate">Faktur Penjualan (AR)</span>
+                    <span x-show="!sidebarTerlipat" class="truncate">Penjualan</span>
                 </a>
                 <a x-show="bisaAkses('ar_piutang')" href="{{ route('keuangan.ar.piutang') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate">List Piutang Pelanggan</span>
+                    <span x-show="!sidebarTerlipat" class="truncate">List Piutang</span>
                 </a>
                 <a x-show="bisaAkses('ar_deposit')" href="{{ route('keuangan.ar.deposit') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate">Deposit Customer</span>
-                </a>
-                <a x-show="bisaAkses('ap_pembelian')" href="{{ route('keuangan.ap.pembelian_so') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
-                    <svg class="w-4 h-4 shrink-0 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate">Pembelian SO Pabrik (AP)</span>
+                    <span x-show="!sidebarTerlipat" class="truncate">List Deposit</span>
                 </a>
                 <a x-show="bisaAkses('ap_pengeluaran')" href="{{ route('keuangan.ap.pengeluaran') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate">Pengeluaran Kas Operasional</span>
+                    <span x-show="!sidebarTerlipat" class="truncate">Pengeluaran</span>
                 </a>
                 <a x-show="bisaAkses('ap_rilisan')" href="{{ route('keuangan.ap.rilisan') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate">List Rilisan Biaya</span>
+                    <span x-show="!sidebarTerlipat" class="truncate">Rilisan</span>
+                </a>
+                <a x-show="bisaAkses('ap_pembelian')" href="{{ route('keuangan.ap.pembelian_so') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+                    <svg class="w-4 h-4 shrink-0 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                    <span x-show="!sidebarTerlipat" class="truncate">Pembelian SO</span>
+                </a>
+                <a x-show="bisaAkses('list_so')" href="{{ route('keuangan.ap.pembelian_so') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+                    <svg class="w-4 h-4 shrink-0 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    <span x-show="!sidebarTerlipat" class="truncate">List SO</span>
                 </a>
                 <a x-show="bisaAkses('akun_coa')" href="{{ route('keuangan.akuntansi.kode_akun') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-violet-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate">Kode Akun (COA)</span>
+                    <span x-show="!sidebarTerlipat" class="truncate">Data Kode Akun</span>
                 </a>
                 <a x-show="bisaAkses('akun_jurnal')" href="{{ route('keuangan.akuntansi.jurnal') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
@@ -121,6 +129,10 @@
                 <a x-show="bisaAkses('akun_aset')" href="{{ route('keuangan.akuntansi.aset') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                     <span x-show="!sidebarTerlipat" class="truncate">Aset Perusahaan</span>
+                </a>
+                <a x-show="bisaAkses('jenis_aset') || bisaAkses('akun_aset')" href="{{ route('keuangan.akuntansi.aset') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+                    <svg class="w-4 h-4 shrink-0 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 11h.01M7 15h.01M13 7h.01M13 11h.01M13 15h.01M19 7h.01M19 11h.01M19 15h.01"/></svg>
+                    <span x-show="!sidebarTerlipat" class="truncate">Data Jenis Aset</span>
                 </a>
             </div>
         </div>
@@ -141,7 +153,7 @@
                 </a>
                 <a x-show="bisaAkses('gudang_stok')" href="{{ route('operasional.gudang.stok') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate">Gudang & Stok Semen</span>
+                    <span x-show="!sidebarTerlipat" class="truncate" x-text="jabatanAktif === 'STAFF_AP' ? 'List Gudang SO' : 'Gudang & Stok Semen'">Gudang & Stok Semen</span>
                 </a>
                 <a x-show="bisaAkses('gudang_opname')" href="{{ route('operasional.gudang.opname') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
