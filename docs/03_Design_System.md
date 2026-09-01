@@ -209,7 +209,7 @@
 
 ### 6.1 Login — Centered Card Elegan
 - **Tata Letak**: Kontainer terpusat di tengah layar (`max-w-md w-full`) dengan sudut membulat proporsional (`rounded-2xl`).
-- **Header Kartu**: Logo perusahaan, identitas *PT Semen Indo*, judul *Selamat Datang*, dan instruksi ringkas.
+- **Header Kartu**: Logo perusahaan, identitas *PT Pura Balkom Jaya*, judul *Selamat Datang*, dan instruksi ringkas.
 - **Form Input**: Input username dan kata sandi dengan ikon vektor, toggle intip kata sandi, checkbox ingat sesi, dan tombol CTA utama.
 - **Footer Kartu**: Baris akun demo cepat untuk kemudahan pengujian jabatan dan sakelar mode tema di pojok layar.
 

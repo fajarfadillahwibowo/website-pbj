@@ -63,7 +63,7 @@
         </svg>
       </div>
       <div>
-        <div class="text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight">PT Semen Indo</div>
+        <div class="text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight">PT Pura Balkom Jaya</div>
         <div class="text-xs text-slate-400 font-medium">Distribusi & Akuntansi</div>
       </div>
     </div>
@@ -205,7 +205,7 @@
 
   <!-- Footer Bawah -->
   <div class="mt-6 text-center text-xs text-slate-400">
-    &copy; {{ date('Y') }} PT Semen Indo. Hak cipta dilindungi.
+    &copy; {{ date('Y') }} PT Pura Balkom Jaya. Hak cipta dilindungi.
   </div>
 
 </body>

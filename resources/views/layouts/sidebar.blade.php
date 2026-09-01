@@ -13,7 +13,7 @@
                 </svg>
             </div>
             <div x-show="!sidebarTerlipat" x-transition class="whitespace-nowrap overflow-hidden">
-                <div class="text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight">PT Semen Indo</div>
+                <div class="text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight">PT Pura Balkom Jaya</div>
                 <div class="text-[10px] text-slate-400 font-medium">Akuntansi & Distribusi</div>
             </div>
         </div>
@@ -165,11 +165,11 @@
                 </a>
                 <a x-show="bisaAkses('kirim_sj')" href="{{ route('operasional.pengiriman.surat_jalan') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate">Pengiriman (Surat Jalan)</span>
+                    <span x-show="!sidebarTerlipat" class="truncate">Pengiriman</span>
                 </a>
                 <a x-show="bisaAkses('ops_kso')" href="{{ route('operasional.kso') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate">Data KSO (Kerja Sama)</span>
+                    <span x-show="!sidebarTerlipat" class="truncate">Data KSO</span>
                 </a>
 
                 <!-- Sub-Modul Khusus Bengkel -->
