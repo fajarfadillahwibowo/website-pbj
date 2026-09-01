@@ -12,6 +12,6 @@ class KelolaAkunController extends Controller
      */
     public function index()
     {
-        return view('auth.kelola_akun');
+        return view('superadmin.kelola_akun');
     }
 }
