@@ -1,12 +1,20 @@
 <header class="h-14 bg-white dark:bg-[#14161F] border-b border-[#E2E8F0] dark:border-[#252837] px-4 sm:px-5 flex items-center justify-between shrink-0 z-20">
 
-    <!-- Breadcrumb / Judul Ruang Kerja -->
-    <div class="flex items-center gap-2 min-w-0">
+    <!-- Tombol Toggle Sidebar & Breadcrumb / Judul Ruang Kerja -->
+    <div class="flex items-center gap-2.5 min-w-0">
+        <button @click="sidebarTerlipat = !sidebarTerlipat"
+                class="p-1.5 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-[#252837] transition-colors shrink-0"
+                title="Buka/Tutup Sidebar">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+        </button>
+
         <span class="text-xs text-slate-400 hidden sm:inline">Portal /</span>
         <span class="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">
             @yield('judul', 'Dashboard Terpadu')
         </span>
-        <span class="text-[11px] px-2 py-0.5 rounded font-mono font-semibold bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20"
+        <span class="text-[11px] px-2 py-0.5 rounded font-mono font-semibold bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 truncate"
               x-text="labelJabatan">
             SPV Keuangan
         </span>
@@ -60,7 +68,7 @@
         <form method="POST" action="{{ route('auth.logout') }}">
             @csrf
             <button type="submit"
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors">
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 border border-transparent hover:border-rose-200 dark:hover:border-rose-500/20 transition-all">
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                 </svg>
