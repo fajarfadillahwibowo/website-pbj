@@ -434,26 +434,23 @@ CREATE TABLE `pembelian_so` (
         ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 5.2 Opname Gudang
+-- 5.2 Stok Opname Gudang
 DROP TABLE IF EXISTS `opname_gudang`;
 CREATE TABLE `opname_gudang` (
     `id_opname` INT AUTO_INCREMENT NOT NULL,
-    `nomor_opname` VARCHAR(50) NOT NULL,
-    `kode_gudang` VARCHAR(30) NOT NULL,
-    `tanggal_opname` DATE NOT NULL,
-    `stok_sistem` INT NOT NULL,
-    `stok_fisik` INT NOT NULL,
-    `selisih` INT NOT NULL,
-    `keterangan_selisih` TEXT DEFAULT NULL,
-    `status_konfirmasi` ENUM('draft', 'dikonfirmasi_spv') NOT NULL DEFAULT 'draft',
-    `petugas_opname` VARCHAR(50) NOT NULL,
+    `no_so` VARCHAR(50) NOT NULL,
+    `no_lo` VARCHAR(50) NOT NULL,
+    `tanggal` DATE NOT NULL,
+    `nama_pemilik` VARCHAR(100) NOT NULL,
+    `alamat` TEXT NOT NULL,
+    `no_hp` VARCHAR(30) NOT NULL,
+    `no_ktp` VARCHAR(30) NOT NULL,
+    `foto_ktp` VARCHAR(255) DEFAULT NULL,
+    `status_aset` ENUM('Tersedia', 'Dalam Pengiriman', 'Terkunci', 'Selesai') NOT NULL DEFAULT 'Tersedia',
     `dibuat_pada` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `diperbarui_pada` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id_opname`),
-    UNIQUE KEY `uk_nomor_opname` (`nomor_opname`),
-    KEY `idx_opname_gudang` (`kode_gudang`),
-    CONSTRAINT `fk_opname_gudang` FOREIGN KEY (`kode_gudang`) 
-        REFERENCES `list_gudang_so` (`kode_gudang`) 
-        ON DELETE RESTRICT ON UPDATE CASCADE
+    KEY `idx_opname_so` (`no_so`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================================

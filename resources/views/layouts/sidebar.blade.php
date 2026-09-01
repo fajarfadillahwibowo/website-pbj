@@ -149,11 +149,11 @@
                 </a>
                 <a x-show="bisaAkses('gudang_opname')" href="{{ route('operasional.gudang.opname') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate">Opname Gudang</span>
+                    <span x-show="!sidebarTerlipat" class="truncate">Stok Opname Gudang</span>
                 </a>
                 <a x-show="bisaAkses('gudang_stok')" href="{{ route('operasional.gudang.stok') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate" x-text="jabatanAktif === 'STAFF_AP' ? 'List Gudang SO' : 'Gudang & Stok Semen'">Gudang & Stok Semen</span>
+                    <span x-show="!sidebarTerlipat" class="truncate" x-text="jabatanAktif === 'STAFF_AP' ? 'List Gudang SO' : 'Data Gudang'">Data Gudang</span>
                 </a>
                 <a x-show="bisaAkses('armada_driver')" href="{{ route('operasional.armada.driver') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>

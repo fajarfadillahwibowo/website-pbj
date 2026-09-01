@@ -13,18 +13,18 @@ class StockOpname extends Model
     protected $primaryKey = 'id_opname';
 
     const CREATED_AT = 'dibuat_pada';
-    const UPDATED_AT = null;
+    const UPDATED_AT = 'diperbarui_pada';
 
     protected $fillable = [
-        'nomor_opname',
-        'kode_gudang',
-        'tanggal_opname',
-        'stok_sistem',
-        'stok_fisik',
-        'selisih',
-        'keterangan_selisih',
-        'status_konfirmasi',
-        'petugas_opname',
+        'no_so',
+        'no_lo',
+        'tanggal',
+        'nama_pemilik',
+        'alamat',
+        'no_hp',
+        'no_ktp',
+        'foto_ktp',
+        'status_aset',
     ];
 
     public function gudang()

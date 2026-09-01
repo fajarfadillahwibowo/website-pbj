@@ -4,7 +4,7 @@
         modeGelap: localStorage.getItem('tema') === 'gelap',
         sidebarTerlipat: false,
         kunciRbac: true,
-        jabatanAktif: localStorage.getItem('jabatan_aktif') || '{{ session('kode_jabatan', 'SPV_OPERASIONAL') }}',
+        jabatanAktif: '{{ session('kode_jabatan', 'SUPER_ADMIN') }}' || localStorage.getItem('jabatan_aktif') || 'SUPER_ADMIN',
         
         get labelJabatan() {
           const peta = {
@@ -61,7 +61,16 @@
           return hak.includes(kodeModul);
         }
       }"
-      x-init="$watch('jabatanAktif', v => localStorage.setItem('jabatan_aktif', v))"
+      x-init="
+        if ({{ session('fresh_login') ? 'true' : 'false' }}) {
+          localStorage.setItem('jabatan_aktif', '{{ session('kode_jabatan', 'SUPER_ADMIN') }}');
+          jabatanAktif = '{{ session('kode_jabatan', 'SUPER_ADMIN') }}';
+          @php session()->forget('fresh_login'); @endphp
+        } else if (localStorage.getItem('jabatan_aktif')) {
+          jabatanAktif = localStorage.getItem('jabatan_aktif');
+        }
+        $watch('jabatanAktif', v => localStorage.setItem('jabatan_aktif', v))
+      "
       :class="{ 'dark': modeGelap }">
 <head>
     <meta charset="UTF-8">

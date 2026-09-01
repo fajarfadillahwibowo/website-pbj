@@ -49,6 +49,7 @@ class AutentikasiController extends Controller
                 'nama_lengkap'    => $super->nama_pemilik,
                 'kode_jabatan'    => 'SUPER_ADMIN',
                 'nama_jabatan'    => 'Super Admin',
+                'fresh_login'     => 1,
             ]);
 
             $this->catatRiwayatLogin($username, 'SUKSES', $request->ip());
@@ -76,6 +77,7 @@ class AutentikasiController extends Controller
                     'kode_jabatan' => $pengguna->jabatan->kode_jabatan ?? 'STAF',
                     'nama_jabatan' => $pengguna->jabatan->nama_jabatan ?? 'Staf Operasional',
                     'nama_lengkap' => $pengguna->karyawan->nama_karyawan ?? $pengguna->username,
+                    'fresh_login'  => 1,
                 ]);
 
                 $this->catatRiwayatLogin($username, 'SUKSES', $request->ip());

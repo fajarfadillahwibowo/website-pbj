@@ -2,7 +2,13 @@
 <html lang="id"
       x-data="{
         modeGelap: localStorage.getItem('tema') === 'gelap',
-        tampilkanSandi: false
+        tampilkanSandi: false,
+        inputUsername: '{{ old('nama_pengguna') }}',
+        inputPassword: '',
+        isiDemo(usr) {
+          this.inputUsername = usr;
+          this.inputPassword = 'password123';
+        }
       }"
       :class="{ 'dark': modeGelap }">
 <head>
@@ -106,6 +112,7 @@
           <input type="text"
                  id="nama_pengguna"
                  name="nama_pengguna"
+                 x-model="inputUsername"
                  autocomplete="username"
                  required
                  placeholder="Contoh: spv_keuangan"
@@ -134,6 +141,7 @@
           <input :type="tampilkanSandi ? 'text' : 'password'"
                  id="kata_sandi"
                  name="kata_sandi"
+                 x-model="inputPassword"
                  autocomplete="current-password"
                  required
                  placeholder="••••••••"
@@ -148,7 +156,7 @@
           <!-- Tombol Intip Password -->
           <button type="button"
                   @click="tampilkanSandi = !tampilkanSandi"
-                  class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
             <svg x-show="!tampilkanSandi" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
               <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -160,23 +168,16 @@
         </div>
       </div>
 
-      <!-- Ingat Sesi -->
-      <div class="flex items-center gap-2 pt-1">
-        <input id="ingat_saya" type="checkbox"
-               class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 bg-[#F4F6F9] dark:bg-[#1C1E2A] text-blue-600 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer">
-        <label for="ingat_saya" class="text-xs text-slate-500 dark:text-slate-400 cursor-pointer select-none">
-          Ingat sesi ini selama 30 hari
+      <!-- Opsi Sesi & Tombol Submit -->
+      <div class="flex items-center justify-between">
+        <label class="inline-flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" name="ingat_saya" class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500/20">
+          <span class="text-xs text-slate-600 dark:text-slate-400">Ingat sesi saya (30 hari)</span>
         </label>
       </div>
 
-      <!-- Tombol Masuk Utama -->
       <button type="submit"
-              class="w-full flex items-center justify-center gap-2 py-2.5 px-4 mt-2
-                     text-sm font-semibold text-white
-                     bg-blue-600 hover:bg-blue-700 active:scale-[0.99]
-                     rounded-xl shadow-md shadow-blue-600/25
-                     focus:outline-none focus:ring-2 focus:ring-blue-500/40
-                     transition-all duration-150">
+              class="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold text-sm rounded-xl shadow-lg shadow-blue-600/25 transition-all flex items-center justify-center gap-2">
         <span>Masuk ke Dashboard</span>
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
@@ -186,18 +187,18 @@
 
     <!-- Daftar Akun Demo Cepat -->
     <div class="mt-6 pt-5 border-t border-[#EEF0F4] dark:border-[#252837]">
-      <div class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-2.5">Akun Demo Masuk (Sandi: password123):</div>
+      <div class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-2.5">Klik Akun Demo Masuk (Sandi: password123):</div>
       <div class="flex flex-wrap gap-1.5">
-        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium">superadmin</span>
-        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium">spv_keuangan</span>
-        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium">staff_ar</span>
-        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium">staff_ap</span>
-        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium">dispatcher</span>
-        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium">pengawas_driver</span>
-        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium">spv_gudang</span>
-        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium">direktur</span>
-        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium">spv_operasional</span>
-        <span class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 font-medium">pengawas_kendaraan</span>
+        <button type="button" @click="isiDemo('superadmin')" class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-500/10 font-medium transition-all">1. superadmin</button>
+        <button type="button" @click="isiDemo('spv_keuangan')" class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 hover:text-blue-600 font-medium transition-all">2. spv_keuangan</button>
+        <button type="button" @click="isiDemo('staff_ar')" class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 hover:text-blue-600 font-medium transition-all">3. staff_ar</button>
+        <button type="button" @click="isiDemo('staff_ap')" class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 hover:text-blue-600 font-medium transition-all">4. staff_ap</button>
+        <button type="button" @click="isiDemo('dispatcher')" class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 hover:text-blue-600 font-medium transition-all">5. dispatcher</button>
+        <button type="button" @click="isiDemo('pengawas_driver')" class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 hover:text-blue-600 font-medium transition-all">6. pengawas_driver</button>
+        <button type="button" @click="isiDemo('spv_gudang')" class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 hover:text-blue-600 font-medium transition-all">7. spv_gudang</button>
+        <button type="button" @click="isiDemo('direktur')" class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 hover:text-blue-600 font-medium transition-all">8. direktur</button>
+        <button type="button" @click="isiDemo('spv_operasional')" class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 hover:text-blue-600 font-medium transition-all">9. spv_operasional</button>
+        <button type="button" @click="isiDemo('pengawas_kendaraan')" class="px-2 py-1 rounded-md bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-[11px] font-mono text-slate-600 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 hover:text-blue-600 font-medium transition-all">10. pengawas_kendaraan</button>
       </div>
     </div>
 
