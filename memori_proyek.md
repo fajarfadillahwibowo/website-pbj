@@ -1,8 +1,20 @@
-# Memori Proyek: Pembuatan Template Desain (Design.md, Login, & Dashboard)
+# Memori Proyek: Sistem Akuntansi & Distribusi Semen Terpadu
 
-## Status Terkini
-1. **Design System**: Dibuat file baku `design.md` yang menetapkan standar token warna (Dual Mode: Light & Dark), tipografi finansial tabular, komponen tombol, kartu, tabel, dan prinsip *Anti AI-Slop / Zero Unicode Emoji*.
-2. **Template Login**: Dibuat file `resources/views/auth/login.blade.php` dengan tata letak *Split Screen Pro* (kiri: visual & proposisi nilai distribusi semen; kanan: form login kredensial dengan toggle sandi & sakelar tema).
-3. **Template Master Layout**: Dibuat file `resources/views/layouts/app.blade.php` dengan *Collapsible Sidebar*, deteksi menu dinamis per jabatan, dan toggle tema.
-4. **Template Dashboard Dinamis**: Dibuat file `resources/views/dashboard.blade.php` yang mendukung pergantian simulasi 9 jabatan + Super Admin dengan kartu KPI dan tabel transaksi yang menyesuaikan diri 100% secara real-time.
-5. **Rute Web**: Rute `/`, `/login`, dan `/dashboard` telah dihubungkan di `routes/web.php`.
+## Status Repositori Git
+- **URL Repositori**: `https://github.com/fajarfadillahwibowo/website-pbj.git`
+- **Branch Utama**: `main`
+- **Status Push**: Berhasil terunggah 100% (Commit: `40f72f2`).
+
+## Ringkasan Struktur Berkas yang Terunggah
+1. **Skema Basis Data**:
+   - `database/skema_database.sql` (Skema InnoDB lengkap dengan relasi Foreign Key, indeks, sistem RBAC 9 Jabatan, COA, Jurnal, dan Views Laporan Neraca & Laba Rugi).
+2. **Panduan Desain**:
+   - `design.md` (Design System v2.0 Enterprise Compact, palet warna dual-mode, spesifikasi tipografi ringkas, dan checklist audit).
+3. **Frontend & Antarmuka**:
+   - `resources/views/layouts/app.blade.php` (Master layout Blade dengan sidebar dinamis per jabatan & sakelar tema).
+   - `resources/views/auth/login.blade.php` (Halaman login Split-Screen Pro).
+   - `resources/views/dashboard.blade.php` (Dashboard operasional bergaya Kravio dengan KPI dinamis dan tabel transaksi).
+   - `routes/web.php` (Rute web terhubung ke controller/view).
+4. **Dokumentasi & Pelacak Bug**:
+   - `memori_proyek.md`
+   - `catatan_bug_dan_error.md`

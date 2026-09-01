@@ -207,10 +207,11 @@
 
 ## 6. Arsitektur Layout
 
-### 6.1 Login — Split Screen Pro
-- **Kiri (38%)**: Panel gelap `bg-[#0C0E14]`, logo, tagline, 4 kartu statistik sistem
-- **Kanan (62%)**: Background `#F4F6F9` / `white dark`, form login dengan input ringkas enterprise
-- Breakpoint: di bawah `md:` tampil satu kolom (form di atas, branding disembunyikan)
+### 6.1 Login — Centered Card Elegan
+- **Tata Letak**: Kontainer terpusat di tengah layar (`max-w-md w-full`) dengan sudut membulat proporsional (`rounded-2xl`).
+- **Header Kartu**: Logo perusahaan, identitas *PT Semen Indo*, judul *Selamat Datang*, dan instruksi ringkas.
+- **Form Input**: Input username dan kata sandi dengan ikon vektor, toggle intip kata sandi, checkbox ingat sesi, dan tombol CTA utama.
+- **Footer Kartu**: Baris akun demo cepat untuk kemudahan pengujian jabatan dan sakelar mode tema di pojok layar.
 
 ### 6.2 Dashboard — Enterprise Left Sidebar
 ```
