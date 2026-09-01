@@ -25,6 +25,7 @@ use App\Http\Controllers\Operasional\Pengiriman\SalesOrderController;
 use App\Http\Controllers\Operasional\Pengiriman\SuratJalanController;
 use App\Http\Controllers\Operasional\Pengiriman\OngkosAngkutController;
 use App\Http\Controllers\Operasional\Bengkel\PerbaikanKendaraanController;
+use App\Http\Controllers\Operasional\Bengkel\PembelianSparepartController;
 use App\Http\Controllers\Operasional\Bengkel\SparepartController;
 use App\Http\Controllers\Operasional\Monitoring\MonitoringOperasionalController;
 use App\Http\Controllers\Operasional\Monitoring\KSOController;
@@ -106,9 +107,10 @@ Route::prefix('operasional')->name('operasional.')->group(function () {
         Route::get('/ongkos-angkut', [OngkosAngkutController::class, 'index'])->name('ongkos_angkut');
     });
 
-    // Bengkel & Pemeliharaan
+    // Bengkel & Pemeliharaan (Pengawas Kendaraan)
     Route::prefix('bengkel')->name('bengkel.')->group(function () {
         Route::get('/perbaikan', [PerbaikanKendaraanController::class, 'index'])->name('perbaikan');
+        Route::get('/pembelian-sparepart', [PembelianSparepartController::class, 'index'])->name('pembelian_sparepart');
         Route::get('/sparepart', [SparepartController::class, 'index'])->name('sparepart');
     });
 

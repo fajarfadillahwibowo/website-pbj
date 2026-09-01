@@ -22,7 +22,7 @@
           return peta[this.jabatanAktif] || this.jabatanAktif;
         },
 
-        // Matriks Hak Akses RBAC Sesuai PRD 1.1
+        // Matriks Hak Akses RBAC Sesuai PRD 1.1 & Diagram Alur Peran
         matriksAkses: {
           SUPER_ADMIN: ['dashboard', 'admin_akun'],
           DIREKTUR_MANAGER: ['dashboard', 'laporan_neraca', 'laporan_laba_rugi'],
@@ -40,7 +40,7 @@
           ],
           SPV_OPERASIONAL: [
             'dashboard', 'kirim_sj', 'kirim_ongkos', 'gudang_stok', 'gudang_opname',
-            'armada_truk', 'armada_driver', 'bengkel_servis'
+            'armada_truk', 'armada_driver', 'bengkel_perbaikan', 'bengkel_pembelian_sparepart', 'bengkel_sparepart'
           ],
           DISPATCHER: [
             'dashboard', 'kirim_sj', 'kirim_ongkos', 'armada_truk', 'armada_driver'
@@ -52,7 +52,7 @@
             'dashboard', 'gudang_stok', 'gudang_opname'
           ],
           PENGAWAS_KENDARAAN: [
-            'dashboard', 'bengkel_servis'
+            'dashboard', 'bengkel_perbaikan', 'bengkel_pembelian_sparepart', 'bengkel_sparepart'
           ]
         },
 

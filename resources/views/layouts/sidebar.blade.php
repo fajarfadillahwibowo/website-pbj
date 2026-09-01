@@ -126,7 +126,7 @@
         </div>
 
         <!-- 5. Operasional, Logistik & Armada -->
-        <div x-show="bisaAkses('kirim_sj') || bisaAkses('kirim_ongkos') || bisaAkses('gudang_stok') || bisaAkses('gudang_opname') || bisaAkses('armada_truk') || bisaAkses('armada_driver') || bisaAkses('bengkel_servis')">
+        <div x-show="bisaAkses('kirim_sj') || bisaAkses('kirim_ongkos') || bisaAkses('gudang_stok') || bisaAkses('gudang_opname') || bisaAkses('armada_truk') || bisaAkses('armada_driver') || bisaAkses('bengkel_perbaikan') || bisaAkses('bengkel_pembelian_sparepart') || bisaAkses('bengkel_sparepart')">
             <div x-show="!sidebarTerlipat" class="px-2 mb-1.5 flex items-center justify-between">
                 <span class="text-[10px] font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-widest">Operasional & Logistik</span>
             </div>
@@ -155,9 +155,19 @@
                     <svg class="w-4 h-4 shrink-0 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                     <span x-show="!sidebarTerlipat" class="truncate">Data Driver & Kesiapan</span>
                 </a>
-                <a x-show="bisaAkses('bengkel_servis')" href="{{ route('operasional.bengkel.perbaikan') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+
+                <!-- Sub-Modul Khusus Pengawas Kendaraan & Bengkel -->
+                <a x-show="bisaAkses('bengkel_perbaikan')" href="{{ route('operasional.bengkel.perbaikan') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
                     <svg class="w-4 h-4 shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate">SPK Perbaikan & Bengkel</span>
+                    <span x-show="!sidebarTerlipat" class="truncate">Perbaikan Kendaraan (SPK)</span>
+                </a>
+                <a x-show="bisaAkses('bengkel_pembelian_sparepart')" href="{{ route('operasional.bengkel.pembelian_sparepart') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+                    <svg class="w-4 h-4 shrink-0 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                    <span x-show="!sidebarTerlipat" class="truncate">Pembelian Sparepart</span>
+                </a>
+                <a x-show="bisaAkses('bengkel_sparepart')" href="{{ route('operasional.bengkel.sparepart') }}" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
+                    <svg class="w-4 h-4 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7c-2 0-3 1-3 3zm0 5h16"/></svg>
+                    <span x-show="!sidebarTerlipat" class="truncate">List Sparepart</span>
                 </a>
             </div>
         </div>
