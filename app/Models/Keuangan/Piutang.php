@@ -17,21 +17,22 @@ class Piutang extends Model
     const UPDATED_AT = 'diperbarui_pada';
 
     protected $fillable = [
-        'no_faktur',
+        'id_penjualan',
         'kode_customer',
-        'total_piutang',
+        'jumlah_piutang',
         'sisa_piutang',
+        'tanggal_terbit',
         'tanggal_jatuh_tempo',
         'status_piutang',
     ];
 
+    public function penjualan()
+    {
+        return $this->belongsTo(FakturPenjualan::class, 'id_penjualan', 'id_penjualan');
+    }
+
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'kode_customer', 'kode_customer');
-    }
-
-    public function faktur()
-    {
-        return $this->belongsTo(FakturPenjualan::class, 'no_faktur', 'no_faktur');
     }
 }

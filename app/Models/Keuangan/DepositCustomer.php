@@ -17,12 +17,14 @@ class DepositCustomer extends Model
     const UPDATED_AT = null;
 
     protected $fillable = [
+        'nomor_bukti_deposit',
         'kode_customer',
-        'tanggal_transaksi',
-        'jenis_mutasi',
-        'nominal',
-        'saldo_akhir',
+        'tanggal_deposit',
+        'tipe_mutasi',
+        'jumlah_nominal',
+        'saldo_akhir_deposit',
         'keterangan',
+        'dibuat_oleh',
     ];
 
     public function customer()

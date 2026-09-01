@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Models\Master;
+namespace App\Models\Operasional;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Barang extends Model
+class Sparepart extends Model
 {
     use HasFactory;
 
-    protected $table = 'data_semen';
-    protected $primaryKey = 'kode_barang';
+    protected $table = 'list_sparepart';
+    protected $primaryKey = 'kode_sparepart';
     public $incrementing = false;
     protected $keyType = 'string';
 
@@ -18,11 +18,11 @@ class Barang extends Model
     const UPDATED_AT = 'diperbarui_pada';
 
     protected $fillable = [
-        'kode_barang',
-        'nama_barang',
-        'jenis_barang',
-        'satuan_barang',
-        'harga_pokok',
-        'harga_jual_standar',
+        'kode_sparepart',
+        'nama_sparepart',
+        'kategori_part',
+        'stok_part',
+        'satuan',
+        'harga_satuan',
     ];
 }

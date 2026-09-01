@@ -4,6 +4,7 @@ namespace App\Models\Operasional;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Master\Barang;
 
 class Gudang extends Model
 {
@@ -15,13 +16,22 @@ class Gudang extends Model
     protected $keyType = 'string';
 
     const CREATED_AT = 'dibuat_pada';
-    const UPDATED_AT = null;
+    const UPDATED_AT = 'diperbarui_pada';
 
     protected $fillable = [
         'kode_gudang',
         'nama_gudang',
-        'lokasi_gudang',
-        'kapasitas_zak',
-        'kapasitas_curah_ton',
+        'jenis_gudang',
+        'kode_barang',
+        'plant',
+        'harga_barang',
+        'stok_tersedia',
+        'distrik',
+        'sub_distrik',
     ];
+
+    public function barang()
+    {
+        return $this->belongsTo(Barang::class, 'kode_barang', 'kode_barang');
+    }
 }

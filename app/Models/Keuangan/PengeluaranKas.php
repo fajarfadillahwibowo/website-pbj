@@ -5,24 +5,26 @@ namespace App\Models\Keuangan;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class JurnalUmum extends Model
+class PengeluaranKas extends Model
 {
     use HasFactory;
 
-    protected $table = 'jurnal_umum';
-    protected $primaryKey = 'id_jurnal';
+    protected $table = 'pengeluaran';
+    protected $primaryKey = 'id_pengeluaran';
 
     const CREATED_AT = 'dibuat_pada';
-    const UPDATED_AT = null;
+    const UPDATED_AT = 'diperbarui_pada';
 
     protected $fillable = [
-        'nomor_jurnal',
-        'tanggal_transaksi',
+        'nomor_pengeluaran',
+        'tanggal_pengeluaran',
+        'kategori_pengeluaran',
         'kode_akun',
-        'posisi',
-        'nominal',
+        'total_nominal',
+        'id_rekening_sumber',
         'keterangan',
-        'referensi_transaksi',
+        'status_persetujuan',
+        'disetujui_oleh',
         'dibuat_oleh',
     ];
 
