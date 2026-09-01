@@ -3,8 +3,9 @@
       x-data="{
         modeGelap: localStorage.getItem('tema') === 'gelap',
         sidebarTerlipat: false,
-        filterRoleAktif: false,
+        kunciRbac: true,
         jabatanAktif: localStorage.getItem('jabatan_aktif') || '{{ session('kode_jabatan', 'SPV_KEUANGAN') }}',
+        
         get labelJabatan() {
           const peta = {
             SUPER_ADMIN: 'Super Admin',
@@ -19,6 +20,46 @@
             PENGAWAS_KENDARAAN: 'Pengawas Kendaraan'
           };
           return peta[this.jabatanAktif] || this.jabatanAktif;
+        },
+
+        // Matriks Hak Akses RBAC Sesuai PRD 1.1
+        matriksAkses: {
+          SUPER_ADMIN: ['dashboard', 'admin_akun'],
+          DIREKTUR_MANAGER: ['dashboard', 'laporan_neraca', 'laporan_laba_rugi'],
+          SPV_KEUANGAN: [
+            'dashboard', 'master_customer', 'master_barang', 'master_wilayah', 'master_karyawan',
+            'ar_faktur', 'ar_piutang', 'ar_deposit', 'ap_pembelian', 'ap_pengeluaran', 'ap_rilisan',
+            'akun_coa', 'akun_jurnal', 'akun_aset', 'laporan_neraca', 'laporan_laba_rugi'
+          ],
+          STAFF_AR: [
+            'dashboard', 'master_customer', 'master_barang',
+            'ar_faktur', 'ar_piutang', 'ar_deposit'
+          ],
+          STAFF_AP: [
+            'dashboard', 'ap_pembelian', 'ap_pengeluaran', 'ap_rilisan', 'gudang_stok'
+          ],
+          SPV_OPERASIONAL: [
+            'dashboard', 'kirim_sj', 'kirim_ongkos', 'gudang_stok', 'gudang_opname',
+            'armada_truk', 'armada_driver', 'bengkel_servis'
+          ],
+          DISPATCHER: [
+            'dashboard', 'kirim_sj', 'kirim_ongkos', 'armada_truk', 'armada_driver'
+          ],
+          PENGAWAS_DRIVER: [
+            'dashboard', 'armada_driver'
+          ],
+          SPV_GUDANG: [
+            'dashboard', 'gudang_stok', 'gudang_opname'
+          ],
+          PENGAWAS_KENDARAAN: [
+            'dashboard', 'bengkel_servis'
+          ]
+        },
+
+        bisaAkses(kodeModul) {
+          if (!this.kunciRbac) return true;
+          const hak = this.matriksAkses[this.jabatanAktif] || [];
+          return hak.includes(kodeModul);
         }
       }"
       x-init="$watch('jabatanAktif', v => localStorage.setItem('jabatan_aktif', v))"
@@ -72,11 +113,7 @@
 
         {{-- Area Konten Dinamis --}}
         <main class="flex-1 overflow-y-auto p-5 sm:p-6">
-            @hasSection('konten')
-                @yield('konten')
-            @else
-                @yield('content')
-            @endif
+            @yield('konten')
         </main>
     </div>
 
