@@ -19,17 +19,20 @@ class Customer extends Model
 
     protected $fillable = [
         'kode_customer',
-        'nama_toko',
+        'kode_wilayah',
+        'nama_toko_bangunan',
         'nama_pemilik',
-        'no_telepon',
         'alamat',
-        'id_wilayah',
+        'no_hp',
+        'no_ktp',
+        'foto_ktp',
+        'plafon_piutang',
+        'saldo_piutang',
         'saldo_deposit',
-        'limit_piutang',
     ];
 
     public function wilayah()
     {
-        return $this->belongsTo(Wilayah::class, 'id_wilayah', 'id_wilayah');
+        return $this->belongsTo(Wilayah::class, 'kode_wilayah', 'kode_wilayah');
     }
 }

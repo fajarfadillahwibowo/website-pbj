@@ -10,20 +10,20 @@ class Wilayah extends Model
     use HasFactory;
 
     protected $table = 'data_wilayah';
-    protected $primaryKey = 'id_wilayah';
+    protected $primaryKey = 'kode_wilayah';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     const CREATED_AT = 'dibuat_pada';
-    const UPDATED_AT = null;
+    const UPDATED_AT = 'diperbarui_pada';
 
     protected $fillable = [
         'kode_wilayah',
         'nama_wilayah',
-        'provinsi',
-        'kota_kabupaten',
     ];
 
     public function daftarCustomer()
     {
-        return $this->hasMany(Customer::class, 'id_wilayah', 'id_wilayah');
+        return $this->hasMany(Customer::class, 'kode_wilayah', 'kode_wilayah');
     }
 }

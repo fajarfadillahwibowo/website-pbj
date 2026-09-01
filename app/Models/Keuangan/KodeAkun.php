@@ -15,17 +15,19 @@ class KodeAkun extends Model
     protected $keyType = 'string';
 
     const CREATED_AT = 'dibuat_pada';
-    const UPDATED_AT = null;
+    const UPDATED_AT = 'diperbarui_pada';
 
     protected $fillable = [
         'kode_akun',
         'nama_akun',
-        'kategori_akun',
+        'tipe_akun',
+        'kelompok_akun',
         'saldo_normal',
         'saldo_awal',
+        'saldo_berjalan',
     ];
 
-    public function jurnalUmum()
+    public function daftarJurnal()
     {
         return $this->hasMany(JurnalUmum::class, 'kode_akun', 'kode_akun');
     }

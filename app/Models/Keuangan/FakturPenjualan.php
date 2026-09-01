@@ -11,23 +11,26 @@ class FakturPenjualan extends Model
     use HasFactory;
 
     protected $table = 'penjualan';
-    protected $primaryKey = 'no_faktur';
-    public $incrementing = false;
-    protected $keyType = 'string';
+    protected $primaryKey = 'id_penjualan';
 
     const CREATED_AT = 'dibuat_pada';
     const UPDATED_AT = 'diperbarui_pada';
 
     protected $fillable = [
-        'no_faktur',
-        'tanggal_faktur',
+        'nomor_faktur',
+        'tanggal_penjualan',
         'kode_customer',
-        'total_bruto',
-        'total_diskon',
-        'total_netto',
         'metode_pembayaran',
+        'total_bruto',
+        'diskon',
+        'total_netto',
+        'jumlah_dibayar',
+        'sisa_piutang',
         'status_pembayaran',
-        'catatan',
+        'jatuh_tempo',
+        'id_rekening',
+        'status_persetujuan',
+        'dibuat_oleh',
     ];
 
     public function customer()
@@ -37,6 +40,6 @@ class FakturPenjualan extends Model
 
     public function piutang()
     {
-        return $this->hasOne(Piutang::class, 'no_faktur', 'no_faktur');
+        return $this->hasOne(Piutang::class, 'id_penjualan', 'id_penjualan');
     }
 }
