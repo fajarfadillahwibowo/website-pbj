@@ -42,7 +42,7 @@
             'dashboard', 'kirim_ongkos', 'gudang_opname', 'armada_driver', 'armada_truk', 'kirim_sj', 'ops_kso'
           ],
           DISPATCHER: [
-            'dashboard', 'kirim_sj', 'kirim_ongkos', 'armada_truk', 'armada_driver'
+            'dashboard', 'armada_truk', 'kirim_sj', 'armada_driver'
           ],
           PENGAWAS_DRIVER: [
             'dashboard', 'armada_driver'
