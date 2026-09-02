@@ -118,9 +118,12 @@
             <form method="POST" action="{{ route('master.wilayah.store') }}" class="p-5 space-y-3.5 text-xs">
                 @csrf
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kode Wilayah</label>
-                    <input type="text" name="kode_wilayah" required placeholder="WIL-SMG-07"
-                           class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300">Kode Wilayah</label>
+                        <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/50 rounded-md">Otomatis</span>
+                    </div>
+                    <input type="text" name="kode_wilayah" value="{{ $kodeOtomatis }}" required placeholder="WLY-001"
+                           class="w-full px-3 py-2 rounded-xl bg-emerald-50/50 dark:bg-[#1C1E2A] border border-emerald-200 dark:border-emerald-900/50 text-emerald-900 dark:text-emerald-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Wilayah / Zonasi Distribusi</label>

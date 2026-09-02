@@ -164,9 +164,12 @@
                 @csrf
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kode Produk</label>
-                        <input type="text" name="kode_barang" required placeholder="SMN-TNS-40"
-                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Kode Produk</label>
+                            <span class="text-[10px] text-amber-600 dark:text-amber-400 font-semibold px-1.5 py-0.5 bg-amber-50 dark:bg-amber-950/50 rounded-md">Otomatis</span>
+                        </div>
+                        <input type="text" name="kode_barang" value="{{ $kodeOtomatis }}" required placeholder="SMN-001"
+                               class="w-full px-3 py-2 rounded-xl bg-amber-50/50 dark:bg-[#1C1E2A] border border-amber-200 dark:border-amber-900/50 text-amber-900 dark:text-amber-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis Kemasan</label>

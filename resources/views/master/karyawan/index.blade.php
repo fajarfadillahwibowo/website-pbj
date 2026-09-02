@@ -185,9 +185,12 @@
                 @csrf
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kode Karyawan</label>
-                        <input type="text" name="kode_karyawan" required placeholder="EMP-012"
-                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Kode Karyawan</label>
+                            <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold px-1.5 py-0.5 bg-indigo-50 dark:bg-indigo-950/50 rounded-md">Otomatis</span>
+                        </div>
+                        <input type="text" name="kode_karyawan" value="{{ $kodeOtomatis }}" required placeholder="KRY-001"
+                               class="w-full px-3 py-2 rounded-xl bg-indigo-50/50 dark:bg-[#1C1E2A] border border-indigo-200 dark:border-indigo-900/50 text-indigo-900 dark:text-indigo-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kategori Karyawan</label>

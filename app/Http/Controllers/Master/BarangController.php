@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Master;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Master\Barang;
+use App\Helpers\GeneratorKodeOtomatis;
 
 class BarangController extends Controller
 {
@@ -35,13 +36,17 @@ class BarangController extends Controller
         $totalZak = Barang::where('jenis_barang', 'Zak')->count();
         $totalCurah = Barang::where('jenis_barang', 'Curah')->count();
 
+        // Generator kode produk otomatis
+        $kodeOtomatis = GeneratorKodeOtomatis::buatKode('data_semen', 'kode_barang', 'SMN-', 3);
+
         return view('master.barang.index', compact(
             'daftarBarang',
             'kataKunci',
             'filterJenis',
             'totalBarang',
             'totalZak',
-            'totalCurah'
+            'totalCurah',
+            'kodeOtomatis'
         ));
     }
 
@@ -50,6 +55,13 @@ class BarangController extends Controller
      */
     public function store(Request $request)
     {
+        // Isi kode otomatis jika kosong
+        if (!$request->filled('kode_barang')) {
+            $request->merge([
+                'kode_barang' => GeneratorKodeOtomatis::buatKode('data_semen', 'kode_barang', 'SMN-', 3)
+            ]);
+        }
+
         $request->validate([
             'kode_barang'        => 'required|string|max:30|unique:data_semen,kode_barang',
             'nama_barang'        => 'required|string|max:150',

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Keuangan\AsetPerusahaan;
+use App\Helpers\GeneratorKodeOtomatis;
 
 class AsetPerusahaanController extends Controller
 {
@@ -40,6 +41,9 @@ class AsetPerusahaanController extends Controller
         $totalAset = DB::table('data_aset')->count();
         $totalTruk = DB::table('data_aset')->where('kode_jenis_aset', 'AST-TRK')->count();
 
+        // Generator kode aset otomatis
+        $kodeOtomatis = GeneratorKodeOtomatis::buatKode('data_aset', 'kode_aset', 'AST-', 3);
+
         return view('keuangan.akuntansi.aset_perusahaan', compact(
             'daftarAset',
             'daftarJenis',
@@ -47,7 +51,8 @@ class AsetPerusahaanController extends Controller
             'filterJenis',
             'totalNilaiAset',
             'totalAset',
-            'totalTruk'
+            'totalTruk',
+            'kodeOtomatis'
         ));
     }
 
@@ -56,6 +61,13 @@ class AsetPerusahaanController extends Controller
      */
     public function store(Request $request)
     {
+        // Isi kode otomatis jika kosong
+        if (!$request->filled('kode_aset')) {
+            $request->merge([
+                'kode_aset' => GeneratorKodeOtomatis::buatKode('data_aset', 'kode_aset', 'AST-', 3)
+            ]);
+        }
+
         $request->validate([
             'kode_aset'         => 'required|string|max:30|unique:data_aset,kode_aset',
             'kode_jenis_aset'   => 'required|string|exists:data_jenis_aset,kode_jenis_aset',

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Master\Karyawan;
 use App\Models\Autentikasi\Jabatan;
+use App\Helpers\GeneratorKodeOtomatis;
 
 class KaryawanController extends Controller
 {
@@ -42,6 +43,9 @@ class KaryawanController extends Controller
         $totalGudang = Karyawan::where('kategori_karyawan', 'gudang')->count();
         $totalTeknisi = Karyawan::where('kategori_karyawan', 'teknisi')->count();
 
+        // Generator kode karyawan otomatis
+        $kodeOtomatis = GeneratorKodeOtomatis::buatKode('data_karyawan', 'kode_karyawan', 'KRY-', 3);
+
         return view('master.karyawan.index', compact(
             'daftarKaryawan',
             'daftarJabatan',
@@ -51,7 +55,8 @@ class KaryawanController extends Controller
             'totalDriver',
             'totalStaf',
             'totalGudang',
-            'totalTeknisi'
+            'totalTeknisi',
+            'kodeOtomatis'
         ));
     }
 
@@ -60,6 +65,13 @@ class KaryawanController extends Controller
      */
     public function store(Request $request)
     {
+        // Isi kode otomatis jika kosong
+        if (!$request->filled('kode_karyawan')) {
+            $request->merge([
+                'kode_karyawan' => GeneratorKodeOtomatis::buatKode('data_karyawan', 'kode_karyawan', 'KRY-', 3)
+            ]);
+        }
+
         $request->validate([
             'kode_karyawan'     => 'required|string|max:30|unique:data_karyawan,kode_karyawan',
             'nama_karyawan'     => 'required|string|max:100',

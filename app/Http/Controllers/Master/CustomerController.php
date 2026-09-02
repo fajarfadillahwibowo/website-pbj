@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Master\Customer;
 use App\Models\Master\Wilayah;
+use App\Helpers\GeneratorKodeOtomatis;
 
 class CustomerController extends Controller
 {
@@ -40,6 +41,9 @@ class CustomerController extends Controller
         $totalPiutang = Customer::sum('saldo_piutang');
         $totalDeposit = Customer::sum('saldo_deposit');
 
+        // Generator kode otomatis gap-filling
+        $kodeOtomatis = GeneratorKodeOtomatis::buatKode('data_customer', 'kode_customer', 'CUST-', 3);
+
         return view('master.customer.index', compact(
             'daftarCustomer',
             'daftarWilayah',
@@ -48,7 +52,8 @@ class CustomerController extends Controller
             'totalCustomer',
             'totalPlafon',
             'totalPiutang',
-            'totalDeposit'
+            'totalDeposit',
+            'kodeOtomatis'
         ));
     }
 
@@ -57,6 +62,13 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
+        // Isi kode otomatis jika kosong
+        if (!$request->filled('kode_customer')) {
+            $request->merge([
+                'kode_customer' => GeneratorKodeOtomatis::buatKode('data_customer', 'kode_customer', 'CUST-', 3)
+            ]);
+        }
+
         $request->validate([
             'kode_customer'      => 'required|string|max:30|unique:data_customer,kode_customer',
             'kode_wilayah'       => 'required|string|exists:data_wilayah,kode_wilayah',

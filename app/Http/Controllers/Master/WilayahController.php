@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Master;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Master\Wilayah;
+use App\Helpers\GeneratorKodeOtomatis;
 
 class WilayahController extends Controller
 {
@@ -27,10 +28,14 @@ class WilayahController extends Controller
         $daftarWilayah = $query->orderBy('kode_wilayah', 'asc')->get();
         $totalWilayah = Wilayah::count();
 
+        // Generator kode wilayah otomatis
+        $kodeOtomatis = GeneratorKodeOtomatis::buatKode('data_wilayah', 'kode_wilayah', 'WLY-', 3);
+
         return view('master.wilayah.index', compact(
             'daftarWilayah',
             'kataKunci',
-            'totalWilayah'
+            'totalWilayah',
+            'kodeOtomatis'
         ));
     }
 
@@ -39,6 +44,13 @@ class WilayahController extends Controller
      */
     public function store(Request $request)
     {
+        // Isi kode otomatis jika kosong
+        if (!$request->filled('kode_wilayah')) {
+            $request->merge([
+                'kode_wilayah' => GeneratorKodeOtomatis::buatKode('data_wilayah', 'kode_wilayah', 'WLY-', 3)
+            ]);
+        }
+
         $request->validate([
             'kode_wilayah' => 'required|string|max:30|unique:data_wilayah,kode_wilayah',
             'nama_wilayah' => 'required|string|max:100',

@@ -6,6 +6,27 @@
 - **Status Developer 1:** ✅ **100% SELESAI & TERVERIFIKASI (HTTP 200 OK pada seluruh modul)**.
 - **Status Standarisasi UI Dropdown:** ✅ **100% SELESAI & TERVERIFIKASI** (Semua native `<select>` diganti dengan `<x-dropdown-kustom>`).
 - **Status Staggered Entrance Animation:** ✅ **100% SELESAI & TERVERIFIKASI** (Terapkan `.animasi-masuk`, `.wadah-bertingkat`, `.tabel-bertingkat`, `.animasi-skala` di seluruh 18 view).
+- **Status Generator Kode Otomatis (Gap-Filling):** ✅ **100% SELESAI & TERVERIFIKASI** (Helper `app/Helpers/GeneratorKodeOtomatis.php` untuk penomoran otomatis dengan algoritma pengisian celah kosong / gap-filling).
+
+---
+
+## 🔢 Generator Kode Otomatis & Algoritma Gap-Filling (Sequence Gap Reuse)
+
+### 1. Helper Baru: `app/Helpers/GeneratorKodeOtomatis.php`
+- **Tujuan:** Menghilangkan keharusan pengguna mengetik kode secara manual dan menjamin penomoran kode sekuensial yang rapi tanpa celah (*gap*).
+- **Algoritma "Gap-Filling" (Lowest Missing Positive Integer):**
+  1. Mengambil seluruh nilai kode yang ada di database berdasarkan tabel, kolom, dan prefix (contoh: `CUST-`).
+  2. Mengekstrak bilangan angka integer di akhir kode ke dalam array daftar nomor terpakai (`$nomorTerpakai`).
+  3. Melakukan perulangan mulai dari angka $1$ ($nomorUrut = 1, 2, 3, \dots$).
+  4. Begitu ditemukan angka pertama yang **TIDAK TERDAFTAR** di database (karena belum dibuat atau karena ada data sebelumnya yang telah dihapus), sistem langsung mengambil angka tersebut sebagai nomor kode baru.
+  5. Memformat nomor tersebut dengan panjang digit padding (misal: 3 digit $\rightarrow$ `001`, `002`).
+
+### 2. Modul yang Menggunakan Generator Kode Otomatis:
+- **Master Customer:** Awalan `CUST-` (contoh: `CUST-001`, `CUST-002`, dst.)
+- **Master Produk Semen:** Awalan `SMN-` (contoh: `SMN-001`, `SMN-002`, dst.)
+- **Master Wilayah:** Awalan `WLY-` (contoh: `WLY-001`, `WLY-002`, dst.)
+- **Master Karyawan & Driver:** Awalan `KRY-` (contoh: `KRY-001`, `KRY-002`, dst.)
+- **Aset Perusahaan:** Awalan `AST-` (contoh: `AST-001`, `AST-002`, dst.)
 
 ---
 
