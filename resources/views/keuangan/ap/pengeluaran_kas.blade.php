@@ -16,11 +16,11 @@
     @endif
 
     <!-- Header Modul Pengeluaran Kas -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
+    <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
         <div>
             <div class="text-xs text-rose-600 dark:text-rose-400 font-semibold font-mono uppercase tracking-wider mb-1">Account Payable · Dev 1</div>
             <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">Pengeluaran Kas & Biaya Operasional</h1>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pencatatan pengeluaran kas kantor, bahan bakar & tol armada truk, dan operasional harian terintegrasi COA.</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pencatatan kas keluar operasional: BBM, Tol armada, servis bengkel, dan beban kantor.</p>
         </div>
         <div class="flex items-center gap-2">
             <button @click="bukaModalTambah = true" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-all shadow-sm">
@@ -31,7 +31,7 @@
     </div>
 
     <!-- Ringkasan Statistik Pengeluaran -->
-    <div class="grid grid-cols-3 gap-3">
+    <div class="wadah-bertingkat grid grid-cols-3 gap-3">
         <div class="bg-white dark:bg-[#14161F] p-3.5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837]">
             <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Total Kas Keluar</div>
             <div class="text-lg font-bold text-rose-600 dark:text-rose-400 mt-0.5 font-mono">Rp {{ number_format($totalPengeluaran ?? 0, 0, ',', '.') }}</div>
@@ -47,7 +47,8 @@
     </div>
 
     <!-- Tabel Data Pengeluaran Kas -->
-    <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+        <form method="GET" action="{{ route('keuangan.ap.pengeluaran') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
             @php
                 $opsiFilterKategoriPengeluaran = [
                     ['nilai' => '', 'label' => '-- Semua Kategori --'],
@@ -94,49 +95,48 @@
         </form>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-xs">
+            <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">No. Transaksi</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Tanggal</th>
-                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Kategori & Akun Beban</th>
-                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Rekening Sumber</th>
-                        <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Total Nominal</th>
+                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Kategori Pengeluaran</th>
+                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Akun COA Terkait</th>
+                        <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Nominal Kas Keluar</th>
+                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Sumber Rekening</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Keterangan</th>
-                        <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Status</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
-                    @forelse($daftarPengeluaran ?? [] as $out)
+                    @forelse($daftarPengeluaran ?? [] as $keluar)
                         <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
                             <td class="px-4 py-3 font-mono font-medium text-rose-600 dark:text-rose-400">
-                                {{ $out->nomor_pengeluaran }}
+                                {{ $keluar->nomor_pengeluaran }}
                             </td>
                             <td class="px-4 py-3 font-mono text-slate-600 dark:text-slate-400">
-                                {{ date('d/m/Y', strtotime($out->tanggal_pengeluaran)) }}
+                                {{ date('d/m/Y', strtotime($keluar->tanggal_pengeluaran)) }}
                             </td>
                             <td class="px-4 py-3">
-                                <div class="font-bold text-slate-900 dark:text-slate-100">{{ $out->kategori_pengeluaran }}</div>
-                                <div class="text-[11px] text-slate-400 font-mono">{{ $out->kode_akun }} - {{ $out->nama_akun ?? 'Beban Operasional' }}</div>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20">
+                                    {{ $keluar->kategori_pengeluaran }}
+                                </span>
                             </td>
-                            <td class="px-4 py-3 text-slate-700 dark:text-slate-300">
-                                {{ $out->nama_bank ?? 'Kas Tunai' }}
+                            <td class="px-4 py-3 font-mono text-slate-700 dark:text-slate-300">
+                                {{ $keluar->kode_akun }} - {{ $keluar->akun->nama_akun ?? '' }}
                             </td>
                             <td class="px-4 py-3 text-right font-mono tabular-nums font-bold text-rose-600 dark:text-rose-400">
-                                Rp {{ number_format($out->total_nominal, 0, ',', '.') }}
+                                Rp {{ number_format($keluar->total_nominal, 0, ',', '.') }}
                             </td>
-                            <td class="px-4 py-3 text-slate-600 dark:text-slate-400 truncate max-w-xs">
-                                {{ $out->keterangan }}
+                            <td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">
+                                {{ $keluar->rekening->nama_bank ?? 'Kas Tunai Brankas' }}
                             </td>
-                            <td class="px-4 py-3 text-center">
-                                <span class="px-2 py-0.5 rounded text-[10px] font-semibold font-mono bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
-                                    Disetujui
-                                </span>
+                            <td class="px-4 py-3 text-slate-500 dark:text-slate-400 truncate max-w-xs">
+                                {{ $keluar->keterangan ?? '-' }}
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-6 text-center text-slate-400">Belum ada catatan pengeluaran kas.</td>
+                            <td colspan="7" class="px-4 py-6 text-center text-slate-400">Belum ada pengeluaran kas tercatat.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -144,9 +144,9 @@
         </div>
     </div>
 
-    <!-- Modal Catat Pengeluaran -->
+    <!-- Modal Tambah Pengeluaran -->
     <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalTambah = false" class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-xl">
+        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Catat Pengeluaran Kas Operasional</h3>
                 <button @click="bukaModalTambah = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>

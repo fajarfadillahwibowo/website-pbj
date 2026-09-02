@@ -65,3 +65,86 @@ select option:checked {
     background-color: #0284c7 !important;
     color: #ffffff !important;
 }
+
+/* ==========================================================================
+   Staggered Entrance Animation System (Micro-Interactions)
+   ========================================================================== */
+
+@keyframes muncul-bertingkat {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes muncul-skala {
+    0% {
+        opacity: 0;
+        transform: scale(0.97) translateY(4px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.animasi-masuk {
+    animation: muncul-bertingkat 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animasi-skala {
+    animation: muncul-skala 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Stagger Delay Classes */
+.tunda-1 { animation-delay: 40ms !important; }
+.tunda-2 { animation-delay: 80ms !important; }
+.tunda-3 { animation-delay: 120ms !important; }
+.tunda-4 { animation-delay: 160ms !important; }
+.tunda-5 { animation-delay: 200ms !important; }
+.tunda-6 { animation-delay: 240ms !important; }
+.tunda-7 { animation-delay: 280ms !important; }
+.tunda-8 { animation-delay: 320ms !important; }
+
+/* Grid / Container Stagger */
+.wadah-bertingkat > *:nth-child(1) { animation: muncul-bertingkat 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 40ms; }
+.wadah-bertingkat > *:nth-child(2) { animation: muncul-bertingkat 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 80ms; }
+.wadah-bertingkat > *:nth-child(3) { animation: muncul-bertingkat 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 120ms; }
+.wadah-bertingkat > *:nth-child(4) { animation: muncul-bertingkat 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 160ms; }
+.wadah-bertingkat > *:nth-child(5) { animation: muncul-bertingkat 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 200ms; }
+.wadah-bertingkat > *:nth-child(6) { animation: muncul-bertingkat 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 240ms; }
+.wadah-bertingkat > *:nth-child(7) { animation: muncul-bertingkat 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 280ms; }
+.wadah-bertingkat > *:nth-child(8) { animation: muncul-bertingkat 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 320ms; }
+.wadah-bertingkat > *:nth-child(9) { animation: muncul-bertingkat 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 360ms; }
+.wadah-bertingkat > *:nth-child(10) { animation: muncul-bertingkat 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 400ms; }
+.wadah-bertingkat > *:nth-child(11) { animation: muncul-bertingkat 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 440ms; }
+.wadah-bertingkat > *:nth-child(12) { animation: muncul-bertingkat 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 480ms; }
+
+/* Table Rows Stagger */
+.tabel-bertingkat tbody tr:nth-child(1) { animation: muncul-bertingkat 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 50ms; }
+.tabel-bertingkat tbody tr:nth-child(2) { animation: muncul-bertingkat 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 80ms; }
+.tabel-bertingkat tbody tr:nth-child(3) { animation: muncul-bertingkat 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 110ms; }
+.tabel-bertingkat tbody tr:nth-child(4) { animation: muncul-bertingkat 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 140ms; }
+.tabel-bertingkat tbody tr:nth-child(5) { animation: muncul-bertingkat 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 170ms; }
+.tabel-bertingkat tbody tr:nth-child(6) { animation: muncul-bertingkat 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 200ms; }
+.tabel-bertingkat tbody tr:nth-child(7) { animation: muncul-bertingkat 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 230ms; }
+.tabel-bertingkat tbody tr:nth-child(8) { animation: muncul-bertingkat 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 260ms; }
+.tabel-bertingkat tbody tr:nth-child(9) { animation: muncul-bertingkat 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 290ms; }
+.tabel-bertingkat tbody tr:nth-child(10) { animation: muncul-bertingkat 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 320ms; }
+
+/* Accessibility Support for Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .animasi-masuk,
+    .animasi-skala,
+    .wadah-bertingkat > *,
+    .tabel-bertingkat tbody tr {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}
+

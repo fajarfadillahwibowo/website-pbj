@@ -15,12 +15,12 @@
         </div>
     @endif
 
-    <!-- Header Modul Rilisan -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
+    <!-- Header Modul Rilisan Kas Bon -->
+    <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
         <div>
             <div class="text-xs text-rose-600 dark:text-rose-400 font-semibold font-mono uppercase tracking-wider mb-1">Account Payable · Dev 1</div>
-            <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">Daftar Rilisan Pembayaran & Kas Bon Driver</h1>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Rilisan dana uang jalan supir armada truk, kas bon darurat, dan klaim reimburse lapangan.</p>
+            <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">Rilisan Kas Bon & Uang Jalan Supir</h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pencatatan rilis kas operasional driver supir, kas bon talangan, dan verifikasi SPV.</p>
         </div>
         <div class="flex items-center gap-2">
             <button @click="bukaModalTambah = true" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-all shadow-sm">
@@ -31,7 +31,7 @@
     </div>
 
     <!-- Ringkasan Statistik -->
-    <div class="grid grid-cols-2 gap-3">
+    <div class="wadah-bertingkat grid grid-cols-2 gap-3">
         <div class="bg-white dark:bg-[#14161F] p-3.5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837]">
             <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Total Dana Rilisan Operasional</div>
             <div class="text-lg font-bold text-rose-600 dark:text-rose-400 mt-0.5 font-mono">Rp {{ number_format($totalRilisan ?? 0, 0, ',', '.') }}</div>
@@ -43,7 +43,7 @@
     </div>
 
     <!-- Tabel Data Rilisan -->
-    <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <form method="GET" action="{{ route('keuangan.ap.rilisan') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
             <div class="relative w-full sm:w-64">
                 <input type="text" name="cari" value="{{ $kataKunci ?? '' }}" placeholder="Cari nomor bukti / keterangan..."
@@ -54,7 +54,7 @@
         </form>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-xs">
+            <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">No. Bukti Rilis</th>

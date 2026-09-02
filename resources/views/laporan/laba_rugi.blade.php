@@ -5,7 +5,7 @@
 @section('konten')
 <div class="space-y-5">
     <!-- Header Modul Laba Rugi -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
+    <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
         <div>
             <div class="text-xs text-blue-600 dark:text-blue-400 font-semibold font-mono uppercase tracking-wider mb-1">Laporan Eksekutif · Direktur & Manager</div>
             <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">Laporan Laba Rugi Komprehensif</h1>
@@ -20,7 +20,7 @@
     </div>
 
     <!-- Ringkasan Kartu Metrik Laba Rugi -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div class="wadah-bertingkat grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div class="bg-white dark:bg-[#14161F] p-3.5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837]">
             <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Total Pendapatan</div>
             <div class="text-lg font-bold text-slate-900 dark:text-slate-100 mt-0.5 font-mono">Rp {{ number_format($totalPendapatan ?? 0, 0, ',', '.') }}</div>
@@ -40,7 +40,7 @@
     </div>
 
     <!-- Rincian Laporan Laba Rugi -->
-    <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl p-6 shadow-sm max-w-4xl space-y-4">
+    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl p-6 shadow-sm max-w-4xl space-y-4">
         <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 pb-2 border-b border-[#E2E8F0] dark:border-[#252837] uppercase tracking-wider">
             PERHITUNGAN LABA RUGI OPERASIONAL
         </h3>

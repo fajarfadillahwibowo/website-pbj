@@ -26,12 +26,12 @@
         </div>
     @endif
 
-    <!-- Header Modul -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
+    <!-- Header Modul Barang -->
+    <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
         <div>
             <div class="text-xs text-amber-600 dark:text-amber-400 font-semibold font-mono uppercase tracking-wider mb-1">Master Data · Dev 1</div>
-            <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">Katalog Produk Semen & Harga Jual</h1>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Master produk semen zak (PCC/OPC), semen curah, harga pokok beli pabrik, dan harga jual standar.</p>
+            <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">Katalog Produk Semen</h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Daftar semen kemasan zak, curah, harga tebus pabrik, dan standar harga jual.</p>
         </div>
         <div class="flex items-center gap-2">
             <button @click="bukaModalTambah = true" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl transition-all shadow-sm">
@@ -42,7 +42,7 @@
     </div>
 
     <!-- Ringkasan Statistik Produk -->
-    <div class="grid grid-cols-3 gap-3">
+    <div class="wadah-bertingkat grid grid-cols-3 gap-3">
         <div class="bg-white dark:bg-[#14161F] p-3.5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837]">
             <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Total Produk Terdaftar</div>
             <div class="text-lg font-bold text-slate-900 dark:text-slate-100 mt-0.5 font-mono">{{ $totalBarang ?? count($daftarBarang ?? []) }} SKU</div>
@@ -58,7 +58,7 @@
     </div>
 
     <!-- Tabel Data Barang -->
-    <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <form method="GET" action="{{ route('master.barang.index') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
             @php
                 $opsiFilterJenis = [
@@ -93,7 +93,7 @@
         </form>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-xs">
+            <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Kode Produk</th>
@@ -155,7 +155,7 @@
 
     <!-- Modal Tambah Produk -->
     <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalTambah = false" class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
+        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Tambah Produk Semen Baru</h3>
                 <button @click="bukaModalTambah = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>
@@ -211,7 +211,7 @@
 
     <!-- Modal Edit Produk -->
     <div x-show="bukaModalEdit" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalEdit = false" class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
+        <div @click.away="bukaModalEdit = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Edit Produk: <span class="font-mono text-amber-600" x-text="editData.kode_barang"></span></h3>
                 <button @click="bukaModalEdit = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>

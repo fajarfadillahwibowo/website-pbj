@@ -15,12 +15,12 @@
         </div>
     @endif
 
-    <!-- Header Modul Aset -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
+    <!-- Header Modul Aset Perusahaan -->
+    <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
         <div>
-            <div class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold font-mono uppercase tracking-wider mb-1">Akuntansi · Dev 1</div>
-            <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">Daftar Aset & Inventaris Perusahaan</h1>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pencatatan aset tetap, armada truk semen, peralatan gudang, dan nilai perolehan aktiva.</p>
+            <div class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold font-mono uppercase tracking-wider mb-1">Buku Besar & Akuntansi · Dev 1</div>
+            <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">Inventarisasi Aset Tetap Perusahaan</h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pendataan aktiva tetap: Armada Truk Tronton, Wingbox, Dump Truck, Gudang, dan Mesin Operasional.</p>
         </div>
         <div class="flex items-center gap-2">
             <button @click="bukaModalTambah = true" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm">
@@ -31,7 +31,7 @@
     </div>
 
     <!-- Ringkasan Statistik Aset -->
-    <div class="grid grid-cols-3 gap-3">
+    <div class="wadah-bertingkat grid grid-cols-3 gap-3">
         <div class="bg-white dark:bg-[#14161F] p-3.5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837]">
             <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Total Nilai Perolehan Aset</div>
             <div class="text-lg font-bold text-indigo-600 dark:text-indigo-400 mt-0.5 font-mono">Rp {{ number_format($totalNilaiAset ?? 0, 0, ',', '.') }}</div>
@@ -47,7 +47,7 @@
     </div>
 
     <!-- Tabel Data Aset -->
-    <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <form method="GET" action="{{ route('keuangan.akuntansi.aset') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
             @php
                 $opsiFilterJenisAset = array_merge([['nilai' => '', 'label' => '-- Semua Jenis Aset --']], ($daftarJenis ?? collect())->map(fn($j) => [
@@ -82,7 +82,7 @@
         </form>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-xs">
+            <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Kode Aset</th>
@@ -99,28 +99,27 @@
                             <td class="px-4 py-3 font-mono font-medium text-indigo-600 dark:text-indigo-400">
                                 {{ $aset->kode_aset }}
                             </td>
-                            <td class="px-4 py-3">
-                                <div class="font-bold text-slate-900 dark:text-slate-100">{{ $aset->nama_aset }}</div>
-                                <div class="text-[11px] text-slate-400">{{ $aset->merek_aset }} · {{ $aset->muatan ?? '-' }}</div>
+                            <td class="px-4 py-3 font-bold text-slate-900 dark:text-slate-100">
+                                {{ $aset->nama_aset }}
                             </td>
                             <td class="px-4 py-3">
                                 <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                                    {{ $aset->jenis_aset ?? $aset->kode_jenis_aset }}
+                                    {{ $aset->jenisAset->jenis_aset ?? $aset->kode_jenis_aset }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 font-mono font-bold text-slate-800 dark:text-slate-200">
-                                {{ $aset->no_polisi ?: '-' }}
+                            <td class="px-4 py-3 font-mono font-semibold text-slate-700 dark:text-slate-300">
+                                {{ $aset->no_polisi ?? '-' }}
                             </td>
-                            <td class="px-4 py-3 text-right font-mono tabular-nums font-bold text-slate-900 dark:text-slate-100">
+                            <td class="px-4 py-3 text-right font-mono tabular-nums font-bold text-indigo-600 dark:text-indigo-400">
                                 Rp {{ number_format($aset->harga_aset, 0, ',', '.') }}
                             </td>
-                            <td class="px-4 py-3 text-center font-mono text-slate-600 dark:text-slate-400">
-                                {{ date('d/m/Y', strtotime($aset->tanggal_pembelian)) }}
+                            <td class="px-4 py-3 text-center font-mono text-slate-500">
+                                {{ $aset->tanggal_pembelian ? date('d/m/Y', strtotime($aset->tanggal_pembelian)) : '-' }}
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-6 text-center text-slate-400">Belum ada data aset perusahaan.</td>
+                            <td colspan="6" class="px-4 py-6 text-center text-slate-400">Belum ada aset tetap tercatat.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -130,7 +129,7 @@
 
     <!-- Modal Tambah Aset -->
     <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalTambah = false" class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
+        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Tambah Aset Perusahaan</h3>
                 <button @click="bukaModalTambah = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>

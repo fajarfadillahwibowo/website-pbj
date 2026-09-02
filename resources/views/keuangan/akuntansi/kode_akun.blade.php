@@ -16,11 +16,11 @@
     @endif
 
     <!-- Header Modul Bagan Akun -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
+    <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
         <div>
-            <div class="text-xs text-violet-600 dark:text-violet-400 font-semibold font-mono uppercase tracking-wider mb-1">Akuntansi · Dev 1</div>
-            <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">Bagan Akun Standar (Chart of Accounts)</h1>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Daftar klasifikasi akun aset, kewajiban, modal, pendapatan, dan beban usaha.</p>
+            <div class="text-xs text-violet-600 dark:text-violet-400 font-semibold font-mono uppercase tracking-wider mb-1">Buku Besar & Akuntansi · Dev 1</div>
+            <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">Bagan Kode Akun (Chart of Accounts)</h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Master kode akun akuntansi standar: Aktiva, Kewajiban, Modal, Pendapatan, dan Beban Operasional.</p>
         </div>
         <div class="flex items-center gap-2">
             <button @click="bukaModalTambah = true" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-violet-600 hover:bg-violet-700 rounded-xl transition-all shadow-sm">
@@ -31,7 +31,7 @@
     </div>
 
     <!-- Ringkasan Statistik COA -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div class="wadah-bertingkat grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div class="bg-white dark:bg-[#14161F] p-3.5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837]">
             <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Total Bagan Akun</div>
             <div class="text-lg font-bold text-slate-900 dark:text-slate-100 mt-0.5 font-mono">{{ $totalAkun ?? 0 }} Akun</div>
@@ -51,7 +51,7 @@
     </div>
 
     <!-- Tabel Data Bagan Akun -->
-    <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         @php
                 $opsiFilterTipeCOA = [
                     ['nilai' => '', 'label' => '-- Semua Tipe Akun --'],
@@ -96,57 +96,53 @@
                     />
                 </div>
             </div>
-            <span class="text-xs text-slate-400 font-mono">Tabel: data_kode_akun</span>
+            <span class="text-xs text-slate-400 font-mono">Tabel: kode_akun</span>
         </form>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-xs">
+            <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Kode Akun</th>
-                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Nama Akun</th>
-                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Tipe & Kelompok</th>
+                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Nama Bagan Akun</th>
+                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Tipe & Kategori</th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Saldo Normal</th>
+                        <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Saldo Awal</th>
                         <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Saldo Berjalan</th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
-                    @forelse($daftarAkun ?? [] as $akun)
+                    @forelse($daftarAkun ?? [] as $acc)
                         <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
                             <td class="px-4 py-3 font-mono font-bold text-violet-600 dark:text-violet-400">
-                                {{ $akun->kode_akun }}
+                                {{ $acc->kode_akun }}
                             </td>
                             <td class="px-4 py-3 font-bold text-slate-900 dark:text-slate-100">
-                                {{ $akun->nama_akun }}
+                                {{ $acc->nama_akun }}
                             </td>
                             <td class="px-4 py-3">
-                                <div class="font-medium text-slate-800 dark:text-slate-200">{{ $akun->tipe_akun }}</div>
-                                <div class="text-[11px] text-slate-400">{{ $akun->kelompok_akun }}</div>
+                                <div class="font-medium text-slate-800 dark:text-slate-200">{{ $acc->tipe_akun }}</div>
+                                <div class="text-[11px] text-slate-400">{{ $acc->kelompok_akun ?? '-' }}</div>
                             </td>
                             <td class="px-4 py-3 text-center">
-                                <span class="px-2 py-0.5 rounded text-[10px] font-semibold font-mono {{ $akun->saldo_normal === 'Debit' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400' }}">
-                                    {{ $akun->saldo_normal }}
+                                <span class="px-2 py-0.5 rounded text-[10px] font-semibold font-mono {{ $acc->saldo_normal === 'Debit' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20' : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' }}">
+                                    {{ $acc->saldo_normal }}
                                 </span>
                             </td>
+                            <td class="px-4 py-3 text-right font-mono tabular-nums text-slate-500">
+                                Rp {{ number_format($acc->saldo_awal ?? 0, 0, ',', '.') }}
+                            </td>
                             <td class="px-4 py-3 text-right font-mono tabular-nums font-bold text-slate-900 dark:text-slate-100">
-                                Rp {{ number_format($akun->saldo_berjalan, 0, ',', '.') }}
+                                Rp {{ number_format($acc->saldo_berjalan ?? 0, 0, ',', '.') }}
                             </td>
                             <td class="px-4 py-3 text-center">
-                                <div class="inline-flex items-center gap-2">
-                                    <button @click="editData = {{ json_encode($akun) }}; bukaModalEdit = true" type="button" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">Edit</button>
-                                    <span class="text-slate-300 dark:text-slate-700">|</span>
-                                    <form method="POST" action="{{ route('keuangan.akuntansi.kode_akun.destroy', $akun->kode_akun) }}" onsubmit="return confirm('Hapus akun COA {{ $akun->nama_akun }}?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 dark:text-red-400 hover:underline font-medium">Hapus</button>
-                                    </form>
-                                </div>
+                                <button @click="editData = {{ json_encode($acc) }}; bukaModalEdit = true" type="button" class="text-violet-600 dark:text-violet-400 hover:underline font-medium">Edit</button>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-6 text-center text-slate-400">Belum ada akun COA terdaftar.</td>
+                            <td colspan="7" class="px-4 py-6 text-center text-slate-400">Belum ada bagan akun yang sesuai.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -156,7 +152,7 @@
 
     <!-- Modal Tambah Akun -->
     <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalTambah = false" class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
+        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Tambah Akun COA Baru</h3>
                 <button @click="bukaModalTambah = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>

@@ -26,7 +26,7 @@
     @endif
 
     <!-- Header Modul Deposit -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
+    <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
         <div>
             <div class="text-xs text-sky-600 dark:text-sky-400 font-semibold font-mono uppercase tracking-wider mb-1">Account Receivable · Dev 1</div>
             <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">Saldo & Mutasi Deposit Customer</h1>
@@ -41,7 +41,7 @@
     </div>
 
     <!-- Ringkasan Statistik Deposit -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div class="wadah-bertingkat grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div class="bg-white dark:bg-[#14161F] p-3.5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837]">
             <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Total Deposit Aktif</div>
             <div class="text-lg font-bold text-sky-600 dark:text-sky-400 mt-0.5 font-mono">Rp {{ number_format($totalDepositAktif ?? 0, 0, ',', '.') }}</div>
@@ -61,7 +61,8 @@
     </div>
 
     <!-- Tabel Mutasi Deposit -->
-    <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+        <form method="GET" action="{{ route('keuangan.ar.deposit') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
             @php
                 $opsiFilterTipe = [
                     ['nilai' => '', 'label' => '-- Semua Mutasi --'],
@@ -96,16 +97,16 @@
         </form>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-xs">
+            <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
-                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">No. Bukti</th>
+                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">No. Bukti Mutasi</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Tanggal</th>
-                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Customer / Toko</th>
+                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Customer Toko</th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Jenis Mutasi</th>
-                        <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Nominal Mutasi</th>
+                        <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Jumlah Nominal</th>
                         <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Saldo Akhir</th>
-                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Keterangan</th>
+                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Keterangan / Ref</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
@@ -124,7 +125,7 @@
                             <td class="px-4 py-3 text-center">
                                 @if($dep->tipe_mutasi === 'Masuk')
                                     <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
-                                        Masuk
+                                        Setoran Masuk
                                     </span>
                                 @else
                                     <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20">
@@ -154,7 +155,7 @@
 
     <!-- Modal Top Up Deposit -->
     <div x-show="bukaModalTopUp" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalTopUp = false" class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
+        <div @click.away="bukaModalTopUp = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Top Up Saldo Deposit Customer</h3>
                 <button @click="bukaModalTopUp = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>

@@ -43,7 +43,7 @@
     @endif
 
     <!-- Header Modul Faktur Penjualan -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
+    <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
         <div>
             <div class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold font-mono uppercase tracking-wider mb-1">Account Receivable · Dev 1</div>
             <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">Faktur Penjualan Semen</h1>
@@ -58,7 +58,7 @@
     </div>
 
     <!-- Ringkasan Statistik Penjualan -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div class="wadah-bertingkat grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div class="bg-white dark:bg-[#14161F] p-3.5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837]">
             <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Total Penjualan</div>
             <div class="text-lg font-bold text-slate-900 dark:text-slate-100 mt-0.5 font-mono">Rp {{ number_format($totalPenjualan ?? 0, 0, ',', '.') }}</div>
@@ -78,7 +78,7 @@
     </div>
 
     <!-- Tabel Data Faktur Penjualan -->
-    <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <form method="GET" action="{{ route('keuangan.ar.faktur') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
             @php
                 $opsiFilterStatusFaktur = [
@@ -88,26 +88,23 @@
                 ];
                 $opsiFilterMetodeFaktur = [
                     ['nilai' => '', 'label' => '-- Semua Metode --'],
-                    ['nilai' => 'Kredit / Piutang', 'label' => 'Kredit / Piutang'],
-                    ['nilai' => 'Potong Deposit', 'label' => 'Potong Deposit'],
-                    ['nilai' => 'Transfer', 'label' => 'Transfer'],
-                    ['nilai' => 'Tunai', 'label' => 'Tunai'],
-                ];
-                $opsiCustomerFaktur = ($daftarCustomer ?? collect())->map(fn($c) => [
-                    'nilai' => $c->kode_customer,
-                    'label' => $c->nama_toko_bangunan,
-                    'sub'   => 'Plafon: Rp ' . number_format($c->plafon_piutang, 0, ',', '.') . ' | Dep: Rp ' . number_format($c->saldo_deposit, 0, ',', '.')
-                ])->toArray();
-                $opsiMetodeModal = [
-                    ['nilai' => 'Kredit / Piutang', 'label' => 'Kredit / Piutang (Tempo)'],
-                    ['nilai' => 'Potong Deposit', 'label' => 'Potong Saldo Deposit Toko'],
+                    ['nilai' => 'Tunai', 'label' => 'Tunai Kas'],
                     ['nilai' => 'Transfer', 'label' => 'Transfer Bank'],
-                    ['nilai' => 'Tunai', 'label' => 'Tunai / Cash'],
+                    ['nilai' => 'Kredit', 'label' => 'Kredit Tempo'],
+                    ['nilai' => 'Deposit', 'label' => 'Potong Deposit'],
+                ];
+                $opsiCustomerFaktur = ($daftarCustomer ?? collect())->map(fn($c) => ['nilai' => $c->kode_customer, 'label' => $c->nama_toko_bangunan . ' (' . $c->kode_customer . ')'])->toArray();
+                $opsiBarangFaktur = ($daftarBarang ?? collect())->map(fn($b) => ['nilai' => $b->kode_barang, 'label' => $b->nama_barang . ' - Rp ' . number_format($b->harga_jual_standar, 0, ',', '.')])->toArray();
+                $opsiMetodeModal = [
+                    ['nilai' => 'Kredit', 'label' => 'Kredit Tempo'],
+                    ['nilai' => 'Tunai', 'label' => 'Tunai Kas'],
+                    ['nilai' => 'Transfer', 'label' => 'Transfer Bank'],
+                    ['nilai' => 'Deposit', 'label' => 'Potong Deposit'],
                 ];
             @endphp
             <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                 <div class="relative w-full sm:w-64">
-                    <input type="text" name="cari" value="{{ $kataKunci ?? '' }}" placeholder="Cari no faktur / nama toko..."
+                    <input type="text" name="cari" value="{{ $kataKunci ?? '' }}" placeholder="Cari no faktur / customer..."
                            class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
                     <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
@@ -138,7 +135,7 @@
         </form>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-xs">
+            <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">No. Faktur</th>
@@ -186,13 +183,13 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-center font-mono text-[11px] text-slate-500">
-                                {{ $faktur->jatuh_tempo ? date('d/m/Y', strtotime($faktur->jatuh_tempo)) : '-' }}
+                            <td class="px-4 py-3 text-center font-mono text-slate-500">
+                                {{ $faktur->tanggal_jatuh_tempo ? date('d/m/Y', strtotime($faktur->tanggal_jatuh_tempo)) : '-' }}
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-4 py-6 text-center text-slate-400">Belum ada faktur penjualan yang terdaftar.</td>
+                            <td colspan="8" class="px-4 py-6 text-center text-slate-400">Belum ada faktur penjualan tercatat.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -200,9 +197,9 @@
         </div>
     </div>
 
-    <!-- Modal Buat Faktur Baru -->
+    <!-- Modal Tambah Faktur Penjualan -->
     <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalTambah = false" class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-xl">
+        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-xl">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Penerbitan Faktur Penjualan Baru</h3>
                 <button @click="bukaModalTambah = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>

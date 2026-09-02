@@ -5,7 +5,7 @@
 @section('konten')
 <div class="space-y-5">
     <!-- Header Modul Neraca -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
+    <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
         <div>
             <div class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold font-mono uppercase tracking-wider mb-1">Laporan Eksekutif · Direktur & Manager</div>
             <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">Laporan Posisi Keuangan (Neraca)</h1>
@@ -20,7 +20,7 @@
     </div>
 
     <!-- Dua Kolom: Aktiva vs Passiva -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+    <div class="wadah-bertingkat grid grid-cols-1 lg:grid-cols-2 gap-5">
         
         <!-- Kolom AKTIVA / ASET -->
         <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl p-5 shadow-sm space-y-4">

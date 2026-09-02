@@ -55,7 +55,7 @@
     <!-- ================================================================
          1. HERO HEADER: GREETING & PINTASAN AKSI DINAMIS SESUAI RBAC
     ================================================================ -->
-    <div class="bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="animasi-masuk bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <div class="flex items-center gap-2 mb-1">
                 <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 font-mono">
@@ -101,43 +101,25 @@
                 <a href="{{ route('keuangan.ap.pembelian_so') }}"
                    class="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-600/20">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                    <span>Input Pembelian SO</span>
+                    <span>Buat SO Baru</span>
                 </a>
             </template>
 
-            <!-- Akses Opname Gudang -->
-            <template x-if="bisaAkses('gudang_opname')">
-                <a href="{{ route('operasional.gudang.opname') }}"
-                   class="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] hover:bg-slate-100 dark:hover:bg-[#252837] transition-colors">
-                    <svg class="w-3.5 h-3.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                    <span>Stock Opname</span>
-                </a>
-            </template>
-
-            <!-- Akses Bengkel SPK -->
-            <template x-if="bisaAkses('bengkel_perbaikan')">
+            <!-- Akses SPK Servis Bengkel (Pengawas Kendaraan) -->
+            <template x-if="bisaAkses('bengkel_perbaikan') && !bisaAkses('master_customer')">
                 <a href="{{ route('operasional.bengkel.perbaikan') }}"
-                   class="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold text-white bg-red-600 hover:bg-red-700 transition-all shadow-sm shadow-red-600/20">
+                   class="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 transition-all shadow-sm shadow-amber-600/20">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                    <span>Buat SPK Servis</span>
+                    <span>SPK Servis Baru</span>
                 </a>
             </template>
 
-            <!-- Akses Super Admin: Kelola Akun -->
-            <template x-if="bisaAkses('admin_akun')">
+            <!-- Akses Kelola Akun (Super Admin) -->
+            <template x-if="jabatanAktif === 'SUPER_ADMIN'">
                 <a href="{{ route('superadmin.kelola_akun') }}"
-                   class="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold text-white bg-purple-600 hover:bg-purple-700 transition-all shadow-sm shadow-purple-600/20">
+                   class="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold text-white bg-violet-600 hover:bg-violet-700 transition-all shadow-sm shadow-violet-600/20">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
                     <span>Tambah Pengguna</span>
-                </a>
-            </template>
-
-            <!-- Akses Laporan Eksekutif (Direktur / SPV Keuangan) -->
-            <template x-if="bisaAkses('laporan_neraca')">
-                <a href="{{ route('laporan.neraca') }}"
-                   class="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] hover:bg-slate-100 dark:hover:bg-[#252837] transition-colors">
-                    <svg class="w-3.5 h-3.5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                    <span>Buka Laporan</span>
                 </a>
             </template>
 
@@ -147,7 +129,7 @@
     <!-- ================================================================
          2. GRID METRIK & KPI CARD ADAPTIF SESUAI HAK AKSES JABATAN
     ================================================================ -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="wadah-bertingkat grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
         <!-- KELOMPOK KPI KEUANGAN (SPV Keuangan, Staff AR, Direktur) -->
         <template x-if="bisaAkses('ar_faktur') || bisaAkses('laporan_neraca')">

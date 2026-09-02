@@ -26,8 +26,8 @@
         </div>
     @endif
 
-    <!-- Header Modul Super Admin -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
+    <!-- Header Modul -->
+    <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
         <div>
             <div class="text-xs text-purple-600 dark:text-purple-400 font-semibold font-mono uppercase tracking-wider mb-1">Kontrol Sistem · Super Admin</div>
             <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">Kelola Akun & Hak Akses RBAC (10 Aktor)</h1>
@@ -42,7 +42,7 @@
     </div>
 
     <!-- Ringkasan Statistik Akun -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div class="wadah-bertingkat grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div class="bg-white dark:bg-[#14161F] p-3.5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837]">
             <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Total Akun Aktor</div>
             <div class="text-lg font-bold text-slate-900 dark:text-slate-100 mt-0.5 font-mono">{{ $totalAkun ?? count($semuaAkun) }} Akun</div>
@@ -62,7 +62,7 @@
     </div>
 
     <!-- Tabel Data 10 Akun Pengguna -->
-    <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <form method="GET" action="{{ route('superadmin.kelola_akun') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
             <div class="relative w-full sm:w-72">
                 <input type="text" name="cari" value="{{ $kataKunci ?? '' }}" placeholder="Cari username / nama staf..."
@@ -73,7 +73,7 @@
         </form>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-xs">
+            <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider w-10">No</th>
@@ -99,34 +99,29 @@
                             <td class="px-4 py-3 font-mono font-medium {{ $isSuper ? 'text-purple-600 dark:text-purple-400 font-bold' : 'text-slate-800 dark:text-slate-200' }}">
                                 {{ $usr }}
                             </td>
-                            <td class="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">
+                            <td class="px-4 py-3 font-bold text-slate-900 dark:text-slate-100">
                                 {{ $nama }}
                             </td>
                             <td class="px-4 py-3">
-                                <span class="px-2 py-0.5 rounded text-[10px] font-semibold font-mono {{ $isSuper ? 'bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300' }}">
+                                <span class="px-2 py-0.5 rounded text-[11px] font-semibold font-mono {{ $isSuper ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-500/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300' }}">
                                     {{ $jbt }} ({{ $kode }})
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-center">
-                                @if($aktif)
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
-                                        Aktif
-                                    </span>
-                                @else
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20">
-                                        Nonaktif
-                                    </span>
-                                @endif
+                                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold {{ $aktif ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20' }}">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $aktif ? 'bg-emerald-600' : 'bg-rose-600' }}"></span>
+                                    <span>{{ $aktif ? 'Aktif' : 'Non-Aktif' }}</span>
+                                </span>
                             </td>
                             <td class="px-4 py-3 text-center">
                                 @if($isSuper)
-                                    <span class="text-purple-500 font-mono text-[11px] font-semibold">Utama</span>
+                                    <span class="text-slate-400 text-[11px] italic font-medium">Hak Utama (Kunci)</span>
                                 @else
                                     <div class="inline-flex items-center gap-2">
-                                        <form method="POST" action="{{ route('superadmin.kelola_akun.reset_password') }}" onsubmit="return confirm('Reset sandi akun {{ $usr }} ke password123?')">
+                                        <form method="POST" action="{{ route('superadmin.kelola_akun.reset_password') }}" onsubmit="return confirm('Reset password akun {{ $usr }} menjadi password123?')">
                                             @csrf
                                             <input type="hidden" name="username" value="{{ $usr }}">
-                                            <button type="submit" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">Reset Sandi</button>
+                                            <button type="submit" class="text-purple-600 dark:text-purple-400 hover:underline font-medium">Reset Sandi</button>
                                         </form>
                                         <span class="text-slate-300 dark:text-slate-700">|</span>
                                         <form method="POST" action="{{ route('superadmin.kelola_akun.toggle_status') }}" onsubmit="return confirm('Ubah status aktif akun {{ $usr }}?')">
@@ -152,7 +147,7 @@
 
     <!-- Modal Tambah Akun Pengguna -->
     <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalTambah = false" class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
+        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Tambah Akun Pengguna Baru</h3>
                 <button @click="bukaModalTambah = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>

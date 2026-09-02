@@ -16,11 +16,11 @@
     @endif
 
     <!-- Header Modul Jurnal Umum -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
+    <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
         <div>
-            <div class="text-xs text-teal-600 dark:text-teal-400 font-semibold font-mono uppercase tracking-wider mb-1">Akuntansi · Dev 1</div>
-            <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">Buku Jurnal Umum (Double-Entry)</h1>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pencatatan debet & kredit berpasangan dari modul operasional, AR/AP, dan ayat jurnal penyesuaian.</p>
+            <div class="text-xs text-teal-600 dark:text-teal-400 font-semibold font-mono uppercase tracking-wider mb-1">Buku Besar & Akuntansi · Dev 1</div>
+            <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">Buku Jurnal Umum Double-Entry</h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pencatatan mutasi debit dan kredit otomatis dari transaksi operasional serta entri jurnal manual.</p>
         </div>
         <div class="flex items-center gap-2">
             <button @click="bukaModalTambah = true" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl transition-all shadow-sm">
@@ -31,7 +31,7 @@
     </div>
 
     <!-- Ringkasan Statistik Jurnal -->
-    <div class="grid grid-cols-3 gap-3">
+    <div class="wadah-bertingkat grid grid-cols-3 gap-3">
         <div class="bg-white dark:bg-[#14161F] p-3.5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837]">
             <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Total Mutasi Debet</div>
             <div class="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 font-mono">Rp {{ number_format($totalDebit ?? 0, 0, ',', '.') }}</div>
@@ -50,7 +50,7 @@
     </div>
 
     <!-- Tabel Data Jurnal Umum -->
-    <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <form method="GET" action="{{ route('keuangan.akuntansi.jurnal') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
             @php
                 $opsiFilterPosisi = [
@@ -86,7 +86,7 @@
         </form>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-xs">
+            <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">No. Jurnal</th>
@@ -107,21 +107,21 @@
                                 {{ date('d/m/Y', strtotime($jurnal->tanggal_transaksi)) }}
                             </td>
                             <td class="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">
-                                <span class="font-mono text-slate-400">{{ $jurnal->kode_akun }}</span> · {{ $jurnal->nama_akun ?? 'Akun COA' }}
+                                <span class="font-mono text-slate-500">{{ $jurnal->kode_akun }}</span> - {{ $jurnal->akun->nama_akun ?? '' }}
                             </td>
                             <td class="px-4 py-3 text-slate-600 dark:text-slate-400 truncate max-w-xs">
                                 {{ $jurnal->keterangan }}
                             </td>
-                            <td class="px-4 py-3 text-right font-mono tabular-nums font-semibold {{ $jurnal->posisi === 'Debit' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400' }}">
-                                {{ $jurnal->posisi === 'Debit' ? 'Rp ' . number_format($jurnal->nominal, 0, ',', '.') : '-' }}
+                            <td class="px-4 py-3 text-right font-mono tabular-nums font-bold {{ $jurnal->posisi_debit_kredit === 'Debit' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-300 dark:text-slate-700' }}">
+                                {{ $jurnal->posisi_debit_kredit === 'Debit' ? 'Rp ' . number_format($jurnal->nominal, 0, ',', '.') : '-' }}
                             </td>
-                            <td class="px-4 py-3 text-right font-mono tabular-nums font-semibold {{ $jurnal->posisi === 'Kredit' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400' }}">
-                                {{ $jurnal->posisi === 'Kredit' ? 'Rp ' . number_format($jurnal->nominal, 0, ',', '.') : '-' }}
+                            <td class="px-4 py-3 text-right font-mono tabular-nums font-bold {{ $jurnal->posisi_debit_kredit === 'Kredit' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-300 dark:text-slate-700' }}">
+                                {{ $jurnal->posisi_debit_kredit === 'Kredit' ? 'Rp ' . number_format($jurnal->nominal, 0, ',', '.') : '-' }}
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-6 text-center text-slate-400">Belum ada entri jurnal umum yang tercatat.</td>
+                            <td colspan="6" class="px-4 py-6 text-center text-slate-400">Belum ada entri ayat jurnal umum.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -131,7 +131,7 @@
 
     <!-- Modal Input Jurnal Manual -->
     <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalTambah = false" class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-xl">
+        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-xl">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Input Entri Jurnal Double-Entry</h3>
                 <button @click="bukaModalTambah = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>

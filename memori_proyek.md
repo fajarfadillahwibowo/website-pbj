@@ -2,9 +2,19 @@
 
 ## 📌 Status Terkini
 - **Branch Aktif:** `web-dev1`
-- **Fokus Eksekusi:** Pengerjaan Penuh Seluruh Modul Developer 1 (Sesuai `docs/02_Pembagian_Tugas.md`) & Standarisasi Komponen Dropdown Kustom Seluruh Antarmuka.
+- **Fokus Eksekusi:** Pengerjaan Penuh Seluruh Modul Developer 1 (Sesuai `docs/02_Pembagian_Tugas.md`), Standarisasi Komponen Dropdown Kustom, dan Penerapan *Staggered Entrance Animation* pada Seluruh View.
 - **Status Developer 1:** ✅ **100% SELESAI & TERVERIFIKASI (HTTP 200 OK pada seluruh modul)**.
 - **Status Standarisasi UI Dropdown:** ✅ **100% SELESAI & TERVERIFIKASI** (Semua native `<select>` diganti dengan `<x-dropdown-kustom>`).
+- **Status Staggered Entrance Animation:** ✅ **100% SELESAI & TERVERIFIKASI** (Terapkan `.animasi-masuk`, `.wadah-bertingkat`, `.tabel-bertingkat`, `.animasi-skala` di seluruh 18 view).
+
+---
+
+## ⚡ Animasi Staggered Entrance (CSS & Micro-Animations)
+- **Definisi CSS di `resources/css/app.css`:**
+  - Keyframes `@keyframes muncul-bertingkat` (translasi vertikal 10px ke 0, opacity 0 ke 1) dan `@keyframes muncul-skala` (scale 0.97 ke 1, opacity 0 ke 1) dengan easing `cubic-bezier(0.16, 1, 0.3, 1)`.
+  - Class `.animasi-masuk`, `.wadah-bertingkat`, `.tabel-bertingkat`, `.animasi-skala`, serta helper tunda `.tunda-1` s.d. `.tunda-8`.
+  - Fallback `@media (prefers-reduced-motion: reduce)` untuk aksesibilitas WCAG.
+- **Terapkan di seluruh modul:** Dashboard, Superadmin Kelola Akun, Master (Customer, Barang, Wilayah, Karyawan), Keuangan AR (Faktur, Piutang, Deposit), Keuangan AP (Pembelian SO, Pengeluaran Kas, Rilisan), Akuntansi (Bagan Akun COA, Jurnal Umum, Aset Perusahaan), dan Laporan Eksekutif (Neraca, Laba Rugi, Arus Kas).
 
 ---
 

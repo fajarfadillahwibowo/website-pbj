@@ -1,7 +1,9 @@
 # 📝 Pelacak Bug, Error, & Progres Terlewati Real-time
 
 ## 🔴 Daftar Bug & Error
-*Tidak ada bug aktif saat ini. Seluruh 17 endpoint Developer 1 lolos pengujian dengan status HTTP 200 OK.*
+- **[TERSELESAIKAN] Undefined property: stdClass::$nomor_transaksi_pengeluaran pada view `keuangan/ap/pengeluaran_kas.blade.php`**:
+  - *Penyebab:* Nama kolom pada tabel `data_pengeluaran_kas` adalah `nomor_pengeluaran`.
+  - *Solusi:* Mengubah referensi `$keluar->nomor_transaksi_pengeluaran` menjadi `$keluar->nomor_pengeluaran`. Seluruh 18 route sekarang lolos dengan status HTTP 200 OK.
 
 ---
 
