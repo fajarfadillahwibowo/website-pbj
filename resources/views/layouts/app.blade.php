@@ -51,10 +51,10 @@
             'dashboard', 'ap_pembelian', 'list_so', 'gudang_stok', 'ap_pengeluaran', 'ap_rilisan'
           ],
           SPV_OPERASIONAL: [
-            'dashboard', 'kirim_ongkos', 'gudang_opname', 'armada_driver', 'armada_truk', 'kirim_sj', 'ops_kso'
+            'dashboard', 'kirim_ongkos', 'gudang_opname', 'armada_driver', 'armada_truk', 'jenis_aset', 'kirim_sj', 'ops_kso'
           ],
           DISPATCHER: [
-            'dashboard', 'armada_truk', 'kirim_sj', 'armada_driver'
+            'dashboard', 'armada_truk', 'jenis_aset', 'kirim_sj', 'armada_driver'
           ],
           PENGAWAS_DRIVER: [
             'dashboard', 'armada_driver'
@@ -63,7 +63,7 @@
             'dashboard', 'gudang_stok', 'gudang_opname'
           ],
           PENGAWAS_KENDARAAN: [
-            'dashboard', 'bengkel_perbaikan', 'bengkel_pembelian_sparepart', 'bengkel_sparepart'
+            'dashboard', 'armada_truk', 'jenis_aset', 'bengkel_perbaikan', 'bengkel_pembelian_sparepart', 'bengkel_sparepart'
           ]
         },
 

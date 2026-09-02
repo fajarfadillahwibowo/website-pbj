@@ -31,6 +31,18 @@ class Customer extends Model
         'saldo_deposit',
     ];
 
+    protected $appends = [
+        'nama_customer',
+    ];
+
+    /**
+     * Accessor alias nama_customer ke nama_toko_bangunan
+     */
+    public function getNamaCustomerAttribute()
+    {
+        return $this->nama_toko_bangunan ?: ($this->nama_pemilik ?: $this->kode_customer);
+    }
+
     public function wilayah()
     {
         return $this->belongsTo(Wilayah::class, 'kode_wilayah', 'kode_wilayah');

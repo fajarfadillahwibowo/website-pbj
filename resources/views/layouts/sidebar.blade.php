@@ -234,7 +234,7 @@
                 <a x-show="bisaAkses('armada_truk')" href="{{ route('operasional.armada.kendaraan') }}"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
                    class="flex items-center gap-2.5 py-2 rounded-xl transition-all duration-150 {{ request()->routeIs('operasional.armada.kendaraan') ? 'font-bold text-orange-700 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-l-2 border-orange-600' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium' }}"
-                   :title="sidebarTerlipat ? 'Data Kendaraan Truk' : ''">
+                   :title="sidebarTerlipat ? 'Data Kendaraan & Jenis Aset' : ''">
                     <svg class="w-4 h-4 shrink-0 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1"/></svg>
                     <span x-show="!sidebarTerlipat" class="truncate">Data Kendaraan</span>
                 </a>
