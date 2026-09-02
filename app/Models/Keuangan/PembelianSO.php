@@ -19,10 +19,13 @@ class PembelianSO extends Model
 
     protected $fillable = [
         'nomor_so',
+        'nomor_lo',
         'tanggal_so',
         'kode_customer',
         'kode_gudang',
+        'jenis_pengiriman',
         'jumlah_zak',
+        'qty_pengambilan',
         'harga_satuan',
         'total_harga',
         'status_so',

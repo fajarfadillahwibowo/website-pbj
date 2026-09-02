@@ -7,11 +7,16 @@
 
 ## 📌 1. Kesiapan Fondasi Proyek (Status: Siap Bagi Tugas)
 
-Seluruh fondasi inti telah disiapkan dan diverifikasi dengan kode status **`200 OK`**:
+Seluruh fondasi inti telah disiapkan dan diverifikasi dengan kode status **`200 OK` (25 Tampilan View Aktif)**:
 - [x] **Autentikasi & RBAC:** Multi-tabel (`super_account` dan `account`) dengan 10 peran pengguna dan kata sandi default `password123`.
-- [x] **Database & Migrasi:** 28+ tabel bisnis termigrasi via `2026_09_01_000001_create_skema_database_lengkap.php`, `2026_09_02_000001_create_ongkos_kso_and_update_data_kso.php`, `2026_09_02_000002_update_status_perbaikan_column.php`, & `AutentikasiSeeder.php`.
-- [x] **Navigasi Dinamis:** Sidebar otomatis memfilter menu sesuai peran aktif (didukung simulator role di topbar).
-- [x] **Template View:** Seluruh file Blade di `resources/views/` sudah tersedia dengan struktur tabel, tombol aksi, filter pencarian, dan desain enterprise.
+- [x] **Database & Migrasi:** 29+ tabel bisnis termigrasi via:
+  - `2026_09_01_000001_create_skema_database_lengkap.php`
+  - `2026_09_02_000001_create_ongkos_kso_and_update_data_kso.php`
+  - `2026_09_02_000002_update_status_perbaikan_column.php`
+  - `2026_09_02_000003_buat_tabel_data_toko_bangunan.php` (Relasi 1:N Customer ke Cabang/Outlet)
+  - `2026_09_02_000004_update_kolom_pembelian_so.php` (Kolom `nomor_lo`, `jenis_pengiriman`, `qty_pengambilan` sesuai patokan `docs/data wajib ada`).
+- [x] **Navigasi Dinamis & Proteksi Read-Only:** Sidebar otomatis memfilter menu sesuai peran aktif dan memberikan badge **Lihat (Read-Only)** pada modul di luar wewenang modifikasi peran.
+- [x] **Template View:** Seluruh 25 file Blade di `resources/views/` (termasuk menu baru **List SO**) sudah tersedia dengan desain enterprise, dropdown kustom, modal `overflow-visible`, dan input tanggal standar.
 
 ---
 
@@ -19,82 +24,121 @@ Seluruh fondasi inti telah disiapkan dan diverifikasi dengan kode status **`200 
 
 | Pengembang | Domain Kerja | Peran / Jabatan PRD | Branch Utama Kerja | Status |
 |---|---|---|---|---|
-| **Developer 1** | **Core, Keuangan, Master Data & Eksekutif** | Super Admin, SPV Keuangan, Staff AR, Staff AP, Direktur & Manager | `web-dev1` | **100% Selesai ✅** |
-| **Developer 2** | **Logistik, Distribusi, Gudang & Bengkel** | Dispatcher, SPV Operasional, SPV Gudang, Pengawas Driver, Pengawas Kendaraan | `web-dev2` | **100% Selesai ✅** |
+| **Developer 1** | **Core, Keuangan, Master Data & Eksekutif** | Super Admin, SPV Keuangan, Staff AR, Staff AP, Direktur & Manager | `web-dev1` | **95% Selesai (Menunggu Auto-Journal Service)** |
+| **Developer 2** | **Logistik, Distribusi, Gudang & Bengkel** | Dispatcher, SPV Operasional, SPV Gudang, Pengawas Driver, Pengawas Kendaraan | `web-dev2` | **100% Selesai & Terintegrasi ✅** |
 
 ---
 
-## 👨‍💻 3. Checklist Tugas Rinci DEVELOPER 1 (Status: ✅ 100% Selesai & Terverifikasi)
+## 🔄 3. Riwayat Pembaruan Setelah Pull (`origin/main`)
+
+Berikut adalah rekapitulasi perubahan yang telah diterapkan setelah sinkronisasi dan pull terakhir:
+
+1. **Sinkronisasi Commit `5c104ee` (Hak Akses Read-Only Driver)**:
+   - Pembatasan hak akses modul Data Karyawan (Driver) menjadi *read-only* khusus untuk peran SPV Operasional pada `DriverController.php`, `sidebar.blade.php`, dan `driver.blade.php`.
+2. **Penyelarasan Skema Database Patokan (`docs/data wajib ada`)**:
+   - Menambahkan kolom `nomor_lo`, `jenis_pengiriman`, dan `qty_pengambilan` ke tabel `pembelian_so` via migrasi `2026_09_02_000004_update_kolom_pembelian_so.php`.
+   - Menambahkan properti fillable terkait pada model `PembelianSO.php`.
+3. **Penyediaan Modul Baru 'List SO' (Monitoring Kuota Semen Real-Time)**:
+   - Controller [`ListSOController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/AP/ListSOController.php) untuk agregasi kuota zak vs realisasi terambil.
+   - View [`list_so.blade.php`](file:///c:/laragon/www/laravel1/resources/views/keuangan/ap/list_so.blade.php) dengan progress bar kuota dan kartu statistik KPI.
+   - Rute `/keuangan/ap/list-so` terdaftar di `routes/web.php`.
+4. **Standardisasi Mode Read-Only Granular untuk 3 Peran Keuangan**:
+   - Method `apakahReadOnly(kodeModul)` pada `resources/views/layouts/app.blade.php`.
+   - Proteksi tombol aksi dan badge indikator *Mode Lihat Saja (Read-Only)* pada `faktur_penjualan.blade.php`, `pembelian_so.blade.php`, `pengeluaran_kas.blade.php`, dan `list_rilisan.blade.php`.
+   - Pemutakhiran sidebar dengan penanda status baca.
+
+---
+
+## ⏳ 4. Daftar Tugas yang Belum Tereksekusi (Pending Tasks)
+
+Berikut adalah daftar pekerjaan yang belum dieksekusi dan dijadwalkan untuk tahap berikutnya:
+
+### A. Mesin Otomasi Jurnal Terpadu (Auto-Journal Engine)
+- [ ] **Service Class `MesinJurnalOtomatis`**:
+  - [ ] Pembuatan `App\Services\Keuangan\MesinJurnalOtomatis.php` dengan transaksi atomik `DB::transaction`.
+  - [ ] Validasi keseimbangan otomatis ($\sum \text{Debit} = \sum \text{Kredit}$) sebelum simpan jurnal.
+  - [ ] Pemeriksaan *Idempotency Guard* berbasis `referensi_transaksi` untuk mencegah duplikasi jurnal ganda.
+- [ ] **Integrasi Controller ke Auto-Journal**:
+  - [ ] Auto-journal Faktur Penjualan (`FakturPenjualanController@store`): Penjualan tunai, transfer, kredit tempo piutang, dan potong deposit.
+  - [ ] Auto-journal Penebusan SO Pabrik (`PembelianSOController@store`): Akun persediaan vs kas/bank/uang muka pabrik.
+  - [ ] Auto-journal Pengeluaran Kas AP (`PengeluaranKasController@store`): Pembebanan biaya BBM, tol, servis, dan kantor.
+  - [ ] Auto-journal Rilisan Uang Jalan Supir (`HutangSupplierController@store`): Kas rilisan uang jalan (Akun 1107).
+  - [ ] Auto-update `saldo_berjalan` pada tabel `data_kode_akun` secara real-time.
+
+### B. Sinkronisasi Operasional ke Kuota SO & Upah Driver
+- [ ] **Pengurangan Kuota Otomatis pada `pembelian_so`**:
+  - [ ] Saat Surat Jalan diterbitkan di modul Dispatcher (`SuratJalanController`), otomatis menambahkan nilai `qty_pengambilan` pada SO terkait dan mengubah status menjadi `Selesai` jika kuota terpenuhi.
+- [ ] **Pencatatan Upah Ritase Supir Otomatis**:
+  - [ ] Kalkulasi upah ritase driver per surat jalan selesai ke tabel rekap upah driver.
+
+### C. Ekspor Laporan & Cetak Dokumen Resmi
+- [ ] Integrasi cetak/ekspor PDF untuk Laporan Neraca, Laba Rugi, dan Arus Kas.
+- [ ] Template cetak invoice faktur penjualan resmi PT PBJ.
+
+---
+
+## 👨‍💻 5. Checklist Tugas Rinci DEVELOPER 1 (Status: 95% Selesai)
 
 **Tanggung Jawab:** Menyelesaikan logika CRUD, modal form input, perhitungan saldo/finansial, validasi data, dan standarisasi UI dropdown untuk modul Core & Keuangan.
 
-### 3.1. Modul Super Admin (Kelola Akun Staf)
-- **File Controller:** [`KelolaAkunController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Autentikasi/KelolaAkunController.php)
-- **File View:** [`superadmin/kelola_akun.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/superadmin/kelola_akun.blade.php)
-- **Model Terkait:** `Pengguna.php`, `Jabatan.php`, `SuperAccount.php`
+### 5.1. Modul Super Admin (Kelola Akun Staf)
+- **File Controller:** [`KelolaAkunController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Autentikasi/KelolaAkunController.php)
+- **File View:** [`superadmin/kelola_akun.blade.php`](file:///c:/laragon/www/laravel1/resources/views/superadmin/kelola_akun.blade.php)
 - **Target Pengerjaan:**
   - [x] Tambah akun baru ke tabel `account` terhubung ke `data_karyawan` dan `jabatan`.
   - [x] Fitur Reset Password akun menjadi `password123` (bcrypt).
   - [x] Toggle status akun (`1: Aktif` / `0: Nonaktif`).
   - [x] Integrasi dropdown kustom pemilihan karyawan & peran RBAC.
 
-### 3.2. Modul Master Data Sentral
-- **File Controller:** [`CustomerController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Master/CustomerController.php), [`BarangController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Master/BarangController.php), [`WilayahController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Master/WilayahController.php), [`KaryawanController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Master/KaryawanController.php), [`JenisAsetController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Master/JenisAsetController.php)
+### 5.2. Modul Master Data Sentral
+- **File Controller:** [`CustomerController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Master/CustomerController.php), [`TokoBangunanController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Master/TokoBangunanController.php), [`BarangController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Master/BarangController.php), [`WilayahController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Master/WilayahController.php), [`KaryawanController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Master/KaryawanController.php), [`JenisAsetController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Master/JenisAsetController.php)
 - **File View:** 
-  - [`master/customer/index.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/master/customer/index.blade.php) (Tabel `data_customer`)
-  - [`master/barang/index.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/master/barang/index.blade.php) (Tabel `data_semen`)
-  - [`master/wilayah/index.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/master/wilayah/index.blade.php) (Tabel `data_wilayah`)
-  - [`master/karyawan/index.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/master/karyawan/index.blade.php) (Tabel `data_karyawan`)
+  - [`master/customer/index.blade.php`](file:///c:/laragon/www/laravel1/resources/views/master/customer/index.blade.php) (Tabel `data_customer`)
+  - [`master/toko_bangunan/index.blade.php`](file:///c:/laragon/www/laravel1/resources/views/master/toko_bangunan/index.blade.php) (Tabel `data_toko_bangunan`)
+  - [`master/barang/index.blade.php`](file:///c:/laragon/www/laravel1/resources/views/master/barang/index.blade.php) (Tabel `data_semen`)
+  - [`master/wilayah/index.blade.php`](file:///c:/laragon/www/laravel1/resources/views/master/wilayah/index.blade.php) (Tabel `data_wilayah`)
+  - [`master/karyawan/index.blade.php`](file:///c:/laragon/www/laravel1/resources/views/master/karyawan/index.blade.php) (Tabel `data_karyawan`)
 - **Target Pengerjaan:**
-  - [x] CRUD Customer: Input nama toko, pemilik, no telp, limit piutang, plafon kredit, dan filter wilayah kustom.
-  - [x] CRUD Produk Semen: Input nama merek, tipe zak/curah, harga beli pabrik, harga jual default, dan filter jenis kustom.
-  - [x] CRUD Wilayah & Zonasi Distribusi (penghitung mitra toko dan proteksi hapus berelasi).
-  - [x] CRUD Karyawan (Staf kantor, teknisi, supir, pengawas) dengan tab kategori dan modal dropdown kustom.
-  - [x] CRUD Data Jenis Aset Kendaraan (Tabel `data_jenis_aset`).
+  - [x] CRUD Customer (Entitas Pemilik & Plafon Kredit Terpusat).
+  - [x] CRUD Toko Bangunan & Proyek Cabang (Relasi 1:N Customer ke Cabang).
+  - [x] CRUD Produk Semen dengan generator kode `SMN-xxx`.
+  - [x] CRUD Wilayah & Zonasi Distribusi dengan generator `WLY-xxx`.
+  - [x] CRUD Karyawan dengan generator kode per jabatan (`ADM-`, `KEU-`, `SAR-`, `SAP-`, `DSP-`, `DRV-`, dll.).
+  - [x] CRUD Jenis Aset Kendaraan (`data_jenis_aset`).
 
-### 3.3. Modul Account Receivable (AR & Penjualan)
-- **File Controller:** [`FakturPenjualanController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Keuangan/AR/FakturPenjualanController.php), [`PiutangController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Keuangan/AR/PiutangController.php), [`DepositCustomerController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Keuangan/AR/DepositCustomerController.php)
-- **File View:**
-  - [`keuangan/ar/faktur_penjualan.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/keuangan/ar/faktur_penjualan.blade.php) (Tabel `faktur_penjualan` & `penjualan`)
-  - [`keuangan/ar/list_piutang.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/keuangan/ar/list_piutang.blade.php) (Tabel `list_piutang`)
-  - [`keuangan/ar/deposit_customer.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/keuangan/ar/deposit_customer.blade.php) (Tabel `list_deposit`)
+### 5.3. Modul Account Receivable (AR & Penjualan)
+- **File Controller:** [`FakturPenjualanController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/AR/FakturPenjualanController.php), [`PiutangController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/AR/PiutangController.php), [`DepositCustomerController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/AR/DepositCustomerController.php)
 - **Target Pengerjaan:**
-  - [x] Input Faktur Penjualan Baru dengan opsi metode: `Tunai`, `Kredit (Piutang)`, atau `Potong Deposit` beserta validasi limit & auto-posting piutang.
-  - [x] List Piutang & Form Pelunasan / Cicilan Pembayaran Piutang Toko sinkron saldo & faktur.
-  - [x] Top Up Saldo Deposit Customer & Mutasi Saldo otomatis.
-  - [x] Filter status & dropdown kustom interaktif pada seluruh tabel dan modal AR.
+  - [x] Input Faktur Penjualan Baru dengan pilihan Toko Bangunan & auto-detect Customer Pemilik.
+  - [x] Opsi metode pembayaran: `Tunai`, `Transfer`, `Kredit / Piutang`, `Potong Deposit`.
+  - [x] List Piutang & Form Pelunasan / Cicilan Pembayaran Piutang Toko.
+  - [x] Top Up Saldo Deposit Customer & Mutasi Saldo.
+  - [x] Proteksi Read-Only untuk Staff AP.
 
-### 3.4. Modul Account Payable (AP & Pengeluaran Kas)
-- **File Controller:** [`PembelianSOController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Keuangan/AP/PembelianSOController.php), [`PengeluaranKasController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Keuangan/AP/PengeluaranKasController.php), [`HutangSupplierController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Keuangan/AP/HutangSupplierController.php)
-- **File View:**
-  - [`keuangan/ap/pembelian_so.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/keuangan/ap/pembelian_so.blade.php) (Tabel `pembelian_so`)
-  - [`keuangan/ap/pengeluaran_kas.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/keuangan/ap/pengeluaran_kas.blade.php) (Tabel `pengeluaran`)
-  - [`keuangan/ap/list_rilisan.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/keuangan/ap/list_rilisan.blade.php) (Tabel `rilisan`)
+### 5.4. Modul Account Payable (AP & Pengeluaran Kas)
+- **File Controller:** [`PembelianSOController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/AP/PembelianSOController.php), [`ListSOController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/AP/ListSOController.php), [`PengeluaranKasController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/AP/PengeluaranKasController.php), [`HutangSupplierController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/AP/HutangSupplierController.php)
 - **Target Pengerjaan:**
-  - [x] Pencatatan Pembelian SO ke Pabrik Semen (alokasi customer dan gudang plant).
-  - [x] Input Pengeluaran Kas Operasional (BBM armada, tol, operasional kantor) terhubung akun beban COA dan rekening bank.
-  - [x] Pencatatan Rilisan Kas Bon / Uang Jalan Supir terhubung akun 1107.
-  - [x] Filter kategori & dropdown kustom interaktif pada seluruh tabel dan modal AP.
+  - [x] Input Pembelian SO ke Pabrik Semen SIG.
+  - [x] Monitoring List SO & Realisasi Kuota Pengambilan Semen per Nomor SO/LO.
+  - [x] Input Pengeluaran Kas Operasional (BBM armada, tol, operasional kantor).
+  - [x] Pencatatan Rilisan Kas Bon / Uang Jalan Supir (Akun 1107).
+  - [x] Proteksi Read-Only untuk Staff AR.
 
-### 3.5. Modul Akuntansi & Laporan Eksekutif
-- **File Controller:** [`KodeAkunController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Keuangan/Akuntansi/KodeAkunController.php), [`JurnalUmumController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Keuangan/Akuntansi/JurnalUmumController.php), [`AsetPerusahaanController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Keuangan/Akuntansi/AsetPerusahaanController.php), [`LaporanEksekutifController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Laporan/LaporanEksekutifController.php)
-- **File View:**
-  - [`keuangan/akuntansi/kode_akun.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/keuangan/akuntansi/kode_akun.blade.php) (Tabel `data_kode_akun`)
-  - [`keuangan/akuntansi/jurnal_umum.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/keuangan/akuntansi/jurnal_umum.blade.php) (Tabel `jurnal_umum`)
-  - [`keuangan/akuntansi/aset_perusahaan.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/keuangan/akuntansi/aset_perusahaan.blade.php) (Tabel `data_aset`)
-  - [`laporan/neraca.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/laporan/neraca.blade.php), [`laporan/laba_rugi.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/laporan/laba_rugi.blade.php), & [`laporan/arus_kas.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/laporan/arus_kas.blade.php)
+### 5.5. Modul Akuntansi & Laporan Eksekutif
+- **File Controller:** [`KodeAkunController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/Akuntansi/KodeAkunController.php), [`JurnalUmumController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/Akuntansi/JurnalUmumController.php), [`AsetPerusahaanController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/Akuntansi/AsetPerusahaanController.php), [`LaporanEksekutifController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Laporan/LaporanEksekutifController.php)
 - **Target Pengerjaan:**
-  - [x] CRUD Bagan Akun Standar (COA) dengan saldo normal Debet/Kredit.
-  - [x] Pencatatan Jurnal Umum Double-Entry otomatis dari transaksi dan manual adjustment.
-  - [x] Ringkasan Neraca, Laba Rugi, & Arus Kas periode berjalan (Ekspor PDF/Cetak).
+  - [x] CRUD Bagan Akun Standar (COA) dengan saldo normal Debit/Kredit.
+  - [x] Pencatatan Jurnal Umum Double-Entry manual.
+  - [x] Aset Tetap Perusahaan & Amortisasi Penyusutan.
+  - [x] Laporan Neraca, Laba Rugi, & Arus Kas periode berjalan.
 
 ---
 
-## 🚚 4. Checklist Tugas Rinci DEVELOPER 2 (Status: ✅ 100% Selesai & Terverifikasi)
+## 🚚 6. Checklist Tugas Rinci DEVELOPER 2 (Status: ✅ 100% Selesai & Terverifikasi)
 
-**Tanggung Jawab:** Menyelesaikan logika pengiriman, alokasi armada truk, penugasan driver supir, mutasi stok gudang semen, stock opname, kemitraan KSO, dan bengkel servis.
+**Tanggung Jawab:** Menyelesaikan logika pengiriman, alokasi armada truk, penugasan driver supir, mutasi stok gudang semen, stock opname, kemitraan KSO, master data ongkos angkut, dan bengkel servis.
 
-### 4.1. Modul Gudang & Manajemen Persediaan (SPV Gudang)
+### 6.1. Modul Gudang & Manajemen Persediaan (SPV Gudang)
 - **File Controller:** [`StokGudangController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Gudang/StokGudangController.php), [`StockOpnameController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Gudang/StockOpnameController.php)
 - **File View:**
   - [`operasional/gudang/stok.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/gudang/stok.blade.php) (Tabel `list_gudang_so`)
@@ -103,7 +147,7 @@ Seluruh fondasi inti telah disiapkan dan diverifikasi dengan kode status **`200 
   - [x] Pemantauan stok per gudang dan riwayat mutasi stok (tambah masuk / kurang keluar / set fisik kuantitas).
   - [x] Formulir Stock Opname Fisik, kalkulasi selisih otomatis secara real-time, generator No. Opname cerdas, dan tombol persetujuan SPV Gudang yang langsung mensinkronkan stok fisik ke master gudang.
 
-### 4.2. Modul Armada Kendaraan & Data Driver (Pengawas Driver & Pengawas Kendaraan)
+### 6.2. Modul Armada Kendaraan & Data Driver (Pengawas Driver & Pengawas Kendaraan)
 - **File Controller:** [`KendaraanController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Armada/KendaraanController.php), [`DriverController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Armada/DriverController.php)
 - **File View:**
   - [`operasional/armada/kendaraan.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/armada/kendaraan.blade.php) (Tabel `data_aset` & `data_jenis_aset`)
@@ -113,7 +157,7 @@ Seluruh fondasi inti telah disiapkan dan diverifikasi dengan kode status **`200 
   - [x] CRUD Driver / Sopir: Generator kode supir cerdas (Mode Daur Ulang Slot Kosong vs Kode Acak Anti-Tebak), manajemen status supir (`Standby`, `Jalan`, `Cuti/Izin`), serta label **🕒 Riwayat Terakhir Diedit Real-Time** pada tiap baris.
   - [x] **Pembatasan RBAC Role SPV Operasional:** Modul *Data Karyawan (Driver)* diset menjadi **Read-Only (Hanya Lihat)** untuk SPV Operasional dengan proteksi frontend (sembunyikan tombol Tambah/Edit/Hapus) dan proteksi backend `DriverController.php`. SPV Operasional hanya memantau data driver armada dan tidak dapat melihat karyawan selain driver.
 
-### 4.3. Modul Dispatcher, Surat Jalan & Ongkos Angkut (Dispatcher & SPV Operasional)
+### 6.3. Modul Dispatcher, Surat Jalan & Ongkos Angkut (Dispatcher & SPV Operasional)
 - **File Controller:** [`SuratJalanController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Pengiriman/SuratJalanController.php), [`OngkosAngkutController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Pengiriman/OngkosAngkutController.php), [`KSOController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/KSO/KSOController.php)
 - **File View:**
   - [`operasional/pengiriman/surat_jalan.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/pengiriman/surat_jalan.blade.php) (Tabel `pengiriman`)
@@ -128,7 +172,7 @@ Seluruh fondasi inti telah disiapkan dan diverifikasi dengan kode status **`200 
   - [x] **CRUD Master Data Ongkos Angkut (9 Atribut):** Implementasi modul tarif pengiriman distribusi dengan kolom lengkap: `kode_oa`, `nama_oa`, `kode_gudang`, `kontrak_oa`, `muatan_oa`, `harga_oa`, `harga_kso`, `harga_kso_khusus`, `wilayah_oa` dilengkapi filter pencarian, smart auto-numbering, dan kalkulator KPI.
   - [x] **CRUD Data KSO (Kerja Sama Operasional) & Ongkos KSO:** 2 Tab terpadu untuk master kemitraan KSO (upload file kontrak, nilai kontrak, masa aktif) dan standardisasi tarif trayek rute ongkos angkut KSO (`ongkos_kso`).
 
-### 4.4. Modul Bengkel & Perbaikan Kendaraan (Pengawas Kendaraan)
+### 6.4. Modul Bengkel & Perbaikan Kendaraan (Pengawas Kendaraan)
 - **File Controller:** [`PerbaikanKendaraanController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Bengkel/PerbaikanKendaraanController.php), [`PembelianSparepartController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Bengkel/PembelianSparepartController.php), [`SparepartController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Bengkel/SparepartController.php)
 - **File View:**
   - [`operasional/bengkel/perbaikan.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/bengkel/perbaikan.blade.php) (Tabel `perbaikan_kendaraan`)
@@ -141,20 +185,7 @@ Seluruh fondasi inti telah disiapkan dan diverifikasi dengan kode status **`200 
 
 ---
 
-## 🔗 5. Kontrak Data Antar-Pengembang (Data Contract)
-
-Agar tidak terjadi benturan integrasi (*integration conflict*):
-
-1. **Penjualan (Dev 1) $\rightarrow$ Pengiriman (Dev 2):**
-   - Saat Developer 1 membuat transaksi di `penjualan` berstatus `SIAP_KIRIM`, data tersebut langsung terbaca oleh Developer 2 di modul Dispatcher untuk diterbitkan `pengiriman` / surat jalan.
-2. **Surat Jalan Selesai (Dev 2) $\rightarrow$ Pengurangan Stok (Dev 2) & HPP (Dev 1):**
-   - Saat surat jalan disetujui, stok di `list_gudang_so` berkurang otomatis.
-3. **Biaya Bengkel / Sparepart (Dev 2) $\rightarrow$ Pengeluaran Kas AP (Dev 1):**
-   - SPK servis yang selesai di bengkel dapat diambil total biayanya oleh Developer 1 ke modul `pengeluaran`.
-
----
-
-## 🌿 6. Alur Kerja Git Tim (Branching Protocol)
+## 🌿 7. Alur Kerja Git Tim (Branching Protocol)
 
 ```text
 [main] ─────────────────────────────────────────────────────────────► [main (Produksi)]
@@ -168,10 +199,8 @@ Agar tidak terjadi benturan integrasi (*integration conflict*):
    ```powershell
    git checkout main
    git pull origin main
-   # Developer 1 bekerja di branch: web-dev1
-   # Developer 2 membuat branch baru: git checkout -b web-dev2
    ```
-2. **Standar Setup Lokal Pengembang Baru:**
+2. **Standar Setup Lokal:**
    ```powershell
    composer install
    php artisan migrate
@@ -179,3 +208,4 @@ Agar tidak terjadi benturan integrasi (*integration conflict*):
    php artisan serve
    ```
 3. **Standar Penamaan Bahasa Indonesia:** Seluruh variabel, fungsi controller, dan komentar kode wajib mengikuti Bahasa Indonesia sesuai aturan sistem.
+

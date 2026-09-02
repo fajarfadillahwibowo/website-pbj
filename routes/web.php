@@ -13,6 +13,7 @@ use App\Http\Controllers\Keuangan\AR\FakturPenjualanController;
 use App\Http\Controllers\Keuangan\AR\PiutangController;
 use App\Http\Controllers\Keuangan\AR\DepositCustomerController;
 use App\Http\Controllers\Keuangan\AP\PembelianSOController;
+use App\Http\Controllers\Keuangan\AP\ListSOController;
 use App\Http\Controllers\Keuangan\AP\PengeluaranKasController;
 use App\Http\Controllers\Keuangan\AP\HutangSupplierController;
 use App\Http\Controllers\Keuangan\Akuntansi\KodeAkunController;
@@ -119,6 +120,7 @@ Route::prefix('keuangan')->name('keuangan.')->group(function () {
     Route::prefix('ap')->name('ap.')->group(function () {
         Route::get('/pembelian-so', [PembelianSOController::class, 'index'])->name('pembelian_so');
         Route::post('/pembelian-so', [PembelianSOController::class, 'store'])->name('pembelian_so.store');
+        Route::get('/list-so', [ListSOController::class, 'index'])->name('list_so');
         Route::get('/pengeluaran-kas', [PengeluaranKasController::class, 'index'])->name('pengeluaran');
         Route::post('/pengeluaran-kas', [PengeluaranKasController::class, 'store'])->name('pengeluaran.store');
         Route::get('/list-rilisan', [HutangSupplierController::class, 'index'])->name('rilisan');
