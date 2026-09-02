@@ -140,7 +140,7 @@
         </div>
 
         <!-- 4. Keuangan & AR/AP -->
-        <div x-show="bisaAkses('ar_faktur') || bisaAkses('ar_piutang') || bisaAkses('ar_deposit') || bisaAkses('ap_pembelian') || bisaAkses('list_so') || bisaAkses('ap_pengeluaran') || bisaAkses('akun_coa') || bisaAkses('akun_jurnal') || bisaAkses('akun_aset') || bisaAkses('jenis_aset')">
+        <div x-show="bisaAkses('ar_faktur') || bisaAkses('ar_piutang') || bisaAkses('ar_deposit') || bisaAkses('ap_pembelian') || bisaAkses('list_so') || bisaAkses('ap_pengeluaran') || bisaAkses('ap_rilisan') || bisaAkses('akun_coa') || bisaAkses('akun_jurnal') || bisaAkses('akun_aset') || bisaAkses('jenis_aset')">
             <div x-show="!sidebarTerlipat" class="px-2.5 mb-1.5 flex items-center justify-between">
                 <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Keuangan & AR/AP</span>
             </div>
@@ -152,7 +152,10 @@
                     <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.ar.faktur') ? 'bg-emerald-600 text-white shadow-xs shadow-emerald-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/20 group-hover:text-emerald-600 dark:group-hover:text-emerald-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     </div>
-                    <span x-show="!sidebarTerlipat" class="truncate">Penjualan</span>
+                    <div x-show="!sidebarTerlipat" class="flex items-center justify-between w-full min-w-0">
+                        <span class="truncate">Penjualan</span>
+                        <span x-show="apakahReadOnly('ar_faktur')" class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-mono font-semibold ml-1">Lihat</span>
+                    </div>
                 </a>
                 <a x-show="bisaAkses('ar_piutang')" href="{{ route('keuangan.ar.piutang') }}"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
@@ -161,7 +164,10 @@
                     <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.ar.piutang') ? 'bg-amber-600 text-white shadow-xs shadow-amber-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-amber-50 dark:group-hover:bg-amber-500/20 group-hover:text-amber-600 dark:group-hover:text-amber-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
-                    <span x-show="!sidebarTerlipat" class="truncate">List Piutang</span>
+                    <div x-show="!sidebarTerlipat" class="flex items-center justify-between w-full min-w-0">
+                        <span class="truncate">List Piutang</span>
+                        <span x-show="apakahReadOnly('ar_piutang')" class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-mono font-semibold ml-1">Lihat</span>
+                    </div>
                 </a>
                 <a x-show="bisaAkses('ar_deposit')" href="{{ route('keuangan.ar.deposit') }}"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
@@ -170,7 +176,10 @@
                     <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.ar.deposit') ? 'bg-sky-600 text-white shadow-xs shadow-sky-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-sky-50 dark:group-hover:bg-sky-500/20 group-hover:text-sky-600 dark:group-hover:text-sky-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
                     </div>
-                    <span x-show="!sidebarTerlipat" class="truncate">List Deposit</span>
+                    <div x-show="!sidebarTerlipat" class="flex items-center justify-between w-full min-w-0">
+                        <span class="truncate">List Deposit</span>
+                        <span x-show="apakahReadOnly('ar_deposit')" class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-mono font-semibold ml-1">Lihat</span>
+                    </div>
                 </a>
                 <a x-show="bisaAkses('ap_pengeluaran')" href="{{ route('keuangan.ap.pengeluaran') }}"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
@@ -179,7 +188,10 @@
                     <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.ap.pengeluaran') ? 'bg-rose-600 text-white shadow-xs shadow-rose-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-rose-50 dark:group-hover:bg-rose-500/20 group-hover:text-rose-600 dark:group-hover:text-rose-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
-                    <span x-show="!sidebarTerlipat" class="truncate">Pengeluaran</span>
+                    <div x-show="!sidebarTerlipat" class="flex items-center justify-between w-full min-w-0">
+                        <span class="truncate">Pengeluaran</span>
+                        <span x-show="apakahReadOnly('ap_pengeluaran')" class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-mono font-semibold ml-1">Lihat</span>
+                    </div>
                 </a>
                 <a x-show="bisaAkses('ap_rilisan')" href="{{ route('keuangan.ap.rilisan') }}"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
@@ -188,7 +200,10 @@
                     <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.ap.rilisan') ? 'bg-amber-600 text-white shadow-xs shadow-amber-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-amber-50 dark:group-hover:bg-amber-500/20 group-hover:text-amber-600 dark:group-hover:text-amber-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
-                    <span x-show="!sidebarTerlipat" class="truncate">Rilisan</span>
+                    <div x-show="!sidebarTerlipat" class="flex items-center justify-between w-full min-w-0">
+                        <span class="truncate">Rilisan</span>
+                        <span x-show="apakahReadOnly('ap_rilisan')" class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-mono font-semibold ml-1">Lihat</span>
+                    </div>
                 </a>
                 <a x-show="bisaAkses('ap_pembelian')" href="{{ route('keuangan.ap.pembelian_so') }}"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
@@ -197,7 +212,22 @@
                     <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.ap.pembelian_so') ? 'bg-blue-600 text-white shadow-xs shadow-blue-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-500/20 group-hover:text-blue-600 dark:group-hover:text-blue-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                     </div>
-                    <span x-show="!sidebarTerlipat" class="truncate">Pembelian SO</span>
+                    <div x-show="!sidebarTerlipat" class="flex items-center justify-between w-full min-w-0">
+                        <span class="truncate">Pembelian SO</span>
+                        <span x-show="apakahReadOnly('ap_pembelian')" class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-mono font-semibold ml-1">Lihat</span>
+                    </div>
+                </a>
+                <a x-show="bisaAkses('list_so')" href="{{ route('keuangan.ap.list_so') }}"
+                   :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
+                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('keuangan.ap.list_so') ? 'font-bold text-indigo-700 dark:text-indigo-400 bg-indigo-50/90 dark:bg-indigo-500/10 border-l-[3.5px] border-indigo-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   :title="sidebarTerlipat ? 'Monitoring List SO Semen' : ''">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.ap.list_so') ? 'bg-indigo-600 text-white shadow-xs shadow-indigo-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/20 group-hover:text-indigo-600 dark:group-hover:text-indigo-400' }}">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    </div>
+                    <div x-show="!sidebarTerlipat" class="flex items-center justify-between w-full min-w-0">
+                        <span class="truncate">List SO</span>
+                        <span x-show="apakahReadOnly('list_so')" class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-mono font-semibold ml-1">Lihat</span>
+                    </div>
                 </a>
                 <a x-show="bisaAkses('akun_coa')" href="{{ route('keuangan.akuntansi.kode_akun') }}"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
@@ -206,7 +236,10 @@
                     <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.akuntansi.kode_akun') ? 'bg-violet-600 text-white shadow-xs shadow-violet-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-violet-50 dark:group-hover:bg-violet-500/20 group-hover:text-violet-600 dark:group-hover:text-violet-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                     </div>
-                    <span x-show="!sidebarTerlipat" class="truncate">Data Kode Akun</span>
+                    <div x-show="!sidebarTerlipat" class="flex items-center justify-between w-full min-w-0">
+                        <span class="truncate">Data Kode Akun</span>
+                        <span x-show="apakahReadOnly('akun_coa')" class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-mono font-semibold ml-1">Lihat</span>
+                    </div>
                 </a>
                 <a x-show="bisaAkses('akun_jurnal')" href="{{ route('keuangan.akuntansi.jurnal') }}"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
@@ -215,7 +248,10 @@
                     <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.akuntansi.jurnal') ? 'bg-teal-600 text-white shadow-xs shadow-teal-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-teal-50 dark:group-hover:bg-teal-500/20 group-hover:text-teal-600 dark:group-hover:text-teal-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                     </div>
-                    <span x-show="!sidebarTerlipat" class="truncate">Jurnal Umum</span>
+                    <div x-show="!sidebarTerlipat" class="flex items-center justify-between w-full min-w-0">
+                        <span class="truncate">Jurnal Umum</span>
+                        <span x-show="apakahReadOnly('akun_jurnal')" class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-mono font-semibold ml-1">Lihat</span>
+                    </div>
                 </a>
                 <a x-show="bisaAkses('akun_aset')" href="{{ route('keuangan.akuntansi.aset') }}"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
@@ -224,7 +260,10 @@
                     <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.akuntansi.aset') ? 'bg-indigo-600 text-white shadow-xs shadow-indigo-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/20 group-hover:text-indigo-600 dark:group-hover:text-indigo-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                     </div>
-                    <span x-show="!sidebarTerlipat" class="truncate">Aset Perusahaan</span>
+                    <div x-show="!sidebarTerlipat" class="flex items-center justify-between w-full min-w-0">
+                        <span class="truncate">Aset Perusahaan</span>
+                        <span x-show="apakahReadOnly('akun_aset')" class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-mono font-semibold ml-1">Lihat</span>
+                    </div>
                 </a>
             </div>
         </div>
