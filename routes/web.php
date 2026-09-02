@@ -202,7 +202,13 @@ Route::prefix('operasional')->name('operasional.')->group(function () {
         Route::patch('/surat-jalan/{id_pengiriman}/status', [SuratJalanController::class, 'perbaruiStatus'])->name('surat_jalan.perbarui_status');
         Route::delete('/surat-jalan/{id_pengiriman}', [SuratJalanController::class, 'hapus'])->name('surat_jalan.hapus');
 
+        // CRUD Data Master Ongkos Angkut
         Route::get('/ongkos-angkut', [OngkosAngkutController::class, 'index'])->name('ongkos_angkut');
+        Route::post('/ongkos-angkut', [OngkosAngkutController::class, 'simpan'])->name('ongkos_angkut.simpan');
+        Route::get('/ongkos-angkut/api/buat-kode', [OngkosAngkutController::class, 'buatKodeOtomatis'])->name('ongkos_angkut.buat_kode');
+        Route::get('/ongkos-angkut/{kode_oa}', [OngkosAngkutController::class, 'ambilDetail'])->name('ongkos_angkut.detail');
+        Route::put('/ongkos-angkut/{kode_oa}', [OngkosAngkutController::class, 'perbarui'])->name('ongkos_angkut.perbarui');
+        Route::delete('/ongkos-angkut/{kode_oa}', [OngkosAngkutController::class, 'hapus'])->name('ongkos_angkut.hapus');
     });
 
     // Bengkel & Pemeliharaan (Pengawas Kendaraan)

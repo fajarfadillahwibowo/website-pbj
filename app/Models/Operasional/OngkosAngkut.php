@@ -5,6 +5,7 @@ namespace App\Models\Operasional;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Master\Wilayah;
+use App\Models\Operasional\Gudang;
 
 class OngkosAngkut extends Model
 {
@@ -13,23 +14,89 @@ class OngkosAngkut extends Model
     protected $table = 'data_ongkos_angkut';
     protected $primaryKey = 'id_ongkos';
 
-    public $timestamps = false;
+    const CREATED_AT = 'dibuat_pada';
+    const UPDATED_AT = 'diperbarui_pada';
 
     protected $fillable = [
-        'kode_wilayah_asal',
-        'kode_wilayah_tujuan',
-        'tarif_per_zak',
-        'tarif_per_ritase',
+        'kode_oa',
+        'nama_oa',
+        'kode_gudang',
+        'kontrak_oa',
+        'muatan_oa',
+        'harga_oa',
+        'harga_kso',
+        'harga_kso_khusus',
+        'wilayah_oa',
         'keterangan',
     ];
 
-    public function wilayahAsal()
+    protected $casts = [
+        'harga_oa' => 'decimal:2',
+        'harga_kso' => 'decimal:2',
+        'harga_kso_khusus' => 'decimal:2',
+        'dibuat_pada' => 'datetime',
+        'diperbarui_pada' => 'datetime',
+    ];
+
+    protected $appends = [
+        'harga_oa_rupiah',
+        'harga_kso_rupiah',
+        'harga_kso_khusus_rupiah',
+        'terakhir_diedit_relatif',
+        'terakhir_diedit_waktu',
+    ];
+
+    /**
+     * Relasi ke data fasilitas Gudang Asal
+     */
+    public function gudang()
     {
-        return $this->belongsTo(Wilayah::class, 'kode_wilayah_asal', 'kode_wilayah');
+        return $this->belongsTo(Gudang::class, 'kode_gudang', 'kode_gudang');
     }
 
-    public function wilayahTujuan()
+    /**
+     * Accessor harga OA format Rupiah
+     */
+    public function getHargaOaRupiahAttribute()
     {
-        return $this->belongsTo(Wilayah::class, 'kode_wilayah_tujuan', 'kode_wilayah');
+        return 'Rp ' . number_format($this->harga_oa ?? 0, 0, ',', '.');
+    }
+
+    /**
+     * Accessor harga KSO format Rupiah
+     */
+    public function getHargaKsoRupiahAttribute()
+    {
+        return 'Rp ' . number_format($this->harga_kso ?? 0, 0, ',', '.');
+    }
+
+    /**
+     * Accessor harga KSO Khusus format Rupiah
+     */
+    public function getHargaKsoKhususRupiahAttribute()
+    {
+        return 'Rp ' . number_format($this->harga_kso_khusus ?? 0, 0, ',', '.');
+    }
+
+    /**
+     * Accessor riwayat diedit relatif waktu
+     */
+    public function getTerakhirDieditRelatifAttribute()
+    {
+        if (!$this->diperbarui_pada) {
+            return 'Baru didaftarkan';
+        }
+        return $this->diperbarui_pada->locale('id')->diffForHumans();
+    }
+
+    /**
+     * Accessor tanggal jam riwayat diedit presisi
+     */
+    public function getTerakhirDieditWaktuAttribute()
+    {
+        if (!$this->diperbarui_pada) {
+            return '-';
+        }
+        return $this->diperbarui_pada->format('d/m/Y H:i:s');
     }
 }
