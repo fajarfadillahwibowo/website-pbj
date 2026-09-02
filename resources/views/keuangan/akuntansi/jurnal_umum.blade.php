@@ -130,8 +130,8 @@
     </div>
 
     <!-- Modal Input Jurnal Manual -->
-    <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-xl">
+    <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-visible shadow-xl my-8">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Input Entri Jurnal Double-Entry</h3>
                 <button @click="bukaModalTambah = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>
@@ -139,13 +139,18 @@
             <form method="POST" action="{{ route('keuangan.akuntansi.jurnal.store') }}" class="p-5 space-y-3.5 text-xs">
                 @csrf
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Transaksi</label>
-                    <input type="date" name="tanggal_transaksi" required value="{{ date('Y-m-d') }}"
-                           class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30">
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Transaksi <span class="text-rose-500">*</span></label>
+                    <x-input-tanggal 
+                        nama="tanggal_transaksi" 
+                        nilaiAwal="{{ date('Y-m-d') }}" 
+                        placeholder="Pilih Tanggal Transaksi"
+                        :wajib="true"
+                        warnaFokus="teal"
+                    />
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Akun Sisi Debet (+)</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Akun Sisi Debet (+) <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="kode_akun_debit"
                             placeholder="-- Pilih Akun Debet --"
@@ -155,7 +160,7 @@
                         />
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Akun Sisi Kredit (-)</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Akun Sisi Kredit (-) <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="kode_akun_kredit"
                             placeholder="-- Pilih Akun Kredit --"
@@ -166,12 +171,12 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nominal Jurnal (Rp)</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nominal Jurnal (Rp) <span class="text-rose-500">*</span></label>
                     <input type="number" name="nominal" required min="1000" step="50000" placeholder="5000000"
                            class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30 font-mono font-semibold text-sm">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan Transaksi</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan Transaksi <span class="text-rose-500">*</span></label>
                     <input type="text" name="keterangan" required placeholder="Ayat jurnal penyesuaian saldo..."
                            class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30">
                 </div>

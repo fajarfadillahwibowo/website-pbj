@@ -20,6 +20,7 @@ class FakturPenjualan extends Model
         'nomor_faktur',
         'tanggal_penjualan',
         'kode_customer',
+        'kode_toko',
         'metode_pembayaran',
         'total_bruto',
         'diskon',
@@ -36,6 +37,11 @@ class FakturPenjualan extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'kode_customer', 'kode_customer');
+    }
+
+    public function tokoBangunan()
+    {
+        return $this->belongsTo(\App\Models\Master\TokoBangunan::class, 'kode_toko', 'kode_toko');
     }
 
     public function piutang()

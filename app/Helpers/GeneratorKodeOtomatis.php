@@ -57,4 +57,58 @@ class GeneratorKodeOtomatis
         // 4. Gabungkan prefix dengan angka terformat padding
         return $awalan . str_pad($nomorUrut, $panjangDigit, '0', STR_PAD_LEFT);
     }
+
+    /**
+     * Mengembalikan awalan (prefix) 3 huruf standar berdasarkan Jabatan / Peran spesifik.
+     *
+     * @param int|string $jabatan ID jabatan atau nama jabatan/kode jabatan
+     * @param string|null $kategori Kategori karyawan (jika 'driver', otomatis DRV-)
+     * @return string
+     */
+    public static function ambilPrefixJabatan($jabatan, ?string $kategori = null): string
+    {
+        if (strtolower((string) $kategori) === 'driver') {
+            return 'DRV-';
+        }
+
+        $kunci = is_numeric($jabatan) ? (int) $jabatan : strtolower(trim((string) $jabatan));
+
+        return match ($kunci) {
+            1, 'super_admin', 'super admin', 'admin'                    => 'ADM-',
+            2, 'spv_keuangan', 'spv keuangan', 'keuangan'              => 'KEU-',
+            3, 'staff_ar', 'staff ar', 'staf ar', 'ar'                 => 'SAR-',
+            4, 'staff_ap', 'staff ap', 'staf ap', 'ap'                 => 'SAP-',
+            5, 'dispatcher'                                            => 'DSP-',
+            6, 'pengawas_driver', 'pengawas driver'                    => 'PDR-',
+            7, 'spv_gudang', 'spv gudang', 'gudang'                    => 'GDG-',
+            8, 'direktur_manager', 'direktur & manager', 'manajemen'   => 'MGR-',
+            9, 'spv_operasional', 'spv operasional', 'operasional'     => 'OPS-',
+            10, 'pengawas_kendaraan', 'pengawas kendaraan', 'teknisi'  => 'PKN-',
+            'driver', 'supir'                                          => 'DRV-',
+            default                                                    => 'STF-',
+        };
+    }
+
+    /**
+     * Menghasilkan kode karyawan otomatis sesuai singkatan 3 huruf dari Jabatan spesifiknya
+     * dengan penomoran urut independen per jabatan (misal: KEU-001, SAR-001, SAP-001, DSP-001, PDR-001, DRV-001).
+     *
+     * @param int|string $jabatan
+     * @param string|null $kategori
+     * @param int $panjangDigit
+     * @return string
+     */
+    public static function buatKodeJabatan($jabatan, ?string $kategori = null, int $panjangDigit = 3): string
+    {
+        $awalan = self::ambilPrefixJabatan($jabatan, $kategori);
+        return self::buatKode('data_karyawan', 'kode_karyawan', $awalan, $panjangDigit);
+    }
+
+    /**
+     * Alias kompatibilitas untuk generator kode karyawan
+     */
+    public static function buatKodeKaryawan(string $kategori = 'staf', int $panjangDigit = 3): string
+    {
+        return self::buatKodeJabatan($kategori, $kategori, $panjangDigit);
+    }
 }

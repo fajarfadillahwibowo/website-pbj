@@ -151,8 +151,8 @@
     </div>
 
     <!-- Modal Tambah Akun -->
-    <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
+    <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-visible shadow-xl my-8">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Tambah Akun COA Baru</h3>
                 <button @click="bukaModalTambah = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>
@@ -161,12 +161,12 @@
                 @csrf
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kode Akun</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kode Akun <span class="text-rose-500">*</span></label>
                         <input type="text" name="kode_akun" required placeholder="1108"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500/30">
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Saldo Normal</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Saldo Normal <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="saldo_normal"
                             placeholder="-- Pilih Posisi --"
@@ -177,13 +177,13 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Akun</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Akun <span class="text-rose-500">*</span></label>
                     <input type="text" name="nama_akun" required placeholder="Kas Kecil Cabang"
                            class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500/30">
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tipe Akun</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tipe Akun <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="tipe_akun"
                             placeholder="-- Pilih Tipe Akun --"
@@ -193,14 +193,14 @@
                         />
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kelompok Akun</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kelompok Akun <span class="text-rose-500">*</span></label>
                         <input type="text" name="kelompok_akun" required placeholder="Kas & Setara Kas"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500/30">
                     </div>
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Saldo Awal (Rp)</label>
-                    <input type="number" name="saldo_awal" value="0" min="0" step="100000"
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Saldo Awal (Rp) <span class="text-rose-500">*</span></label>
+                    <input type="number" name="saldo_awal" value="0" min="0" step="100000" required
                            class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500/30 font-mono">
                 </div>
                 <div class="flex items-center justify-end gap-2 pt-2">
@@ -212,8 +212,8 @@
     </div>
 
     <!-- Modal Edit Akun -->
-    <div x-show="bukaModalEdit" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalEdit = false" class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
+    <div x-show="bukaModalEdit" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="bukaModalEdit = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-visible shadow-xl my-8">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Edit Akun: <span class="font-mono text-violet-600" x-text="editData.kode_akun"></span></h3>
                 <button @click="bukaModalEdit = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>
@@ -222,13 +222,13 @@
                 @csrf
                 @method('PUT')
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Akun</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Akun <span class="text-rose-500">*</span></label>
                     <input type="text" name="nama_akun" x-model="editData.nama_akun" required
                            class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500/30">
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tipe Akun</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tipe Akun <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="tipe_akun"
                             placeholder="-- Pilih Tipe Akun --"
@@ -239,7 +239,7 @@
                         />
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Saldo Normal</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Saldo Normal <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="saldo_normal"
                             placeholder="-- Pilih Posisi --"
@@ -251,7 +251,7 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kelompok Akun</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kelompok Akun <span class="text-rose-500">*</span></label>
                     <input type="text" name="kelompok_akun" x-model="editData.kelompok_akun" required
                            class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500/30">
                 </div>

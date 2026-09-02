@@ -346,80 +346,44 @@
                 </tbody>
             </table>
         </div>
-    </    <!-- ========================================================================= -->
-    <!-- 5. MODAL FORM: TAMBAH SURAT JALAN BARU -->
-    <!-- ========================================================================= -->
-    <div x-show="modalTambahTerbuka" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="modalTambahTerbuka = false"
-             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
-            
-            <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                    </div>
-                    <div>
-                        <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Terbitkan Surat Jalan (SJ) Baru</h2>
-                        <p class="text-[11px] text-slate-400">Tugaskan driver dan armada truk untuk pengiriman Sales Order semen.</p>
-                    </div>
-                </div>
-                <button @click="modalTambahTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+    </div>
+
+    <!-- Modal Tambah Surat Jalan -->
+    <div x-show="modalTambahTerbuka" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="modalTambahTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-visible shadow-xl my-8">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Terbitkan Surat Jalan (SJ) Baru</h3>
+                <button @click="modalTambahTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none">&times;</button>
             </div>
 
-            <form action="{{ route('operasional.pengiriman.surat_jalan.simpan') }}" method="POST" class="p-6 space-y-4 text-xs">
+            <form action="{{ route('operasional.pengiriman.surat_jalan.simpan') }}" method="POST" class="p-5 space-y-3.5 text-xs">
                 @csrf
-
-                <!-- Generator Nomor Surat Jalan Cerdas -->
-                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837]">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <label class="text-xs font-bold text-slate-800 dark:text-slate-200">
-                                    Nomor Surat Jalan <span class="text-rose-500">*</span>
-                                </label>
-                                <span class="text-[10px] text-sky-600 dark:text-sky-400 font-semibold px-1.5 py-0.5 bg-sky-50 dark:bg-sky-950/50 rounded-md">Otomatis</span>
-                            </div>
-                            <div class="text-[10px] text-slate-400 font-mono mt-0.5" x-text="keteranganKodeSJ"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Nomor Surat Jalan <span class="text-rose-500">*</span></label>
+                            <span class="text-[10px] text-sky-600 dark:text-sky-400 font-semibold px-1.5 py-0.5 bg-sky-50 dark:bg-sky-950/50 rounded-md">Otomatis</span>
                         </div>
-                        
-                        <div class="flex items-center gap-1.5 shrink-0">
-                            <button type="button" @click="buatKodeOtomatis('gap')"
-                                    class="px-2.5 py-1 text-[11px] font-semibold text-sky-700 dark:text-sky-300 bg-sky-100 dark:bg-sky-900/30 hover:bg-sky-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                <span>Daur Ulang (SJ-001)</span>
-                            </button>
-                            <button type="button" @click="buatKodeOtomatis('acak')"
-                                    class="px-2.5 py-1 text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                <span>Format Tanggal</span>
-                            </button>
-                        </div>
+                        <input type="text" name="nomor_surat_jalan" x-model="formTambah.nomor_surat_jalan" required placeholder="SJ-001"
+                               class="w-full px-3 py-2 rounded-xl bg-sky-50/50 dark:bg-[#1C1E2A] border border-sky-200 dark:border-sky-900/50 text-sky-900 dark:text-sky-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500/30">
                     </div>
 
-                    <input type="text" name="nomor_surat_jalan" x-model="formTambah.nomor_surat_jalan" required placeholder="Contoh: SJ-001 atau SJ-20260902-8K2"
-                           class="w-full px-3 py-2 text-xs font-mono font-bold rounded-xl bg-white dark:bg-[#14161F] border border-sky-200 dark:border-sky-900/50 text-sky-600 dark:text-sky-400 uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-sky-500/30">
-                </div>
-
-                <!-- Pemilih Sales Order -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Sales Order (SO) Pelanggan <span class="text-rose-500">*</span></label>
-                    <x-dropdown-kustom 
-                        nama="id_so"
-                        placeholder="-- Pilih Sales Order --"
-                        :opsi="$opsiSO"
-                        :wajib="true"
-                        warnaFokus="sky"
-                        modelBind="formTambah.id_so"
-                    />
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <!-- Pemilih Driver (Data Karyawan) -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Driver Pengemudi <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Sales Order (SO) Pelanggan <span class="text-rose-500">*</span></label>
+                        <x-dropdown-kustom 
+                            nama="id_so"
+                            placeholder="-- Pilih Sales Order --"
+                            :opsi="$opsiSO"
+                            :wajib="true"
+                            warnaFokus="sky"
+                            modelBind="formTambah.id_so"
+                        />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Driver Pengemudi <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="kode_driver"
                             placeholder="-- Pilih Driver --"
@@ -430,9 +394,8 @@
                         />
                     </div>
 
-                    <!-- Pemilih Kendaraan (Data Aset) -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Truk Armada Pengiriman <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Truk Armada Pengiriman <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="kode_aset"
                             placeholder="-- Pilih Truk Armada --"
@@ -442,17 +405,22 @@
                             modelBind="formTambah.kode_aset"
                         />
                     </div>
+                </div>
 
-                    <!-- Tanggal & Jam Kirim -->
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal & Waktu Keberangkatan <span class="text-rose-500">*</span></label>
-                        <input type="datetime-local" name="tanggal_kirim" x-model="formTambah.tanggal_kirim" required
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Keberangkatan <span class="text-rose-500">*</span></label>
+                        <x-input-tanggal 
+                            nama="tanggal_kirim" 
+                            modelBind="formTambah.tanggal_kirim" 
+                            placeholder="Pilih Tanggal Kirim"
+                            :wajib="true"
+                            warnaFokus="sky"
+                        />
                     </div>
 
-                    <!-- Status Pengiriman -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Keberangkatan <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Keberangkatan <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="status_pengiriman"
                             placeholder="-- Pilih Status --"
@@ -464,75 +432,54 @@
                     </div>
                 </div>
 
-                <!-- Keterangan -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan / Nomor Segel / Catatan Rute</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan / Nomor Segel / Rute <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
                     <textarea name="keterangan" x-model="formTambah.keterangan" rows="2" placeholder="Contoh: Nomor Segel: PBJ-9921, dikirim via Jalur Pantura"
-                              class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/30"></textarea>
+                              class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/30"></textarea>
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    <button type="button" @click="modalTambahTerbuka = false"
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="px-5 py-2 text-xs font-semibold text-white bg-sky-600 hover:bg-sky-700 active:scale-95 rounded-xl transition-all shadow-md shadow-sky-600/20">
-                        Terbitkan Surat Jalan
-                    </button>
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" @click="modalTambahTerbuka = false" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-all shadow-sm">Terbitkan Surat Jalan</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- 6. MODAL FORM: EDIT SURAT JALAN -->
-    <!-- ========================================================================= -->
-    <div x-show="modalEditTerbuka" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="modalEditTerbuka = false"
-             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
-            
-            <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                    </div>
-                    <div>
-                        <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Ubah Data Surat Jalan</h2>
-                        <p class="text-[11px] text-slate-400">No SJ: <span class="font-mono font-bold text-sky-600" x-text="formEdit.nomor_surat_jalan"></span></p>
-                    </div>
-                </div>
-                <button @click="modalEditTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+    <!-- Modal Edit Surat Jalan -->
+    <div x-show="modalEditTerbuka" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="modalEditTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-visible shadow-xl my-8">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Ubah Data Surat Jalan: <span class="font-mono text-sky-600" x-text="formEdit.nomor_surat_jalan"></span></h3>
+                <button @click="modalEditTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none">&times;</button>
             </div>
 
-            <form :action="'{{ url('operasional/pengiriman/surat-jalan') }}/' + formEdit.id_pengiriman" method="POST" class="p-6 space-y-4 text-xs">
+            <form :action="'{{ url('operasional/pengiriman/surat-jalan') }}/' + formEdit.id_pengiriman" method="POST" class="p-5 space-y-3.5 text-xs">
                 @csrf
                 @method('PUT')
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Surat Jalan (Terkunci)</label>
-                    <input type="text" :value="formEdit.nomor_surat_jalan" disabled
-                           class="w-full px-3 py-2 text-xs font-mono font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 cursor-not-allowed">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Sales Order (SO) Pelanggan <span class="text-rose-500">*</span></label>
-                    <x-dropdown-kustom 
-                        nama="id_so"
-                        placeholder="-- Pilih Sales Order --"
-                        :opsi="$opsiSO"
-                        :wajib="true"
-                        warnaFokus="amber"
-                        modelBind="formEdit.id_so"
-                    />
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Driver Pengemudi <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Surat Jalan (Terkunci)</label>
+                        <input type="text" :value="formEdit.nomor_surat_jalan" disabled
+                               class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 font-mono font-semibold cursor-not-allowed">
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Sales Order (SO) Pelanggan <span class="text-rose-500">*</span></label>
+                        <x-dropdown-kustom 
+                            nama="id_so"
+                            placeholder="-- Pilih Sales Order --"
+                            :opsi="$opsiSO"
+                            :wajib="true"
+                            warnaFokus="amber"
+                            modelBind="formEdit.id_so"
+                        />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Driver Pengemudi <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="kode_driver"
                             placeholder="-- Pilih Driver --"
@@ -544,7 +491,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Truk Armada <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Truk Armada <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="kode_aset"
                             placeholder="-- Pilih Truk Armada --"
@@ -554,15 +501,22 @@
                             modelBind="formEdit.kode_aset"
                         />
                     </div>
+                </div>
 
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Keberangkatan <span class="text-rose-500">*</span></label>
-                        <input type="datetime-local" name="tanggal_kirim" x-model="formEdit.tanggal_kirim" required
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Keberangkatan <span class="text-rose-500">*</span></label>
+                        <x-input-tanggal 
+                            nama="tanggal_kirim" 
+                            modelBind="formEdit.tanggal_kirim" 
+                            placeholder="Pilih Tanggal Kirim"
+                            :wajib="true"
+                            warnaFokus="amber"
+                        />
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Pengiriman <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Pengiriman <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="status_pengiriman"
                             placeholder="-- Pilih Status --"
@@ -575,20 +529,14 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan / Catatan Rute</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan / Catatan Rute <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
                     <textarea name="keterangan" x-model="formEdit.keterangan" rows="2"
-                              class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30"></textarea>
+                              class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30"></textarea>
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    <button type="button" @click="modalEditTerbuka = false"
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 active:scale-95 rounded-xl transition-all shadow-md shadow-amber-600/20">
-                        Simpan Perubahan
-                    </button>
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" @click="modalEditTerbuka = false" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl transition-all shadow-sm">Simpan Perubahan</button>
                 </div>
             </form>
         </div>

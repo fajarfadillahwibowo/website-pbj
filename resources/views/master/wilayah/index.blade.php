@@ -109,8 +109,8 @@
     </div>
 
     <!-- Modal Tambah Wilayah -->
-    <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
+    <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-visible shadow-xl my-8">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Tambah Wilayah Zonasi Baru</h3>
                 <button @click="bukaModalTambah = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>
@@ -119,14 +119,14 @@
                 @csrf
                 <div>
                     <div class="flex items-center justify-between mb-1">
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300">Kode Wilayah</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300">Kode Wilayah <span class="text-rose-500">*</span></label>
                         <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/50 rounded-md">Otomatis</span>
                     </div>
                     <input type="text" name="kode_wilayah" value="{{ $kodeOtomatis }}" required placeholder="WLY-001"
                            class="w-full px-3 py-2 rounded-xl bg-emerald-50/50 dark:bg-[#1C1E2A] border border-emerald-200 dark:border-emerald-900/50 text-emerald-900 dark:text-emerald-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Wilayah / Zonasi Distribusi</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Wilayah / Zonasi Distribusi <span class="text-rose-500">*</span></label>
                     <input type="text" name="nama_wilayah" required placeholder="Semarang Raya & Kendal"
                            class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
                 </div>
@@ -139,8 +139,8 @@
     </div>
 
     <!-- Modal Edit Wilayah -->
-    <div x-show="bukaModalEdit" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalEdit = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
+    <div x-show="bukaModalEdit" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="bukaModalEdit = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-visible shadow-xl my-8">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Edit Wilayah: <span class="font-mono text-emerald-600" x-text="editData.kode_wilayah"></span></h3>
                 <button @click="bukaModalEdit = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>
@@ -149,7 +149,7 @@
                 @csrf
                 @method('PUT')
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Wilayah / Zonasi Distribusi</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Wilayah / Zonasi Distribusi <span class="text-rose-500">*</span></label>
                     <input type="text" name="nama_wilayah" x-model="editData.nama_wilayah" required
                            class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
                 </div>

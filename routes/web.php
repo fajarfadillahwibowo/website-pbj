@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Autentikasi\AutentikasiController;
 use App\Http\Controllers\Autentikasi\KelolaAkunController;
 use App\Http\Controllers\Master\CustomerController;
+use App\Http\Controllers\Master\TokoBangunanController;
 use App\Http\Controllers\Master\BarangController;
 use App\Http\Controllers\Master\WilayahController;
 use App\Http\Controllers\Master\KaryawanController;
@@ -59,11 +60,21 @@ Route::prefix('superadmin')->name('superadmin.')->group(function () {
 
 // Modul Master Data
 Route::prefix('master')->name('master.')->group(function () {
-    // Customer
+    // Customer (Entitas Pemilik & Finansial)
     Route::get('/customer', [CustomerController::class, 'index'])->name('customer.index');
     Route::post('/customer', [CustomerController::class, 'store'])->name('customer.store');
+    Route::get('/customer/api/buat-kode', [CustomerController::class, 'buatKodeOtomatis'])->name('customer.buat_kode');
+    Route::get('/customer/{kode_customer}/detail', [CustomerController::class, 'ambilDetail'])->name('customer.detail');
     Route::put('/customer/{kode_customer}', [CustomerController::class, 'update'])->name('customer.update');
     Route::delete('/customer/{kode_customer}', [CustomerController::class, 'destroy'])->name('customer.destroy');
+
+    // Toko Bangunan & Proyek Cabang (1:N Customer)
+    Route::get('/toko-bangunan', [TokoBangunanController::class, 'index'])->name('toko_bangunan.index');
+    Route::post('/toko-bangunan', [TokoBangunanController::class, 'simpan'])->name('toko_bangunan.simpan');
+    Route::get('/toko-bangunan/api/buat-kode', [TokoBangunanController::class, 'buatKodeOtomatis'])->name('toko_bangunan.buat_kode');
+    Route::get('/toko-bangunan/{kode_toko}/detail', [TokoBangunanController::class, 'ambilDetail'])->name('toko_bangunan.detail');
+    Route::put('/toko-bangunan/{kode_toko}', [TokoBangunanController::class, 'perbarui'])->name('toko_bangunan.perbarui');
+    Route::delete('/toko-bangunan/{kode_toko}', [TokoBangunanController::class, 'hapus'])->name('toko_bangunan.hapus');
 
     // Barang / Semen
     Route::get('/barang', [BarangController::class, 'index'])->name('barang.index');

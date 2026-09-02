@@ -362,77 +362,29 @@
                     @endforelse
                 </tbody>
             </table>
-<!-- Modal Tambah Driver -->
-    <div x-show="modalTambahTerbuka" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="modalTambahTerbuka = false"
-             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
-            
-            <!-- Modal Header -->
-            <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                    </div>
-                    <div>
-                        <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Tambah Driver Pengemudi Baru</h2>
-                        <p class="text-[11px] text-slate-400">Pendaftaran supir armada truk semen dan kelengkapan identitas.</p>
-                    </div>
-                </div>
-                <button @click="modalTambahTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+        </div>
+    </div>
+
+    <!-- Modal Tambah Driver -->
+    <div x-show="modalTambahTerbuka" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="modalTambahTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-visible shadow-xl my-8">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Tambah Driver Pengemudi Baru</h3>
+                <button @click="modalTambahTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none">&times;</button>
             </div>
-
-            <!-- Modal Form -->
-            <form action="{{ route('operasional.armada.driver.simpan') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-4 text-xs">
+            <form action="{{ route('operasional.armada.driver.simpan') }}" method="POST" class="p-5 space-y-3.5 text-xs">
                 @csrf
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <!-- Kode Karyawan Cerdas (Gap-Filling & Alfanumerik Acak) -->
-                    <div class="sm:col-span-2 p-3.5 rounded-xl bg-slate-50 dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837]">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-                            <div>
-                                <div class="flex items-center gap-2">
-                                    <label class="text-xs font-bold text-slate-800 dark:text-slate-200">
-                                        Kode Karyawan / Sopir <span class="text-rose-500">*</span>
-                                    </label>
-                                    <span class="text-[10px] text-blue-600 dark:text-blue-400 font-semibold px-1.5 py-0.5 bg-blue-50 dark:bg-blue-950/50 rounded-md">Otomatis</span>
-                                </div>
-                                <div class="text-[10px] text-slate-400 font-mono mt-0.5" x-text="keteranganKodeOtomatis"></div>
-                            </div>
-                            
-                            <!-- Tombol Generator Mode -->
-                            <div class="flex items-center gap-1.5 shrink-0">
-                                <button type="button" @click="buatKodeOtomatis('gap')"
-                                        class="px-2.5 py-1 text-[11px] font-semibold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 rounded-lg transition-colors flex items-center gap-1 shadow-xs"
-                                        title="Daur ulang nomor: mengisi slot nomor terkecil yang kosong atau pernah dihapus (DRV-001, DRV-002, dst)">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                    <span>Isi Nomor Kosong</span>
-                                </button>
-                                <button type="button" @click="buatKodeOtomatis('acak')"
-                                        class="px-2.5 py-1 text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 dark:hover:bg-purple-900/50 rounded-lg transition-colors flex items-center gap-1 shadow-xs"
-                                        title="Buat kode acak alfanumerik anti-tebak (misal DRV-7K8B)">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                    <span>Kode Acak Aman</span>
-                                </button>
-                            </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Kode Driver <span class="text-rose-500">*</span></label>
+                            <span class="text-[10px] text-blue-600 dark:text-blue-400 font-semibold px-1.5 py-0.5 bg-blue-50 dark:bg-blue-950/50 rounded-md">Otomatis</span>
                         </div>
-
-                        <input type="text" name="kode_karyawan" x-model="formTambah.kode_karyawan" required placeholder="Contoh: DRV-002 atau DRV-7K8B"
-                               class="w-full px-3 py-2 text-xs font-mono font-bold rounded-xl bg-white dark:bg-[#14161F] border border-blue-200 dark:border-blue-900/50 text-blue-600 dark:text-blue-400 uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-blue-500/30">
+                        <input type="text" name="kode_karyawan" x-model="formTambah.kode_karyawan" required placeholder="DRV-001"
+                               class="w-full px-3 py-2 rounded-xl bg-blue-50/50 dark:bg-[#1C1E2A] border border-blue-200 dark:border-blue-900/50 text-blue-900 dark:text-blue-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30">
                     </div>
-
-                    <!-- Nama Karyawan -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap Driver <span class="text-rose-500">*</span></label>
-                        <input type="text" name="nama_karyawan" x-model="formTambah.nama_karyawan" required placeholder="Nama lengkap pengemudi"
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
-                    </div>
-
-                    <!-- Jabatan Karyawan -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Jabatan Karyawan <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jabatan Karyawan <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="id_jabatan"
                             placeholder="-- Pilih Jabatan --"
@@ -442,10 +394,15 @@
                             modelBind="formTambah.id_jabatan"
                         />
                     </div>
-
-                    <!-- Status Karyawan -->
+                </div>
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Karyawan <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap Driver <span class="text-rose-500">*</span></label>
+                        <input type="text" name="nama_karyawan" x-model="formTambah.nama_karyawan" required placeholder="Nama pengemudi"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Karyawan <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="status_karyawan"
                             placeholder="-- Pilih Status --"
@@ -455,143 +412,72 @@
                             modelBind="formTambah.status_karyawan"
                         />
                     </div>
-
-                    <!-- No KTP -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">No. KTP / Identitas (NIK) <span class="text-rose-500">*</span></label>
-                        <input type="text" name="no_ktp" x-model="formTambah.no_ktp" required placeholder="Contoh: 321601xxxxxxxxxx" maxlength="30"
-                               class="w-full px-3 py-2 text-xs font-mono rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
-                    </div>
-
-                    <!-- No HP -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">No. Handphone / WhatsApp <span class="text-rose-500">*</span></label>
-                        <input type="text" name="no_hp" x-model="formTambah.no_hp" required placeholder="Contoh: 0812-3456-7890" maxlength="25"
-                               class="w-full px-3 py-2 text-xs font-mono rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
-                    </div>
-
-                    <!-- Tanggal Mulai Kerja -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Mulai Kerja</label>
-                        <input type="date" name="tanggal_mulai_kerja" x-model="formTambah.tanggal_mulai_kerja"
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
-                    </div>
-
-                    <!-- Tanggal Selesai / Berhenti -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Berakhir / Selesai</label>
-                        <input type="date" name="tanggal_berhenti" x-model="formTambah.tanggal_berhenti"
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
-                    </div>
-
                 </div>
-
-                <!-- Alamat Domisili -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. KTP / Identitas (NIK) <span class="text-rose-500">*</span></label>
+                        <input type="text" name="no_ktp" x-model="formTambah.no_ktp" required placeholder="321601xxxxxxxxxx" maxlength="30"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 font-mono">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. Handphone / WhatsApp <span class="text-rose-500">*</span></label>
+                        <input type="text" name="no_hp" x-model="formTambah.no_hp" required placeholder="0812-xxxx-xxxx" maxlength="25"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 font-mono">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Mulai Kerja <span class="text-rose-500">*</span></label>
+                        <x-input-tanggal 
+                            nama="tanggal_mulai_kerja" 
+                            modelBind="formTambah.tanggal_mulai_kerja" 
+                            placeholder="Pilih Tanggal Mulai"
+                            :wajib="true"
+                            warnaFokus="blue"
+                        />
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Berakhir <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
+                        <x-input-tanggal 
+                            nama="tanggal_berhenti" 
+                            modelBind="formTambah.tanggal_berhenti" 
+                            placeholder="Pilih Tanggal Berakhir"
+                            :wajib="false"
+                            warnaFokus="blue"
+                        />
+                    </div>
+                </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Alamat Domisili Lengkap <span class="text-rose-500">*</span></label>
-                    <textarea name="alamat" x-model="formTambah.alamat" required rows="2" placeholder="Jl. Nama Jalan No. RT/RW, Kelurahan, Kecamatan, Kota/Kabupaten"
-                              class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30"></textarea>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Alamat Domisili Lengkap <span class="text-rose-500">*</span></label>
+                    <textarea name="alamat" x-model="formTambah.alamat" required rows="2" placeholder="Jl. Raya Utama No. ..."
+                              class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30"></textarea>
                 </div>
-
-                <!-- Upload Lampiran: Foto KTP & File Kontrak -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    
-                    <!-- Foto KTP -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Foto KTP / SIM (Gambar)</label>
-                        <div class="flex items-center gap-3">
-                            <input type="file" name="foto_ktp" accept="image/jpeg,image/png,image/jpg,image/webp"
-                                   @change="pratinjauFotoTambah($event)"
-                                   class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 dark:file:bg-blue-500/10 dark:file:text-blue-400 hover:file:bg-blue-100">
-                        </div>
-                        <p class="text-[10px] text-slate-400 mt-1">Format: JPG, PNG, WEBP (Maks. 3 MB)</p>
-                        
-                        <!-- Live Preview -->
-                        <template x-if="pratinjauFotoUrl">
-                            <div class="mt-2 relative inline-block">
-                                <img :src="pratinjauFotoUrl" class="w-32 h-20 object-cover rounded-lg border border-[#E2E8F0] dark:border-[#252837]">
-                                <button type="button" @click="pratinjauFotoUrl = null" class="absolute -top-1.5 -right-1.5 bg-rose-600 text-white rounded-full p-0.5" title="Hapus foto">
-                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                </button>
-                            </div>
-                        </template>
-                    </div>
-
-                    <!-- Dokumen Kontrak -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Dokumen Kontrak Kerja</label>
-                        <input type="file" name="file_kontrak" accept=".pdf,.doc,.docx,image/jpeg,image/png"
-                               class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 dark:file:bg-slate-800 dark:file:text-slate-300 hover:file:bg-slate-200">
-                        <p class="text-[10px] text-slate-400 mt-1">Format: PDF, DOC, DOCX, JPG (Maks. 5 MB)</p>
-                    </div>
-
-                </div>
-
-                <!-- Tombol Submit Form Tambah -->
-                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    <button type="button" @click="modalTambahTerbuka = false"
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="px-5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 rounded-xl transition-all shadow-md shadow-blue-600/20">
-                        Simpan Data Driver
-                    </button>
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button @click="modalTambahTerbuka = false" type="button" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all shadow-sm">Simpan Data Driver</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- 6. MODAL FORM: EDIT DATA DRIVER -->
-    <!-- ========================================================================= -->
-    <div x-show="modalEditTerbuka" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="modalEditTerbuka = false"
-             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
-            
-            <!-- Modal Header -->
-            <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                    </div>
-                    <div>
-                        <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Ubah Data Driver</h2>
-                        <p class="text-[11px] text-slate-400">
-                            Perbarui informasi profil supir <span class="font-mono font-bold text-amber-600 dark:text-amber-400" x-text="formEdit.kode_karyawan"></span>
-                        </p>
-                    </div>
-                </div>
-                <button @click="modalEditTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+    <!-- Modal Edit Driver -->
+    <div x-show="modalEditTerbuka" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="modalEditTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-visible shadow-xl my-8">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Ubah Data Driver: <span class="font-mono text-amber-600" x-text="formEdit.kode_karyawan"></span></h3>
+                <button @click="modalEditTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none">&times;</button>
             </div>
-
-            <!-- Modal Form Edit -->
-            <form :action="'{{ url('operasional/armada/driver') }}/' + formEdit.kode_karyawan" method="POST" enctype="multipart/form-data" class="p-6 space-y-4 text-xs">
+            <form :action="'{{ url('operasional/armada/driver') }}/' + formEdit.kode_karyawan" method="POST" class="p-5 space-y-3.5 text-xs">
                 @csrf
                 @method('PUT')
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    
-                    <!-- Kode Karyawan (Readonly) -->
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Kode Karyawan (Terkunci)</label>
-                        <input type="text" :value="formEdit.kode_karyawan" disabled
-                               class="w-full px-3 py-2 text-xs font-mono font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 cursor-not-allowed">
-                    </div>
-
-                    <!-- Nama Karyawan -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap Driver <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap Driver <span class="text-rose-500">*</span></label>
                         <input type="text" name="nama_karyawan" x-model="formEdit.nama_karyawan" required
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
-
-                    <!-- Jabatan Karyawan -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Jabatan Karyawan <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jabatan Karyawan <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="id_jabatan"
                             placeholder="-- Pilih Jabatan --"
@@ -601,10 +487,10 @@
                             modelBind="formEdit.id_jabatan"
                         />
                     </div>
-
-                    <!-- Status Karyawan -->
+                </div>
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Karyawan <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Karyawan <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="status_karyawan"
                             placeholder="-- Pilih Status --"
@@ -614,81 +500,37 @@
                             modelBind="formEdit.status_karyawan"
                         />
                     </div>
-
-                    <!-- No KTP -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">No. KTP / Identitas (NIK) <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. KTP / NIK <span class="text-rose-500">*</span></label>
                         <input type="text" name="no_ktp" x-model="formEdit.no_ktp" required maxlength="30"
-                               class="w-full px-3 py-2 text-xs font-mono rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30 font-mono">
                     </div>
-
-                    <!-- No HP -->
+                </div>
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">No. Handphone / WhatsApp <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. Handphone / WA <span class="text-rose-500">*</span></label>
                         <input type="text" name="no_hp" x-model="formEdit.no_hp" required maxlength="25"
-                               class="w-full px-3 py-2 text-xs font-mono rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30 font-mono">
                     </div>
-
-                    <!-- Tanggal Mulai Kerja -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Mulai Kerja</label>
-                        <input type="date" name="tanggal_mulai_kerja" x-model="formEdit.tanggal_mulai_kerja"
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Mulai Kerja <span class="text-rose-500">*</span></label>
+                        <x-input-tanggal 
+                            nama="tanggal_mulai_kerja" 
+                            modelBind="formEdit.tanggal_mulai_kerja" 
+                            placeholder="Pilih Tanggal Mulai"
+                            :wajib="true"
+                            warnaFokus="amber"
+                        />
                     </div>
-
-                    <!-- Tanggal Selesai / Berhenti -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Berakhir / Selesai</label>
-                        <input type="date" name="tanggal_berhenti" x-model="formEdit.tanggal_berhenti"
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                    </div>
-
                 </div>
-
-                <!-- Alamat Domisili -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Alamat Domisili Lengkap <span class="text-rose-500">*</span></label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Alamat Domisili Lengkap <span class="text-rose-500">*</span></label>
                     <textarea name="alamat" x-model="formEdit.alamat" required rows="2"
-                              class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30"></textarea>
+                              class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30"></textarea>
                 </div>
-
-                <!-- Upload Lampiran Edit: Foto KTP & File Kontrak -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    
-                    <!-- Foto KTP -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Perbarui Foto KTP / SIM</label>
-                        <input type="file" name="foto_ktp" accept="image/jpeg,image/png,image/jpg,image/webp"
-                               @change="pratinjauFotoEdit($event)"
-                               class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 dark:file:bg-amber-500/10 dark:file:text-amber-400 hover:file:bg-amber-100">
-                        <p class="text-[10px] text-slate-400 mt-1">Kosongkan jika tidak ingin mengganti foto saat ini.</p>
-                        
-                        <!-- Live Preview -->
-                        <div class="mt-2" x-show="pratinjauFotoUrlEdit || formEdit.foto_ktp_url">
-                            <img :src="pratinjauFotoUrlEdit || formEdit.foto_ktp_url" class="w-32 h-20 object-cover rounded-lg border border-[#E2E8F0] dark:border-[#252837]">
-                        </div>
-                    </div>
-
-                    <!-- Dokumen Kontrak -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Perbarui Dokumen Kontrak</label>
-                        <input type="file" name="file_kontrak" accept=".pdf,.doc,.docx,image/jpeg,image/png"
-                               class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 dark:file:bg-slate-800 dark:file:text-slate-300 hover:file:bg-slate-200">
-                        <p class="text-[10px] text-slate-400 mt-1">Kosongkan jika tidak ingin mengganti file kontrak.</p>
-                    </div>
-
-                </div>
-
-                <!-- Tombol Submit Form Edit -->
-                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    <button type="button" @click="modalEditTerbuka = false"
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 active:scale-95 rounded-xl transition-all shadow-md shadow-amber-600/20">
-                        Simpan Perubahan
-                    </button>
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button @click="modalEditTerbuka = false" type="button" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl transition-all shadow-sm">Simpan Perubahan</button>
                 </div>
             </form>
         </div>

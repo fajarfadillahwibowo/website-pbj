@@ -147,7 +147,7 @@
 
     <!-- Modal Tambah Akun Pengguna -->
     <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
+        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-visible shadow-xl">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Tambah Akun Pengguna Baru</h3>
                 <button @click="bukaModalTambah = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>
@@ -155,7 +155,7 @@
             <form method="POST" action="{{ route('superadmin.kelola_akun.store') }}" class="p-5 space-y-4 text-xs">
                 @csrf
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Username Login</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Username Login <span class="text-rose-500">*</span></label>
                     <input type="text" name="username" required placeholder="contoh: staf_gudang_02"
                            class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30">
                 </div>
@@ -173,7 +173,7 @@
                     ])->toArray();
                 @endphp
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Karyawan Terkait</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Karyawan Terkait <span class="text-rose-500">*</span></label>
                     <x-dropdown-kustom 
                         nama="kode_karyawan"
                         placeholder="-- Pilih Karyawan --"
@@ -183,7 +183,7 @@
                     />
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Jabatan / Peran RBAC</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Jabatan / Peran RBAC <span class="text-rose-500">*</span></label>
                     <x-dropdown-kustom 
                         nama="id_jabatan"
                         placeholder="-- Pilih Jabatan / Role --"
@@ -193,7 +193,7 @@
                     />
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kata Sandi Default</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kata Sandi Default <span class="text-rose-500">*</span></label>
                     <input type="password" name="password" required value="password123" placeholder="Minimal 6 karakter"
                            class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30">
                 </div>

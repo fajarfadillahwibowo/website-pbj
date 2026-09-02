@@ -47,4 +47,12 @@ class Customer extends Model
     {
         return $this->belongsTo(Wilayah::class, 'kode_wilayah', 'kode_wilayah');
     }
+
+    /**
+     * Relasi 1 Customer ke Banyak Toko Bangunan / Proyek Cabang
+     */
+    public function tokoBangunan()
+    {
+        return $this->hasMany(TokoBangunan::class, 'kode_customer', 'kode_customer');
+    }
 }

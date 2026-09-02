@@ -145,8 +145,8 @@
     </div>
 
     <!-- Modal Tambah Pengeluaran -->
-    <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
+    <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-visible shadow-xl my-8">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Catat Pengeluaran Kas Operasional</h3>
                 <button @click="bukaModalTambah = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>
@@ -155,12 +155,17 @@
                 @csrf
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Pengeluaran</label>
-                        <input type="date" name="tanggal_pengeluaran" required value="{{ date('Y-m-d') }}"
-                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/30">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Pengeluaran <span class="text-rose-500">*</span></label>
+                        <x-input-tanggal 
+                            nama="tanggal_pengeluaran" 
+                            nilaiAwal="{{ date('Y-m-d') }}" 
+                            placeholder="Pilih Tanggal Pengeluaran"
+                            :wajib="true"
+                            warnaFokus="rose"
+                        />
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kategori Biaya</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kategori Biaya <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="kategori_pengeluaran"
                             placeholder="-- Pilih Kategori --"
@@ -172,7 +177,7 @@
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Bagan Akun COA</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Bagan Akun COA <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="kode_akun"
                             placeholder="-- Pilih Akun Beban --"
@@ -182,7 +187,7 @@
                         />
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Rekening Sumber Kas</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Rekening Sumber Kas <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
                         <x-dropdown-kustom 
                             nama="id_rekening_sumber"
                             placeholder="-- Kas Tunai Brankas --"
@@ -192,12 +197,12 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Total Nominal Pengeluaran (Rp)</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Total Nominal Pengeluaran (Rp) <span class="text-rose-500">*</span></label>
                     <input type="number" name="total_nominal" required min="1000" step="10000" placeholder="1500000"
                            class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/30 font-mono font-semibold text-sm">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan Keperluan</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan Keperluan <span class="text-rose-500">*</span></label>
                     <textarea name="keterangan" rows="2" required placeholder="Pengisian Solar B35 dan e-toll rute Cikarang-Bandung..."
                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/30"></textarea>
                 </div>

@@ -585,77 +585,29 @@
 
     <!-- ========================================================================= -->
     <!-- MODAL-MODAL KENDARAAN (TAMBAH, EDIT, DETAIL, HAPUS) -->
-    <!-- ========================================================================= -->    <!-- Modal Tambah Kendaraan -->
-    <div x-show="modalTambahKendaraanTerbuka" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="modalTambahKendaraanTerbuka = false"
-             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl my-8">
-            <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                    </div>
-                    <div>
-                        <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Tambah Unit Kendaraan Baru</h2>
-                        <p class="text-[11px] text-slate-400">Lengkapi data teknis armada truk, nomor mesin/rangka, dan perizinan KIR/Pajak.</p>
-                    </div>
-                </div>
-                <button @click="modalTambahKendaraanTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+    <!-- ========================================================================= -->
+    <!-- Modal Tambah Kendaraan -->
+    <div x-show="modalTambahKendaraanTerbuka" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="modalTambahKendaraanTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-visible shadow-xl my-8">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Tambah Unit Kendaraan Baru</h3>
+                <button @click="modalTambahKendaraanTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none">&times;</button>
             </div>
 
-            <form action="{{ route('operasional.armada.kendaraan.simpan') }}" method="POST" class="p-6 space-y-4 text-xs">
+            <form action="{{ route('operasional.armada.kendaraan.simpan') }}" method="POST" class="p-5 space-y-3.5 text-xs">
                 @csrf
-                <!-- Generator Kode Aset Cerdas -->
-                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837]">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <label class="text-xs font-bold text-slate-800 dark:text-slate-200">
-                                    Kode Aset Kendaraan <span class="text-rose-500">*</span>
-                                </label>
-                                <span class="text-[10px] text-orange-600 dark:text-orange-400 font-semibold px-1.5 py-0.5 bg-orange-50 dark:bg-orange-950/50 rounded-md">Otomatis</span>
-                            </div>
-                            <div class="text-[10px] text-slate-400 font-mono mt-0.5" x-text="keteranganKodeKendaraan"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Kode Kendaraan</label>
+                            <span class="text-[10px] text-orange-600 dark:text-orange-400 font-semibold px-1.5 py-0.5 bg-orange-50 dark:bg-orange-950/50 rounded-md">Otomatis</span>
                         </div>
-                        
-                        <div class="flex items-center gap-1.5 shrink-0">
-                            <button type="button" @click="buatKodeKendaraanOtomatis('gap')"
-                                    class="px-2.5 py-1 text-[11px] font-semibold text-orange-700 dark:text-orange-300 bg-orange-100 dark:bg-orange-900/30 hover:bg-orange-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                <span>Daur Ulang Slot</span>
-                            </button>
-                            <button type="button" @click="buatKodeKendaraanOtomatis('acak')"
-                                    class="px-2.5 py-1 text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                <span>Kode Acak</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <input type="text" name="kode_aset" x-model="formTambahKendaraan.kode_aset" required placeholder="Contoh: TRK-001 atau TRK-7K8B"
-                           class="w-full px-3 py-2 text-xs font-mono font-bold rounded-xl bg-white dark:bg-[#14161F] border border-orange-200 dark:border-orange-900/50 text-orange-600 dark:text-orange-400 uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-orange-500/30">
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
-                    <div class="md:col-span-3">
-                        <x-input-plat-nomor 
-                            nama="no_polisi" 
-                            modelBind="formTambahKendaraan.no_polisi" 
-                            :wajib="true" 
-                            label="Nomor Plat Polisi Kendaraan"
-                        />
-                    </div>
-
-                    <div class="sm:col-span-2">
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Model Truk / Aset <span class="text-rose-500">*</span></label>
-                        <input type="text" name="nama_aset" x-model="formTambahKendaraan.nama_aset" required placeholder="Contoh: Hino 500 Tronton Wingbox FL 260"
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/30">
+                        <input type="text" name="kode_aset" x-model="formTambahKendaraan.kode_aset" required placeholder="TRK-001"
+                               class="w-full px-3 py-2 rounded-xl bg-orange-50/50 dark:bg-[#1C1E2A] border border-orange-200 dark:border-orange-900/50 text-orange-900 dark:text-orange-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500/30">
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis Aset Truk <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis Aset Truk</label>
                         <x-dropdown-kustom 
                             nama="kode_jenis_aset"
                             placeholder="-- Pilih Jenis Aset --"
@@ -665,17 +617,36 @@
                             modelBind="formTambahKendaraan.kode_jenis_aset"
                         />
                     </div>
+                </div>
 
+                <div class="col-span-2">
+                    <x-input-plat-nomor 
+                        nama="no_polisi" 
+                        modelBind="formTambahKendaraan.no_polisi" 
+                        :wajib="true" 
+                        label="Nomor Plat Polisi Kendaraan"
+                    />
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Merek Truk <span class="text-rose-500">*</span></label>
-                        <input type="text" name="merek_aset" x-model="formTambahKendaraan.merek_aset" required placeholder="Contoh: Hino, Mitsubishi, Isuzu"
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/30">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Model Truk</label>
+                        <input type="text" name="nama_aset" x-model="formTambahKendaraan.nama_aset" required placeholder="Hino 500 Tronton Wingbox"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/30">
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Kapasitas Muatan <span class="text-rose-500">*</span></label>
-                        <input type="text" name="muatan" x-model="formTambahKendaraan.muatan" required placeholder="Contoh: 25 Ton (500 Zak)"
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/30">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Merek Truk</label>
+                        <input type="text" name="merek_aset" x-model="formTambahKendaraan.merek_aset" required placeholder="Hino / Mitsubishi / Isuzu"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/30">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kapasitas Muatan</label>
+                        <input type="text" name="muatan" x-model="formTambahKendaraan.muatan" required placeholder="25 Ton (500 Zak)"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/30">
                     </div>
 
                     <div>
@@ -687,51 +658,50 @@
                             placeholder="850.000.000"
                         />
                     </div>
+                </div>
 
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Pembelian <span class="text-rose-500">*</span></label>
-                        <input type="date" name="tanggal_pembelian" x-model="formTambahKendaraan.tanggal_pembelian" required
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/30">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Pembelian <span class="text-rose-500">*</span></label>
+                        <x-input-tanggal 
+                            nama="tanggal_pembelian" 
+                            modelBind="formTambahKendaraan.tanggal_pembelian" 
+                            placeholder="Pilih Tanggal Beli"
+                            :wajib="true"
+                            warnaFokus="orange"
+                        />
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tahun Pembuatan <span class="text-rose-500">*</span></label>
-                        <input type="number" name="tahun_pembuatan" x-model="formTambahKendaraan.tahun_pembuatan" required min="1990" max="2099"
-                               class="w-full px-3 py-2 text-xs font-mono rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/30">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tahun Pembuatan <span class="text-rose-500">*</span></label>
+                        <input type="number" name="tahun_pembuatan" x-model="formTambahKendaraan.tahun_pembuatan" required min="1990" max="2099" placeholder="2022"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/30 font-mono">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Mesin <span class="text-rose-500">*</span></label>
+                        <input type="text" name="no_mesin" x-model="formTambahKendaraan.no_mesin" required placeholder="J08E-UG-12948"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 uppercase focus:outline-none focus:ring-2 focus:ring-orange-500/30 font-mono">
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Mesin <span class="text-rose-500">*</span></label>
-                        <input type="text" name="no_mesin" x-model="formTambahKendaraan.no_mesin" required placeholder="Contoh: J08E-UG-12948"
-                               class="w-full px-3 py-2 text-xs font-mono rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 uppercase focus:outline-none focus:ring-2 focus:ring-orange-500/30">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Rangka (VIN) <span class="text-rose-500">*</span></label>
+                        <input type="text" name="no_rangka" x-model="formTambahKendaraan.no_rangka" required placeholder="MJECFL8J7N-039182"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 uppercase focus:outline-none focus:ring-2 focus:ring-orange-500/30 font-mono">
                     </div>
+                </div>
 
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Rangka (VIN) <span class="text-rose-500">*</span></label>
-                        <input type="text" name="no_rangka" x-model="formTambahKendaraan.no_rangka" required placeholder="Contoh: MJECFL8J7N-039182"
-                               class="w-full px-3 py-2 text-xs font-mono rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 uppercase focus:outline-none focus:ring-2 focus:ring-orange-500/30">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Pemilik Legal <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Pemilik Legal <span class="text-rose-500">*</span></label>
                         <input type="text" name="nama_pemilik" x-model="formTambahKendaraan.nama_pemilik" required placeholder="PT Pura Balkom Jaya"
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/30">
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/30">
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Masa Berlaku Uji KIR</label>
-                        <input type="date" name="tanggal_kir" x-model="formTambahKendaraan.tanggal_kir"
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/30">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Masa Berlaku Pajak STNK</label>
-                        <input type="date" name="tanggal_pajak" x-model="formTambahKendaraan.tanggal_pajak"
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/30">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Operasional <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Operasional <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="status_aset"
                             placeholder="-- Pilih Status --"
@@ -743,67 +713,43 @@
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    <button type="button" @click="modalTambahKendaraanTerbuka = false"
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="px-5 py-2 text-xs font-semibold text-white bg-orange-600 hover:bg-orange-700 active:scale-95 rounded-xl transition-all shadow-md shadow-orange-600/20">
-                        Simpan Data Kendaraan
-                    </button>
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" @click="modalTambahKendaraanTerbuka = false" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-orange-600 hover:bg-orange-700 rounded-xl transition-all shadow-sm">Simpan Kendaraan</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Modal Edit Kendaraan -->
-    <div x-show="modalEditKendaraanTerbuka" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="modalEditKendaraanTerbuka = false"
-             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl my-8">
-            <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                    </div>
-                    <div>
-                        <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Ubah Data Kendaraan</h2>
-                        <p class="text-[11px] text-slate-400">Plat: <span class="font-mono font-bold text-amber-600" x-text="formEditKendaraan.no_polisi"></span></p>
-                    </div>
-                </div>
-                <button @click="modalEditKendaraanTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+    <div x-show="modalEditKendaraanTerbuka" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="modalEditKendaraanTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-visible shadow-xl my-8">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Ubah Data Kendaraan: <span class="font-mono text-amber-600" x-text="formEditKendaraan.kode_aset"></span></h3>
+                <button @click="modalEditKendaraanTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none">&times;</button>
             </div>
 
-            <form :action="'{{ url('operasional/armada/kendaraan') }}/' + formEditKendaraan.kode_aset" method="POST" class="p-6 space-y-4 text-xs">
+            <form :action="'{{ url('operasional/armada/kendaraan') }}/' + formEditKendaraan.kode_aset" method="POST" class="p-5 space-y-3.5 text-xs">
                 @csrf
                 @method('PUT')
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Kode Aset (Terkunci)</label>
-                        <input type="text" :value="formEditKendaraan.kode_aset" disabled
-                               class="w-full px-3 py-2 text-xs font-mono font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 cursor-not-allowed">
-                    </div>
+                <div class="col-span-2">
+                    <x-input-plat-nomor 
+                        nama="no_polisi" 
+                        modelBind="formEditKendaraan.no_polisi" 
+                        :wajib="true" 
+                        label="Nomor Plat Polisi Kendaraan"
+                    />
+                </div>
 
-                    <div class="sm:col-span-2">
-                        <x-input-plat-nomor 
-                            nama="no_polisi" 
-                            modelBind="formEditKendaraan.no_polisi" 
-                            :wajib="true" 
-                            label="Nomor Plat Polisi Kendaraan"
-                        />
-                    </div>
-
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Model Truk <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Model Truk <span class="text-rose-500">*</span></label>
                         <input type="text" name="nama_aset" x-model="formEditKendaraan.nama_aset" required
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis Aset Truk <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis Aset Truk <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="kode_jenis_aset"
                             placeholder="-- Pilih Jenis Aset --"
@@ -813,19 +759,23 @@
                             modelBind="formEditKendaraan.kode_jenis_aset"
                         />
                     </div>
+                </div>
 
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Merek Truk <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Merek Truk <span class="text-rose-500">*</span></label>
                         <input type="text" name="merek_aset" x-model="formEditKendaraan.merek_aset" required
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Kapasitas Muatan <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kapasitas Muatan <span class="text-rose-500">*</span></label>
                         <input type="text" name="muatan" x-model="formEditKendaraan.muatan" required
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
+                </div>
 
+                <div class="grid grid-cols-2 gap-3">
                     <div>
                         <x-input-rupiah 
                             nama="harga_aset" 
@@ -836,49 +786,26 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Pembelian <span class="text-rose-500">*</span></label>
-                        <input type="date" name="tanggal_pembelian" x-model="formEditKendaraan.tanggal_pembelian" required
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Pembelian <span class="text-rose-500">*</span></label>
+                        <x-input-tanggal 
+                            nama="tanggal_pembelian" 
+                            modelBind="formEditKendaraan.tanggal_pembelian" 
+                            placeholder="Pilih Tanggal Beli"
+                            :wajib="true"
+                            warnaFokus="amber"
+                        />
                     </div>
+                </div>
 
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tahun Pembuatan <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tahun Pembuatan <span class="text-rose-500">*</span></label>
                         <input type="number" name="tahun_pembuatan" x-model="formEditKendaraan.tahun_pembuatan" required min="1990" max="2099"
-                               class="w-full px-3 py-2 text-xs font-mono rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30 font-mono">
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Mesin <span class="text-rose-500">*</span></label>
-                        <input type="text" name="no_mesin" x-model="formEditKendaraan.no_mesin" required
-                               class="w-full px-3 py-2 text-xs font-mono rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 uppercase focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Rangka (VIN) <span class="text-rose-500">*</span></label>
-                        <input type="text" name="no_rangka" x-model="formEditKendaraan.no_rangka" required
-                               class="w-full px-3 py-2 text-xs font-mono rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 uppercase focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Pemilik Legal <span class="text-rose-500">*</span></label>
-                        <input type="text" name="nama_pemilik" x-model="formEditKendaraan.nama_pemilik" required
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Masa Berlaku Uji KIR</label>
-                        <input type="date" name="tanggal_kir" x-model="formEditKendaraan.tanggal_kir"
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Masa Berlaku Pajak STNK</label>
-                        <input type="date" name="tanggal_pajak" x-model="formEditKendaraan.tanggal_pajak"
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Operasional <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Operasional <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="status_aset"
                             placeholder="-- Pilih Status --"
@@ -890,15 +817,23 @@
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    <button type="button" @click="modalEditKendaraanTerbuka = false"
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 active:scale-95 rounded-xl transition-all shadow-md shadow-amber-600/20">
-                        Simpan Perubahan
-                    </button>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Mesin <span class="text-rose-500">*</span></label>
+                        <input type="text" name="no_mesin" x-model="formEditKendaraan.no_mesin" required
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 uppercase focus:outline-none focus:ring-2 focus:ring-amber-500/30 font-mono">
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Rangka (VIN) <span class="text-rose-500">*</span></label>
+                        <input type="text" name="no_rangka" x-model="formEditKendaraan.no_rangka" required
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 uppercase focus:outline-none focus:ring-2 focus:ring-amber-500/30 font-mono">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" @click="modalEditKendaraanTerbuka = false" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl transition-all shadow-sm">Simpan Perubahan</button>
                 </div>
             </form>
         </div>

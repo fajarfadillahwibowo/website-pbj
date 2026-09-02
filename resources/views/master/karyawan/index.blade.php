@@ -3,7 +3,39 @@
 @section('judul', 'Master Data Karyawan & Seluruh Pegawai')
 
 @section('konten')
-<div class="space-y-5" x-data="{ bukaModalTambah: false, bukaModalEdit: false, editData: {} }">
+<div class="space-y-5" x-data="{ 
+    bukaModalTambah: false, 
+    bukaModalEdit: false, 
+    editData: {},
+    petaKodeOtomatis: @js($kodePerJabatan),
+    formTambah: {
+        kode_karyawan: '{{ $kodeOtomatis }}',
+        kategori_karyawan: 'staf',
+        nama_karyawan: '',
+        id_jabatan: '{{ $daftarJabatan->first()->id_jabatan ?? 2 }}',
+        no_identitas: '',
+        no_hp: '',
+        status_karyawan: 'aktif',
+        tanggal_bergabung: '{{ date('Y-m-d') }}',
+        alamat: ''
+    },
+    sinkronkanKodeOtomatis() {
+        if (this.formTambah.kategori_karyawan === 'driver') {
+            if (this.petaKodeOtomatis && this.petaKodeOtomatis['driver']) {
+                this.formTambah.kode_karyawan = this.petaKodeOtomatis['driver'];
+            }
+        } else {
+            let jId = this.formTambah.id_jabatan;
+            if (this.petaKodeOtomatis && this.petaKodeOtomatis[jId]) {
+                this.formTambah.kode_karyawan = this.petaKodeOtomatis[jId];
+            }
+        }
+    },
+    init() {
+        this.$watch('formTambah.id_jabatan', () => this.sinkronkanKodeOtomatis());
+        this.$watch('formTambah.kategori_karyawan', () => this.sinkronkanKodeOtomatis());
+    }
+}">
     <!-- Flash Notification -->
     @if(session('sukses'))
         <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-center justify-between">
@@ -175,8 +207,8 @@
     @endphp
 
     <!-- Modal Tambah Karyawan -->
-    <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-xl">
+    <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-visible shadow-xl my-8">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Tambah Data Pegawai / Driver</h3>
                 <button @click="bukaModalTambah = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>
@@ -186,72 +218,80 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <div class="flex items-center justify-between mb-1">
-                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Kode Karyawan</label>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Kode Karyawan <span class="text-rose-500">*</span></label>
                             <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold px-1.5 py-0.5 bg-indigo-50 dark:bg-indigo-950/50 rounded-md">Otomatis</span>
                         </div>
-                        <input type="text" name="kode_karyawan" value="{{ $kodeOtomatis }}" required placeholder="KRY-001"
+                        <input type="text" name="kode_karyawan" x-model="formTambah.kode_karyawan" required placeholder="STF-001"
                                class="w-full px-3 py-2 rounded-xl bg-indigo-50/50 dark:bg-[#1C1E2A] border border-indigo-200 dark:border-indigo-900/50 text-indigo-900 dark:text-indigo-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kategori Karyawan</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kategori Karyawan <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="kategori_karyawan"
                             placeholder="-- Pilih Kategori --"
                             :opsi="$opsiKategoriKaryawan"
                             :wajib="true"
                             warnaFokus="indigo"
+                            modelBind="formTambah.kategori_karyawan"
                         />
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap</label>
-                        <input type="text" name="nama_karyawan" required placeholder="Nama Lengkap Pegawai"
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap <span class="text-rose-500">*</span></label>
+                        <input type="text" name="nama_karyawan" x-model="formTambah.nama_karyawan" required placeholder="Nama Lengkap Pegawai"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jabatan Sistem</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jabatan Sistem <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="id_jabatan"
                             placeholder="-- Pilih Jabatan --"
                             :opsi="$opsiJabatanKaryawan"
                             :wajib="true"
                             warnaFokus="indigo"
+                            modelBind="formTambah.id_jabatan"
                         />
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. KTP / Identitas</label>
-                        <input type="text" name="no_identitas" required placeholder="321606xxxxxx0001"
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. KTP / Identitas <span class="text-rose-500">*</span></label>
+                        <input type="text" name="no_identitas" x-model="formTambah.no_identitas" required placeholder="321606xxxxxx0001"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. HP / WhatsApp</label>
-                        <input type="text" name="no_hp" required placeholder="0812-xxxx-xxxx"
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. HP / WhatsApp <span class="text-rose-500">*</span></label>
+                        <input type="text" name="no_hp" x-model="formTambah.no_hp" required placeholder="0812-xxxx-xxxx"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Kepegawaian</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Kepegawaian <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="status_karyawan"
                             placeholder="-- Pilih Status --"
                             :opsi="$opsiStatusKaryawan"
                             :wajib="true"
                             warnaFokus="indigo"
+                            modelBind="formTambah.status_karyawan"
                         />
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Bergabung</label>
-                        <input type="date" name="tanggal_bergabung" required value="{{ date('Y-m-d') }}"
-                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Bergabung <span class="text-rose-500">*</span></label>
+                        <x-input-tanggal 
+                            nama="tanggal_bergabung" 
+                            modelBind="formTambah.tanggal_bergabung" 
+                            placeholder="Pilih Tanggal"
+                            :wajib="true"
+                            warnaFokus="indigo"
+                        />
                     </div>
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Alamat Domisili</label>
-                    <textarea name="alamat" rows="2" placeholder="Jl. Raya ..."
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Alamat Domisili <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
+                    <textarea name="alamat" x-model="formTambah.alamat" rows="2" placeholder="Jl. Raya ..."
                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"></textarea>
                 </div>
                 <div class="flex items-center justify-end gap-2 pt-2">
@@ -263,8 +303,8 @@
     </div>
 
     <!-- Modal Edit Karyawan -->
-    <div x-show="bukaModalEdit" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalEdit = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-xl">
+    <div x-show="bukaModalEdit" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="bukaModalEdit = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-visible shadow-xl my-8">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Edit Karyawan: <span class="font-mono text-indigo-600" x-text="editData.kode_karyawan"></span></h3>
                 <button @click="bukaModalEdit = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>
@@ -274,12 +314,12 @@
                 @method('PUT')
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap <span class="text-rose-500">*</span></label>
                         <input type="text" name="nama_karyawan" x-model="editData.nama_karyawan" required
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kategori Karyawan</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kategori Karyawan <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="kategori_karyawan"
                             placeholder="-- Pilih Kategori --"
@@ -292,7 +332,7 @@
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jabatan Sistem</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jabatan Sistem <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="id_jabatan"
                             placeholder="-- Pilih Jabatan --"
@@ -303,7 +343,7 @@
                         />
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Kepegawaian</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Kepegawaian <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="status_karyawan"
                             placeholder="-- Pilih Status --"
@@ -316,19 +356,19 @@
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. KTP / Identitas</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. KTP / Identitas <span class="text-rose-500">*</span></label>
                         <input type="text" name="no_identitas" x-model="editData.no_identitas" required
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. HP / WhatsApp</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. HP / WhatsApp <span class="text-rose-500">*</span></label>
                         <input type="text" name="no_hp" x-model="editData.no_hp" required
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
                     </div>
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Alamat Domisili</label>
-                    <textarea name="alamat" x-model="editData.alamat" rows="2" required
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Alamat Domisili <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
+                    <textarea name="alamat" x-model="editData.alamat" rows="2"
                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"></textarea>
                 </div>
                 <div class="flex items-center justify-end gap-2 pt-2">

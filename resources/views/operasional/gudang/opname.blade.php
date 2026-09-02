@@ -328,64 +328,28 @@
         </div>
     </div>
 
-    <!-- 5. MODAL FORM: TAMBAH CATATAN OPNAME -->
-    <div x-show="modalTambahTerbuka" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="modalTambahTerbuka = false"
-             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
-            
-            <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-teal-50 dark:bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center font-bold">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                    </div>
-                    <div>
-                        <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Catat Stock Opname Fisik Gudang</h2>
-                        <p class="text-[11px] text-slate-400">Pencatatan perbandingan stok sistem vs fisik riil semen zak.</p>
-                    </div>
-                </div>
-                <button @click="modalTambahTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+    <!-- Modal Tambah Catatan Opname -->
+    <div x-show="modalTambahTerbuka" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="modalTambahTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-visible shadow-xl my-8">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Catat Stock Opname Fisik Gudang</h3>
+                <button @click="modalTambahTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none">&times;</button>
             </div>
 
-            <form action="{{ route('operasional.gudang.opname.simpan') }}" method="POST" class="p-6 space-y-4 text-xs">
+            <form action="{{ route('operasional.gudang.opname.simpan') }}" method="POST" class="p-5 space-y-3.5 text-xs">
                 @csrf
-
-                <!-- Generator Nomor Opname -->
-                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837]">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <label class="text-xs font-bold text-slate-800 dark:text-slate-200">
-                                    Nomor Opname <span class="text-rose-500">*</span>
-                                </label>
-                                <span class="text-[10px] text-teal-600 dark:text-teal-400 font-semibold px-1.5 py-0.5 bg-teal-50 dark:bg-teal-950/50 rounded-md">Otomatis</span>
-                            </div>
-                            <div class="text-[10px] text-slate-400 font-mono mt-0.5" x-text="keteranganKodeOpn"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Nomor Opname <span class="text-rose-500">*</span></label>
+                            <span class="text-[10px] text-teal-600 dark:text-teal-400 font-semibold px-1.5 py-0.5 bg-teal-50 dark:bg-teal-950/50 rounded-md">Otomatis</span>
                         </div>
-                        
-                        <div class="flex items-center gap-1.5 shrink-0">
-                            <button type="button" @click="buatNomorOpname('gap')"
-                                    class="px-2.5 py-1 text-[11px] font-semibold text-teal-700 dark:text-teal-300 bg-teal-100 dark:bg-teal-900/30 hover:bg-teal-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                <span>Isi Nomor Kosong</span>
-                            </button>
-                            <button type="button" @click="buatNomorOpname('acak')"
-                                    class="px-2.5 py-1 text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                <span>Kode Acak Aman</span>
-                            </button>
-                        </div>
+                        <input type="text" name="nomor_opname" x-model="formTambah.nomor_opname" required placeholder="OPN-001"
+                               class="w-full px-3 py-2 rounded-xl bg-teal-50/50 dark:bg-[#1C1E2A] border border-teal-200 dark:border-teal-900/50 text-teal-900 dark:text-teal-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500/30">
                     </div>
 
-                    <input type="text" name="nomor_opname" x-model="formTambah.nomor_opname" required placeholder="Contoh: OPN-001 atau OPN-20260902-8K2"
-                           class="w-full px-3 py-2 text-xs font-mono font-bold rounded-xl bg-white dark:bg-[#14161F] border border-teal-200 dark:border-teal-900/50 text-teal-600 dark:text-teal-400 uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-teal-500/30">
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Fasilitas Gudang <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Fasilitas Gudang <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="kode_gudang"
                             placeholder="-- Pilih Gudang --"
@@ -395,112 +359,99 @@
                             modelBind="formTambah.kode_gudang"
                         />
                     </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Opname Fisik <span class="text-rose-500">*</span></label>
-                        <input type="date" name="tanggal_opname" x-model="formTambah.tanggal_opname" required
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Stok Tercatat di Sistem (Zak) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="stok_sistem" x-model.number="formTambah.stok_sistem" min="0" required
-                               class="w-full px-3 py-2 text-xs font-mono rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Stok Fisik Hasil Hitung (Zak) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="stok_fisik" x-model.number="formTambah.stok_fisik" min="0" required
-                               class="w-full px-3 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-teal-600 dark:text-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30">
-                    </div>
                 </div>
 
-                <div class="p-3 rounded-xl bg-slate-50 dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] flex items-center justify-between text-xs">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <span class="text-slate-500">Hasil Kalkulasi Selisih:</span>
-                        <div class="text-[11px] text-slate-400">(Stok Fisik - Stok Sistem)</div>
-                    </div>
-                    <div class="text-right">
-                        <span class="font-mono font-bold text-sm px-2.5 py-1 rounded-lg inline-block"
-                              :class="selisihHitungTambah > 0 ? 'bg-emerald-100 text-emerald-800' : (selisihHitungTambah < 0 ? 'bg-rose-100 text-rose-800' : 'bg-slate-200 text-slate-800')"
-                              x-text="(selisihHitungTambah > 0 ? '+' : '') + selisihHitungTambah + ' Zak'"></span>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Konfirmasi Opname <span class="text-rose-500">*</span></label>
-                        <x-dropdown-kustom 
-                            nama="status_konfirmasi"
-                            placeholder="-- Pilih Status --"
-                            :opsi="$opsiStatusOpname"
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Opname Fisik <span class="text-rose-500">*</span></label>
+                        <x-input-tanggal 
+                            nama="tanggal_opname" 
+                            modelBind="formTambah.tanggal_opname" 
+                            placeholder="Pilih Tanggal Opname"
                             :wajib="true"
                             warnaFokus="teal"
-                            modelBind="formTambah.status_konfirmasi"
                         />
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Petugas / Auditor Opname <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Petugas / Auditor Opname <span class="text-rose-500">*</span></label>
                         <input type="text" name="petugas_opname" x-model="formTambah.petugas_opname" required placeholder="Nama auditor / SPV Gudang"
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30">
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Stok Tercatat Sistem (Zak) <span class="text-rose-500">*</span></label>
+                        <input type="number" name="stok_sistem" x-model.number="formTambah.stok_sistem" min="0" required
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30 font-mono">
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Stok Fisik Hasil Hitung (Zak) <span class="text-rose-500">*</span></label>
+                        <input type="number" name="stok_fisik" x-model.number="formTambah.stok_fisik" min="0" required
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-teal-600 dark:text-teal-400 font-bold focus:outline-none focus:ring-2 focus:ring-teal-500/30 font-mono">
+                    </div>
+                </div>
+
+                <div class="p-3 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] flex items-center justify-between">
+                    <div>
+                        <span class="font-semibold text-slate-700 dark:text-slate-300">Hasil Kalkulasi Selisih:</span>
+                        <div class="text-[10px] text-slate-400">(Stok Fisik - Stok Sistem)</div>
+                    </div>
+                    <div>
+                        <span class="font-mono font-bold px-2.5 py-1 rounded-lg inline-block text-xs"
+                              :class="selisihHitungTambah > 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300' : (selisihHitungTambah < 0 ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/50 dark:text-rose-300' : 'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-300')"
+                              x-text="(selisihHitungTambah > 0 ? '+' : '') + selisihHitungTambah + ' Zak'"></span>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Catatan / Alasan Selisih Fisik</label>
-                    <textarea name="keterangan_selisih" x-model="formTambah.keterangan_selisih" rows="2" placeholder="Contoh: Ditemukan 20 zak semen robek/rusak saat bongkar muat..."
-                              class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30"></textarea>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Konfirmasi Opname <span class="text-rose-500">*</span></label>
+                    <x-dropdown-kustom 
+                        nama="status_konfirmasi"
+                        placeholder="-- Pilih Status --"
+                        :opsi="$opsiStatusOpname"
+                        :wajib="true"
+                        warnaFokus="teal"
+                        modelBind="formTambah.status_konfirmasi"
+                    />
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    <button type="button" @click="modalTambahTerbuka = false"
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="px-5 py-2 text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 active:scale-95 rounded-xl transition-all shadow-md shadow-teal-600/20">
-                        Simpan Catatan Opname
-                    </button>
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Catatan / Alasan Selisih Fisik <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
+                    <textarea name="keterangan_selisih" x-model="formTambah.keterangan_selisih" rows="2" placeholder="Contoh: Ditemukan 20 zak semen robek/rusak saat bongkar muat..."
+                              class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30"></textarea>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" @click="modalTambahTerbuka = false" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl transition-all shadow-sm">Simpan Catatan Opname</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- 6. MODAL FORM: EDIT CATATAN OPNAME -->
-    <div x-show="modalEditTerbuka" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="modalEditTerbuka = false"
-             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
-            
-            <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                    </div>
-                    <div>
-                        <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Ubah Data Stock Opname</h2>
-                        <p class="text-[11px] text-slate-400">No Opname: <span class="font-mono font-bold text-teal-600" x-text="formEdit.nomor_opname"></span></p>
-                    </div>
-                </div>
-                <button @click="modalEditTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+    <!-- Modal Edit Catatan Opname -->
+    <div x-show="modalEditTerbuka" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="modalEditTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-visible shadow-xl my-8">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Ubah Data Stock Opname: <span class="font-mono text-teal-600" x-text="formEdit.nomor_opname"></span></h3>
+                <button @click="modalEditTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none">&times;</button>
             </div>
 
-            <form :action="'{{ url('operasional/gudang/opname') }}/' + formEdit.id_opname" method="POST" class="p-6 space-y-4 text-xs">
+            <form :action="'{{ url('operasional/gudang/opname') }}/' + formEdit.id_opname" method="POST" class="p-5 space-y-3.5 text-xs">
                 @csrf
                 @method('PUT')
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Opname (Terkunci)</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Opname (Terkunci)</label>
                         <input type="text" :value="formEdit.nomor_opname" disabled
-                               class="w-full px-3 py-2 text-xs font-mono font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 cursor-not-allowed">
+                               class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 font-mono font-semibold cursor-not-allowed">
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Fasilitas Gudang <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Fasilitas Gudang <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="kode_gudang"
                             placeholder="-- Pilih Gudang --"
@@ -510,34 +461,43 @@
                             modelBind="formEdit.kode_gudang"
                         />
                     </div>
+                </div>
 
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Opname <span class="text-rose-500">*</span></label>
-                        <input type="date" name="tanggal_opname" x-model="formEdit.tanggal_opname" required
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Opname <span class="text-rose-500">*</span></label>
+                        <x-input-tanggal 
+                            nama="tanggal_opname" 
+                            modelBind="formEdit.tanggal_opname" 
+                            placeholder="Pilih Tanggal Opname"
+                            :wajib="true"
+                            warnaFokus="amber"
+                        />
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Petugas Opname <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Petugas Opname <span class="text-rose-500">*</span></label>
                         <input type="text" name="petugas_opname" x-model="formEdit.petugas_opname" required
-                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
+                </div>
 
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Stok Sistem (Zak) <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Stok Sistem (Zak) <span class="text-rose-500">*</span></label>
                         <input type="number" name="stok_sistem" x-model.number="formEdit.stok_sistem" min="0" required
-                               class="w-full px-3 py-2 text-xs font-mono rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30 font-mono">
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Stok Fisik Riil (Zak) <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Stok Fisik Riil (Zak) <span class="text-rose-500">*</span></label>
                         <input type="number" name="stok_fisik" x-model.number="formEdit.stok_fisik" min="0" required
-                               class="w-full px-3 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-amber-600 dark:text-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-amber-600 dark:text-amber-400 font-bold focus:outline-none focus:ring-2 focus:ring-amber-500/30 font-mono">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Konfirmasi SPV <span class="text-rose-500">*</span></label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Konfirmasi SPV <span class="text-rose-500">*</span></label>
                     <x-dropdown-kustom 
                         nama="status_konfirmasi"
                         placeholder="-- Pilih Status --"
@@ -549,20 +509,14 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Catatan / Alasan Selisih Fisik</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Catatan / Alasan Selisih Fisik <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
                     <textarea name="keterangan_selisih" x-model="formEdit.keterangan_selisih" rows="2"
-                              class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30"></textarea>
+                              class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30"></textarea>
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    <button type="button" @click="modalEditTerbuka = false"
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 active:scale-95 rounded-xl transition-all shadow-md shadow-amber-600/20">
-                        Simpan Perubahan
-                    </button>
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" @click="modalEditTerbuka = false" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl transition-all shadow-sm">Simpan Perubahan</button>
                 </div>
             </form>
         </div>

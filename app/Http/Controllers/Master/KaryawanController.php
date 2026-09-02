@@ -43,8 +43,15 @@ class KaryawanController extends Controller
         $totalGudang = Karyawan::where('kategori_karyawan', 'gudang')->count();
         $totalTeknisi = Karyawan::where('kategori_karyawan', 'teknisi')->count();
 
-        // Generator kode karyawan otomatis
-        $kodeOtomatis = GeneratorKodeOtomatis::buatKode('data_karyawan', 'kode_karyawan', 'KRY-', 3);
+        // Generator kode karyawan otomatis per masing-masing Jabatan (independen 3 huruf: KEU, SAR, SAP, DSP, PDR, GDG, MGR, OPS, PKN, DRV, ADM)
+        $kodePerJabatan = [];
+        foreach ($daftarJabatan as $j) {
+            $kodePerJabatan[$j->id_jabatan] = GeneratorKodeOtomatis::buatKodeJabatan($j->id_jabatan, null, 3);
+        }
+        $kodePerJabatan['driver'] = GeneratorKodeOtomatis::buatKodeJabatan(6, 'driver', 3);
+
+        $defaultJabatanId = $daftarJabatan->first()->id_jabatan ?? 2;
+        $kodeOtomatis = $kodePerJabatan[$defaultJabatanId] ?? 'KEU-001';
 
         return view('master.karyawan.index', compact(
             'daftarKaryawan',
@@ -56,7 +63,8 @@ class KaryawanController extends Controller
             'totalStaf',
             'totalGudang',
             'totalTeknisi',
-            'kodeOtomatis'
+            'kodeOtomatis',
+            'kodePerJabatan'
         ));
     }
 
@@ -65,10 +73,13 @@ class KaryawanController extends Controller
      */
     public function store(Request $request)
     {
+        $idJabatan = $request->input('id_jabatan');
+        $kategori = $request->input('kategori_karyawan');
+
         // Isi kode otomatis jika kosong
         if (!$request->filled('kode_karyawan')) {
             $request->merge([
-                'kode_karyawan' => GeneratorKodeOtomatis::buatKode('data_karyawan', 'kode_karyawan', 'KRY-', 3)
+                'kode_karyawan' => GeneratorKodeOtomatis::buatKodeJabatan($idJabatan, $kategori, 3)
             ]);
         }
 
