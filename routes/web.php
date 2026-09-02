@@ -51,14 +51,36 @@ Route::get('/dashboard', function () {
 // Modul Super Admin / Pengaturan Akun
 Route::prefix('superadmin')->name('superadmin.')->group(function () {
     Route::get('/kelola-akun', [KelolaAkunController::class, 'index'])->name('kelola_akun');
+    Route::post('/kelola-akun', [KelolaAkunController::class, 'store'])->name('kelola_akun.store');
+    Route::post('/kelola-akun/reset-password', [KelolaAkunController::class, 'resetPassword'])->name('kelola_akun.reset_password');
+    Route::post('/kelola-akun/toggle-status', [KelolaAkunController::class, 'toggleStatus'])->name('kelola_akun.toggle_status');
 });
 
 // Modul Master Data
 Route::prefix('master')->name('master.')->group(function () {
+    // Customer
     Route::get('/customer', [CustomerController::class, 'index'])->name('customer.index');
+    Route::post('/customer', [CustomerController::class, 'store'])->name('customer.store');
+    Route::put('/customer/{kode_customer}', [CustomerController::class, 'update'])->name('customer.update');
+    Route::delete('/customer/{kode_customer}', [CustomerController::class, 'destroy'])->name('customer.destroy');
+
+    // Barang / Semen
     Route::get('/barang', [BarangController::class, 'index'])->name('barang.index');
+    Route::post('/barang', [BarangController::class, 'store'])->name('barang.store');
+    Route::put('/barang/{kode_barang}', [BarangController::class, 'update'])->name('barang.update');
+    Route::delete('/barang/{kode_barang}', [BarangController::class, 'destroy'])->name('barang.destroy');
+
+    // Wilayah
     Route::get('/wilayah', [WilayahController::class, 'index'])->name('wilayah.index');
+    Route::post('/wilayah', [WilayahController::class, 'store'])->name('wilayah.store');
+    Route::put('/wilayah/{kode_wilayah}', [WilayahController::class, 'update'])->name('wilayah.update');
+    Route::delete('/wilayah/{kode_wilayah}', [WilayahController::class, 'destroy'])->name('wilayah.destroy');
+
+    // Karyawan
     Route::get('/karyawan', [KaryawanController::class, 'index'])->name('karyawan.index');
+    Route::post('/karyawan', [KaryawanController::class, 'store'])->name('karyawan.store');
+    Route::put('/karyawan/{kode_karyawan}', [KaryawanController::class, 'update'])->name('karyawan.update');
+    Route::delete('/karyawan/{kode_karyawan}', [KaryawanController::class, 'destroy'])->name('karyawan.destroy');
 });
 
 // Modul Keuangan (AR, AP, Akuntansi)
@@ -66,22 +88,33 @@ Route::prefix('keuangan')->name('keuangan.')->group(function () {
     // Account Receivable (Piutang)
     Route::prefix('ar')->name('ar.')->group(function () {
         Route::get('/faktur-penjualan', [FakturPenjualanController::class, 'index'])->name('faktur');
+        Route::post('/faktur-penjualan', [FakturPenjualanController::class, 'store'])->name('faktur.store');
         Route::get('/list-piutang', [PiutangController::class, 'index'])->name('piutang');
+        Route::post('/list-piutang/{id_piutang}/bayar', [PiutangController::class, 'bayar'])->name('piutang.bayar');
         Route::get('/deposit-customer', [DepositCustomerController::class, 'index'])->name('deposit');
+        Route::post('/deposit-customer/topup', [DepositCustomerController::class, 'topUp'])->name('deposit.topup');
     });
 
     // Account Payable (Hutang)
     Route::prefix('ap')->name('ap.')->group(function () {
         Route::get('/pembelian-so', [PembelianSOController::class, 'index'])->name('pembelian_so');
+        Route::post('/pembelian-so', [PembelianSOController::class, 'store'])->name('pembelian_so.store');
         Route::get('/pengeluaran-kas', [PengeluaranKasController::class, 'index'])->name('pengeluaran');
+        Route::post('/pengeluaran-kas', [PengeluaranKasController::class, 'store'])->name('pengeluaran.store');
         Route::get('/list-rilisan', [HutangSupplierController::class, 'index'])->name('rilisan');
+        Route::post('/list-rilisan', [HutangSupplierController::class, 'store'])->name('rilisan.store');
     });
 
     // Akuntansi & Buku Besar
     Route::prefix('akuntansi')->name('akuntansi.')->group(function () {
         Route::get('/kode-akun', [KodeAkunController::class, 'index'])->name('kode_akun');
+        Route::post('/kode-akun', [KodeAkunController::class, 'store'])->name('kode_akun.store');
+        Route::put('/kode-akun/{kode_akun}', [KodeAkunController::class, 'update'])->name('kode_akun.update');
+        Route::delete('/kode-akun/{kode_akun}', [KodeAkunController::class, 'destroy'])->name('kode_akun.destroy');
         Route::get('/jurnal-umum', [JurnalUmumController::class, 'index'])->name('jurnal');
+        Route::post('/jurnal-umum', [JurnalUmumController::class, 'store'])->name('jurnal.store');
         Route::get('/aset-perusahaan', [AsetPerusahaanController::class, 'index'])->name('aset');
+        Route::post('/aset-perusahaan', [AsetPerusahaanController::class, 'store'])->name('aset.store');
     });
 });
 

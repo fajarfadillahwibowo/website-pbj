@@ -4,11 +4,87 @@ namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Master\Wilayah;
 
 class WilayahController extends Controller
 {
-    public function index()
+    /**
+     * Tampilkan daftar master wilayah zonasi distribusi semen.
+     */
+    public function index(Request $request)
     {
-        return view('master.wilayah.index');
+        $kataKunci = $request->input('cari');
+
+        $query = Wilayah::withCount('daftarCustomer');
+
+        if ($kataKunci) {
+            $query->where(function ($q) use ($kataKunci) {
+                $q->where('nama_wilayah', 'like', "%{$kataKunci}%")
+                  ->orWhere('kode_wilayah', 'like', "%{$kataKunci}%");
+            });
+        }
+
+        $daftarWilayah = $query->orderBy('kode_wilayah', 'asc')->get();
+        $totalWilayah = Wilayah::count();
+
+        return view('master.wilayah.index', compact(
+            'daftarWilayah',
+            'kataKunci',
+            'totalWilayah'
+        ));
+    }
+
+    /**
+     * Simpan data wilayah zonasi baru.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'kode_wilayah' => 'required|string|max:30|unique:data_wilayah,kode_wilayah',
+            'nama_wilayah' => 'required|string|max:100',
+        ], [
+            'kode_wilayah.unique' => 'Kode wilayah sudah digunakan.',
+        ]);
+
+        Wilayah::create([
+            'kode_wilayah' => strtoupper($request->kode_wilayah),
+            'nama_wilayah' => $request->nama_wilayah,
+        ]);
+
+        return redirect()->route('master.wilayah.index')->with('sukses', "Wilayah '{$request->nama_wilayah}' berhasil ditambahkan.");
+    }
+
+    /**
+     * Perbarui data wilayah zonasi.
+     */
+    public function update(Request $request, $kode_wilayah)
+    {
+        $wilayah = Wilayah::findOrFail($kode_wilayah);
+
+        $request->validate([
+            'nama_wilayah' => 'required|string|max:100',
+        ]);
+
+        $wilayah->update([
+            'nama_wilayah' => $request->nama_wilayah,
+        ]);
+
+        return redirect()->route('master.wilayah.index')->with('sukses', "Wilayah '{$wilayah->nama_wilayah}' berhasil diperbarui.");
+    }
+
+    /**
+     * Hapus data wilayah jika belum ada customer terhubung.
+     */
+    public function destroy($kode_wilayah)
+    {
+        $wilayah = Wilayah::withCount('daftarCustomer')->findOrFail($kode_wilayah);
+
+        if ($wilayah->daftar_customer_count > 0) {
+            return redirect()->route('master.wilayah.index')->with('gagal', "Wilayah '{$wilayah->nama_wilayah}' tidak dapat dihapus karena memiliki {$wilayah->daftar_customer_count} data customer toko yang terhubung.");
+        }
+
+        $wilayah->delete();
+
+        return redirect()->route('master.wilayah.index')->with('sukses', "Wilayah '{$wilayah->nama_wilayah}' berhasil dihapus.");
     }
 }

@@ -3,7 +3,29 @@
 @section('judul', 'Master Data Karyawan & Seluruh Pegawai')
 
 @section('konten')
-<div class="space-y-5">
+<div class="space-y-5" x-data="{ bukaModalTambah: false, bukaModalEdit: false, editData: {} }">
+    <!-- Flash Notification -->
+    @if(session('sukses'))
+        <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                <span>{{ session('sukses') }}</span>
+            </div>
+            <button @click="$el.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700 text-sm font-bold">&times;</button>
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="p-4 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-800 dark:text-rose-300 text-xs">
+            <div class="font-semibold mb-1">Terjadi kesalahan validasi:</div>
+            <ul class="list-disc list-inside space-y-0.5">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <!-- Header Modul Master Karyawan -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
         <div>
@@ -12,7 +34,7 @@
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Database terpadu seluruh personil perusahaan: staf kantor keuangan/operasional, pengemudi armada (driver), staf gudang, teknisi, dan pimpinan.</p>
         </div>
         <div class="flex items-center gap-2">
-            <button class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm">
+            <button @click="bukaModalTambah = true" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm">
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                 Tambah Karyawan Baru
             </button>
@@ -67,7 +89,7 @@
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Nama Lengkap & Kontak</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Jabatan Peran</th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Kategori</th>
-                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">No. Identitas (KTP/SIM)</th>
+                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">No. Identitas (KTP)</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Alamat Domisili</th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Status</th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Aksi</th>
@@ -108,10 +130,16 @@
                                     {{ $karyawan->status_karyawan }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-center space-x-2">
-                                <button class="text-blue-600 dark:text-blue-400 hover:underline font-medium">Edit</button>
-                                <span class="text-slate-300 dark:text-slate-700">|</span>
-                                <button class="text-red-600 dark:text-red-400 hover:underline font-medium">Hapus</button>
+                            <td class="px-4 py-3 text-center">
+                                <div class="inline-flex items-center gap-2">
+                                    <button @click="editData = {{ json_encode($karyawan) }}; bukaModalEdit = true" type="button" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">Edit</button>
+                                    <span class="text-slate-300 dark:text-slate-700">|</span>
+                                    <form method="POST" action="{{ route('master.karyawan.destroy', $karyawan->kode_karyawan) }}" onsubmit="return confirm('Hapus karyawan {{ $karyawan->nama_karyawan }}?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 dark:text-red-400 hover:underline font-medium">Hapus</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -123,6 +151,159 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- Modal Tambah Karyawan -->
+    <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div @click.away="bukaModalTambah = false" class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-xl">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Tambah Data Karyawan Baru</h3>
+                <button @click="bukaModalTambah = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>
+            </div>
+            <form method="POST" action="{{ route('master.karyawan.store') }}" class="p-5 space-y-3.5 text-xs">
+                @csrf
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kode Karyawan</label>
+                        <input type="text" name="kode_karyawan" required placeholder="KRY-STF-011"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kategori Karyawan</label>
+                        <select name="kategori_karyawan" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                            <option value="staf">Staf Kantor</option>
+                            <option value="driver">Driver Supir</option>
+                            <option value="gudang">Staf Gudang</option>
+                            <option value="teknisi">Teknisi Bengkel</option>
+                            <option value="manajemen">Manajemen / Direksi</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap</label>
+                        <input type="text" name="nama_karyawan" required placeholder="Nama Lengkap Pegawai"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jabatan Sistem</label>
+                        <select name="id_jabatan" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                            @foreach($daftarJabatan ?? [] as $j)
+                                <option value="{{ $j->id_jabatan }}">{{ $j->nama_jabatan }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. KTP / Identitas</label>
+                        <input type="text" name="no_identitas" required placeholder="321606xxxxxx0001"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. HP / WhatsApp</label>
+                        <input type="text" name="no_hp" required placeholder="0812-xxxx-xxxx"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Kepegawaian</label>
+                        <select name="status_karyawan" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                            <option value="aktif">Aktif</option>
+                            <option value="kontrak">Kontrak</option>
+                            <option value="tetap">Tetap</option>
+                            <option value="non-aktif">Non-Aktif</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Mulai Kerja</label>
+                        <input type="date" name="tanggal_mulai_kerja" value="{{ date('Y-m-d') }}"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Alamat Domisili</label>
+                    <textarea name="alamat" rows="2" required placeholder="Jl. ..."
+                              class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"></textarea>
+                </div>
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button @click="bukaModalTambah = false" type="button" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm">Simpan Karyawan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Edit Karyawan -->
+    <div x-show="bukaModalEdit" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div @click.away="bukaModalEdit = false" class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-xl">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Edit Karyawan: <span class="font-mono text-indigo-600" x-text="editData.kode_karyawan"></span></h3>
+                <button @click="bukaModalEdit = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>
+            </div>
+            <form :action="'{{ url('master/karyawan') }}/' + editData.kode_karyawan" method="POST" class="p-5 space-y-3.5 text-xs">
+                @csrf
+                @method('PUT')
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap</label>
+                        <input type="text" name="nama_karyawan" x-model="editData.nama_karyawan" required
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kategori Karyawan</label>
+                        <select name="kategori_karyawan" x-model="editData.kategori_karyawan" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                            <option value="staf">Staf Kantor</option>
+                            <option value="driver">Driver Supir</option>
+                            <option value="gudang">Staf Gudang</option>
+                            <option value="teknisi">Teknisi Bengkel</option>
+                            <option value="manajemen">Manajemen / Direksi</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jabatan Sistem</label>
+                        <select name="id_jabatan" x-model="editData.id_jabatan" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                            @foreach($daftarJabatan ?? [] as $j)
+                                <option value="{{ $j->id_jabatan }}">{{ $j->nama_jabatan }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Kepegawaian</label>
+                        <select name="status_karyawan" x-model="editData.status_karyawan" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                            <option value="aktif">Aktif</option>
+                            <option value="kontrak">Kontrak</option>
+                            <option value="tetap">Tetap</option>
+                            <option value="non-aktif">Non-Aktif</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. KTP / Identitas</label>
+                        <input type="text" name="no_identitas" x-model="editData.no_identitas" required
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. HP / WhatsApp</label>
+                        <input type="text" name="no_hp" x-model="editData.no_hp" required
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Alamat Domisili</label>
+                    <textarea name="alamat" x-model="editData.alamat" rows="2" required
+                              class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"></textarea>
+                </div>
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button @click="bukaModalEdit = false" type="button" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm">Simpan Perubahan</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

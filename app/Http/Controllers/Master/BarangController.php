@@ -4,11 +4,110 @@ namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Master\Barang;
 
 class BarangController extends Controller
 {
-    public function index()
+    /**
+     * Tampilkan daftar master produk semen (Zak & Curah).
+     */
+    public function index(Request $request)
     {
-        return view('master.barang.index');
+        $kataKunci = $request->input('cari');
+        $filterJenis = $request->input('jenis');
+
+        $query = Barang::query();
+
+        if ($filterJenis) {
+            $query->where('jenis_barang', $filterJenis);
+        }
+
+        if ($kataKunci) {
+            $query->where(function ($q) use ($kataKunci) {
+                $q->where('nama_barang', 'like', "%{$kataKunci}%")
+                  ->orWhere('kode_barang', 'like', "%{$kataKunci}%");
+            });
+        }
+
+        $daftarBarang = $query->orderBy('kode_barang', 'asc')->get();
+
+        $totalBarang = Barang::count();
+        $totalZak = Barang::where('jenis_barang', 'Zak')->count();
+        $totalCurah = Barang::where('jenis_barang', 'Curah')->count();
+
+        return view('master.barang.index', compact(
+            'daftarBarang',
+            'kataKunci',
+            'filterJenis',
+            'totalBarang',
+            'totalZak',
+            'totalCurah'
+        ));
+    }
+
+    /**
+     * Simpan produk semen baru.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'kode_barang'        => 'required|string|max:30|unique:data_semen,kode_barang',
+            'nama_barang'        => 'required|string|max:150',
+            'jenis_barang'       => 'required|string|in:Zak,Curah',
+            'satuan_barang'      => 'required|string|max:20',
+            'harga_pokok'        => 'required|numeric|min:0',
+            'harga_jual_standar' => 'required|numeric|min:0',
+        ], [
+            'kode_barang.unique' => 'Kode produk semen sudah digunakan.',
+            'jenis_barang.in'    => 'Jenis barang harus Zak atau Curah.',
+        ]);
+
+        Barang::create([
+            'kode_barang'        => strtoupper($request->kode_barang),
+            'nama_barang'        => $request->nama_barang,
+            'jenis_barang'       => $request->jenis_barang,
+            'satuan_barang'      => $request->satuan_barang,
+            'harga_pokok'        => $request->harga_pokok,
+            'harga_jual_standar' => $request->harga_jual_standar,
+        ]);
+
+        return redirect()->route('master.barang.index')->with('sukses', "Produk '{$request->nama_barang}' berhasil ditambahkan.");
+    }
+
+    /**
+     * Perbarui data produk semen.
+     */
+    public function update(Request $request, $kode_barang)
+    {
+        $barang = Barang::findOrFail($kode_barang);
+
+        $request->validate([
+            'nama_barang'        => 'required|string|max:150',
+            'jenis_barang'       => 'required|string|in:Zak,Curah',
+            'satuan_barang'      => 'required|string|max:20',
+            'harga_pokok'        => 'required|numeric|min:0',
+            'harga_jual_standar' => 'required|numeric|min:0',
+        ]);
+
+        $barang->update([
+            'nama_barang'        => $request->nama_barang,
+            'jenis_barang'       => $request->jenis_barang,
+            'satuan_barang'      => $request->satuan_barang,
+            'harga_pokok'        => $request->harga_pokok,
+            'harga_jual_standar' => $request->harga_jual_standar,
+        ]);
+
+        return redirect()->route('master.barang.index')->with('sukses', "Produk '{$barang->nama_barang}' berhasil diperbarui.");
+    }
+
+    /**
+     * Hapus produk semen.
+     */
+    public function destroy($kode_barang)
+    {
+        $barang = Barang::findOrFail($kode_barang);
+        $barang->delete();
+
+        return redirect()->route('master.barang.index')->with('sukses', "Produk '{$barang->nama_barang}' berhasil dihapus.");
     }
 }
