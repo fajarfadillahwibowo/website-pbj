@@ -66,6 +66,11 @@ class DriverController extends Controller
      */
     public function simpan(Request $request)
     {
+        if (session('kode_jabatan') === 'SPV_OPERASIONAL') {
+            return redirect()->route('operasional.armada.driver')
+                ->with('error', 'Akses Ditolak! Role SPV Operasional hanya memiliki wewenang Lihat Saja (Read-Only) pada modul Driver.');
+        }
+
         $pesanKustom = [
             'kode_karyawan.required' => 'Kode karyawan wajib diisi.',
             'kode_karyawan.unique' => 'Kode karyawan sudah terdaftar dalam sistem.',
@@ -150,6 +155,11 @@ class DriverController extends Controller
      */
     public function perbarui(Request $request, $kode_karyawan)
     {
+        if (session('kode_jabatan') === 'SPV_OPERASIONAL') {
+            return redirect()->route('operasional.armada.driver')
+                ->with('error', 'Akses Ditolak! Role SPV Operasional hanya memiliki wewenang Lihat Saja (Read-Only) pada modul Driver.');
+        }
+
         $driver = Driver::where('kode_karyawan', $kode_karyawan)->firstOrFail();
 
         $pesanKustom = [
@@ -220,6 +230,11 @@ class DriverController extends Controller
      */
     public function hapus($kode_karyawan)
     {
+        if (session('kode_jabatan') === 'SPV_OPERASIONAL') {
+            return redirect()->route('operasional.armada.driver')
+                ->with('error', 'Akses Ditolak! Role SPV Operasional hanya memiliki wewenang Lihat Saja (Read-Only) pada modul Driver.');
+        }
+
         $driver = Driver::where('kode_karyawan', $kode_karyawan)->firstOrFail();
         $namaDriver = $driver->nama_karyawan;
 

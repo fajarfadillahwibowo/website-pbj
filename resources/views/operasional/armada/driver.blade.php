@@ -28,9 +28,16 @@
     <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#14161F] p-4 sm:p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
         <div>
             <div class="flex items-center gap-2 mb-1.5">
-                <span class="px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase rounded-md bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 font-mono">
-                    Dispatcher & Pengawas Driver
-                </span>
+                <template x-if="jabatanAktif === 'SPV_OPERASIONAL'">
+                    <span class="px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase rounded-md bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 font-mono">
+                        SPV Operasional (Read-Only)
+                    </span>
+                </template>
+                <template x-if="jabatanAktif !== 'SPV_OPERASIONAL'">
+                    <span class="px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase rounded-md bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 font-mono">
+                        Dispatcher & Pengawas Driver
+                    </span>
+                </template>
                 <span class="text-xs text-slate-400 font-mono">Modul Operasional</span>
             </div>
             <h1 class="text-xl font-bold text-slate-900 dark:text-slate-100">Data Karyawan (Driver)</h1>
@@ -40,15 +47,44 @@
         </div>
 
         <div class="flex items-center gap-2.5">
-            <button @click="bukaModalTambah()"
-                    class="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 rounded-xl transition-all shadow-md shadow-blue-600/20">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                </svg>
-                <span>Tambah Driver Baru</span>
-            </button>
+            <template x-if="jabatanAktif !== 'SPV_OPERASIONAL'">
+                <button @click="bukaModalTambah()"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 rounded-xl transition-all shadow-md shadow-blue-600/20">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    <span>Tambah Driver Baru</span>
+                </button>
+            </template>
+            <template x-if="jabatanAktif === 'SPV_OPERASIONAL'">
+                <span class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 shadow-xs">
+                    <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                    <span>Mode: Hanya Lihat (Read-Only)</span>
+                </span>
+            </template>
         </div>
     </div>
+
+    <!-- Banner Khusus SPV Operasional -->
+    <template x-if="jabatanAktif === 'SPV_OPERASIONAL'">
+        <div class="animasi-masuk p-4 rounded-2xl bg-amber-50/80 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs flex items-center justify-between shadow-xs">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
+                    <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <span class="font-bold">Hak Akses SPV Operasional (Hanya Driver):</span>
+                    <span class="text-amber-700 dark:text-amber-300 ml-1">Anda hanya memiliki hak pantau khusus untuk data karyawan <strong>Driver / Pengemudi</strong> armada. Hak tambah, ubah, dan hapus driver dibatasi untuk Dispatcher & Pengawas Driver, dan karyawan kategori non-driver tidak ditampilkan pada modul ini.</span>
+                </div>
+            </div>
+            <span class="px-2.5 py-1 text-[10px] font-mono font-bold uppercase rounded-lg bg-amber-200/70 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200 shrink-0 ml-3">Read-Only</span>
+        </div>
+    </template>
 
     <!-- 2. Flash Message / Notifikasi Sukses & Error -->
     @if(session('sukses'))
@@ -306,7 +342,7 @@
                             <!-- Tombol Aksi & Riwayat Diedit -->
                             <td class="px-4 py-3.5 text-center whitespace-nowrap">
                                 <div class="inline-flex items-center gap-1.5">
-                                    <!-- Detail -->
+                                    <!-- Detail (Bisa diakses semua peran termasuk SPV Operasional) -->
                                     <button @click="bukaModalDetail('{{ $driver->kode_karyawan }}')"
                                             class="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
                                             title="Lihat Detail Profil Driver">
@@ -316,23 +352,28 @@
                                         </svg>
                                     </button>
 
-                                    <!-- Edit -->
-                                    <button @click="bukaModalEdit('{{ $driver->kode_karyawan }}')"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
-                                            title="Ubah Data Driver">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </button>
+                                    <!-- Edit & Hapus (Disembunyikan untuk SPV Operasional) -->
+                                    <template x-if="jabatanAktif !== 'SPV_OPERASIONAL'">
+                                        <div class="inline-flex items-center gap-1.5">
+                                            <!-- Edit -->
+                                            <button @click="bukaModalEdit('{{ $driver->kode_karyawan }}')"
+                                                    class="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
+                                                    title="Ubah Data Driver">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                            </button>
 
-                                    <!-- Hapus -->
-                                    <button @click="bukaModalHapus('{{ $driver->kode_karyawan }}', '{{ addslashes($driver->nama_karyawan) }}')"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
-                                            title="Hapus Data Driver">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
+                                            <!-- Hapus -->
+                                            <button @click="bukaModalHapus('{{ $driver->kode_karyawan }}', '{{ addslashes($driver->nama_karyawan) }}')"
+                                                    class="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
+                                                    title="Hapus Data Driver">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </template>
                                 </div>
 
                                 <!-- Riwayat Terakhir Diedit Real-Time -->
@@ -751,6 +792,10 @@
             },
 
             bukaModalTambah() {
+                if (this.jabatanAktif === 'SPV_OPERASIONAL') {
+                    alert('Akses Ditolak: SPV Operasional hanya memiliki hak akses Lihat Saja (Read-Only).');
+                    return;
+                }
                 this.pratinjauFotoUrl = null;
                 this.formTambah.nama_karyawan = '';
                 this.formTambah.no_ktp = '';
@@ -794,6 +839,10 @@
             },
 
             async bukaModalEdit(kode) {
+                if (this.jabatanAktif === 'SPV_OPERASIONAL') {
+                    alert('Akses Ditolak: SPV Operasional hanya memiliki hak akses Lihat Saja (Read-Only).');
+                    return;
+                }
                 try {
                     const response = await fetch(`{{ url('operasional/armada/driver') }}/${kode}`);
                     const hasil = await response.json();
@@ -820,6 +869,10 @@
             },
 
             bukaModalHapus(kode, nama) {
+                if (this.jabatanAktif === 'SPV_OPERASIONAL') {
+                    alert('Akses Ditolak: SPV Operasional hanya memiliki hak akses Lihat Saja (Read-Only).');
+                    return;
+                }
                 this.hapusData.kode = kode;
                 this.hapusData.nama = nama;
                 this.modalHapusTerbuka = true;
