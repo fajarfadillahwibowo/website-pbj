@@ -24,18 +24,19 @@ Seluruh fondasi inti telah disiapkan dan diverifikasi dengan kode status **`200 
 
 ---
 
-## 👨‍💻 3. Checklist Tugas Rinci DEVELOPER 1
+## 👨‍💻 3. Checklist Tugas Rinci DEVELOPER 1 (Status: ✅ 100% Selesai & Terverifikasi)
 
-**Tanggung Jawab:** Menyelesaikan logika CRUD, modal form input, perhitungan saldo/finansial, dan validasi data untuk modul Core & Keuangan.
+**Tanggung Jawab:** Menyelesaikan logika CRUD, modal form input, perhitungan saldo/finansial, validasi data, dan standarisasi UI dropdown untuk modul Core & Keuangan.
 
 ### 3.1. Modul Super Admin (Kelola Akun Staf)
 - **File Controller:** [KelolaAkunController.php](file:///c:/laragon/www/laravel1/app/Http/Controllers/Autentikasi/KelolaAkunController.php)
 - **File View:** [superadmin/kelola_akun.blade.php](file:///c:/laragon/www/laravel1/resources/views/superadmin/kelola_akun.blade.php)
 - **Model Terkait:** `Pengguna.php`, `Jabatan.php`, `SuperAccount.php`
 - **Target Pengerjaan:**
-  - [ ] Tambah akun baru ke tabel `account` terhubung ke `data_karyawan` dan `jabatan`.
-  - [ ] Fitur Reset Password akun menjadi `password123` (bcrypt).
-  - [ ] Toggle status akun (`1: Aktif` / `0: Nonaktif`).
+  - [x] Tambah akun baru ke tabel `account` terhubung ke `data_karyawan` dan `jabatan`.
+  - [x] Fitur Reset Password akun menjadi `password123` (bcrypt).
+  - [x] Toggle status akun (`1: Aktif` / `0: Nonaktif`).
+  - [x] Integrasi dropdown kustom pemilihan karyawan & peran RBAC.
 
 ### 3.2. Modul Master Data Sentral
 - **File Controller:** [CustomerController.php](file:///c:/laragon/www/laravel1/app/Http/Controllers/Master/CustomerController.php), [BarangController.php](file:///c:/laragon/www/laravel1/app/Http/Controllers/Master/BarangController.php), [WilayahController.php](file:///c:/laragon/www/laravel1/app/Http/Controllers/Master/WilayahController.php), [KaryawanController.php](file:///c:/laragon/www/laravel1/app/Http/Controllers/Master/KaryawanController.php)
@@ -45,10 +46,10 @@ Seluruh fondasi inti telah disiapkan dan diverifikasi dengan kode status **`200 
   - [master/wilayah/index.blade.php](file:///c:/laragon/www/laravel1/resources/views/master/wilayah/index.blade.php) (Tabel `wilayah`)
   - [master/karyawan/index.blade.php](file:///c:/laragon/www/laravel1/resources/views/master/karyawan/index.blade.php) (Tabel `data_karyawan`)
 - **Target Pengerjaan:**
-  - [ ] CRUD Customer: Input nama toko, pemilik, no telp, limit piutang, dan plafon kredit.
-  - [ ] CRUD Produk Semen: Input nama merek, tipe zak/curah, harga beli pabrik, dan harga jual default.
-  - [ ] CRUD Wilayah & Zonasi Distribusi.
-  - [ ] CRUD Karyawan (Staf kantor, teknisi, supir, pengawas).
+  - [x] CRUD Customer: Input nama toko, pemilik, no telp, limit piutang, plafon kredit, dan filter wilayah kustom.
+  - [x] CRUD Produk Semen: Input nama merek, tipe zak/curah, harga beli pabrik, harga jual default, dan filter jenis kustom.
+  - [x] CRUD Wilayah & Zonasi Distribusi (penghitung mitra toko dan proteksi hapus berelasi).
+  - [x] CRUD Karyawan (Staf kantor, teknisi, supir, pengawas) dengan tab kategori dan modal dropdown kustom.
 
 ### 3.3. Modul Account Receivable (AR & Penjualan)
 - **File Controller:** [FakturPenjualanController.php](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/AR/FakturPenjualanController.php), [PiutangController.php](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/AR/PiutangController.php), [DepositCustomerController.php](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/AR/DepositCustomerController.php)
@@ -57,9 +58,10 @@ Seluruh fondasi inti telah disiapkan dan diverifikasi dengan kode status **`200 
   - [keuangan/ar/list_piutang.blade.php](file:///c:/laragon/www/laravel1/resources/views/keuangan/ar/list_piutang.blade.php) (Tabel `piutang`)
   - [keuangan/ar/deposit_customer.blade.php](file:///c:/laragon/www/laravel1/resources/views/keuangan/ar/deposit_customer.blade.php) (Tabel `deposit_customer`)
 - **Target Pengerjaan:**
-  - [ ] Input Faktur Penjualan Baru dengan opsi metode: `Tunai`, `Kredit (Piutang)`, atau `Potong Deposit`.
-  - [ ] List Piutang & Form Pelunasan / Cicilan Pembayaran Piutang Toko.
-  - [ ] Top Up Saldo Deposit Customer & Mutasi Saldo.
+  - [x] Input Faktur Penjualan Baru dengan opsi metode: `Tunai`, `Kredit (Piutang)`, atau `Potong Deposit` beserta validasi limit & auto-posting piutang.
+  - [x] List Piutang & Form Pelunasan / Cicilan Pembayaran Piutang Toko sinkron saldo & faktur.
+  - [x] Top Up Saldo Deposit Customer & Mutasi Saldo otomatis.
+  - [x] Filter status & dropdown kustom interaktif pada seluruh tabel dan modal AR.
 
 ### 3.4. Modul Account Payable (AP & Pengeluaran Kas)
 - **File Controller:** [PembelianSOController.php](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/AP/PembelianSOController.php), [PengeluaranKasController.php](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/AP/PengeluaranKasController.php), [HutangSupplierController.php](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/AP/HutangSupplierController.php)
@@ -68,9 +70,10 @@ Seluruh fondasi inti telah disiapkan dan diverifikasi dengan kode status **`200 
   - [keuangan/ap/pengeluaran_kas.blade.php](file:///c:/laragon/www/laravel1/resources/views/keuangan/ap/pengeluaran_kas.blade.php)
   - [keuangan/ap/list_rilisan.blade.php](file:///c:/laragon/www/laravel1/resources/views/keuangan/ap/list_rilisan.blade.php)
 - **Target Pengerjaan:**
-  - [ ] Pencatatan Pembelian SO ke Pabrik Semen (PT Semen Indonesia / Distributor).
-  - [ ] Input Pengeluaran Kas Operasional (BBM armada, tol, operasional kantor).
-  - [ ] Pencatatan Rilisan Kas Bon / Uang Jalan Supir.
+  - [x] Pencatatan Pembelian SO ke Pabrik Semen (alokasi customer dan gudang plant).
+  - [x] Input Pengeluaran Kas Operasional (BBM armada, tol, operasional kantor) terhubung akun beban COA dan rekening bank.
+  - [x] Pencatatan Rilisan Kas Bon / Uang Jalan Supir terhubung akun 1107.
+  - [x] Filter kategori & dropdown kustom interaktif pada seluruh tabel dan modal AP.
 
 ### 3.5. Modul Akuntansi & Laporan Eksekutif
 - **File Controller:** [KodeAkunController.php](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/Akuntansi/KodeAkunController.php), [JurnalUmumController.php](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/Akuntansi/JurnalUmumController.php), [AsetPerusahaanController.php](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/Akuntansi/AsetPerusahaanController.php), [LaporanEksekutifController.php](file:///c:/laragon/www/laravel1/app/Http/Controllers/Laporan/LaporanEksekutifController.php)
@@ -78,11 +81,14 @@ Seluruh fondasi inti telah disiapkan dan diverifikasi dengan kode status **`200 
   - [keuangan/akuntansi/kode_akun.blade.php](file:///c:/laragon/www/laravel1/resources/views/keuangan/akuntansi/kode_akun.blade.php) (Tabel `kode_akun`)
   - [keuangan/akuntansi/jurnal_umum.blade.php](file:///c:/laragon/www/laravel1/resources/views/keuangan/akuntansi/jurnal_umum.blade.php) (Tabel `jurnal_umum` & `detail_jurnal`)
   - [keuangan/akuntansi/aset_perusahaan.blade.php](file:///c:/laragon/www/laravel1/resources/views/keuangan/akuntansi/aset_perusahaan.blade.php) (Tabel `aset_perusahaan`)
-  - [laporan/neraca.blade.php](file:///c:/laragon/www/laravel1/resources/views/laporan/neraca.blade.php) & [laporan/laba_rugi.blade.php](file:///c:/laragon/www/laravel1/resources/views/laporan/laba_rugi.blade.php)
+  - [laporan/neraca.blade.php](file:///c:/laragon/www/laravel1/resources/views/laporan/neraca.blade.php), [laporan/laba_rugi.blade.php](file:///c:/laragon/www/laravel1/resources/views/laporan/laba_rugi.blade.php), & [laporan/arus_kas.blade.php](file:///c:/laragon/www/laravel1/resources/views/laporan/arus_kas.blade.php)
 - **Target Pengerjaan:**
-  - [ ] CRUD Bagan Akun Standar (COA) dengan saldo normal Debet/Kredit.
-  - [ ] Pencatatan Jurnal Umum Double-Entry otomatis dari transaksi dan manual adjustment.
-  - [ ] Ringkasan Neraca & Perhitungan Laba Rugi periode berjalan (Ekspor PDF/Cetak).
+  - [x] CRUD Bagan Akun Standar (COA) dengan saldo normal Debet/Kredit dan filter tipe akun.
+  - [x] Pencatatan Jurnal Umum Double-Entry otomatis dari transaksi dan entri manual dengan verifikasi balance debit/kredit.
+  - [x] Inventarisasi Aset Tetap Perusahaan (armada truk, gudang, dll) dengan kalkulasi perolehan.
+  - [x] Ringkasan Neraca Keuangan real-time (Aktiva = Kewajiban + Modal).
+  - [x] Perhitungan Laba Rugi Komprehensif (Pendapatan - HPP - Beban Operasional).
+  - [x] Laporan Arus Kas (Metode Langsung Aktivitas Operasional).
 
 ---
 
