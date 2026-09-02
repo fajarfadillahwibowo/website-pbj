@@ -2,9 +2,11 @@
 
 ## 📌 Status Terkini
 - **Branch Aktif:** `web-dev1`
-- **Fokus Eksekusi:** Integrasi Arsitektur Relasi 1:N Customer (Entitas Pemilik & Finansial) ke Data Toko Bangunan / Proyek Cabang, Modul Master Toko Bangunan & Proyek (`/master/toko-bangunan`), Modal Kinerja 360 Derajat, Dropdown Kustom `<x-dropdown-kustom>`, Input Tanggal Kustom `<x-input-tanggal>`, Standarisasi Wajib `*` & Opsional, serta Form Faktur Penjualan (AR).
+- **Fokus Eksekusi:** Integrasi Arsitektur Relasi 1:N Customer (Entitas Pemilik & Finansial) ke Data Toko Bangunan / Proyek Cabang, Modul Master Toko Bangunan & Proyek (`/master/toko-bangunan`), Modul Monitoring List SO (`/keuangan/ap/list-so`), Matriks Hak Akses & Read-Only Guard, Modal Kinerja 360 Derajat, Dropdown Kustom `<x-dropdown-kustom>`, Input Tanggal Kustom `<x-input-tanggal>`, Standarisasi Wajib `*` & Opsional, serta Form Faktur Penjualan (AR).
 - **Status Master Customer & Toko Bangunan:** ✅ **100% SELESAI, TERHUBUNG, & TERVERIFIKASI**.
-- **Status Developer 1 & Operasional:** ✅ **100% SELESAI & TERVERIFIKASI (HTTP 200 OK pada 24 rute modul view)**.
+- **Status Developer 1 & Operasional:** ✅ **100% SELESAI & TERVERIFIKASI (HTTP 200 OK pada 25 rute modul view, termasuk menu baru List SO)**.
+- **Status Modul Baru List SO (`/keuangan/ap/list-so`):** ✅ **100% SELESAI & TERVERIFIKASI** (Monitoring real-time kuota kuantitas zak semen per nomor SO/LO pabrik SIG vs realisasi pengambilan).
+- **Status Matriks Hak Akses & Read-Only:** ✅ **100% SELESAI & TERUJI** (Mode Read-Only dengan penanda status 'Lihat' di sidebar dan badge 'Mode Lihat Saja' pada form transaksi di luar wewenang modifikasi peran).
 - **Status Komponen Input Tanggal Kustom (`<x-input-tanggal>`):** ✅ **100% SELESAI & TERPASANG DI SELURUH FORM** (Desain 100% identik dengan `<x-dropdown-kustom>`: background `#F4F6F9`/`#1C1E2A`, border slate, font medium text-xs, ikon SVG kalender kustom, date picker trigger overlay, dan two-way binding Alpine.js).
 - **Status Standarisasi Penanda Wajib & Opsional:** ✅ **100% SELESAI DI SELURUH VIEW FORM** (Setiap input wajib ditandai bintang merah `<span class="text-rose-500">*</span>` dan input opsional ditandai abu-abu `<span class="text-slate-400 font-normal text-[10px]">(Opsional)</span>`).
 - **Status Bebas Pembatasan Modal (`overflow-visible`):** ✅ **100% SELESAI DI SELURUH MODAL** (Dropdown dan kalender mengambang bebas di luar batas canvas modal).
@@ -53,7 +55,7 @@
 
 ---
 
-## 🌐 Status Server & Endpoint (24 Rute 100% OK)
-- **Laravel Artisan Dev Server:** `http://127.0.0.1:8000` (24/24 Routes HTTP 200 OK)
+## 🌐 Status Server & Endpoint (25 Rute 100% OK)
+- **Laravel Artisan Dev Server:** `http://127.0.0.1:8000` (25/25 Routes HTTP 200 OK)
 - **Laragon MySQL:** `127.0.0.1:3306` (200 OK)
 - **Laragon Apache:** `http://localhost/laravel1/public` (200 OK)

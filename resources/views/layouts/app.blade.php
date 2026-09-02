@@ -44,7 +44,7 @@
             'akun_coa', 'akun_jurnal', 'akun_aset', 'jenis_aset', 'laporan_neraca', 'laporan_laba_rugi'
           ],
           STAFF_AR: [
-            'dashboard', 'master_customer',
+            'dashboard', 'master_customer', 'master_barang',
             'ar_faktur', 'ar_piutang', 'ar_deposit'
           ],
           STAFF_AP: [
@@ -71,6 +71,21 @@
           if (!this.kunciRbac) return true;
           const hak = this.matriksAkses[this.jabatanAktif] || [];
           return hak.includes(kodeModul);
+        },
+
+        apakahReadOnly(kodeModul) {
+          if (!this.kunciRbac) return false;
+          if (this.jabatanAktif === 'SUPER_ADMIN' || this.jabatanAktif === 'SPV_KEUANGAN') return false;
+          if (this.jabatanAktif === 'SPV_OPERASIONAL' && kodeModul === 'armada_driver') return true;
+          if (this.jabatanAktif === 'STAFF_AR') {
+            const hakTulis = ['dashboard', 'master_customer', 'master_barang', 'ar_faktur', 'ar_piutang', 'ar_deposit'];
+            return !hakTulis.includes(kodeModul);
+          }
+          if (this.jabatanAktif === 'STAFF_AP') {
+            const hakTulis = ['dashboard', 'ap_pembelian', 'list_so', 'gudang_stok', 'ap_pengeluaran', 'ap_rilisan'];
+            return !hakTulis.includes(kodeModul);
+          }
+          return false;
         }
       }"
       x-init="
