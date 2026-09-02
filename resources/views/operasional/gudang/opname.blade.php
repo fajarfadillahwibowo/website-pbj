@@ -5,8 +5,24 @@
 @section('konten')
 <div x-data="kelolaStockOpname()" x-init="initOpname()" class="space-y-6">
 
+    @php
+        $opsiStatusOpname = [
+            ['nilai' => 'dikonfirmasi_spv', 'label' => 'Dikonfirmasi SPV (Langsung Sinkron)'],
+            ['nilai' => 'draft', 'label' => 'Draft (Simpan Sementara)'],
+        ];
+        $opsiStatusFilterOpname = array_merge([
+            ['nilai' => 'semua', 'label' => 'Semua Status Konfirmasi']
+        ], $opsiStatusOpname);
+
+        $opsiGudang = ($daftarGudang ?? collect())->map(fn($g) => [
+            'nilai' => $g->kode_gudang,
+            'label' => $g->nama_gudang . ' (' . $g->kode_gudang . ')',
+            'sub'   => 'Stok: ' . number_format($g->stok_tersedia, 0, ',', '.') . ' Zak'
+        ])->toArray();
+    @endphp
+
     <!-- 1. Header Banner Modul -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#14161F] p-4 sm:p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
+    <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#14161F] p-4 sm:p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
         <div>
             <div class="flex items-center gap-2 mb-1.5">
                 <span class="px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase rounded-md bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-500/20 font-mono">
@@ -77,7 +93,7 @@
     @endif
 
     <!-- 3. 4 Kartu KPI Ringkasan Opname Fisik -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <div class="wadah-bertingkat grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <!-- Total Opname -->
         <div class="bg-white dark:bg-[#14161F] p-4 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm flex items-center gap-3.5">
             <div class="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
@@ -134,7 +150,7 @@
     </div>
 
     <!-- 4. Tabel Data Stok Opname & Filter -->
-    <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         
         <!-- Filter Bar -->
         <div class="p-4 sm:px-5 sm:py-4 border-b border-[#E2E8F0] dark:border-[#252837] flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -148,13 +164,17 @@
                     </svg>
                 </div>
 
-                <!-- Filter Status -->
-                <select name="status" onchange="this.form.submit()"
-                        class="px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30">
-                    <option value="semua" {{ ($statusFilter ?? 'semua') === 'semua' ? 'selected' : '' }}>Semua Status Konfirmasi</option>
-                    <option value="dikonfirmasi_spv" {{ ($statusFilter ?? '') === 'dikonfirmasi_spv' ? 'selected' : '' }}>Dikonfirmasi SPV</option>
-                    <option value="draft" {{ ($statusFilter ?? '') === 'draft' ? 'selected' : '' }}>Draft / Belum Konfirmasi</option>
-                </select>
+                <!-- Filter Status Dropdown Kustom -->
+                <div class="w-full sm:w-60">
+                    <x-dropdown-kustom 
+                        nama="status"
+                        placeholder="-- Status Konfirmasi --"
+                        :opsi="$opsiStatusFilterOpname"
+                        :nilaiAwal="$statusFilter ?? 'semua'"
+                        :submitOnChange="true"
+                        warnaFokus="teal"
+                    />
+                </div>
 
                 <button type="submit" class="px-3.5 py-2 text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition-colors">
                     Cari
@@ -308,13 +328,11 @@
         </div>
     </div>
 
-    <!-- ========================================================================= -->
     <!-- 5. MODAL FORM: TAMBAH CATATAN OPNAME -->
-    <!-- ========================================================================= -->
     <div x-show="modalTambahTerbuka" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
         <div @click.away="modalTambahTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
+             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
             
             <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <div class="flex items-center gap-2.5">
@@ -331,16 +349,19 @@
                 </button>
             </div>
 
-            <form action="{{ route('operasional.gudang.opname.simpan') }}" method="POST" class="p-6 space-y-4">
+            <form action="{{ route('operasional.gudang.opname.simpan') }}" method="POST" class="p-6 space-y-4 text-xs">
                 @csrf
 
                 <!-- Generator Nomor Opname -->
                 <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837]">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                         <div>
-                            <label class="text-xs font-bold text-slate-800 dark:text-slate-200">
-                                Nomor Opname <span class="text-rose-500">*</span>
-                            </label>
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                                    Nomor Opname <span class="text-rose-500">*</span>
+                                </label>
+                                <span class="text-[10px] text-teal-600 dark:text-teal-400 font-semibold px-1.5 py-0.5 bg-teal-50 dark:bg-teal-950/50 rounded-md">Otomatis</span>
+                            </div>
                             <div class="text-[10px] text-slate-400 font-mono mt-0.5" x-text="keteranganKodeOpn"></div>
                         </div>
                         
@@ -348,58 +369,52 @@
                             <button type="button" @click="buatNomorOpname('gap')"
                                     class="px-2.5 py-1 text-[11px] font-semibold text-teal-700 dark:text-teal-300 bg-teal-100 dark:bg-teal-900/30 hover:bg-teal-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs">
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                <span>Daur Ulang (OPN-001)</span>
+                                <span>Isi Nomor Kosong</span>
                             </button>
                             <button type="button" @click="buatNomorOpname('acak')"
                                     class="px-2.5 py-1 text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                <span>Format Tanggal</span>
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                <span>Kode Acak Aman</span>
                             </button>
                         </div>
                     </div>
 
                     <input type="text" name="nomor_opname" x-model="formTambah.nomor_opname" required placeholder="Contoh: OPN-001 atau OPN-20260902-8K2"
-                           class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-teal-600 dark:text-teal-400 uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-teal-500/30">
+                           class="w-full px-3 py-2 text-xs font-mono font-bold rounded-xl bg-white dark:bg-[#14161F] border border-teal-200 dark:border-teal-900/50 text-teal-600 dark:text-teal-400 uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-teal-500/30">
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <!-- Fasilitas Gudang -->
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Fasilitas Gudang <span class="text-rose-500">*</span></label>
-                        <select name="kode_gudang" x-model="formTambah.kode_gudang" @change="ubahGudangPilihan($event.target.value)" required
-                                class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30">
-                            <option value="">-- Pilih Gudang --</option>
-                            @foreach($daftarGudang as $g)
-                                <option value="{{ $g->kode_gudang }}" data-stok="{{ $g->stok_tersedia }}">
-                                    {{ $g->nama_gudang }} ({{ $g->kode_gudang }}) - Stok: {{ number_format($g->stok_tersedia, 0, ',', '.') }} Zak
-                                </option>
-                            @endforeach
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="kode_gudang"
+                            placeholder="-- Pilih Gudang --"
+                            :opsi="$opsiGudang"
+                            :wajib="true"
+                            warnaFokus="teal"
+                            modelBind="formTambah.kode_gudang"
+                        />
                     </div>
 
-                    <!-- Tanggal Opname -->
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Opname Fisik <span class="text-rose-500">*</span></label>
                         <input type="date" name="tanggal_opname" x-model="formTambah.tanggal_opname" required
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30">
+                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30">
                     </div>
 
-                    <!-- Stok Sistem -->
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Stok Tercatat di Sistem (Zak) <span class="text-rose-500">*</span></label>
                         <input type="number" name="stok_sistem" x-model.number="formTambah.stok_sistem" min="0" required
-                               class="w-full px-3.5 py-2 text-xs font-mono rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30">
+                               class="w-full px-3 py-2 text-xs font-mono rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30">
                     </div>
 
-                    <!-- Stok Fisik Riil -->
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Stok Fisik Hasil Hitung (Zak) <span class="text-rose-500">*</span></label>
                         <input type="number" name="stok_fisik" x-model.number="formTambah.stok_fisik" min="0" required
-                               class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-teal-600 dark:text-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30">
+                               class="w-full px-3 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-teal-600 dark:text-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30">
                     </div>
                 </div>
 
-                <!-- Live Perhitungan Selisih -->
                 <div class="p-3 rounded-xl bg-slate-50 dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] flex items-center justify-between text-xs">
                     <div>
                         <span class="text-slate-500">Hasil Kalkulasi Selisih:</span>
@@ -413,32 +428,32 @@
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <!-- Status Konfirmasi -->
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Konfirmasi Opname <span class="text-rose-500">*</span></label>
-                        <select name="status_konfirmasi" x-model="formTambah.status_konfirmasi" required
-                                class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30">
-                            <option value="dikonfirmasi_spv">Dikonfirmasi SPV (Langsung Sinkron Stok)</option>
-                            <option value="draft">Draft (Simpan Sementara)</option>
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="status_konfirmasi"
+                            placeholder="-- Pilih Status --"
+                            :opsi="$opsiStatusOpname"
+                            :wajib="true"
+                            warnaFokus="teal"
+                            modelBind="formTambah.status_konfirmasi"
+                        />
                     </div>
 
-                    <!-- Petugas Opname -->
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Petugas / Auditor Opname <span class="text-rose-500">*</span></label>
                         <input type="text" name="petugas_opname" x-model="formTambah.petugas_opname" required placeholder="Nama auditor / SPV Gudang"
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30">
+                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30">
                     </div>
                 </div>
 
-                <!-- Keterangan Selisih -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Catatan / Alasan Selisih Fisik</label>
                     <textarea name="keterangan_selisih" x-model="formTambah.keterangan_selisih" rows="2" placeholder="Contoh: Ditemukan 20 zak semen robek/rusak saat bongkar muat..."
-                              class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30"></textarea>
+                              class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30"></textarea>
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E2E8F0] dark:border-[#252837]">
+                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E2E8F0] dark:border-[#252837]">
                     <button type="button" @click="modalTambahTerbuka = false"
                             class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-colors">
                         Batal
@@ -452,13 +467,11 @@
         </div>
     </div>
 
-    <!-- ========================================================================= -->
     <!-- 6. MODAL FORM: EDIT CATATAN OPNAME -->
-    <!-- ========================================================================= -->
     <div x-show="modalEditTerbuka" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
         <div @click.away="modalEditTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
+             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
             
             <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <div class="flex items-center gap-2.5">
@@ -475,7 +488,7 @@
                 </button>
             </div>
 
-            <form :action="'{{ url('operasional/gudang/opname') }}/' + formEdit.id_opname" method="POST" class="p-6 space-y-4">
+            <form :action="'{{ url('operasional/gudang/opname') }}/' + formEdit.id_opname" method="POST" class="p-6 space-y-4 text-xs">
                 @csrf
                 @method('PUT')
 
@@ -483,62 +496,65 @@
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Opname (Terkunci)</label>
                         <input type="text" :value="formEdit.nomor_opname" disabled
-                               class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 cursor-not-allowed">
+                               class="w-full px-3 py-2 text-xs font-mono font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 cursor-not-allowed">
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Fasilitas Gudang <span class="text-rose-500">*</span></label>
-                        <select name="kode_gudang" x-model="formEdit.kode_gudang" required
-                                class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                            @foreach($daftarGudang as $g)
-                                <option value="{{ $g->kode_gudang }}">
-                                    {{ $g->nama_gudang }} ({{ $g->kode_gudang }})
-                                </option>
-                            @endforeach
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="kode_gudang"
+                            placeholder="-- Pilih Gudang --"
+                            :opsi="$opsiGudang"
+                            :wajib="true"
+                            warnaFokus="amber"
+                            modelBind="formEdit.kode_gudang"
+                        />
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Opname <span class="text-rose-500">*</span></label>
                         <input type="date" name="tanggal_opname" x-model="formEdit.tanggal_opname" required
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Petugas Opname <span class="text-rose-500">*</span></label>
                         <input type="text" name="petugas_opname" x-model="formEdit.petugas_opname" required
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Stok Sistem (Zak) <span class="text-rose-500">*</span></label>
                         <input type="number" name="stok_sistem" x-model.number="formEdit.stok_sistem" min="0" required
-                               class="w-full px-3.5 py-2 text-xs font-mono rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 text-xs font-mono rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Stok Fisik Riil (Zak) <span class="text-rose-500">*</span></label>
                         <input type="number" name="stok_fisik" x-model.number="formEdit.stok_fisik" min="0" required
-                               class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-amber-600 dark:text-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-amber-600 dark:text-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Konfirmasi SPV <span class="text-rose-500">*</span></label>
-                    <select name="status_konfirmasi" x-model="formEdit.status_konfirmasi" required
-                            class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                        <option value="dikonfirmasi_spv">Dikonfirmasi SPV (Sinkronkan Stok Gudang)</option>
-                        <option value="draft">Draft (Belum Konfirmasi)</option>
-                    </select>
+                    <x-dropdown-kustom 
+                        nama="status_konfirmasi"
+                        placeholder="-- Pilih Status --"
+                        :opsi="$opsiStatusOpname"
+                        :wajib="true"
+                        warnaFokus="amber"
+                        modelBind="formEdit.status_konfirmasi"
+                    />
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Catatan / Alasan Selisih Fisik</label>
                     <textarea name="keterangan_selisih" x-model="formEdit.keterangan_selisih" rows="2"
-                              class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30"></textarea>
+                              class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30"></textarea>
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E2E8F0] dark:border-[#252837]">
+                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E2E8F0] dark:border-[#252837]">
                     <button type="button" @click="modalEditTerbuka = false"
                             class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-colors">
                         Batal
@@ -552,13 +568,11 @@
         </div>
     </div>
 
-    <!-- ========================================================================= -->
     <!-- 7. MODAL KONFIRMASI HAPUS OPNAME -->
-    <!-- ========================================================================= -->
     <div x-show="modalHapusTerbuka" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
         <div @click.away="modalHapusTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 text-center">
+             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 text-center">
             
             <div class="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 mx-auto flex items-center justify-center mb-3.5">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

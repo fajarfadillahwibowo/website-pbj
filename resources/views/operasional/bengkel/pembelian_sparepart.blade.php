@@ -5,8 +5,23 @@
 @section('konten')
 <div x-data="kelolaPembelianSparepart()" x-init="initPembelian()" class="space-y-6">
 
+    @php
+        $opsiSparepart = collect($daftarSparepart ?? [])->map(fn($sp) => [
+            'nilai' => $sp->kode_sparepart,
+            'label' => $sp->nama_sparepart . ' (' . $sp->kode_sparepart . ')',
+            'sub'   => 'Stok: ' . $sp->stok_part . ' ' . $sp->satuan . ' · Rp ' . number_format($sp->harga_satuan, 0, ',', '.')
+        ])->values()->toArray();
+
+        $opsiFilterSparepart = array_merge([
+            ['nilai' => 'semua', 'label' => 'Semua Suku Cadang']
+        ], collect($daftarSparepart ?? [])->map(fn($sp) => [
+            'nilai' => $sp->kode_sparepart,
+            'label' => $sp->nama_sparepart . ' (' . $sp->kode_sparepart . ')'
+        ])->values()->toArray());
+    @endphp
+
     <!-- 1. Header Modul -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#14161F] p-4 sm:p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
+    <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#14161F] p-4 sm:p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
         <div>
             <div class="flex items-center gap-2 mb-1.5">
                 <span class="px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase rounded-md bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 font-mono">
@@ -77,7 +92,7 @@
     @endif
 
     <!-- 3. Ringkasan 4 Kartu KPI Pembelian Sparepart -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <div class="wadah-bertingkat grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <!-- Total Faktur Pembelian -->
         <div class="bg-white dark:bg-[#14161F] p-4 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm flex items-center gap-3.5">
             <div class="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
@@ -132,7 +147,7 @@
     </div>
 
     <!-- 4. Tabel Pembelian Sparepart & Filter -->
-    <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         
         <!-- Filter Bar -->
         <div class="p-4 sm:px-5 sm:py-4 border-b border-[#E2E8F0] dark:border-[#252837] flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -146,16 +161,17 @@
                     </svg>
                 </div>
 
-                <!-- Filter Sparepart -->
-                <select name="kode_sparepart" onchange="this.form.submit()"
-                        class="px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/30">
-                    <option value="semua" {{ ($filterPart ?? 'semua') === 'semua' ? 'selected' : '' }}>Semua Suku Cadang</option>
-                    @foreach($daftarSparepart as $sp)
-                        <option value="{{ $sp->kode_sparepart }}" {{ ($filterPart ?? '') === $sp->kode_sparepart ? 'selected' : '' }}>
-                            {{ $sp->nama_sparepart }} ({{ $sp->kode_sparepart }})
-                        </option>
-                    @endforeach
-                </select>
+                <!-- Filter Sparepart Dropdown Kustom -->
+                <div class="w-full sm:w-64">
+                    <x-dropdown-kustom 
+                        nama="kode_sparepart"
+                        placeholder="-- Semua Suku Cadang --"
+                        :opsi="$opsiFilterSparepart"
+                        :nilaiAwal="$filterPart ?? 'semua'"
+                        :submitOnChange="true"
+                        warnaFokus="rose"
+                    />
+                </div>
 
                 <button type="submit" class="px-3.5 py-2 text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition-colors">
                     Cari
@@ -175,7 +191,7 @@
 
         <!-- Tabel Pembelian -->
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="tabel-bertingkat w-full text-left text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500 dark:text-slate-400">
                     <tr>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">No. Faktur Beli & Tanggal</th>
@@ -298,13 +314,11 @@
         </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- 5. MODAL FORM: TAMBAH PEMBELIAN SPAREPART -->
-    <!-- ========================================================================= -->
+    <!-- Modal Tambah Pembelian Sparepart -->
     <div x-show="modalTambahTerbuka" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
         <div @click.away="modalTambahTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-8">
+             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-8">
             
             <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <div class="flex items-center gap-2.5">
@@ -321,27 +335,32 @@
                 </button>
             </div>
 
-            <form action="{{ route('operasional.bengkel.pembelian_sparepart.simpan') }}" method="POST" class="p-6 space-y-4">
+            <form action="{{ route('operasional.bengkel.pembelian_sparepart.simpan') }}" method="POST" class="p-6 space-y-4 text-xs">
                 @csrf
 
                 <!-- Generator Nomor Faktur Beli -->
                 <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837]">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                         <div>
-                            <label class="text-xs font-bold text-slate-800 dark:text-slate-200">
-                                Nomor Faktur Beli <span class="text-rose-500">*</span>
-                            </label>
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                                    Nomor Faktur Beli <span class="text-rose-500">*</span>
+                                </label>
+                                <span class="text-[10px] text-rose-600 dark:text-rose-400 font-semibold px-1.5 py-0.5 bg-rose-50 dark:bg-rose-950/50 rounded-md">Otomatis</span>
+                            </div>
                             <div class="text-[10px] text-slate-400 font-mono mt-0.5" x-text="keteranganKodeFaktur"></div>
                         </div>
                         
                         <div class="flex items-center gap-1.5 shrink-0">
                             <button type="button" @click="buatNomorFaktur('gap')"
-                                    class="px-2.5 py-1 text-[11px] font-semibold text-rose-700 dark:text-rose-300 bg-rose-100 dark:bg-rose-900/30 hover:bg-rose-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs">
+                                    class="px-2.5 py-1 text-[11px] font-semibold text-rose-700 dark:text-rose-300 bg-rose-100 dark:bg-rose-900/30 hover:bg-rose-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs"
+                                    title="Daur ulang nomor: mengisi slot faktur terkecil yang kosong (FB-SP-001, FB-SP-002, dst)">
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                <span>Daur Ulang (FB-SP-001)</span>
+                                <span>Isi Nomor Kosong</span>
                             </button>
                             <button type="button" @click="buatNomorFaktur('acak')"
-                                    class="px-2.5 py-1 text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs">
+                                    class="px-2.5 py-1 text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs"
+                                    title="Buat nomor faktur format tanggal">
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                 <span>Format Tanggal</span>
                             </button>
@@ -349,57 +368,60 @@
                     </div>
 
                     <input type="text" name="nomor_faktur_beli" x-model="formTambah.nomor_faktur_beli" required placeholder="Contoh: FB-SP-001 atau FB-SP-20260902-8K2"
-                           class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-rose-600 dark:text-rose-400 uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-rose-500/30">
+                           class="w-full px-3 py-2 text-xs font-mono font-bold rounded-xl bg-white dark:bg-[#14161F] border border-rose-200 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-rose-500/30">
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <!-- Suku Cadang Sparepart -->
                     <div class="sm:col-span-2">
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Suku Cadang / Sparepart <span class="text-rose-500">*</span></label>
-                        <select name="kode_sparepart" x-model="formTambah.kode_sparepart" @change="ubahSparepartPilihan($event.target.value)" required
-                                class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/30">
-                            <option value="">-- Pilih Suku Cadang --</option>
-                            @foreach($daftarSparepart as $sp)
-                                <option value="{{ $sp->kode_sparepart }}" data-harga="{{ $sp->harga_satuan }}">
-                                    {{ $sp->nama_sparepart }} ({{ $sp->kode_sparepart }}) - Stok: {{ $sp->stok_part }} {{ $sp->satuan }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="kode_sparepart"
+                            placeholder="-- Pilih Suku Cadang --"
+                            :opsi="$opsiSparepart"
+                            :wajib="true"
+                            warnaFokus="rose"
+                            modelBind="formTambah.kode_sparepart"
+                        />
                     </div>
 
                     <!-- Tanggal Beli -->
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Pembelian <span class="text-rose-500">*</span></label>
                         <input type="date" name="tanggal_beli" x-model="formTambah.tanggal_beli" required
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/30">
+                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/30">
                     </div>
 
                     <!-- Toko / Supplier -->
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Toko / Supplier <span class="text-rose-500">*</span></label>
                         <input type="text" name="nama_supplier" x-model="formTambah.nama_supplier" required placeholder="Nama toko / distributor"
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/30">
+                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/30">
                     </div>
 
                     <!-- Kuantitas Beli -->
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Kuantitas Beli <span class="text-rose-500">*</span></label>
                         <input type="number" name="jumlah_beli" x-model.number="formTambah.jumlah_beli" min="1" required placeholder="Contoh: 4"
-                               class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/30">
+                               class="w-full px-3 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/30">
                     </div>
 
                     <!-- Harga Beli Satuan -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Beli Satuan (Rp) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="harga_beli" x-model.number="formTambah.harga_beli" step="1000" min="0" required placeholder="3450000"
-                               class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/30">
+                        <x-input-rupiah 
+                            nama="harga_beli" 
+                            label="Harga Beli Satuan (Rp)" 
+                            modelBind="formTambah.harga_beli" 
+                            :wajib="true" 
+                            placeholder="3.450.000" 
+                        />
                     </div>
 
                     <!-- Petugas Pencatat -->
                     <div class="sm:col-span-2">
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pengawas / Pencatat Pembelian <span class="text-rose-500">*</span></label>
                         <input type="text" name="dibuat_oleh" x-model="formTambah.dibuat_oleh" required placeholder="Nama pengawas kendaraan"
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/30">
+                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/30">
                     </div>
                 </div>
 
@@ -414,7 +436,7 @@
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E2E8F0] dark:border-[#252837]">
+                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E2E8F0] dark:border-[#252837]">
                     <button type="button" @click="modalTambahTerbuka = false"
                             class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-colors">
                         Batal
@@ -428,13 +450,11 @@
         </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- 6. MODAL FORM: EDIT PEMBELIAN SPAREPART -->
-    <!-- ========================================================================= -->
+    <!-- Modal Edit Pembelian Sparepart -->
     <div x-show="modalEditTerbuka" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
         <div @click.away="modalEditTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-8">
+             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-8">
             
             <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <div class="flex items-center gap-2.5">
@@ -451,61 +471,64 @@
                 </button>
             </div>
 
-            <form :action="'{{ url('operasional/bengkel/pembelian-sparepart') }}/' + formEdit.id_pembelian_part" method="POST" class="p-6 space-y-4">
+            <form :action="'{{ url('operasional/bengkel/pembelian-sparepart') }}/' + formEdit.id_pembelian_part" method="POST" class="p-6 space-y-4 text-xs">
                 @csrf
                 @method('PUT')
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Faktur (Terkunci)</label>
                     <input type="text" :value="formEdit.nomor_faktur_beli" disabled
-                           class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 cursor-not-allowed">
+                           class="w-full px-3 py-2 text-xs font-mono font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 cursor-not-allowed">
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div class="sm:col-span-2">
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Suku Cadang Sparepart <span class="text-rose-500">*</span></label>
-                        <select name="kode_sparepart" x-model="formEdit.kode_sparepart" required
-                                class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                            @foreach($daftarSparepart as $sp)
-                                <option value="{{ $sp->kode_sparepart }}">
-                                    {{ $sp->nama_sparepart }} ({{ $sp->kode_sparepart }})
-                                </option>
-                            @endforeach
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="kode_sparepart"
+                            placeholder="-- Pilih Suku Cadang --"
+                            :opsi="$opsiSparepart"
+                            :wajib="true"
+                            warnaFokus="amber"
+                            modelBind="formEdit.kode_sparepart"
+                        />
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Pembelian <span class="text-rose-500">*</span></label>
                         <input type="date" name="tanggal_beli" x-model="formEdit.tanggal_beli" required
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Toko / Supplier <span class="text-rose-500">*</span></label>
                         <input type="text" name="nama_supplier" x-model="formEdit.nama_supplier" required
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Kuantitas Beli <span class="text-rose-500">*</span></label>
                         <input type="number" name="jumlah_beli" x-model.number="formEdit.jumlah_beli" min="1" required
-                               class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Beli Satuan (Rp) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="harga_beli" x-model.number="formEdit.harga_beli" step="1000" min="0" required
-                               class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                        <x-input-rupiah 
+                            nama="harga_beli" 
+                            label="Harga Beli Satuan (Rp)" 
+                            modelBind="formEdit.harga_beli" 
+                            :wajib="true" 
+                        />
                     </div>
 
                     <div class="sm:col-span-2">
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pengawas Pencatat <span class="text-rose-500">*</span></label>
                         <input type="text" name="dibuat_oleh" x-model="formEdit.dibuat_oleh" required
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E2E8F0] dark:border-[#252837]">
+                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E2E8F0] dark:border-[#252837]">
                     <button type="button" @click="modalEditTerbuka = false"
                             class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-colors">
                         Batal
@@ -519,13 +542,11 @@
         </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- 7. MODAL DETAIL PEMBELIAN SPAREPART -->
-    <!-- ========================================================================= -->
+    <!-- Modal Detail Pembelian Sparepart -->
     <div x-show="modalDetailTerbuka" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
         <div @click.away="modalDetailTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-8">
+             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-8">
             
             <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Rincian Faktur Pembelian Sparepart</h3>
@@ -576,13 +597,11 @@
         </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- 8. MODAL KONFIRMASI HAPUS PEMBELIAN -->
-    <!-- ========================================================================= -->
+    <!-- Modal Konfirmasi Hapus Pembelian -->
     <div x-show="modalHapusTerbuka" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
         <div @click.away="modalHapusTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 text-center">
+             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 text-center">
             
             <div class="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 mx-auto flex items-center justify-center mb-3.5">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -652,14 +671,23 @@
                 return (parseInt(this.formTambah.jumlah_beli) || 0) * (parseFloat(this.formTambah.harga_beli) || 0);
             },
 
-            initPembelian() {},
+            daftarHargaPart: {
+                @foreach($daftarSparepart as $sp)
+                    '{{ $sp->kode_sparepart }}': {{ (float) $sp->harga_satuan }},
+                @endforeach
+            },
+
+            initPembelian() {
+                this.$watch('formTambah.kode_sparepart', (val) => {
+                    if (val && this.daftarHargaPart[val] !== undefined) {
+                        this.formTambah.harga_beli = this.daftarHargaPart[val];
+                    }
+                });
+            },
 
             ubahSparepartPilihan(kodePart) {
-                const selectEl = document.querySelector('select[name="kode_sparepart"]');
-                const selectedOpt = selectEl.options[selectEl.selectedIndex];
-                const harga = selectedOpt.getAttribute('data-harga');
-                if (harga !== null) {
-                    this.formTambah.harga_beli = parseFloat(harga) || 0;
+                if (kodePart && this.daftarHargaPart[kodePart] !== undefined) {
+                    this.formTambah.harga_beli = this.daftarHargaPart[kodePart];
                 }
             },
 

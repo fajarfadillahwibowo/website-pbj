@@ -160,13 +160,13 @@
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Aset</label>
                     <input type="text" name="nama_aset" required placeholder="Hino Dutro 130 HD"
                            class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. Polisi (Kendaraan)</label>
-                        <input type="text" name="no_polisi" placeholder="B 9876 PBJ"
-                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                    </div>
+                </div>                <div class="space-y-3">
+                    <x-input-plat-nomor 
+                        nama="no_polisi" 
+                        :wajib="false" 
+                        label="No. Polisi (Khusus Kendaraan/Truk)" 
+                    />
+
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Pembelian</label>
                         <input type="date" name="tanggal_pembelian" required value="{{ date('Y-m-d') }}"
@@ -174,9 +174,12 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Perolehan (Rp)</label>
-                    <input type="number" name="harga_aset" required min="0" step="1000000" placeholder="400000000"
-                           class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 font-mono">
+                    <x-input-rupiah 
+                        nama="harga_aset" 
+                        label="Harga Perolehan Unit (Rp)" 
+                        :wajib="true" 
+                        placeholder="400.000.000" 
+                    />
                 </div>
                 <div class="flex items-center justify-end gap-2 pt-2">
                     <button @click="bukaModalTambah = false" type="button" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
