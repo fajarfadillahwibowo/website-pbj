@@ -52,17 +52,35 @@
     <!-- Tabel Data Jurnal Umum -->
     <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <form method="GET" action="{{ route('keuangan.akuntansi.jurnal') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
+            @php
+                $opsiFilterPosisi = [
+                    ['nilai' => '', 'label' => '-- Semua Posisi --'],
+                    ['nilai' => 'Debit', 'label' => 'Debit'],
+                    ['nilai' => 'Kredit', 'label' => 'Kredit'],
+                ];
+                $opsiAkunJurnal = ($daftarAkun ?? collect())->map(fn($a) => [
+                    'nilai' => $a->kode_akun,
+                    'label' => $a->nama_akun,
+                    'sub'   => 'Kode: ' . $a->kode_akun
+                ])->toArray();
+            @endphp
             <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                 <div class="relative w-full sm:w-64">
                     <input type="text" name="cari" value="{{ $kataKunci ?? '' }}" placeholder="Cari no jurnal / akun / keterangan..."
                            class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30">
                     <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
-                <select name="posisi" onchange="this.form.submit()" class="px-3 py-1.5 text-xs rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300">
-                    <option value="">-- Semua Posisi --</option>
-                    <option value="Debit" {{ ($filterPosisi ?? '') === 'Debit' ? 'selected' : '' }}>Debit</option>
-                    <option value="Kredit" {{ ($filterPosisi ?? '') === 'Kredit' ? 'selected' : '' }}>Kredit</option>
-                </select>
+                <div class="w-full sm:w-40">
+                    <x-dropdown-kustom 
+                        nama="posisi" 
+                        :nilaiAwal="$filterPosisi ?? ''" 
+                        placeholder="-- Semua Posisi --" 
+                        :opsi="$opsiFilterPosisi" 
+                        warnaFokus="teal"
+                        classTombol="py-1.5"
+                        :submitOnChange="true" 
+                    />
+                </div>
             </div>
             <span class="text-xs text-slate-400 font-mono">Tabel: jurnal_umum</span>
         </form>
@@ -128,21 +146,23 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Akun Sisi Debet (+)</label>
-                        <select name="kode_akun_debit" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30">
-                            <option value="">-- Pilih Akun Debet --</option>
-                            @foreach($daftarAkun ?? [] as $a)
-                                <option value="{{ $a->kode_akun }}">{{ $a->kode_akun }} - {{ $a->nama_akun }}</option>
-                            @endforeach
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="kode_akun_debit"
+                            placeholder="-- Pilih Akun Debet --"
+                            :opsi="$opsiAkunJurnal"
+                            :wajib="true"
+                            warnaFokus="teal"
+                        />
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Akun Sisi Kredit (-)</label>
-                        <select name="kode_akun_kredit" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/30">
-                            <option value="">-- Pilih Akun Kredit --</option>
-                            @foreach($daftarAkun ?? [] as $a)
-                                <option value="{{ $a->kode_akun }}">{{ $a->kode_akun }} - {{ $a->nama_akun }}</option>
-                            @endforeach
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="kode_akun_kredit"
+                            placeholder="-- Pilih Akun Kredit --"
+                            :opsi="$opsiAkunJurnal"
+                            :wajib="true"
+                            warnaFokus="teal"
+                        />
                     </div>
                 </div>
                 <div>

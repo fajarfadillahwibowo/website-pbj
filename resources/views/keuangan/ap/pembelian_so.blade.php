@@ -54,19 +54,41 @@
     <!-- Tabel Data Pembelian SO -->
     <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <form method="GET" action="{{ route('keuangan.ap.pembelian_so') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
+            @php
+                $opsiFilterStatusSO = [
+                    ['nilai' => '', 'label' => '-- Semua Status --'],
+                    ['nilai' => 'disetujui', 'label' => 'Disetujui'],
+                    ['nilai' => 'diproses', 'label' => 'Diproses'],
+                    ['nilai' => 'dikirim', 'label' => 'Dikirim'],
+                    ['nilai' => 'selesai', 'label' => 'Selesai'],
+                ];
+                $opsiCustomerSO = ($daftarCustomer ?? collect())->map(fn($c) => [
+                    'nilai' => $c->kode_customer,
+                    'label' => $c->nama_toko_bangunan
+                ])->toArray();
+                $opsiGudangSO = ($daftarGudang ?? collect())->map(fn($g) => [
+                    'nilai' => $g->kode_gudang,
+                    'label' => $g->nama_gudang,
+                    'sub'   => 'Plant: ' . $g->plant
+                ])->toArray();
+            @endphp
             <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                 <div class="relative w-full sm:w-64">
                     <input type="text" name="cari" value="{{ $kataKunci ?? '' }}" placeholder="Cari no SO / customer / gudang..."
                            class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
                     <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
-                <select name="status" onchange="this.form.submit()" class="px-3 py-1.5 text-xs rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300">
-                    <option value="">-- Semua Status --</option>
-                    <option value="disetujui" {{ ($filterStatus ?? '') === 'disetujui' ? 'selected' : '' }}>Disetujui</option>
-                    <option value="diproses" {{ ($filterStatus ?? '') === 'diproses' ? 'selected' : '' }}>Diproses</option>
-                    <option value="dikirim" {{ ($filterStatus ?? '') === 'dikirim' ? 'selected' : '' }}>Dikirim</option>
-                    <option value="selesai" {{ ($filterStatus ?? '') === 'selesai' ? 'selected' : '' }}>Selesai</option>
-                </select>
+                <div class="w-full sm:w-44">
+                    <x-dropdown-kustom 
+                        nama="status" 
+                        :nilaiAwal="$filterStatus ?? ''" 
+                        placeholder="-- Semua Status --" 
+                        :opsi="$opsiFilterStatusSO" 
+                        warnaFokus="blue"
+                        classTombol="py-1.5"
+                        :submitOnChange="true" 
+                    />
+                </div>
             </div>
             <span class="text-xs text-slate-400 font-mono">Tabel: pembelian_so</span>
         </form>
@@ -134,21 +156,23 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Customer / Alokasi Toko</label>
-                        <select name="kode_customer" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
-                            <option value="">-- Pilih Customer --</option>
-                            @foreach($daftarCustomer ?? [] as $c)
-                                <option value="{{ $c->kode_customer }}">{{ $c->nama_toko_bangunan }}</option>
-                            @endforeach
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="kode_customer"
+                            placeholder="-- Pilih Customer --"
+                            :opsi="$opsiCustomerSO"
+                            :wajib="true"
+                            warnaFokus="blue"
+                        />
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Gudang / Plant Pengambilan</label>
-                        <select name="kode_gudang" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
-                            <option value="">-- Pilih Gudang SO --</option>
-                            @foreach($daftarGudang ?? [] as $g)
-                                <option value="{{ $g->kode_gudang }}">{{ $g->nama_gudang }} ({{ $g->plant }})</option>
-                            @endforeach
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="kode_gudang"
+                            placeholder="-- Pilih Gudang SO --"
+                            :opsi="$opsiGudangSO"
+                            :wajib="true"
+                            warnaFokus="blue"
+                        />
                     </div>
                 </div>
                 <div>

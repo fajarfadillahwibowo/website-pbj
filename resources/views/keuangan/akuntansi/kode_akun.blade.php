@@ -52,6 +52,31 @@
 
     <!-- Tabel Data Bagan Akun -->
     <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+        @php
+                $opsiFilterTipeCOA = [
+                    ['nilai' => '', 'label' => '-- Semua Tipe Akun --'],
+                    ['nilai' => 'Aktiva Lancar', 'label' => 'Aktiva Lancar'],
+                    ['nilai' => 'Aktiva Tetap', 'label' => 'Aktiva Tetap'],
+                    ['nilai' => 'Kewajiban Lancar', 'label' => 'Kewajiban Lancar'],
+                    ['nilai' => 'Modal', 'label' => 'Modal'],
+                    ['nilai' => 'Pendapatan', 'label' => 'Pendapatan'],
+                    ['nilai' => 'Harga Pokok Penjualan', 'label' => 'Harga Pokok Penjualan'],
+                    ['nilai' => 'Beban Operasional', 'label' => 'Beban Operasional'],
+                ];
+                $opsiTipeCOA = [
+                    ['nilai' => 'Aktiva Lancar', 'label' => 'Aktiva Lancar'],
+                    ['nilai' => 'Aktiva Tetap', 'label' => 'Aktiva Tetap'],
+                    ['nilai' => 'Kewajiban Lancar', 'label' => 'Kewajiban Lancar'],
+                    ['nilai' => 'Modal', 'label' => 'Modal'],
+                    ['nilai' => 'Pendapatan', 'label' => 'Pendapatan'],
+                    ['nilai' => 'Harga Pokok Penjualan', 'label' => 'Harga Pokok Penjualan'],
+                    ['nilai' => 'Beban Operasional', 'label' => 'Beban Operasional'],
+                ];
+                $opsiSaldoNormal = [
+                    ['nilai' => 'Debit', 'label' => 'Debit'],
+                    ['nilai' => 'Kredit', 'label' => 'Kredit'],
+                ];
+            @endphp
         <form method="GET" action="{{ route('keuangan.akuntansi.kode_akun') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
             <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                 <div class="relative w-full sm:w-64">
@@ -59,15 +84,17 @@
                            class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/30">
                     <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
-                <select name="tipe" onchange="this.form.submit()" class="px-3 py-1.5 text-xs rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300">
-                    <option value="">-- Semua Tipe Akun --</option>
-                    <option value="Aktiva Lancar" {{ ($filterTipe ?? '') === 'Aktiva Lancar' ? 'selected' : '' }}>Aktiva Lancar</option>
-                    <option value="Aktiva Tetap" {{ ($filterTipe ?? '') === 'Aktiva Tetap' ? 'selected' : '' }}>Aktiva Tetap</option>
-                    <option value="Kewajiban Lancar" {{ ($filterTipe ?? '') === 'Kewajiban Lancar' ? 'selected' : '' }}>Kewajiban Lancar</option>
-                    <option value="Modal" {{ ($filterTipe ?? '') === 'Modal' ? 'selected' : '' }}>Modal</option>
-                    <option value="Pendapatan" {{ ($filterTipe ?? '') === 'Pendapatan' ? 'selected' : '' }}>Pendapatan</option>
-                    <option value="Beban Operasional" {{ ($filterTipe ?? '') === 'Beban Operasional' ? 'selected' : '' }}>Beban Operasional</option>
-                </select>
+                <div class="w-full sm:w-48">
+                    <x-dropdown-kustom 
+                        nama="tipe" 
+                        :nilaiAwal="$filterTipe ?? ''" 
+                        placeholder="-- Semua Tipe Akun --" 
+                        :opsi="$opsiFilterTipeCOA" 
+                        warnaFokus="violet"
+                        classTombol="py-1.5"
+                        :submitOnChange="true" 
+                    />
+                </div>
             </div>
             <span class="text-xs text-slate-400 font-mono">Tabel: data_kode_akun</span>
         </form>
@@ -144,10 +171,13 @@
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Saldo Normal</label>
-                        <select name="saldo_normal" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500/30">
-                            <option value="Debit">Debit</option>
-                            <option value="Kredit">Kredit</option>
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="saldo_normal"
+                            placeholder="-- Pilih Posisi --"
+                            :opsi="$opsiSaldoNormal"
+                            :wajib="true"
+                            warnaFokus="violet"
+                        />
                     </div>
                 </div>
                 <div>
@@ -158,15 +188,13 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tipe Akun</label>
-                        <select name="tipe_akun" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500/30">
-                            <option value="Aktiva Lancar">Aktiva Lancar</option>
-                            <option value="Aktiva Tetap">Aktiva Tetap</option>
-                            <option value="Kewajiban Lancar">Kewajiban Lancar</option>
-                            <option value="Modal">Modal</option>
-                            <option value="Pendapatan">Pendapatan</option>
-                            <option value="Harga Pokok Penjualan">Harga Pokok Penjualan</option>
-                            <option value="Beban Operasional">Beban Operasional</option>
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="tipe_akun"
+                            placeholder="-- Pilih Tipe Akun --"
+                            :opsi="$opsiTipeCOA"
+                            :wajib="true"
+                            warnaFokus="violet"
+                        />
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kelompok Akun</label>
@@ -205,22 +233,25 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tipe Akun</label>
-                        <select name="tipe_akun" x-model="editData.tipe_akun" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500/30">
-                            <option value="Aktiva Lancar">Aktiva Lancar</option>
-                            <option value="Aktiva Tetap">Aktiva Tetap</option>
-                            <option value="Kewajiban Lancar">Kewajiban Lancar</option>
-                            <option value="Modal">Modal</option>
-                            <option value="Pendapatan">Pendapatan</option>
-                            <option value="Harga Pokok Penjualan">Harga Pokok Penjualan</option>
-                            <option value="Beban Operasional">Beban Operasional</option>
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="tipe_akun"
+                            placeholder="-- Pilih Tipe Akun --"
+                            :opsi="$opsiTipeCOA"
+                            :wajib="true"
+                            warnaFokus="violet"
+                            modelBind="editData.tipe_akun"
+                        />
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Saldo Normal</label>
-                        <select name="saldo_normal" x-model="editData.saldo_normal" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500/30">
-                            <option value="Debit">Debit</option>
-                            <option value="Kredit">Kredit</option>
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="saldo_normal"
+                            placeholder="-- Pilih Posisi --"
+                            :opsi="$opsiSaldoNormal"
+                            :wajib="true"
+                            warnaFokus="violet"
+                            modelBind="editData.saldo_normal"
+                        />
                     </div>
                 </div>
                 <div>

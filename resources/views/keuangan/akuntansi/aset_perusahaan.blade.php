@@ -49,20 +49,34 @@
     <!-- Tabel Data Aset -->
     <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <form method="GET" action="{{ route('keuangan.akuntansi.aset') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
+            @php
+                $opsiFilterJenisAset = array_merge([['nilai' => '', 'label' => '-- Semua Jenis Aset --']], ($daftarJenis ?? collect())->map(fn($j) => [
+                    'nilai' => $j->kode_jenis_aset,
+                    'label' => $j->jenis_aset
+                ])->toArray());
+                $opsiJenisAsetModal = ($daftarJenis ?? collect())->map(fn($j) => [
+                    'nilai' => $j->kode_jenis_aset,
+                    'label' => $j->jenis_aset,
+                    'sub'   => 'Kode: ' . $j->kode_jenis_aset
+                ])->toArray();
+            @endphp
             <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                 <div class="relative w-full sm:w-64">
-                    <input type="text" name="cari" value="{{ $kataKunci ?? '' }}" placeholder="Cari nama aset / kode / plat..."
+                    <input type="text" name="cari" value="{{ $kataKunci ?? '' }}" placeholder="Cari nama aset / kode / no polisi..."
                            class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
                     <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
-                <select name="jenis" onchange="this.form.submit()" class="px-3 py-1.5 text-xs rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300">
-                    <option value="">-- Semua Jenis Aset --</option>
-                    @foreach($daftarJenis ?? [] as $j)
-                        <option value="{{ $j->kode_jenis_aset }}" {{ ($filterJenis ?? '') === $j->kode_jenis_aset ? 'selected' : '' }}>
-                            {{ $j->jenis_aset }}
-                        </option>
-                    @endforeach
-                </select>
+                <div class="w-full sm:w-48">
+                    <x-dropdown-kustom 
+                        nama="jenis" 
+                        :nilaiAwal="$filterJenis ?? ''" 
+                        placeholder="-- Semua Jenis Aset --" 
+                        :opsi="$opsiFilterJenisAset" 
+                        warnaFokus="indigo"
+                        classTombol="py-1.5"
+                        :submitOnChange="true" 
+                    />
+                </div>
             </div>
             <span class="text-xs text-slate-400 font-mono">Tabel: data_aset</span>
         </form>
@@ -131,11 +145,13 @@
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis Aset</label>
-                        <select name="kode_jenis_aset" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                            @foreach($daftarJenis ?? [] as $j)
-                                <option value="{{ $j->kode_jenis_aset }}">{{ $j->jenis_aset }}</option>
-                            @endforeach
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="kode_jenis_aset"
+                            placeholder="-- Pilih Jenis Aset --"
+                            :opsi="$opsiJenisAsetModal"
+                            :wajib="true"
+                            warnaFokus="indigo"
+                        />
                     </div>
                 </div>
                 <div>

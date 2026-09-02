@@ -80,24 +80,59 @@
     <!-- Tabel Data Faktur Penjualan -->
     <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <form method="GET" action="{{ route('keuangan.ar.faktur') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
+            @php
+                $opsiFilterStatusFaktur = [
+                    ['nilai' => '', 'label' => '-- Semua Status --'],
+                    ['nilai' => 'Lunas', 'label' => 'Lunas'],
+                    ['nilai' => 'Belum Lunas', 'label' => 'Belum Lunas'],
+                ];
+                $opsiFilterMetodeFaktur = [
+                    ['nilai' => '', 'label' => '-- Semua Metode --'],
+                    ['nilai' => 'Kredit / Piutang', 'label' => 'Kredit / Piutang'],
+                    ['nilai' => 'Potong Deposit', 'label' => 'Potong Deposit'],
+                    ['nilai' => 'Transfer', 'label' => 'Transfer'],
+                    ['nilai' => 'Tunai', 'label' => 'Tunai'],
+                ];
+                $opsiCustomerFaktur = ($daftarCustomer ?? collect())->map(fn($c) => [
+                    'nilai' => $c->kode_customer,
+                    'label' => $c->nama_toko_bangunan,
+                    'sub'   => 'Plafon: Rp ' . number_format($c->plafon_piutang, 0, ',', '.') . ' | Dep: Rp ' . number_format($c->saldo_deposit, 0, ',', '.')
+                ])->toArray();
+                $opsiMetodeModal = [
+                    ['nilai' => 'Kredit / Piutang', 'label' => 'Kredit / Piutang (Tempo)'],
+                    ['nilai' => 'Potong Deposit', 'label' => 'Potong Saldo Deposit Toko'],
+                    ['nilai' => 'Transfer', 'label' => 'Transfer Bank'],
+                    ['nilai' => 'Tunai', 'label' => 'Tunai / Cash'],
+                ];
+            @endphp
             <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                 <div class="relative w-full sm:w-64">
                     <input type="text" name="cari" value="{{ $kataKunci ?? '' }}" placeholder="Cari no faktur / nama toko..."
                            class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
                     <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
-                <select name="status" onchange="this.form.submit()" class="px-3 py-1.5 text-xs rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300">
-                    <option value="">-- Semua Status --</option>
-                    <option value="Lunas" {{ ($filterStatus ?? '') === 'Lunas' ? 'selected' : '' }}>Lunas</option>
-                    <option value="Belum Lunas" {{ ($filterStatus ?? '') === 'Belum Lunas' ? 'selected' : '' }}>Belum Lunas</option>
-                </select>
-                <select name="metode" onchange="this.form.submit()" class="px-3 py-1.5 text-xs rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300">
-                    <option value="">-- Semua Metode --</option>
-                    <option value="Kredit / Piutang" {{ ($filterMetode ?? '') === 'Kredit / Piutang' ? 'selected' : '' }}>Kredit / Piutang</option>
-                    <option value="Potong Deposit" {{ ($filterMetode ?? '') === 'Potong Deposit' ? 'selected' : '' }}>Potong Deposit</option>
-                    <option value="Transfer" {{ ($filterMetode ?? '') === 'Transfer' ? 'selected' : '' }}>Transfer</option>
-                    <option value="Tunai" {{ ($filterMetode ?? '') === 'Tunai' ? 'selected' : '' }}>Tunai</option>
-                </select>
+                <div class="w-full sm:w-40">
+                    <x-dropdown-kustom 
+                        nama="status" 
+                        :nilaiAwal="$filterStatus ?? ''" 
+                        placeholder="-- Semua Status --" 
+                        :opsi="$opsiFilterStatusFaktur" 
+                        warnaFokus="emerald"
+                        classTombol="py-1.5"
+                        :submitOnChange="true" 
+                    />
+                </div>
+                <div class="w-full sm:w-44">
+                    <x-dropdown-kustom 
+                        nama="metode" 
+                        :nilaiAwal="$filterMetode ?? ''" 
+                        placeholder="-- Semua Metode --" 
+                        :opsi="$opsiFilterMetodeFaktur" 
+                        warnaFokus="emerald"
+                        classTombol="py-1.5"
+                        :submitOnChange="true" 
+                    />
+                </div>
             </div>
             <span class="text-xs text-slate-400 font-mono">Tabel: penjualan</span>
         </form>
@@ -177,14 +212,13 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Customer / Mitra Toko</label>
-                        <select name="kode_customer" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
-                            <option value="">-- Pilih Customer --</option>
-                            @foreach($daftarCustomer ?? [] as $c)
-                                <option value="{{ $c->kode_customer }}">
-                                    {{ $c->nama_toko_bangunan }} (Plafon: Rp {{ number_format($c->plafon_piutang, 0, ',', '.') }} | Dep: Rp {{ number_format($c->saldo_deposit, 0, ',', '.') }})
-                                </option>
-                            @endforeach
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="kode_customer"
+                            placeholder="-- Pilih Customer --"
+                            :opsi="$opsiCustomerFaktur"
+                            :wajib="true"
+                            warnaFokus="emerald"
+                        />
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Transaksi</label>
@@ -195,12 +229,14 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Metode Pembayaran</label>
-                        <select name="metode_pembayaran" x-model="metode" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
-                            <option value="Kredit / Piutang">Kredit / Piutang (Tempo)</option>
-                            <option value="Potong Deposit">Potong Saldo Deposit Toko</option>
-                            <option value="Transfer">Transfer Bank</option>
-                            <option value="Tunai">Tunai / Cash</option>
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="metode_pembayaran"
+                            placeholder="-- Pilih Metode --"
+                            :opsi="$opsiMetodeModal"
+                            :wajib="true"
+                            warnaFokus="emerald"
+                            modelBind="metode"
+                        />
                     </div>
                     <div x-show="metode === 'Kredit / Piutang'">
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Jatuh Tempo</label>

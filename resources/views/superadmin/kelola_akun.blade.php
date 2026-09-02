@@ -164,23 +164,38 @@
                     <input type="text" name="username" required placeholder="contoh: staf_gudang_02"
                            class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30">
                 </div>
+                @php
+                    $opsiKaryawan = ($daftarKaryawan ?? collect())->map(fn($k) => [
+                        'nilai' => $k->kode_karyawan, 
+                        'label' => $k->nama_karyawan,
+                        'sub' => $k->kode_karyawan . ' · ' . ucfirst($k->kategori_karyawan)
+                    ])->toArray();
+
+                    $opsiJabatan = ($daftarJabatan ?? collect())->map(fn($j) => [
+                        'nilai' => $j->id_jabatan, 
+                        'label' => $j->nama_jabatan,
+                        'sub' => 'Kode Peran: ' . $j->kode_jabatan
+                    ])->toArray();
+                @endphp
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Karyawan Terkait</label>
-                    <select name="kode_karyawan" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30">
-                        <option value="">-- Pilih Karyawan --</option>
-                        @foreach($daftarKaryawan ?? [] as $karyawan)
-                            <option value="{{ $karyawan->kode_karyawan }}">{{ $karyawan->kode_karyawan }} - {{ $karyawan->nama_karyawan }} ({{ ucfirst($karyawan->kategori_karyawan) }})</option>
-                        @endforeach
-                    </select>
+                    <x-dropdown-kustom 
+                        nama="kode_karyawan"
+                        placeholder="-- Pilih Karyawan --"
+                        :opsi="$opsiKaryawan"
+                        :wajib="true"
+                        warnaFokus="purple"
+                    />
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Jabatan / Peran RBAC</label>
-                    <select name="id_jabatan" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30">
-                        <option value="">-- Pilih Jabatan --</option>
-                        @foreach($daftarJabatan ?? [] as $jabatan)
-                            <option value="{{ $jabatan->id_jabatan }}">{{ $jabatan->nama_jabatan }} ({{ $jabatan->kode_jabatan }})</option>
-                        @endforeach
-                    </select>
+                    <x-dropdown-kustom 
+                        nama="id_jabatan"
+                        placeholder="-- Pilih Jabatan / Role --"
+                        :opsi="$opsiJabatan"
+                        :wajib="true"
+                        warnaFokus="purple"
+                    />
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kata Sandi Default</label>

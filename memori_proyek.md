@@ -2,8 +2,41 @@
 
 ## 📌 Status Terkini
 - **Branch Aktif:** `web-dev1`
-- **Fokus Eksekusi:** Pengerjaan Penuh Seluruh Modul Developer 1 (Sesuai `docs/02_Pembagian_Tugas.md`).
+- **Fokus Eksekusi:** Pengerjaan Penuh Seluruh Modul Developer 1 (Sesuai `docs/02_Pembagian_Tugas.md`) & Standarisasi Komponen Dropdown Kustom Seluruh Antarmuka.
 - **Status Developer 1:** ✅ **100% SELESAI & TERVERIFIKASI (HTTP 200 OK pada seluruh modul)**.
+- **Status Standarisasi UI Dropdown:** ✅ **100% SELESAI & TERVERIFIKASI** (Semua native `<select>` diganti dengan `<x-dropdown-kustom>`).
+
+---
+
+## 🎨 Standarisasi Dropdown Kustom (Alpine.js + Tailwind CSS)
+
+### 1. Komponen Baru: `resources/views/components/dropdown-kustom.blade.php`
+- **Fitur Unggulan:**
+  - Desain compact, modern, dan elegan (bebas dari template bawaan OS yang kaku).
+  - Animasi transisi floating popover yang halus (`transition:enter`, `transition:leave`).
+  - Mendukung pencarian/filter cepat untuk daftar panjang dan scrollbar minimalis kustom.
+  - Indikator checkmark aktif dan subteks badge informasi (misal: plafon, deposit, kode COA).
+  - Mendukung sinkronisasi edit modal Alpine.js via `modelBind`.
+  - Mendukung filter auto-submit instan via `submitOnChange="true"`.
+  - Aksesibilitas keyboard (Escape / Click Outside to close).
+
+### 2. Global Styling: `resources/css/app.css`
+- Menambahkan kustomisasi scrollbar, reset `appearance: none`, dan custom chevron icon untuk fallback element.
+
+### 3. File yang Telah Diimplementasikan Dropdown Kustom:
+1. `resources/views/superadmin/kelola_akun.blade.php` (Pilih Karyawan, Pilih Jabatan RBAC)
+2. `resources/views/master/customer/index.blade.php` (Filter Wilayah, Modal Tambah & Edit Wilayah)
+3. `resources/views/master/barang/index.blade.php` (Filter Jenis, Modal Tambah & Edit Jenis Kemasan)
+4. `resources/views/master/karyawan/index.blade.php` (Modal Tambah & Edit: Kategori Karyawan, Jabatan Sistem, Status Kepegawaian)
+5. `resources/views/keuangan/ar/faktur_penjualan.blade.php` (Filter Status, Filter Metode, Modal Terbitkan Faktur: Customer, Metode Pembayaran)
+6. `resources/views/keuangan/ar/list_piutang.blade.php` (Filter Status Piutang)
+7. `resources/views/keuangan/ar/deposit_customer.blade.php` (Filter Tipe Mutasi, Modal Top Up Customer)
+8. `resources/views/keuangan/ap/pembelian_so.blade.php` (Filter Status SO, Modal Buat SO: Customer, Gudang Pabrik)
+9. `resources/views/keuangan/ap/pengeluaran_kas.blade.php` (Filter Kategori, Modal Pengeluaran: Kategori Biaya, Akun Beban COA, Rekening Sumber)
+10. `resources/views/keuangan/ap/list_rilisan.blade.php` (Modal Rilis Uang Jalan: Driver Supir, Rekening Sumber)
+11. `resources/views/keuangan/akuntansi/kode_akun.blade.php` (Filter Tipe Akun, Modal Tambah & Edit: Tipe Akun, Saldo Normal)
+12. `resources/views/keuangan/akuntansi/jurnal_umum.blade.php` (Filter Posisi, Modal Jurnal: Akun Sisi Debet, Akun Sisi Kredit)
+13. `resources/views/keuangan/akuntansi/aset_perusahaan.blade.php` (Filter Jenis Aset, Modal Tambah: Jenis Aset)
 
 ---
 
@@ -12,37 +45,32 @@
 ### 1. Seeder Database Realistis
 - `database/seeders/MasterDataSeeder.php`: Master Wilayah (6), Produk Semen (6), Customer Toko (5), Rekening Bank (3), Gudang SO (3).
 - `database/seeders/KeuanganSeeder.php`: Bagan Akun COA (22 akun standar), Data Aset Tetap, Faktur Penjualan Awal, Buku Piutang, Mutasi Deposit, dan Pengeluaran Kas.
-- Status: Berhasil dijalankan ke MySQL via `php artisan db:seed`.
 
 ### 2. Modul Super Admin (Kelola Akun)
-- **Controller:** `app/Http/Controllers/Autentikasi/KelolaAkunController.php` (`store`, `resetPassword`, `toggleStatus`)
+- **Controller:** `app/Http/Controllers/Autentikasi/KelolaAkunController.php`
 - **View:** `resources/views/superadmin/kelola_akun.blade.php`
-- **Fitur:** CRUD Akun, Reset Password default `password123`, Toggle Status Aktif/Nonaktif.
 
 ### 3. Modul Master Data Sentral
-- **Customer Toko:** `CustomerController.php` + `master/customer/index.blade.php` (CRUD, modal Alpine.js, filter wilayah, kalkulasi plafon, piutang, dan deposit).
-- **Semen / Barang:** `BarangController.php` + `master/barang/index.blade.php` (CRUD semen zak & curah, kalkulasi margin estimasi).
-- **Wilayah Distribusi:** `WilayahController.php` + `master/wilayah/index.blade.php` (CRUD wilayah, penghitung jumlah mitra toko, proteksi hapus berelasi).
-- **Karyawan & Driver:** `KaryawanController.php` + `master/karyawan/index.blade.php` (CRUD karyawan, tab filter staf/driver/gudang/teknisi/manajemen).
+- **Customer Toko:** `CustomerController.php` + `master/customer/index.blade.php`
+- **Semen / Barang:** `BarangController.php` + `master/barang/index.blade.php`
+- **Wilayah Distribusi:** `WilayahController.php` + `master/wilayah/index.blade.php`
+- **Karyawan & Driver:** `KaryawanController.php` + `master/karyawan/index.blade.php`
 
 ### 4. Modul Account Receivable (AR & Penjualan)
-- **Faktur Penjualan:** `FakturPenjualanController.php` + `keuangan/ar/faktur_penjualan.blade.php` (Penerbitan faktur `INV-YYYYMMDD-XXX`, validasi plafon kredit toko, pemotongan saldo deposit otomatis, pencatatan otomatis ke `list_piutang`).
-- **List Piutang:** `PiutangController.php` + `keuangan/ar/list_piutang.blade.php` (Monitoring buku pembantu piutang, modal pelunasan cicilan, mutasi otomatis saldo customer & status faktur).
-- **Deposit Customer:** `DepositCustomerController.php` + `keuangan/ar/deposit_customer.blade.php` (Monitoring saldo uang muka, riwayat mutasi masuk/keluar, modal top-up deposit interaktif).
+- **Faktur Penjualan:** `FakturPenjualanController.php` + `keuangan/ar/faktur_penjualan.blade.php`
+- **List Piutang:** `PiutangController.php` + `keuangan/ar/list_piutang.blade.php`
+- **Deposit Customer:** `DepositCustomerController.php` + `keuangan/ar/deposit_customer.blade.php`
 
 ### 5. Modul Account Payable (AP & Kas Keluar)
-- **Pembelian SO Pabrik:** `PembelianSOController.php` + `keuangan/ap/pembelian_so.blade.php` (Penerbitan SO semen ke pabrik, kalkulasi volume zak & harga, alokasi gudang/plant).
-- **Pengeluaran Kas:** `PengeluaranKasController.php` + `keuangan/ap/pengeluaran_kas.blade.php` (Pencatatan kas operasional kantor, BBM & Tol armada terhubung akun beban COA, pemotongan saldo rekening sumber).
-- **Rilisan Kas Bon Supir:** `HutangSupplierController.php` + `keuangan/ap/list_rilisan.blade.php` (Rilisan uang jalan supir armada truk terintegrasi akun 1107).
+- **Pembelian SO Pabrik:** `PembelianSOController.php` + `keuangan/ap/pembelian_so.blade.php`
+- **Pengeluaran Kas:** `PengeluaranKasController.php` + `keuangan/ap/pengeluaran_kas.blade.php`
+- **Rilisan Kas Bon Supir:** `HutangSupplierController.php` + `keuangan/ap/list_rilisan.blade.php`
 
 ### 6. Modul Akuntansi & Laporan Eksekutif
-- **Bagan Akun (COA):** `KodeAkunController.php` + `keuangan/akuntansi/kode_akun.blade.php` (Klasifikasi aktiva, kewajiban, modal, pendapatan, beban, modal CRUD).
-- **Buku Jurnal Umum:** `JurnalUmumController.php` + `keuangan/akuntansi/jurnal_umum.blade.php` (Entri transaksi double-entry debit-kredit berpasangan otomatis, verifikasi status keseimbangan saldo).
-- **Aset Perusahaan:** `AsetPerusahaanController.php` + `keuangan/akuntansi/aset_perusahaan.blade.php` (Inventaris aset tetap armada truk, gudang, kalkulasi total nilai perolehan).
-- **Laporan Eksekutif:** `LaporanEksekutifController.php`
-  - `resources/views/laporan/neraca.blade.php`: Posisi keuangan aktiva vs passiva (kewajiban & ekuitas) real-time.
-  - `resources/views/laporan/laba_rugi.blade.php`: Perhitungan pendapatan penjualan semen, HPP pabrik, biaya operasional, dan laba bersih setelah pajak.
-  - `resources/views/laporan/arus_kas.blade.php`: Arus kas aktivitas operasional penerimaan customer dan kas keluar serta saldo akhir kas & bank.
+- **Bagan Akun (COA):** `KodeAkunController.php` + `keuangan/akuntansi/kode_akun.blade.php`
+- **Buku Jurnal Umum:** `JurnalUmumController.php` + `keuangan/akuntansi/jurnal_umum.blade.php`
+- **Aset Perusahaan:** `AsetPerusahaanController.php` + `keuangan/akuntansi/aset_perusahaan.blade.php`
+- **Laporan Eksekutif:** `LaporanEksekutifController.php` (`neraca`, `laba_rugi`, `arus_kas`)
 
 ---
 

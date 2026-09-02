@@ -153,12 +153,32 @@
             </table>
         </div>
     </div>
+    @php
+        $opsiKategoriKaryawan = [
+            ['nilai' => 'staf', 'label' => 'Staf Kantor'],
+            ['nilai' => 'driver', 'label' => 'Driver Supir'],
+            ['nilai' => 'gudang', 'label' => 'Staf Gudang'],
+            ['nilai' => 'teknisi', 'label' => 'Teknisi Bengkel'],
+            ['nilai' => 'manajemen', 'label' => 'Manajemen / Direksi'],
+        ];
+        $opsiJabatanKaryawan = ($daftarJabatan ?? collect())->map(fn($j) => [
+            'nilai' => $j->id_jabatan,
+            'label' => $j->nama_jabatan,
+            'sub'   => 'Kode: ' . $j->kode_jabatan
+        ])->toArray();
+        $opsiStatusKaryawan = [
+            ['nilai' => 'aktif', 'label' => 'Aktif'],
+            ['nilai' => 'kontrak', 'label' => 'Kontrak'],
+            ['nilai' => 'tetap', 'label' => 'Tetap'],
+            ['nilai' => 'non-aktif', 'label' => 'Non-Aktif'],
+        ];
+    @endphp
 
     <!-- Modal Tambah Karyawan -->
     <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
         <div @click.away="bukaModalTambah = false" class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-xl">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Tambah Data Karyawan Baru</h3>
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Tambah Data Pegawai / Driver</h3>
                 <button @click="bukaModalTambah = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>
             </div>
             <form method="POST" action="{{ route('master.karyawan.store') }}" class="p-5 space-y-3.5 text-xs">
@@ -166,18 +186,18 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kode Karyawan</label>
-                        <input type="text" name="kode_karyawan" required placeholder="KRY-STF-011"
+                        <input type="text" name="kode_karyawan" required placeholder="EMP-012"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kategori Karyawan</label>
-                        <select name="kategori_karyawan" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                            <option value="staf">Staf Kantor</option>
-                            <option value="driver">Driver Supir</option>
-                            <option value="gudang">Staf Gudang</option>
-                            <option value="teknisi">Teknisi Bengkel</option>
-                            <option value="manajemen">Manajemen / Direksi</option>
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="kategori_karyawan"
+                            placeholder="-- Pilih Kategori --"
+                            :opsi="$opsiKategoriKaryawan"
+                            :wajib="true"
+                            warnaFokus="indigo"
+                        />
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
@@ -188,11 +208,13 @@
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jabatan Sistem</label>
-                        <select name="id_jabatan" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                            @foreach($daftarJabatan ?? [] as $j)
-                                <option value="{{ $j->id_jabatan }}">{{ $j->nama_jabatan }}</option>
-                            @endforeach
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="id_jabatan"
+                            placeholder="-- Pilih Jabatan --"
+                            :opsi="$opsiJabatanKaryawan"
+                            :wajib="true"
+                            warnaFokus="indigo"
+                        />
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
@@ -210,22 +232,23 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Kepegawaian</label>
-                        <select name="status_karyawan" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                            <option value="aktif">Aktif</option>
-                            <option value="kontrak">Kontrak</option>
-                            <option value="tetap">Tetap</option>
-                            <option value="non-aktif">Non-Aktif</option>
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="status_karyawan"
+                            placeholder="-- Pilih Status --"
+                            :opsi="$opsiStatusKaryawan"
+                            :wajib="true"
+                            warnaFokus="indigo"
+                        />
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Mulai Kerja</label>
-                        <input type="date" name="tanggal_mulai_kerja" value="{{ date('Y-m-d') }}"
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Bergabung</label>
+                        <input type="date" name="tanggal_bergabung" required value="{{ date('Y-m-d') }}"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
                     </div>
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Alamat Domisili</label>
-                    <textarea name="alamat" rows="2" required placeholder="Jl. ..."
+                    <textarea name="alamat" rows="2" placeholder="Jl. Raya ..."
                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"></textarea>
                 </div>
                 <div class="flex items-center justify-end gap-2 pt-2">
@@ -254,32 +277,38 @@
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kategori Karyawan</label>
-                        <select name="kategori_karyawan" x-model="editData.kategori_karyawan" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                            <option value="staf">Staf Kantor</option>
-                            <option value="driver">Driver Supir</option>
-                            <option value="gudang">Staf Gudang</option>
-                            <option value="teknisi">Teknisi Bengkel</option>
-                            <option value="manajemen">Manajemen / Direksi</option>
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="kategori_karyawan"
+                            placeholder="-- Pilih Kategori --"
+                            :opsi="$opsiKategoriKaryawan"
+                            :wajib="true"
+                            warnaFokus="indigo"
+                            modelBind="editData.kategori_karyawan"
+                        />
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jabatan Sistem</label>
-                        <select name="id_jabatan" x-model="editData.id_jabatan" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                            @foreach($daftarJabatan ?? [] as $j)
-                                <option value="{{ $j->id_jabatan }}">{{ $j->nama_jabatan }}</option>
-                            @endforeach
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="id_jabatan"
+                            placeholder="-- Pilih Jabatan --"
+                            :opsi="$opsiJabatanKaryawan"
+                            :wajib="true"
+                            warnaFokus="indigo"
+                            modelBind="editData.id_jabatan"
+                        />
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Kepegawaian</label>
-                        <select name="status_karyawan" x-model="editData.status_karyawan" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                            <option value="aktif">Aktif</option>
-                            <option value="kontrak">Kontrak</option>
-                            <option value="tetap">Tetap</option>
-                            <option value="non-aktif">Non-Aktif</option>
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="status_karyawan"
+                            placeholder="-- Pilih Status --"
+                            :opsi="$opsiStatusKaryawan"
+                            :wajib="true"
+                            warnaFokus="indigo"
+                            modelBind="editData.status_karyawan"
+                        />
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">

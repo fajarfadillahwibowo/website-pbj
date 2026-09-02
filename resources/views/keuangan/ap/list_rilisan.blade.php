@@ -99,6 +99,19 @@
         </div>
     </div>
 
+    @php
+        $opsiDriver = ($daftarDriver ?? collect())->map(fn($d) => [
+            'nilai' => $d->kode_karyawan,
+            'label' => $d->nama_karyawan,
+            'sub'   => 'ID: ' . $d->kode_karyawan
+        ])->toArray();
+        $opsiRekeningRilisan = array_merge([['nilai' => '', 'label' => 'Kas Tunai']], ($daftarRekening ?? collect())->map(fn($r) => [
+            'nilai' => $r->id_rekening,
+            'label' => $r->nama_bank,
+            'sub'   => 'Saldo: Rp ' . number_format($r->saldo_rekening, 0, ',', '.')
+        ])->toArray());
+    @endphp
+
     <!-- Modal Rilis Uang Jalan -->
     <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
         <div @click.away="bukaModalTambah = false" class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
@@ -110,12 +123,13 @@
                 @csrf
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Driver Supir</label>
-                    <select name="kode_driver" required class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/30">
-                        <option value="">-- Pilih Driver --</option>
-                        @foreach($daftarDriver ?? [] as $drv)
-                            <option value="{{ $drv->kode_karyawan }}">{{ $drv->nama_karyawan }} ({{ $drv->kode_karyawan }})</option>
-                        @endforeach
-                    </select>
+                    <x-dropdown-kustom 
+                        nama="kode_driver"
+                        placeholder="-- Pilih Driver --"
+                        :opsi="$opsiDriver"
+                        :wajib="true"
+                        warnaFokus="rose"
+                    />
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Rilisan</label>
@@ -130,12 +144,12 @@
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Rekening Sumber Kas</label>
-                        <select name="id_rekening_sumber" class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/30">
-                            <option value="">-- Kas Tunai --</option>
-                            @foreach($daftarRekening ?? [] as $rek)
-                                <option value="{{ $rek->id_rekening }}">{{ $rek->nama_bank }}</option>
-                            @endforeach
-                        </select>
+                        <x-dropdown-kustom 
+                            nama="id_rekening_sumber"
+                            placeholder="-- Kas Tunai --"
+                            :opsi="$opsiRekeningRilisan"
+                            warnaFokus="rose"
+                        />
                     </div>
                 </div>
                 <div>
