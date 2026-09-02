@@ -93,13 +93,4 @@ class PembelianSOController extends Controller
 
         return redirect()->route('keuangan.ap.pembelian_so')->with('sukses', "Sales Order {$nomorSO} ({$jumlahZak} Zak - Rp " . number_format($totalHarga, 0, ',', '.') . ") berhasil diterbitkan.");
     }
-
-    /**
-     * Generator Nomor SO Otomatis (Daur Ulang Slot vs Acak Tanggal).
-     */
-    public function buatKodeOtomatis(Request $request)
-    {
-        $mode = $request->input('mode', 'gap');
-        return \App\Helpers\GeneratorKodeOtomatis::responJson('pembelian_so', 'nomor_so', 'PO-', $mode, 3, true);
-    }
 }

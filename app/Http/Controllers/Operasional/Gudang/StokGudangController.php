@@ -245,12 +245,67 @@ class StokGudangController extends Controller
     }
 
     /**
-     * Generator kode otomatis untuk Kode Gudang (Format Kombinasi Huruf & Angka, contoh: GDG-PBJ1).
+     * Generator kode otomatis untuk Kode Gudang.
      */
     public function buatKodeOtomatis(Request $request)
     {
         $mode = $request->input('mode', 'gap');
-        return \App\Helpers\GeneratorKodeOtomatis::responJson('list_gudang_so', 'kode_gudang', 'GDG-PBJ', $mode, 1, false);
+
+        if ($mode === 'acak') {
+            $karakter = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+            $panjang = strlen($karakter);
+            $kodeUnik = null;
+            $percobaan = 0;
+
+            do {
+                $acak = '';
+                for ($i = 0; $i < 4; $i++) {
+                    $acak .= $karakter[random_int(0, $panjang - 1)];
+                }
+                $kandidat = 'GDG-' . $acak;
+                $sudahAda = DB::table('list_gudang_so')->where('kode_gudang', $kandidat)->exists();
+                if (!$sudahAda) {
+                    $kodeUnik = $kandidat;
+                }
+                $percobaan++;
+            } while (!$kodeUnik && $percobaan < 50);
+
+            return response()->json([
+                'status' => 'sukses',
+                'mode' => 'acak',
+                'kode_otomatis' => $kodeUnik ?? ('GDG-' . strtoupper(bin2hex(random_bytes(2)))),
+                'keterangan' => 'Format Acak Anti-Tebak'
+            ]);
+        }
+
+        // Mode GAP FILLING: Cari slot nomor terkecil yang kosong / terhapus
+        $daftarGudang = DB::table('list_gudang_so')
+            ->where('kode_gudang', 'like', 'GDG-%')
+            ->pluck('kode_gudang');
+
+        $nomorTerpakai = [];
+        foreach ($daftarGudang as $kode) {
+            if (preg_match('/GDG-(\d+)/', $kode, $cocok)) {
+                $nomorTerpakai[] = (int) $cocok[1];
+            }
+        }
+
+        $nomorTerpakai = array_unique($nomorTerpakai);
+        sort($nomorTerpakai);
+
+        $slotTersedia = 1;
+        while (in_array($slotTersedia, $nomorTerpakai)) {
+            $slotTersedia++;
+        }
+
+        $kodeBaru = 'GDG-' . str_pad($slotTersedia, 3, '0', STR_PAD_LEFT);
+
+        return response()->json([
+            'status' => 'sukses',
+            'mode' => 'gap',
+            'kode_otomatis' => $kodeBaru,
+            'keterangan' => 'Slot Nomor Terkecil Tersedia (Daur Ulang Otomatis)'
+        ]);
     }
 
     /**
@@ -264,7 +319,7 @@ class StokGudangController extends Controller
 
             DB::table('list_gudang_so')->insert([
                 [
-                    'kode_gudang' => 'GDG-PBJ1',
+                    'kode_gudang' => 'GDG-PUSAT',
                     'nama_gudang' => 'Gudang Utama Pabrik Cikarang',
                     'jenis_gudang' => 'Utama',
                     'kode_barang' => $kodeBarangSemen,
@@ -277,7 +332,7 @@ class StokGudangController extends Controller
                     'diperbarui_pada' => Carbon::now()->subDays(1),
                 ],
                 [
-                    'kode_gudang' => 'GDG-PBJ2',
+                    'kode_gudang' => 'GDG-KRW-01',
                     'nama_gudang' => 'Gudang Distribusi Karawang',
                     'jenis_gudang' => 'Distribusi',
                     'kode_barang' => $kodeBarangSemen,
@@ -290,7 +345,7 @@ class StokGudangController extends Controller
                     'diperbarui_pada' => Carbon::now()->subHours(4),
                 ],
                 [
-                    'kode_gudang' => 'GDG-PBJ3',
+                    'kode_gudang' => 'GDG-BKS-02',
                     'nama_gudang' => 'Gudang Buffer Tambun',
                     'jenis_gudang' => 'Buffer',
                     'kode_barang' => $kodeBarangSemen,

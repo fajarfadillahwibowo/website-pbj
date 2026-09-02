@@ -3,30 +3,7 @@
 @section('judul', 'Deposit Customer (AR)')
 
 @section('konten')
-<div class="space-y-5" x-data="{ 
-    bukaModalTopUp: false,
-    nomorBuktiOtomatis: '',
-    modeKode: 'gap',
-    sedangBuatKode: false,
-    keteranganKode: 'Slot Nomor Terkecil Tersedia (Daur Ulang Otomatis)',
-
-    async buatKode(mode = 'gap') {
-        this.modeKode = mode;
-        this.sedangBuatKode = true;
-        try {
-            const res = await fetch(`{{ route('keuangan.ar.deposit.buat_kode') }}?mode=${mode}`);
-            const data = await res.json();
-            if (data.status === 'sukses') {
-                this.nomorBuktiOtomatis = data.kode_otomatis;
-                this.keteranganKode = data.keterangan;
-            }
-        } catch (e) {
-            console.error('Gagal generate nomor bukti deposit', e);
-        } finally {
-            this.sedangBuatKode = false;
-        }
-    }
-}" x-init="buatKode('gap')">
+<div class="space-y-5" x-data="{ bukaModalTopUp: false }">
     <!-- Flash Notification -->
     @if(session('sukses'))
         <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-center justify-between">
@@ -130,7 +107,6 @@
                         <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Jumlah Nominal</th>
                         <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Saldo Akhir</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Keterangan / Ref</th>
-                        <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Riwayat</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
@@ -166,13 +142,10 @@
                             <td class="px-4 py-3 text-slate-500 dark:text-slate-400 truncate max-w-xs">
                                 {{ $dep->keterangan ?? '-' }}
                             </td>
-                            <td class="px-4 py-3 text-center font-mono text-[10px] text-slate-400" title="Waktu: {{ $dep->terakhir_diedit_waktu }}">
-                                🕒 {{ $dep->terakhir_diedit_relatif }}
-                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-4 py-6 text-center text-slate-400">Belum ada riwayat mutasi deposit.</td>
+                            <td colspan="7" class="px-4 py-6 text-center text-slate-400">Belum ada riwayat mutasi deposit.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -181,8 +154,8 @@
     </div>
 
     <!-- Modal Top Up Deposit -->
-    <div x-show="bukaModalTopUp" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalTopUp = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
+    <div x-show="bukaModalTopUp" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="bukaModalTopUp = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-visible shadow-xl my-8">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Top Up Saldo Deposit Customer</h3>
                 <button @click="bukaModalTopUp = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>
@@ -190,27 +163,7 @@
             <form method="POST" action="{{ route('keuangan.ar.deposit.topup') }}" class="p-5 space-y-3.5 text-xs">
                 @csrf
                 <div>
-                    <div class="flex items-center justify-between mb-1">
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300">No. Bukti Deposit</label>
-                        <div class="flex items-center gap-1">
-                            <button type="button" @click="buatKode('gap')" :disabled="sedangBuatKode"
-                                    :class="modeKode === 'gap' ? 'bg-sky-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'"
-                                    class="text-[9px] font-semibold px-1.5 py-0.5 rounded transition-all">
-                                Daur Ulang
-                            </button>
-                            <button type="button" @click="buatKode('acak')" :disabled="sedangBuatKode"
-                                    :class="modeKode === 'acak' ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'"
-                                    class="text-[9px] font-semibold px-1.5 py-0.5 rounded transition-all">
-                                Acak
-                            </button>
-                        </div>
-                    </div>
-                    <input type="text" name="nomor_bukti_deposit" x-model="nomorBuktiOtomatis" required placeholder="DEP-001"
-                           class="w-full px-3 py-2 rounded-xl bg-sky-50/50 dark:bg-[#1C1E2A] border border-sky-200 dark:border-sky-900/50 text-sky-900 dark:text-sky-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500/30">
-                    <span class="text-[9px] text-slate-400 font-mono mt-0.5 block" x-text="keteranganKode"></span>
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Customer Toko</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Customer Toko <span class="text-rose-500">*</span></label>
                     <x-dropdown-kustom 
                         nama="kode_customer"
                         placeholder="-- Pilih Customer --"
@@ -220,17 +173,22 @@
                     />
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Setoran</label>
-                    <input type="date" name="tanggal_deposit" required value="{{ date('Y-m-d') }}"
-                           class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Setoran <span class="text-rose-500">*</span></label>
+                    <x-input-tanggal 
+                        nama="tanggal_deposit" 
+                        nilaiAwal="{{ date('Y-m-d') }}" 
+                        placeholder="Pilih Tanggal Setoran"
+                        :wajib="true"
+                        warnaFokus="sky"
+                    />
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jumlah Nominal Top Up (Rp)</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jumlah Nominal Top Up (Rp) <span class="text-rose-500">*</span></label>
                     <input type="number" name="jumlah_nominal" required min="100000" step="100000" placeholder="10000000"
                            class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/30 font-mono font-semibold text-sm">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan / Referensi Bank</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan / Referensi Bank <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
                     <input type="text" name="keterangan" placeholder="Setoran via transfer Bank BCA..."
                            class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
                 </div>

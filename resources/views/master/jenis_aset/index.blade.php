@@ -6,7 +6,7 @@
 <div x-data="kelolaJenisAset()" x-init="initJenisAset()" class="space-y-6">
 
     <!-- 1. Header Modul & Tombol Aksi -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#14161F] p-4 sm:p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
+    <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#14161F] p-4 sm:p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
         <div>
             <div class="flex items-center gap-2 mb-1.5">
                 <span class="px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase rounded-md bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 border border-violet-200 dark:border-violet-500/20 font-mono">
@@ -77,7 +77,7 @@
     @endif
 
     <!-- 3. Ringkasan Kartu KPI / Statistik -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <div class="wadah-bertingkat grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <!-- Total Kategori -->
         <div class="bg-white dark:bg-[#14161F] p-4 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm flex items-center gap-3.5">
             <div class="w-10 h-10 rounded-xl bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center shrink-0">
@@ -134,7 +134,7 @@
     </div>
 
     <!-- 4. Tabel Data & Bar Pencarian -->
-    <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         
         <!-- Search Bar -->
         <div class="p-4 sm:px-5 sm:py-4 border-b border-[#E2E8F0] dark:border-[#252837] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -164,7 +164,7 @@
 
         <!-- Tabel Jenis Aset -->
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="tabel-bertingkat w-full text-left text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500 dark:text-slate-400">
                     <tr>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Kode Jenis Aset</th>
@@ -269,9 +269,9 @@
     <!-- 5. MODAL FORM: TAMBAH JENIS ASET -->
     <!-- ========================================================================= -->
     <div x-show="modalTambahTerbuka" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
         <div @click.away="modalTambahTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
+             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-visible shadow-2xl my-8">
             
             <!-- Header -->
             <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
@@ -290,56 +290,59 @@
             </div>
 
             <!-- Form Tambah -->
-            <form action="{{ route('master.jenis_aset.simpan') }}" method="POST" class="p-6 space-y-4">
+            <form action="{{ route('master.jenis_aset.simpan') }}" method="POST" class="p-6 space-y-4 text-xs">
                 @csrf
 
                 <!-- Generator Kode Jenis Cerdas -->
                 <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837]">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                         <div>
-                            <label class="text-xs font-bold text-slate-800 dark:text-slate-200">
-                                Kode Jenis Aset <span class="text-rose-500">*</span>
-                            </label>
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                                    Kode Jenis Aset <span class="text-rose-500">*</span>
+                                </label>
+                                <span class="text-[10px] text-violet-600 dark:text-violet-400 font-semibold px-1.5 py-0.5 bg-violet-50 dark:bg-violet-950/50 rounded-md">Otomatis</span>
+                            </div>
                             <div class="text-[10px] text-slate-400 font-mono mt-0.5" x-text="keteranganKodeOtomatis"></div>
                         </div>
                         
                         <!-- Tombol Generator Mode -->
                         <div class="flex items-center gap-1.5 shrink-0">
                             <button type="button" @click="buatKodeOtomatis('gap')"
-                                    class="px-2 py-1 text-[10px] font-semibold text-violet-700 dark:text-violet-300 bg-violet-100 dark:bg-violet-900/30 hover:bg-violet-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs"
-                                    title="Daur ulang nomor: mengisi slot nomor terkecil yang kosong">
-                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                <span>Daur Ulang</span>
+                                    class="px-2.5 py-1 text-[11px] font-semibold text-violet-700 dark:text-violet-300 bg-violet-100 dark:bg-violet-900/30 hover:bg-violet-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs"
+                                    title="Daur ulang nomor: mengisi slot nomor terkecil yang kosong (JNS-001, JNS-002, dst)">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                <span>Isi Nomor Kosong</span>
                             </button>
                             <button type="button" @click="buatKodeOtomatis('acak')"
-                                    class="px-2 py-1 text-[10px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs"
+                                    class="px-2.5 py-1 text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs"
                                     title="Buat kode acak alfanumerik anti-tebak">
-                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                 <span>Kode Acak</span>
                             </button>
                         </div>
                     </div>
 
                     <input type="text" name="kode_jenis_aset" x-model="formTambah.kode_jenis_aset" required placeholder="Contoh: KND-TRN atau JNS-001"
-                           class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-violet-600 dark:text-violet-400 uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-violet-500/30">
+                           class="w-full px-3 py-2 text-xs font-mono font-bold rounded-xl bg-white dark:bg-[#14161F] border border-violet-200 dark:border-violet-900/50 text-violet-600 dark:text-violet-400 uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-violet-500/30">
                 </div>
 
                 <!-- Nama Jenis Aset -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Jenis / Kategori Aset <span class="text-rose-500">*</span></label>
                     <input type="text" name="jenis_aset" x-model="formTambah.jenis_aset" required placeholder="Contoh: Truk Tronton Wingbox"
-                           class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500/30">
+                           class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500/30">
                 </div>
 
                 <!-- Keterangan -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan & Spesifikasi Muatan <span class="text-rose-500">*</span></label>
                     <textarea name="keterangan" x-model="formTambah.keterangan" rows="3" required placeholder="Contoh: Kapasitas 25 - 30 Ton (500 - 600 Zak Semen)"
-                              class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500/30"></textarea>
+                              class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500/30"></textarea>
                 </div>
 
                 <!-- Footer Submit -->
-                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E2E8F0] dark:border-[#252837]">
+                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E2E8F0] dark:border-[#252837]">
                     <button type="button" @click="modalTambahTerbuka = false"
                             class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-colors">
                         Batal
@@ -357,9 +360,9 @@
     <!-- 6. MODAL FORM: EDIT JENIS ASET -->
     <!-- ========================================================================= -->
     <div x-show="modalEditTerbuka" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
         <div @click.away="modalEditTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
+             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-visible shadow-2xl my-8">
             
             <!-- Header -->
             <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
@@ -378,7 +381,7 @@
             </div>
 
             <!-- Form Edit -->
-            <form :action="'{{ url('master/jenis-aset') }}/' + formEdit.kode_jenis_aset" method="POST" class="p-6 space-y-4">
+            <form :action="'{{ url('master/jenis-aset') }}/' + formEdit.kode_jenis_aset" method="POST" class="p-6 space-y-4 text-xs">
                 @csrf
                 @method('PUT')
 
@@ -386,25 +389,25 @@
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Kode Jenis Aset (Terkunci)</label>
                     <input type="text" :value="formEdit.kode_jenis_aset" disabled
-                           class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 cursor-not-allowed">
+                           class="w-full px-3 py-2 text-xs font-mono font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 cursor-not-allowed">
                 </div>
 
                 <!-- Nama Jenis Aset -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Jenis / Kategori Aset <span class="text-rose-500">*</span></label>
                     <input type="text" name="jenis_aset" x-model="formEdit.jenis_aset" required
-                           class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                           class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                 </div>
 
                 <!-- Keterangan -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan & Spesifikasi Muatan <span class="text-rose-500">*</span></label>
                     <textarea name="keterangan" x-model="formEdit.keterangan" rows="3" required
-                              class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30"></textarea>
+                              class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30"></textarea>
                 </div>
 
                 <!-- Footer Submit -->
-                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E2E8F0] dark:border-[#252837]">
+                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E2E8F0] dark:border-[#252837]">
                     <button type="button" @click="modalEditTerbuka = false"
                             class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-colors">
                         Batal
@@ -424,7 +427,7 @@
     <div x-show="modalDetailTerbuka" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
         <div @click.away="modalDetailTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
+             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-visible shadow-2xl my-8">
             
             <!-- Header -->
             <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837] bg-slate-50 dark:bg-[#1C1E2A]">
@@ -457,7 +460,7 @@
 
                     <div class="max-h-56 overflow-y-auto border border-[#E2E8F0] dark:border-[#252837] rounded-xl">
                         <template x-if="detailJenisAset.kendaraan && detailJenisAset.kendaraan.length > 0">
-                            <table class="w-full text-left text-xs">
+                            <table class="tabel-bertingkat w-full text-left text-xs">
                                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] text-slate-500 font-semibold border-b border-[#E2E8F0] dark:border-[#252837]">
                                     <tr>
                                         <th class="px-3 py-2">Plat Nomor</th>
@@ -508,7 +511,7 @@
     <div x-show="modalHapusTerbuka" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
         <div @click.away="modalHapusTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 text-center">
+             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 text-center">
             
             <div class="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 mx-auto flex items-center justify-center mb-3.5">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -522,8 +525,11 @@
             </p>
 
             <template x-if="hapusData.jumlahTruk > 0">
-                <div class="mt-3 p-3 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-800 dark:text-amber-300 text-[11px] text-left">
-                    ⚠️ <strong>Perhatian:</strong> Kategori ini memiliki <span class="font-bold font-mono" x-text="hapusData.jumlahTruk"></span> unit truk yang terhubung. Hapus atau pindahkan unit kendaraan terlebih dahulu.
+                <div class="mt-3 p-3 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-800 dark:text-amber-300 text-[11px] text-left flex items-start gap-2">
+                    <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <div>
+                        <strong>Perhatian:</strong> Kategori ini memiliki <span class="font-bold font-mono" x-text="hapusData.jumlahTruk"></span> unit truk yang terhubung. Hapus atau pindahkan unit kendaraan terlebih dahulu.
+                    </div>
                 </div>
             </template>
 

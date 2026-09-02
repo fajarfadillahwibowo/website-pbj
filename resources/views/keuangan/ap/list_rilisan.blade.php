@@ -3,30 +3,7 @@
 @section('judul', 'Daftar Rilisan Biaya Operasional (AP)')
 
 @section('konten')
-<div class="space-y-5" x-data="{ 
-    bukaModalTambah: false,
-    nomorRilisanOtomatis: '',
-    modeKode: 'gap',
-    sedangBuatKode: false,
-    keteranganKode: 'Slot Nomor Terkecil Tersedia (Daur Ulang Otomatis)',
-
-    async buatKode(mode = 'gap') {
-        this.modeKode = mode;
-        this.sedangBuatKode = true;
-        try {
-            const res = await fetch(`{{ route('keuangan.ap.rilisan.buat_kode') }}?mode=${mode}`);
-            const data = await res.json();
-            if (data.status === 'sukses') {
-                this.nomorRilisanOtomatis = data.kode_otomatis;
-                this.keteranganKode = data.keterangan;
-            }
-        } catch (e) {
-            console.error('Gagal generate nomor rilisan', e);
-        } finally {
-            this.sedangBuatKode = false;
-        }
-    }
-}" x-init="buatKode('gap')">
+<div class="space-y-5" x-data="{ bukaModalTambah: false }">
     <!-- Flash Notification -->
     @if(session('sukses'))
         <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-center justify-between">
@@ -86,7 +63,6 @@
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Sumber Dana</th>
                         <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Nominal Rilis</th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Status Validasi</th>
-                        <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Riwayat</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
@@ -112,13 +88,10 @@
                                     Disetujui SPV
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-center font-mono text-[10px] text-slate-400" title="Waktu: {{ $r->terakhir_diedit_waktu ?? '-' }}">
-                                🕒 {{ $r->terakhir_diedit_relatif ?? 'Baru saja' }}
-                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-6 text-center text-slate-400">Belum ada riwayat rilisan kas bon.</td>
+                            <td colspan="6" class="px-4 py-6 text-center text-slate-400">Belum ada riwayat rilisan kas bon.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -140,8 +113,8 @@
     @endphp
 
     <!-- Modal Rilis Uang Jalan -->
-    <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalTambah = false" class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
+    <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-visible shadow-xl my-8">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Rilisan Uang Jalan Supir / Kas Bon</h3>
                 <button @click="bukaModalTambah = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>
@@ -149,27 +122,7 @@
             <form method="POST" action="{{ route('keuangan.ap.rilisan.store') }}" class="p-5 space-y-3.5 text-xs">
                 @csrf
                 <div>
-                    <div class="flex items-center justify-between mb-1">
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300">Nomor Rilisan</label>
-                        <div class="flex items-center gap-1">
-                            <button type="button" @click="buatKode('gap')" :disabled="sedangBuatKode"
-                                    :class="modeKode === 'gap' ? 'bg-rose-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'"
-                                    class="text-[9px] font-semibold px-1.5 py-0.5 rounded transition-all">
-                                Daur Ulang
-                            </button>
-                            <button type="button" @click="buatKode('acak')" :disabled="sedangBuatKode"
-                                    :class="modeKode === 'acak' ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'"
-                                    class="text-[9px] font-semibold px-1.5 py-0.5 rounded transition-all">
-                                Acak
-                            </button>
-                        </div>
-                    </div>
-                    <input type="text" name="nomor_rilisan" x-model="nomorRilisanOtomatis" required placeholder="RLS-001"
-                           class="w-full px-3 py-2 rounded-xl bg-rose-50/50 dark:bg-[#1C1E2A] border border-rose-200 dark:border-rose-900/50 text-rose-900 dark:text-rose-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-rose-500/30">
-                    <span class="text-[9px] text-slate-400 font-mono mt-0.5 block" x-text="keteranganKode"></span>
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Driver Supir</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Driver Supir <span class="text-rose-500">*</span></label>
                     <x-dropdown-kustom 
                         nama="kode_driver"
                         placeholder="-- Pilih Driver --"
@@ -179,18 +132,23 @@
                     />
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Rilisan</label>
-                    <input type="date" name="tanggal_rilisan" required value="{{ date('Y-m-d') }}"
-                           class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/30">
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Rilisan <span class="text-rose-500">*</span></label>
+                    <x-input-tanggal 
+                        nama="tanggal_rilisan" 
+                        nilaiAwal="{{ date('Y-m-d') }}" 
+                        placeholder="Pilih Tanggal Rilisan"
+                        :wajib="true"
+                        warnaFokus="rose"
+                    />
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nominal Uang Jalan (Rp)</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nominal Uang Jalan (Rp) <span class="text-rose-500">*</span></label>
                         <input type="number" name="nominal" required min="50000" step="50000" placeholder="1500000"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/30 font-mono font-semibold text-sm">
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Rekening Sumber Kas</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Rekening Sumber Kas <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
                         <x-dropdown-kustom 
                             nama="id_rekening_sumber"
                             placeholder="-- Kas Tunai --"
@@ -200,7 +158,7 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan / Rute Pengiriman</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan / Rute Pengiriman <span class="text-rose-500">*</span></label>
                     <input type="text" name="keterangan" required placeholder="Uang jalan pengiriman 500 zak ke Cikarang..."
                            class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/30">
                 </div>

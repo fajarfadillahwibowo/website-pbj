@@ -9,6 +9,7 @@ use App\Models\Keuangan\FakturPenjualan;
 use App\Models\Keuangan\Piutang;
 use App\Models\Keuangan\DepositCustomer;
 use App\Models\Master\Customer;
+use App\Models\Master\TokoBangunan;
 use App\Models\Master\Barang;
 
 class FakturPenjualanController extends Controller
@@ -22,7 +23,7 @@ class FakturPenjualanController extends Controller
         $filterStatus = $request->input('status');
         $filterMetode = $request->input('metode');
 
-        $query = FakturPenjualan::with('customer');
+        $query = FakturPenjualan::with(['customer', 'tokoBangunan']);
 
         if ($filterStatus) {
             $query->where('status_pembayaran', $filterStatus);
@@ -36,14 +37,23 @@ class FakturPenjualanController extends Controller
             $query->where(function ($q) use ($kataKunci) {
                 $q->where('nomor_faktur', 'like', "%{$kataKunci}%")
                   ->orWhereHas('customer', function ($c) use ($kataKunci) {
-                      $c->where('nama_toko_bangunan', 'like', "%{$kataKunci}%");
+                      $c->where('nama_pemilik', 'like', "%{$kataKunci}%")
+                        ->orWhere('nama_toko_bangunan', 'like', "%{$kataKunci}%");
                   });
             });
         }
 
         $daftarFaktur = $query->orderBy('id_penjualan', 'desc')->get();
-        $daftarCustomer = Customer::orderBy('nama_toko_bangunan')->get();
+        $daftarCustomer = Customer::orderBy('nama_pemilik')->get();
+        $daftarToko = TokoBangunan::with('customer')->where('status_toko', 'aktif')->orderBy('nama_toko_bangunan')->get();
         $daftarBarang = Barang::orderBy('nama_barang')->get();
+
+        // Opsi Dropdown Toko Bangunan
+        $opsiToko = $daftarToko->map(fn($t) => [
+            'nilai' => $t->kode_toko,
+            'label' => $t->nama_toko_bangunan . ' (' . ($t->customer->nama_pemilik ?? '-') . ')',
+            'sub'   => 'Customer Induk: ' . ($t->customer->nama_pemilik ?? '-') . ' | PIC: ' . $t->penanggung_jawab
+        ])->toArray();
 
         // Statistik Penjualan
         $totalPenjualan = FakturPenjualan::sum('total_netto');
@@ -54,6 +64,8 @@ class FakturPenjualanController extends Controller
         return view('keuangan.ar.faktur_penjualan', compact(
             'daftarFaktur',
             'daftarCustomer',
+            'daftarToko',
+            'opsiToko',
             'daftarBarang',
             'kataKunci',
             'filterStatus',
@@ -70,8 +82,17 @@ class FakturPenjualanController extends Controller
      */
     public function store(Request $request)
     {
+        // Jika kode_toko dipilih, otomatis ambil kode_customer dari toko tersebut
+        if ($request->filled('kode_toko')) {
+            $toko = TokoBangunan::where('kode_toko', $request->kode_toko)->first();
+            if ($toko) {
+                $request->merge(['kode_customer' => $toko->kode_customer]);
+            }
+        }
+
         $request->validate([
             'kode_customer'     => 'required|string|exists:data_customer,kode_customer',
+            'kode_toko'         => 'nullable|string|exists:data_toko_bangunan,kode_toko',
             'tanggal_penjualan' => 'required|date',
             'metode_pembayaran' => 'required|string|in:Tunai,Transfer,Kredit / Piutang,Potong Deposit',
             'total_bruto'       => 'required|numeric|min:1',
@@ -100,7 +121,7 @@ class FakturPenjualanController extends Controller
                 // Periksa batas plafon piutang
                 if (($customer->saldo_piutang + $totalNetto) > $customer->plafon_piutang) {
                     $sisaPlafon = max(0, $customer->plafon_piutang - $customer->saldo_piutang);
-                    return redirect()->back()->withInput()->with('gagal', "Penjualan melebihi Plafon Kredit toko '{$customer->nama_toko_bangunan}'. Sisa plafon tersedia: Rp " . number_format($sisaPlafon, 0, ',', '.'));
+                    return redirect()->back()->withInput()->with('gagal', "Penjualan melebihi Plafon Kredit customer '{$customer->nama_pemilik}'. Sisa plafon tersedia: Rp " . number_format($sisaPlafon, 0, ',', '.'));
                 }
 
                 $sisaPiutang = $totalNetto;
@@ -113,7 +134,7 @@ class FakturPenjualanController extends Controller
             } elseif ($metode === 'Potong Deposit') {
                 // Periksa saldo deposit customer
                 if ($customer->saldo_deposit < $totalNetto) {
-                    return redirect()->back()->withInput()->with('gagal', "Saldo deposit toko '{$customer->nama_toko_bangunan}' tidak mencukupi (Tersedia: Rp " . number_format($customer->saldo_deposit, 0, ',', '.') . ").");
+                    return redirect()->back()->withInput()->with('gagal', "Saldo deposit customer '{$customer->nama_pemilik}' tidak mencukupi (Tersedia: Rp " . number_format($customer->saldo_deposit, 0, ',', '.') . ").");
                 }
 
                 $jumlahDibayar = $totalNetto;
@@ -146,6 +167,7 @@ class FakturPenjualanController extends Controller
                 'nomor_faktur'       => $nomorFaktur,
                 'tanggal_penjualan'  => $request->tanggal_penjualan,
                 'kode_customer'      => $customer->kode_customer,
+                'kode_toko'          => $request->kode_toko ?? null,
                 'metode_pembayaran'  => $metode,
                 'total_bruto'        => $totalBruto,
                 'diskon'             => $diskon,
@@ -179,14 +201,5 @@ class FakturPenjualanController extends Controller
             DB::rollBack();
             return redirect()->back()->withInput()->with('gagal', "Gagal menerbitkan faktur: " . $e->getMessage());
         }
-    }
-
-    /**
-     * Generator Nomor Faktur Otomatis (Daur Ulang Slot vs Acak Tanggal).
-     */
-    public function buatKodeOtomatis(Request $request)
-    {
-        $mode = $request->input('mode', 'gap');
-        return \App\Helpers\GeneratorKodeOtomatis::responJson('penjualan', 'nomor_faktur', 'INV-', $mode, 3, true);
     }
 }

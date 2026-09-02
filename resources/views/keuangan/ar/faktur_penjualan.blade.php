@@ -8,29 +8,8 @@
     metode: 'Kredit / Piutang',
     bruto: 35000000,
     diskon: 0,
-    nomorFakturOtomatis: '',
-    modeKode: 'gap',
-    sedangBuatKode: false,
-    keteranganKode: 'Slot Nomor Terkecil Tersedia (Daur Ulang Otomatis)',
-
-    async buatKode(mode = 'gap') {
-        this.modeKode = mode;
-        this.sedangBuatKode = true;
-        try {
-            const res = await fetch(`{{ route('keuangan.ar.faktur.buat_kode') }}?mode=${mode}`);
-            const data = await res.json();
-            if (data.status === 'sukses') {
-                this.nomorFakturOtomatis = data.kode_otomatis;
-                this.keteranganKode = data.keterangan;
-            }
-        } catch (e) {
-            console.error('Gagal generate nomor faktur', e);
-        } finally {
-            this.sedangBuatKode = false;
-        }
-    },
     hitungNetto() { return Math.max(0, this.bruto - this.diskon); }
-}" x-init="buatKode('gap')">
+}">
     <!-- Flash Notification -->
     @if(session('sukses'))
         <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-center justify-between">
@@ -167,7 +146,6 @@
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Metode Bayar</th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Status</th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Jatuh Tempo</th>
-                        <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Aksi & Riwayat</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
@@ -208,18 +186,10 @@
                             <td class="px-4 py-3 text-center font-mono text-slate-500">
                                 {{ $faktur->tanggal_jatuh_tempo ? date('d/m/Y', strtotime($faktur->tanggal_jatuh_tempo)) : '-' }}
                             </td>
-                            <td class="px-4 py-3 text-center">
-                                <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400">
-                                    {{ $faktur->status_persetujuan ?? 'Disetujui' }}
-                                </span>
-                                <div class="mt-1 text-[10px] text-slate-400 dark:text-slate-500 font-mono" title="Terakhir diperbarui: {{ $faktur->terakhir_diedit_waktu }}">
-                                    🕒 {{ $faktur->terakhir_diedit_relatif }}
-                                </div>
-                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="px-4 py-6 text-center text-slate-400">Belum ada faktur penjualan tercatat.</td>
+                            <td colspan="8" class="px-4 py-6 text-center text-slate-400">Belum ada faktur penjualan tercatat.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -228,8 +198,8 @@
     </div>
 
     <!-- Modal Tambah Faktur Penjualan -->
-    <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-xl">
+    <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-visible shadow-xl my-8">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Penerbitan Faktur Penjualan Baru</h3>
                 <button @click="bukaModalTambah = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>
@@ -238,43 +208,29 @@
                 @csrf
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <div class="flex items-center justify-between mb-1">
-                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Nomor Faktur</label>
-                            <div class="flex items-center gap-1">
-                                <button type="button" @click="buatKode('gap')" :disabled="sedangBuatKode"
-                                        :class="modeKode === 'gap' ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'"
-                                        class="text-[9px] font-semibold px-1.5 py-0.5 rounded transition-all">
-                                    Daur Ulang
-                                </button>
-                                <button type="button" @click="buatKode('acak')" :disabled="sedangBuatKode"
-                                        :class="modeKode === 'acak' ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'"
-                                        class="text-[9px] font-semibold px-1.5 py-0.5 rounded transition-all">
-                                    Acak
-                                </button>
-                            </div>
-                        </div>
-                        <input type="text" name="nomor_faktur" x-model="nomorFakturOtomatis" required placeholder="INV-001"
-                               class="w-full px-3 py-2 rounded-xl bg-emerald-50/50 dark:bg-[#1C1E2A] border border-emerald-200 dark:border-emerald-900/50 text-emerald-900 dark:text-emerald-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
-                        <span class="text-[9px] text-slate-400 font-mono mt-0.5 block" x-text="keteranganKode"></span>
-                    </div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Customer / Mitra Toko</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Toko Bangunan / Proyek Tujuan <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
-                            nama="kode_customer"
-                            placeholder="-- Pilih Customer --"
-                            :opsi="$opsiCustomerFaktur"
+                            nama="kode_toko"
+                            placeholder="-- Pilih Toko / Proyek --"
+                            :opsi="$opsiToko ?? $opsiCustomerFaktur"
                             :wajib="true"
                             warnaFokus="emerald"
                         />
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Transaksi</label>
-                        <input type="date" name="tanggal_penjualan" required value="{{ date('Y-m-d') }}"
-                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Transaksi <span class="text-rose-500">*</span></label>
+                        <x-input-tanggal 
+                            nama="tanggal_penjualan" 
+                            nilaiAwal="{{ date('Y-m-d') }}" 
+                            placeholder="Pilih Tanggal"
+                            :wajib="true"
+                            warnaFokus="emerald"
+                        />
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Metode Pembayaran</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Metode Pembayaran <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="metode_pembayaran"
                             placeholder="-- Pilih Metode --"
@@ -285,19 +241,24 @@
                         />
                     </div>
                     <div x-show="metode === 'Kredit / Piutang'">
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Jatuh Tempo</label>
-                        <input type="date" name="jatuh_tempo" value="{{ date('Y-m-d', strtotime('+30 days')) }}"
-                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Jatuh Tempo <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
+                        <x-input-tanggal 
+                            nama="jatuh_tempo" 
+                            nilaiAwal="{{ date('Y-m-d', strtotime('+30 days')) }}" 
+                            placeholder="Pilih Jatuh Tempo"
+                            :wajib="false"
+                            warnaFokus="emerald"
+                        />
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Total Nilai Bruto (Rp)</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Total Nilai Bruto (Rp) <span class="text-rose-500">*</span></label>
                         <input type="number" name="total_bruto" x-model.number="bruto" required min="1" step="100000"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Potongan Diskon (Rp)</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Potongan Diskon (Rp) <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
                         <input type="number" name="diskon" x-model.number="diskon" min="0" step="50000"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
                     </div>

@@ -59,17 +59,10 @@ class KodeAkunController extends Controller
             'tipe_akun'     => 'required|string',
             'kelompok_akun' => 'required|string|max:50',
             'saldo_normal'  => 'required|string|in:Debit,Kredit',
-            'saldo'         => 'nullable|numeric|min:0',
             'saldo_awal'    => 'nullable|numeric|min:0',
-        ], [
-            'kode_akun.required' => 'Kode akun wajib diisi.',
-            'kode_akun.unique'   => 'Kode akun sudah terdaftar.',
-            'nama_akun.required' => 'Nama akun wajib diisi.',
-            'tipe_akun.required' => 'Tipe akun wajib dipilih.',
-            'kelompok_akun.required' => 'Kelompok akun wajib diisi.',
         ]);
 
-        $saldoNominal = (float) ($request->saldo ?? $request->saldo_awal ?? 0);
+        $saldoAwal = (float) ($request->saldo_awal ?? 0);
 
         KodeAkun::create([
             'kode_akun'      => $request->kode_akun,
@@ -77,11 +70,11 @@ class KodeAkunController extends Controller
             'tipe_akun'      => $request->tipe_akun,
             'kelompok_akun'  => $request->kelompok_akun,
             'saldo_normal'   => $request->saldo_normal,
-            'saldo_awal'     => $saldoNominal,
-            'saldo_berjalan' => $saldoNominal,
+            'saldo_awal'     => $saldoAwal,
+            'saldo_berjalan' => $saldoAwal,
         ]);
 
-        return redirect()->route('keuangan.akuntansi.kode_akun')->with('sukses', "Akun COA [{$request->kode_akun}] '{$request->nama_akun}' berhasil ditambahkan.");
+        return redirect()->route('keuangan.akuntansi.kode_akun')->with('sukses', "Akun COA {$request->kode_akun} - {$request->nama_akun} berhasil ditambahkan.");
     }
 
     /**
@@ -96,23 +89,16 @@ class KodeAkunController extends Controller
             'tipe_akun'     => 'required|string',
             'kelompok_akun' => 'required|string|max:50',
             'saldo_normal'  => 'required|string|in:Debit,Kredit',
-            'saldo'         => 'nullable|numeric|min:0',
         ]);
 
-        $dataUpdate = [
+        $akun->update([
             'nama_akun'     => $request->nama_akun,
             'tipe_akun'     => $request->tipe_akun,
             'kelompok_akun' => $request->kelompok_akun,
             'saldo_normal'  => $request->saldo_normal,
-        ];
+        ]);
 
-        if ($request->has('saldo') && $request->saldo !== null) {
-            $dataUpdate['saldo_berjalan'] = (float) $request->saldo;
-        }
-
-        $akun->update($dataUpdate);
-
-        return redirect()->route('keuangan.akuntansi.kode_akun')->with('sukses', "Data Akun COA [{$akun->kode_akun}] berhasil diperbarui.");
+        return redirect()->route('keuangan.akuntansi.kode_akun')->with('sukses', "Akun COA {$akun->kode_akun} berhasil diperbarui.");
     }
 
     /**
@@ -121,23 +107,8 @@ class KodeAkunController extends Controller
     public function destroy($kode_akun)
     {
         $akun = KodeAkun::findOrFail($kode_akun);
-
-        $adaJurnal = \Illuminate\Support\Facades\DB::table('jurnal_umum')->where('kode_akun', $kode_akun)->exists();
-        if ($adaJurnal) {
-            return redirect()->route('keuangan.akuntansi.kode_akun')->with('gagal', "Akun COA [{$kode_akun}] tidak dapat dihapus karena telah memiliki riwayat posting jurnal umum.");
-        }
-
         $akun->delete();
 
-        return redirect()->route('keuangan.akuntansi.kode_akun')->with('sukses', "Akun COA [{$akun->kode_akun}] berhasil dihapus.");
-    }
-
-    /**
-     * Generator Kode Akun COA Otomatis (Daur Ulang Slot vs Acak).
-     */
-    public function buatKodeOtomatis(Request $request)
-    {
-        $mode = $request->input('mode', 'gap');
-        return \App\Helpers\GeneratorKodeOtomatis::responJson('data_kode_akun', 'kode_akun', '1', $mode, 3, false);
+        return redirect()->route('keuangan.akuntansi.kode_akun')->with('sukses', "Akun COA {$akun->kode_akun} berhasil dihapus.");
     }
 }

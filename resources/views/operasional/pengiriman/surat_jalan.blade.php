@@ -5,8 +5,39 @@
 @section('konten')
 <div x-data="kelolaSuratJalan()" x-init="initSuratJalan()" class="space-y-6">
 
+    @php
+        $opsiStatusFilter = [
+            ['nilai' => 'semua', 'label' => 'Semua Status Pengiriman'],
+            ['nilai' => 'menunggu', 'label' => 'Menunggu Muat'],
+            ['nilai' => 'dalam_perjalanan', 'label' => 'Dalam Perjalanan'],
+            ['nilai' => 'terkirim', 'label' => 'Terkirim / Selesai'],
+            ['nilai' => 'retur', 'label' => 'Retur / Ditolak'],
+        ];
+        $opsiStatusPengiriman = [
+            ['nilai' => 'menunggu', 'label' => 'Menunggu Muat di Gudang'],
+            ['nilai' => 'dalam_perjalanan', 'label' => 'Dalam Perjalanan (Berangkat)'],
+            ['nilai' => 'terkirim', 'label' => 'Terkirim / Tiba di Lokasi'],
+            ['nilai' => 'retur', 'label' => 'Retur / Ditolak Toko'],
+        ];
+        $opsiSO = ($daftarSO ?? collect())->map(fn($so) => [
+            'nilai' => $so->id_so,
+            'label' => $so->nomor_so . ' — ' . ($so->customer->nama_toko_bangunan ?? $so->customer->nama_customer ?? 'Toko Pelanggan'),
+            'sub'   => ($so->jumlah_zak ?? 0) . ' Zak | ' . ($so->customer->alamat ?? 'Alamat pengiriman')
+        ])->toArray();
+        $opsiDriver = ($daftarDriver ?? collect())->map(fn($drv) => [
+            'nilai' => $drv->kode_karyawan,
+            'label' => $drv->nama_karyawan . ' (' . $drv->kode_karyawan . ')',
+            'sub'   => 'HP: ' . ($drv->no_hp ?? '-')
+        ])->toArray();
+        $opsiKendaraan = ($daftarKendaraan ?? collect())->map(fn($knd) => [
+            'nilai' => $knd->kode_aset,
+            'label' => ($knd->no_polisi ?? '-') . ' — ' . ($knd->nama_aset ?? 'Truk Armada'),
+            'sub'   => 'Kapasitas: ' . ($knd->muatan ?? 'Standar')
+        ])->toArray();
+    @endphp
+
     <!-- 1. Header Modul & Tombol Aksi -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#14161F] p-4 sm:p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
+    <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#14161F] p-4 sm:p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
         <div>
             <div class="flex items-center gap-2 mb-1.5">
                 <span class="px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase rounded-md bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-500/20 font-mono">
@@ -77,7 +108,7 @@
     @endif
 
     <!-- 3. Ringkasan Kartu KPI Logistik Pengiriman -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <div class="wadah-bertingkat grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <!-- Total Pengiriman -->
         <div class="bg-white dark:bg-[#14161F] p-4 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm flex items-center gap-3.5">
             <div class="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
@@ -133,7 +164,7 @@
     </div>
 
     <!-- 4. Tabel Data Surat Jalan & Filter -->
-    <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         
         <!-- Filter Bar -->
         <div class="p-4 sm:px-5 sm:py-4 border-b border-[#E2E8F0] dark:border-[#252837] flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -147,19 +178,17 @@
                     </svg>
                 </div>
 
-                <!-- Filter Status -->
-                <select name="status" onchange="this.form.submit()"
-                        class="px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
-                    <option value="semua" {{ ($statusFilter ?? 'semua') === 'semua' ? 'selected' : '' }}>Semua Status</option>
-                    <option value="menunggu" {{ ($statusFilter ?? '') === 'menunggu' ? 'selected' : '' }}>Menunggu Muat</option>
-                    <option value="dalam_perjalanan" {{ ($statusFilter ?? '') === 'dalam_perjalanan' ? 'selected' : '' }}>Dalam Perjalanan</option>
-                    <option value="terkirim" {{ ($statusFilter ?? '') === 'terkirim' ? 'selected' : '' }}>Terkirim / Selesai</option>
-                    <option value="retur" {{ ($statusFilter ?? '') === 'retur' ? 'selected' : '' }}>Retur / Ditolak</option>
-                </select>
-
-                <button type="submit" class="px-3.5 py-2 text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition-colors">
-                    Cari
-                </button>
+                <!-- Filter Status Dropdown Kustom -->
+                <div class="w-full sm:w-56">
+                    <x-dropdown-kustom 
+                        nama="status"
+                        placeholder="-- Status Pengiriman --"
+                        :opsi="$opsiStatusFilter"
+                        :nilaiAwal="$statusFilter ?? 'semua'"
+                        :submitOnChange="true"
+                        warnaFokus="sky"
+                    />
+                </div>
 
                 @if(!empty($kataKunci) || ($statusFilter !== 'semua' && !empty($statusFilter)))
                     <a href="{{ route('operasional.pengiriman.surat_jalan') }}" class="text-xs font-semibold text-rose-600 dark:text-rose-400 hover:underline">
@@ -175,7 +204,7 @@
 
         <!-- Tabel Data Pengiriman -->
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="tabel-bertingkat w-full text-left text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500 dark:text-slate-400">
                     <tr>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">No. Surat Jalan & Waktu</th>
@@ -319,250 +348,195 @@
         </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- 5. MODAL FORM: TERBITKAN SURAT JALAN BARU -->
-    <!-- ========================================================================= -->
-    <div x-show="modalTambahTerbuka" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="modalTambahTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
-            
-            <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                    </div>
-                    <div>
-                        <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Terbitkan Surat Jalan (SJ) Baru</h2>
-                        <p class="text-[11px] text-slate-400">Tugaskan driver dan armada truk untuk pengiriman Sales Order semen.</p>
-                    </div>
-                </div>
-                <button @click="modalTambahTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+    <!-- Modal Tambah Surat Jalan -->
+    <div x-show="modalTambahTerbuka" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="modalTambahTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-visible shadow-xl my-8">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Terbitkan Surat Jalan (SJ) Baru</h3>
+                <button @click="modalTambahTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none">&times;</button>
             </div>
 
-            <form action="{{ route('operasional.pengiriman.surat_jalan.simpan') }}" method="POST" class="p-6 space-y-4">
+            <form action="{{ route('operasional.pengiriman.surat_jalan.simpan') }}" method="POST" class="p-5 space-y-3.5 text-xs">
                 @csrf
-
-                <!-- Generator Nomor Surat Jalan Cerdas -->
-                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837]">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-                        <div>
-                            <label class="text-xs font-bold text-slate-800 dark:text-slate-200">
-                                Nomor Surat Jalan <span class="text-rose-500">*</span>
-                            </label>
-                            <div class="text-[10px] text-slate-400 font-mono mt-0.5" x-text="keteranganKodeSJ"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Nomor Surat Jalan <span class="text-rose-500">*</span></label>
+                            <span class="text-[10px] text-sky-600 dark:text-sky-400 font-semibold px-1.5 py-0.5 bg-sky-50 dark:bg-sky-950/50 rounded-md">Otomatis</span>
                         </div>
-                        
-                        <div class="flex items-center gap-1.5 shrink-0">
-                            <button type="button" @click="buatKodeOtomatis('gap')"
-                                    class="px-2.5 py-1 text-[11px] font-semibold text-sky-700 dark:text-sky-300 bg-sky-100 dark:bg-sky-900/30 hover:bg-sky-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                <span>Daur Ulang (SJ-001)</span>
-                            </button>
-                            <button type="button" @click="buatKodeOtomatis('acak')"
-                                    class="px-2.5 py-1 text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                <span>Format Tanggal</span>
-                            </button>
-                        </div>
+                        <input type="text" name="nomor_surat_jalan" x-model="formTambah.nomor_surat_jalan" required placeholder="SJ-001"
+                               class="w-full px-3 py-2 rounded-xl bg-sky-50/50 dark:bg-[#1C1E2A] border border-sky-200 dark:border-sky-900/50 text-sky-900 dark:text-sky-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500/30">
                     </div>
 
-                    <input type="text" name="nomor_surat_jalan" x-model="formTambah.nomor_surat_jalan" required placeholder="Contoh: SJ-001 atau SJ-20260902-8K2"
-                           class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-sky-600 dark:text-sky-400 uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-sky-500/30">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Sales Order (SO) Pelanggan <span class="text-rose-500">*</span></label>
+                        <x-dropdown-kustom 
+                            nama="id_so"
+                            placeholder="-- Pilih Sales Order --"
+                            :opsi="$opsiSO"
+                            :wajib="true"
+                            warnaFokus="sky"
+                            modelBind="formTambah.id_so"
+                        />
+                    </div>
                 </div>
 
-                <!-- Pemilih Sales Order -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Driver Pengemudi <span class="text-rose-500">*</span></label>
+                        <x-dropdown-kustom 
+                            nama="kode_driver"
+                            placeholder="-- Pilih Driver --"
+                            :opsi="$opsiDriver"
+                            :wajib="true"
+                            warnaFokus="sky"
+                            modelBind="formTambah.kode_driver"
+                        />
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Truk Armada Pengiriman <span class="text-rose-500">*</span></label>
+                        <x-dropdown-kustom 
+                            nama="kode_aset"
+                            placeholder="-- Pilih Truk Armada --"
+                            :opsi="$opsiKendaraan"
+                            :wajib="true"
+                            warnaFokus="sky"
+                            modelBind="formTambah.kode_aset"
+                        />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Keberangkatan <span class="text-rose-500">*</span></label>
+                        <x-input-tanggal 
+                            nama="tanggal_kirim" 
+                            modelBind="formTambah.tanggal_kirim" 
+                            placeholder="Pilih Tanggal Kirim"
+                            :wajib="true"
+                            warnaFokus="sky"
+                        />
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Keberangkatan <span class="text-rose-500">*</span></label>
+                        <x-dropdown-kustom 
+                            nama="status_pengiriman"
+                            placeholder="-- Pilih Status --"
+                            :opsi="$opsiStatusPengiriman"
+                            :wajib="true"
+                            warnaFokus="sky"
+                            modelBind="formTambah.status_pengiriman"
+                        />
+                    </div>
+                </div>
+
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Sales Order (SO) Pelanggan <span class="text-rose-500">*</span></label>
-                    <select name="id_so" x-model="formTambah.id_so" required
-                            class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
-                        <option value="">-- Pilih Sales Order --</option>
-                        @foreach($daftarSO as $so)
-                            <option value="{{ $so->id_so }}">
-                                {{ $so->nomor_so }} — {{ $so->customer->nama_customer ?? 'Umum' }} ({{ $so->jumlah_zak }} Zak) - {{ $so->customer->alamat ?? '' }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <!-- Pemilih Driver (Data Karyawan) -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Driver Pengemudi <span class="text-rose-500">*</span></label>
-                        <select name="kode_driver" x-model="formTambah.kode_driver" required
-                                class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
-                            <option value="">-- Pilih Driver --</option>
-                            @foreach($daftarDriver as $drv)
-                                <option value="{{ $drv->kode_karyawan }}">
-                                    {{ $drv->nama_karyawan }} ({{ $drv->kode_karyawan }}) - Telp: {{ $drv->no_hp }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Pemilih Kendaraan (Data Aset) -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Truk Armada Pengiriman <span class="text-rose-500">*</span></label>
-                        <select name="kode_aset" x-model="formTambah.kode_aset" required
-                                class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
-                            <option value="">-- Pilih Truk Armada --</option>
-                            @foreach($daftarKendaraan as $knd)
-                                <option value="{{ $knd->kode_aset }}">
-                                    {{ $knd->no_polisi }} — {{ $knd->nama_aset }} ({{ $knd->muatan }})
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Tanggal & Jam Kirim -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal & Waktu Keberangkatan <span class="text-rose-500">*</span></label>
-                        <input type="datetime-local" name="tanggal_kirim" x-model="formTambah.tanggal_kirim" required
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
-                    </div>
-
-                    <!-- Status Pengiriman -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Keberangkatan <span class="text-rose-500">*</span></label>
-                        <select name="status_pengiriman" x-model="formTambah.status_pengiriman" required
-                                class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
-                            <option value="menunggu">Menunggu Muat di Gudang</option>
-                            <option value="dalam_perjalanan">Dalam Perjalanan (Berangkat)</option>
-                            <option value="terkirim">Terkirim / Tiba di Lokasi</option>
-                            <option value="retur">Retur / Ditolak Toko</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Keterangan -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan / Nomor Segel / Catatan Rute</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan / Nomor Segel / Rute <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
                     <textarea name="keterangan" x-model="formTambah.keterangan" rows="2" placeholder="Contoh: Nomor Segel: PBJ-9921, dikirim via Jalur Pantura"
-                              class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/30"></textarea>
+                              class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/30"></textarea>
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    <button type="button" @click="modalTambahTerbuka = false"
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="px-5 py-2 text-xs font-semibold text-white bg-sky-600 hover:bg-sky-700 active:scale-95 rounded-xl transition-all shadow-md shadow-sky-600/20">
-                        Terbitkan Surat Jalan
-                    </button>
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" @click="modalTambahTerbuka = false" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-all shadow-sm">Terbitkan Surat Jalan</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- 6. MODAL FORM: EDIT SURAT JALAN -->
-    <!-- ========================================================================= -->
-    <div x-show="modalEditTerbuka" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="modalEditTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
-            
-            <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                    </div>
-                    <div>
-                        <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Ubah Data Surat Jalan</h2>
-                        <p class="text-[11px] text-slate-400">No SJ: <span class="font-mono font-bold text-sky-600" x-text="formEdit.nomor_surat_jalan"></span></p>
-                    </div>
-                </div>
-                <button @click="modalEditTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+    <!-- Modal Edit Surat Jalan -->
+    <div x-show="modalEditTerbuka" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="modalEditTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-visible shadow-xl my-8">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Ubah Data Surat Jalan: <span class="font-mono text-sky-600" x-text="formEdit.nomor_surat_jalan"></span></h3>
+                <button @click="modalEditTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none">&times;</button>
             </div>
 
-            <form :action="'{{ url('operasional/pengiriman/surat-jalan') }}/' + formEdit.id_pengiriman" method="POST" class="p-6 space-y-4">
+            <form :action="'{{ url('operasional/pengiriman/surat-jalan') }}/' + formEdit.id_pengiriman" method="POST" class="p-5 space-y-3.5 text-xs">
                 @csrf
                 @method('PUT')
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Surat Jalan (Terkunci)</label>
-                    <input type="text" :value="formEdit.nomor_surat_jalan" disabled
-                           class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 cursor-not-allowed">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Sales Order (SO) Pelanggan <span class="text-rose-500">*</span></label>
-                    <select name="id_so" x-model="formEdit.id_so" required
-                            class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                        <option value="">-- Pilih Sales Order --</option>
-                        @foreach($daftarSO as $so)
-                            <option value="{{ $so->id_so }}">
-                                {{ $so->nomor_so }} — {{ $so->customer->nama_customer ?? 'Umum' }} ({{ $so->jumlah_zak }} Zak)
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Driver Pengemudi <span class="text-rose-500">*</span></label>
-                        <select name="kode_driver" x-model="formEdit.kode_driver" required
-                                class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                            <option value="">-- Pilih Driver --</option>
-                            @foreach($daftarDriver as $drv)
-                                <option value="{{ $drv->kode_karyawan }}">
-                                    {{ $drv->nama_karyawan }} ({{ $drv->kode_karyawan }})
-                                </option>
-                            @endforeach
-                        </select>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Surat Jalan (Terkunci)</label>
+                        <input type="text" :value="formEdit.nomor_surat_jalan" disabled
+                               class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 font-mono font-semibold cursor-not-allowed">
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Truk Armada <span class="text-rose-500">*</span></label>
-                        <select name="kode_aset" x-model="formEdit.kode_aset" required
-                                class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                            <option value="">-- Pilih Truk Armada --</option>
-                            @foreach($daftarKendaraan as $knd)
-                                <option value="{{ $knd->kode_aset }}">
-                                    {{ $knd->no_polisi }} — {{ $knd->nama_aset }} ({{ $knd->muatan }})
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Keberangkatan <span class="text-rose-500">*</span></label>
-                        <input type="datetime-local" name="tanggal_kirim" x-model="formEdit.tanggal_kirim" required
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Pengiriman <span class="text-rose-500">*</span></label>
-                        <select name="status_pengiriman" x-model="formEdit.status_pengiriman" required
-                                class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                            <option value="menunggu">Menunggu Muat di Gudang</option>
-                            <option value="dalam_perjalanan">Dalam Perjalanan</option>
-                            <option value="terkirim">Terkirim / Selesai</option>
-                            <option value="retur">Retur / Ditolak Toko</option>
-                        </select>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Sales Order (SO) Pelanggan <span class="text-rose-500">*</span></label>
+                        <x-dropdown-kustom 
+                            nama="id_so"
+                            placeholder="-- Pilih Sales Order --"
+                            :opsi="$opsiSO"
+                            :wajib="true"
+                            warnaFokus="amber"
+                            modelBind="formEdit.id_so"
+                        />
                     </div>
                 </div>
 
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Driver Pengemudi <span class="text-rose-500">*</span></label>
+                        <x-dropdown-kustom 
+                            nama="kode_driver"
+                            placeholder="-- Pilih Driver --"
+                            :opsi="$opsiDriver"
+                            :wajib="true"
+                            warnaFokus="amber"
+                            modelBind="formEdit.kode_driver"
+                        />
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Truk Armada <span class="text-rose-500">*</span></label>
+                        <x-dropdown-kustom 
+                            nama="kode_aset"
+                            placeholder="-- Pilih Truk Armada --"
+                            :opsi="$opsiKendaraan"
+                            :wajib="true"
+                            warnaFokus="amber"
+                            modelBind="formEdit.kode_aset"
+                        />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Keberangkatan <span class="text-rose-500">*</span></label>
+                        <x-input-tanggal 
+                            nama="tanggal_kirim" 
+                            modelBind="formEdit.tanggal_kirim" 
+                            placeholder="Pilih Tanggal Kirim"
+                            :wajib="true"
+                            warnaFokus="amber"
+                        />
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Pengiriman <span class="text-rose-500">*</span></label>
+                        <x-dropdown-kustom 
+                            nama="status_pengiriman"
+                            placeholder="-- Pilih Status --"
+                            :opsi="$opsiStatusPengiriman"
+                            :wajib="true"
+                            warnaFokus="amber"
+                            modelBind="formEdit.status_pengiriman"
+                        />
+                    </div>
+                </div>
+
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan / Catatan Rute</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan / Catatan Rute <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
                     <textarea name="keterangan" x-model="formEdit.keterangan" rows="2"
-                              class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30"></textarea>
+                              class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30"></textarea>
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    <button type="button" @click="modalEditTerbuka = false"
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 active:scale-95 rounded-xl transition-all shadow-md shadow-amber-600/20">
-                        Simpan Perubahan
-                    </button>
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" @click="modalEditTerbuka = false" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl transition-all shadow-sm">Simpan Perubahan</button>
                 </div>
             </form>
         </div>
@@ -689,7 +663,7 @@
     <div x-show="modalStatusTerbuka" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
         <div @click.away="modalStatusTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl p-6">
+             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-xs">
             
             <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Perbarui Status Pengiriman</h3>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -701,19 +675,20 @@
                 @method('PATCH')
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Status Baru:</label>
-                    <select name="status_pengiriman" x-model="statusData.status" required
-                            class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
-                        <option value="menunggu">Menunggu Muat di Gudang</option>
-                        <option value="dalam_perjalanan">Dalam Perjalanan (Berangkat)</option>
-                        <option value="terkirim">Terkirim / Tiba di Lokasi</option>
-                        <option value="retur">Retur / Ditolak Toko</option>
-                    </select>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Status Baru <span class="text-rose-500">*</span></label>
+                    <x-dropdown-kustom 
+                        nama="status_pengiriman"
+                        placeholder="-- Pilih Status --"
+                        :opsi="$opsiStatusPengiriman"
+                        :wajib="true"
+                        warnaFokus="sky"
+                        modelBind="statusData.status"
+                    />
                 </div>
 
                 <div class="flex items-center justify-end gap-2 pt-2">
                     <button type="button" @click="modalStatusTerbuka = false"
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-colors">
+                            class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
                         Batal
                     </button>
                     <button type="submit"

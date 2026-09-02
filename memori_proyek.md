@@ -2,116 +2,58 @@
 
 ## 📌 Status Terkini
 - **Branch Aktif:** `web-dev1`
-- **Fokus Eksekusi:** Pengerjaan Penuh Seluruh Modul Developer 1 (Sesuai `docs/02_Pembagian_Tugas.md`), Standarisasi Komponen Dropdown Kustom, dan Penerapan *Staggered Entrance Animation* pada Seluruh View.
-- **Status Developer 1:** ✅ **100% SELESAI & TERVERIFIKASI (HTTP 200 OK pada seluruh modul)**.
-- **Status Standarisasi UI Dropdown:** ✅ **100% SELESAI & TERVERIFIKASI** (Semua native `<select>` diganti dengan `<x-dropdown-kustom>`).
-- **Status Staggered Entrance Animation:** ✅ **100% SELESAI & TERVERIFIKASI** (Terapkan `.animasi-masuk`, `.wadah-bertingkat`, `.tabel-bertingkat`, `.animasi-skala` di seluruh 18 view).
-- **Status Generator Kode Otomatis (Gap-Filling):** ✅ **100% SELESAI & TERVERIFIKASI** (Helper `app/Helpers/GeneratorKodeOtomatis.php` untuk penomoran otomatis dengan algoritma pengisian celah kosong / gap-filling).
+- **Fokus Eksekusi:** Integrasi Arsitektur Relasi 1:N Customer (Entitas Pemilik & Finansial) ke Data Toko Bangunan / Proyek Cabang, Modul Master Toko Bangunan & Proyek (`/master/toko-bangunan`), Modal Kinerja 360 Derajat, Dropdown Kustom `<x-dropdown-kustom>`, Input Tanggal Kustom `<x-input-tanggal>`, Standarisasi Wajib `*` & Opsional, serta Form Faktur Penjualan (AR).
+- **Status Master Customer & Toko Bangunan:** ✅ **100% SELESAI, TERHUBUNG, & TERVERIFIKASI**.
+- **Status Developer 1 & Operasional:** ✅ **100% SELESAI & TERVERIFIKASI (HTTP 200 OK pada 24 rute modul view)**.
+- **Status Komponen Input Tanggal Kustom (`<x-input-tanggal>`):** ✅ **100% SELESAI & TERPASANG DI SELURUH FORM** (Desain 100% identik dengan `<x-dropdown-kustom>`: background `#F4F6F9`/`#1C1E2A`, border slate, font medium text-xs, ikon SVG kalender kustom, date picker trigger overlay, dan two-way binding Alpine.js).
+- **Status Standarisasi Penanda Wajib & Opsional:** ✅ **100% SELESAI DI SELURUH VIEW FORM** (Setiap input wajib ditandai bintang merah `<span class="text-rose-500">*</span>` dan input opsional ditandai abu-abu `<span class="text-slate-400 font-normal text-[10px]">(Opsional)</span>`).
+- **Status Bebas Pembatasan Modal (`overflow-visible`):** ✅ **100% SELESAI DI SELURUH MODAL** (Dropdown dan kalender mengambang bebas di luar batas canvas modal).
+
+---
+
+## 🏢 Arsitektur Relasi 1:N Customer Pemilik ke Toko Bangunan & Proyek
+
+### 1. Model & Tabel `data_customer` (Entitas Legal, Pemilik, & Finansial Terpusat)
+- **Tujuan:** Menyimpan data pemilik modal / direktur usaha, NIK KTP, No HP, Plafon Kredit terpusat, Saldo Piutang Berjalan, dan Saldo Deposit aktif.
+- **Relasi:** `hasMany(TokoBangunan::class, 'kode_customer', 'kode_customer')`.
+- **Fitur 360 Derajat:** Modal Kinerja Customer menampilkan agregat sisa plafon kredit, daftar seluruh cabang toko bangunan dan proyek yang dimiliki, serta status keaktifannya.
+
+### 2. Model & Tabel `data_toko_bangunan` (Outlet Fisik, Proyek Konstruksi, & Titik Drop Point)
+- **Tujuan:** Menyimpan titik fisik pengiriman semen, nama toko/proyek cabang, tipe lokasi (`toko_retail`, `proyek_kontraktor`, `gudang_transit`), wilayah zonasi (`kode_wilayah`), PIC lapangan & nomor telepon toko, alamat lengkap pengiriman, dan titik koordinat maps.
+- **Relasi:** `belongsTo(Customer::class)` dan `belongsTo(Wilayah::class)`.
+- **Fitur 360 Derajat:** Modal Kinerja Toko menampilkan profil pemilik induk, plafon kredit customer induk, total akumulasi nilai pembelian toko, dan jumlah transaksi yang selesai.
+
+### 3. Integrasi Transaksi Penjualan (`penjualan` / Faktur Penjualan AR)
+- Form Tambah Faktur Penjualan memiliki opsi memilih **Toko Bangunan / Proyek Cabang Tujuan Kirim**.
+- Sistem otomatis mendeteksi entitas **Customer Pemilik Induk** untuk validasi plafon kredit piutang tempo atau pemotongan saldo deposit secara akurat.
 
 ---
 
 ## 🔢 Generator Kode Otomatis & Algoritma Gap-Filling (Sequence Gap Reuse)
 
 ### 1. Helper Baru: `app/Helpers/GeneratorKodeOtomatis.php`
-- **Tujuan:** Menghilangkan keharusan pengguna mengetik kode secara manual dan menjamin penomoran kode sekuensial yang rapi tanpa celah (*gap*).
 - **Algoritma "Gap-Filling" (Lowest Missing Positive Integer):**
-  1. Mengambil seluruh nilai kode yang ada di database berdasarkan tabel, kolom, dan prefix (contoh: `CUST-`).
-  2. Mengekstrak bilangan angka integer di akhir kode ke dalam array daftar nomor terpakai (`$nomorTerpakai`).
-  3. Melakukan perulangan mulai dari angka $1$ ($nomorUrut = 1, 2, 3, \dots$).
-  4. Begitu ditemukan angka pertama yang **TIDAK TERDAFTAR** di database (karena belum dibuat atau karena ada data sebelumnya yang telah dihapus), sistem langsung mengambil angka tersebut sebagai nomor kode baru.
-  5. Memformat nomor tersebut dengan panjang digit padding (misal: 3 digit $\rightarrow$ `001`, `002`).
+  1. Mengambil seluruh nilai kode yang ada di database berdasarkan tabel, kolom, dan prefix.
+  2. Mengekstrak bilangan angka integer di akhir kode ke dalam array daftar nomor terpakai.
+  3. Mencari angka terkecil pertama yang belum digunakan dan memformatnya dengan leading zero (`001`, `002`, dst.).
 
-### 2. Modul yang Menggunakan Generator Kode Otomatis:
-- **Master Customer:** Awalan `CUST-` (contoh: `CUST-001`, `CUST-002`, dst.)
-- **Master Produk Semen:** Awalan `SMN-` (contoh: `SMN-001`, `SMN-002`, dst.)
-- **Master Wilayah:** Awalan `WLY-` (contoh: `WLY-001`, `WLY-002`, dst.)
-- **Master Karyawan & Driver:** Awalan `KRY-` (contoh: `KRY-001`, `KRY-002`, dst.)
-- **Aset Perusahaan:** Awalan `AST-` (contoh: `AST-001`, `AST-002`, dst.)
-
----
-
-## ⚡ Animasi Staggered Entrance (CSS & Micro-Animations)
-- **Definisi CSS di `resources/css/app.css`:**
-  - Keyframes `@keyframes muncul-bertingkat` (translasi vertikal 10px ke 0, opacity 0 ke 1) dan `@keyframes muncul-skala` (scale 0.97 ke 1, opacity 0 ke 1) dengan easing `cubic-bezier(0.16, 1, 0.3, 1)`.
-  - Class `.animasi-masuk`, `.wadah-bertingkat`, `.tabel-bertingkat`, `.animasi-skala`, serta helper tunda `.tunda-1` s.d. `.tunda-8`.
-  - Fallback `@media (prefers-reduced-motion: reduce)` untuk aksesibilitas WCAG.
-- **Terapkan di seluruh modul:** Dashboard, Superadmin Kelola Akun, Master (Customer, Barang, Wilayah, Karyawan), Keuangan AR (Faktur, Piutang, Deposit), Keuangan AP (Pembelian SO, Pengeluaran Kas, Rilisan), Akuntansi (Bagan Akun COA, Jurnal Umum, Aset Perusahaan), dan Laporan Eksekutif (Neraca, Laba Rugi, Arus Kas).
+### 2. Daftar Prefix Kode:
+- **Master Customer:** `CUST-` (contoh: `CUST-001`)
+- **Master Toko Bangunan / Proyek:** `TKB-` (contoh: `TKB-001`, `TKB-002`)
+- **Master Produk Semen:** `SMN-` (contoh: `SMN-001`)
+- **Master Wilayah:** `WLY-` (contoh: `WLY-001`)
+- **Master Karyawan:** `ADM-`, `KEU-`, `SAR-`, `SAP-`, `DSP-`, `PDR-`, `GDG-`, `MGR-`, `OPS-`, `PKN-`, `DRV-`
+- **Aset & Truk:** `AST-`
+- **Surat Jalan:** `SJ-`
+- **SPK Bengkel:** `SPK-`
+- **Master Sparepart:** `PRT-`
+- **Pembelian Sparepart:** `FB-SP-`
+- **KSO:** `KSO-`, `OAK-`
+- **Master Jenis Aset:** `JNS-`
 
 ---
 
-## 🎨 Standarisasi Dropdown Kustom (Alpine.js + Tailwind CSS)
-
-### 1. Komponen Baru: `resources/views/components/dropdown-kustom.blade.php`
-- **Fitur Unggulan:**
-  - Desain compact, modern, dan elegan (bebas dari template bawaan OS yang kaku).
-  - Animasi transisi floating popover yang halus (`transition:enter`, `transition:leave`).
-  - Mendukung pencarian/filter cepat untuk daftar panjang dan scrollbar minimalis kustom.
-  - Indikator checkmark aktif dan subteks badge informasi (misal: plafon, deposit, kode COA).
-  - Mendukung sinkronisasi edit modal Alpine.js via `modelBind`.
-  - Mendukung filter auto-submit instan via `submitOnChange="true"`.
-  - Aksesibilitas keyboard (Escape / Click Outside to close).
-
-### 2. Global Styling: `resources/css/app.css`
-- Menambahkan kustomisasi scrollbar, reset `appearance: none`, dan custom chevron icon untuk fallback element.
-
-### 3. File yang Telah Diimplementasikan Dropdown Kustom:
-1. `resources/views/superadmin/kelola_akun.blade.php` (Pilih Karyawan, Pilih Jabatan RBAC)
-2. `resources/views/master/customer/index.blade.php` (Filter Wilayah, Modal Tambah & Edit Wilayah)
-3. `resources/views/master/barang/index.blade.php` (Filter Jenis, Modal Tambah & Edit Jenis Kemasan)
-4. `resources/views/master/karyawan/index.blade.php` (Modal Tambah & Edit: Kategori Karyawan, Jabatan Sistem, Status Kepegawaian)
-5. `resources/views/keuangan/ar/faktur_penjualan.blade.php` (Filter Status, Filter Metode, Modal Terbitkan Faktur: Customer, Metode Pembayaran)
-6. `resources/views/keuangan/ar/list_piutang.blade.php` (Filter Status Piutang)
-7. `resources/views/keuangan/ar/deposit_customer.blade.php` (Filter Tipe Mutasi, Modal Top Up Customer)
-8. `resources/views/keuangan/ap/pembelian_so.blade.php` (Filter Status SO, Modal Buat SO: Customer, Gudang Pabrik)
-9. `resources/views/keuangan/ap/pengeluaran_kas.blade.php` (Filter Kategori, Modal Pengeluaran: Kategori Biaya, Akun Beban COA, Rekening Sumber)
-10. `resources/views/keuangan/ap/list_rilisan.blade.php` (Modal Rilis Uang Jalan: Driver Supir, Rekening Sumber)
-11. `resources/views/keuangan/akuntansi/kode_akun.blade.php` (Filter Tipe Akun, Modal Tambah & Edit: Tipe Akun, Saldo Normal)
-12. `resources/views/keuangan/akuntansi/jurnal_umum.blade.php` (Filter Posisi, Modal Jurnal: Akun Sisi Debet, Akun Sisi Kredit)
-13. `resources/views/keuangan/akuntansi/aset_perusahaan.blade.php` (Filter Jenis Aset, Modal Tambah: Jenis Aset)
-
----
-
-## 🏗️ Modul yang Telah Diselesaikan (Developer 1)
-
-### 1. Seeder Database Realistis
-- `database/seeders/MasterDataSeeder.php`: Master Wilayah (6), Produk Semen (6), Customer Toko (5), Rekening Bank (3), Gudang SO (3).
-- `database/seeders/KeuanganSeeder.php`: Bagan Akun COA (22 akun standar), Data Aset Tetap, Faktur Penjualan Awal, Buku Piutang, Mutasi Deposit, dan Pengeluaran Kas.
-
-### 2. Modul Super Admin (Kelola Akun)
-- **Controller:** `app/Http/Controllers/Autentikasi/KelolaAkunController.php`
-- **View:** `resources/views/superadmin/kelola_akun.blade.php`
-
-### 3. Modul Master Data Sentral
-- **Customer Toko:** `CustomerController.php` + `master/customer/index.blade.php`
-- **Semen / Barang:** `BarangController.php` + `master/barang/index.blade.php`
-- **Wilayah Distribusi:** `WilayahController.php` + `master/wilayah/index.blade.php`
-- **Karyawan & Driver:** `KaryawanController.php` + `master/karyawan/index.blade.php`
-
-### 4. Modul Account Receivable (AR & Penjualan)
-- **Faktur Penjualan:** `FakturPenjualanController.php` + `keuangan/ar/faktur_penjualan.blade.php`
-- **List Piutang:** `PiutangController.php` + `keuangan/ar/list_piutang.blade.php`
-- **Deposit Customer:** `DepositCustomerController.php` + `keuangan/ar/deposit_customer.blade.php`
-
-### 5. Modul Account Payable (AP & Kas Keluar)
-- **Pembelian SO Pabrik:** `PembelianSOController.php` + `keuangan/ap/pembelian_so.blade.php`
-- **Pengeluaran Kas:** `PengeluaranKasController.php` + `keuangan/ap/pengeluaran_kas.blade.php`
-- **Rilisan Kas Bon Supir:** `HutangSupplierController.php` + `keuangan/ap/list_rilisan.blade.php`
-
-### 6. Modul Akuntansi & Laporan Eksekutif
-- **Data Kode Akun (COA):** `KodeAkunController.php` + `keuangan/akuntansi/kode_akun.blade.php` (CRUD kolom `kode_akun`, `nama_akun`, `tipe_akun`, `kelompok_akun`, `saldo` + generator gap/acak).
-- **Buku Jurnal Umum:** `JurnalUmumController.php` + `keuangan/akuntansi/jurnal_umum.blade.php`
-- **Aset Perusahaan:** `AsetPerusahaanController.php` + `keuangan/akuntansi/aset_perusahaan.blade.php`
-- **Laporan Eksekutif:** `LaporanEksekutifController.php` (`neraca` seimbang Aktiva vs Pasiva, `laba_rugi`, `arus_kas`).
-
-### 7. Standardisasi Tambahan (Baru Diperbarui)
-- **Standardisasi Format NIK 16 Digit:** Diterapkan validasi ketat `required|numeric|digits:16`, anti-huruf regex, dan visual counter `16/16 Digit` di Master Karyawan, Driver, dan Customer.
-- **Standardisasi Format Kode Gudang:** Format `GDG-PBJ1`, `GDG-PBJ2` (Daur Ulang) vs `GDG-PBJ7X` (Acak) dan pembersihan tuntas record `GDG-PUSAT`.
-- **Standardisasi Kolom Data Gudang:** Menampilkan kolom `kode_gudang`, `nama_gudang`, `jenis_gudang`, `kode_barang`, `plant`, `harga_barang`, dan `stok_tersedia`.
-
----
-
-## 🌐 Status Server & Endpoint
-- **Laravel Artisan Dev Server:** `http://127.0.0.1:8000` (Running)
-- **Vite Dev Server:** `http://localhost:5173` (Running)
+## 🌐 Status Server & Endpoint (24 Rute 100% OK)
+- **Laravel Artisan Dev Server:** `http://127.0.0.1:8000` (24/24 Routes HTTP 200 OK)
+- **Laragon MySQL:** `127.0.0.1:3306` (200 OK)
 - **Laragon Apache:** `http://localhost/laravel1/public` (200 OK)
-- **MySQL Database:** `127.0.0.1:3306` (200 OK)

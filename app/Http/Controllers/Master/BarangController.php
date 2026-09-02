@@ -122,13 +122,4 @@ class BarangController extends Controller
 
         return redirect()->route('master.barang.index')->with('sukses', "Produk '{$barang->nama_barang}' berhasil dihapus.");
     }
-
-    /**
-     * Generator Kode Barang Otomatis (Daur Ulang Slot vs Acak).
-     */
-    public function buatKodeOtomatis(Request $request)
-    {
-        $mode = $request->input('mode', 'gap');
-        return GeneratorKodeOtomatis::responJson('data_semen', 'kode_barang', 'SMN-', $mode, 3);
-    }
 }

@@ -5,8 +5,30 @@
 @section('konten')
 <div x-data="kelolaStokSparepart()" x-init="initSparepart()" class="space-y-6">
 
+    @php
+        $opsiKategoriPart = [
+            ['nilai' => 'Pelumas & Oli', 'label' => 'Pelumas & Oli'],
+            ['nilai' => 'Ban & Roda', 'label' => 'Ban & Roda'],
+            ['nilai' => 'Pengereman', 'label' => 'Pengereman (Kampas/Brake)'],
+            ['nilai' => 'Filter', 'label' => 'Filter (Oli/Solar/Udara)'],
+            ['nilai' => 'Elektrikal & Aki', 'label' => 'Elektrikal & Aki'],
+            ['nilai' => 'Mesin & Transmisi', 'label' => 'Mesin & Transmisi'],
+            ['nilai' => 'Suspensi & Sasis', 'label' => 'Suspensi & Sasis'],
+            ['nilai' => 'Lainnya', 'label' => 'Lainnya / Aksesoris'],
+        ];
+        $opsiFilterKategori = array_merge([
+            ['nilai' => 'semua', 'label' => 'Semua Kategori Sparepart']
+        ], collect($daftarKategori ?? [])->map(fn($k) => ['nilai' => $k, 'label' => $k])->values()->toArray());
+
+        $opsiTipeMutasiPart = [
+            ['nilai' => 'masuk', 'label' => 'Tambah Stok Masuk (Penerimaan Toko)'],
+            ['nilai' => 'keluar', 'label' => 'Kurang Stok Keluar (Pemakaian Servis / Rusak)'],
+            ['nilai' => 'atur', 'label' => 'Set Kuantitas Fisik Langsung (Hasil Opname)'],
+        ];
+    @endphp
+
     <!-- 1. Header Modul -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#14161F] p-4 sm:p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
+    <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#14161F] p-4 sm:p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
         <div>
             <div class="flex items-center gap-2 mb-1.5">
                 <span class="px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase rounded-md bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 font-mono">
@@ -77,7 +99,7 @@
     @endif
 
     <!-- 3. Ringkasan 4 Kartu KPI Inventaris Sparepart -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <div class="wadah-bertingkat grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <!-- Total Jenis Sparepart -->
         <div class="bg-white dark:bg-[#14161F] p-4 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm flex items-center gap-3.5">
             <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
@@ -132,7 +154,7 @@
     </div>
 
     <!-- 4. Tabel Sparepart & Filter -->
-    <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         
         <!-- Filter Bar -->
         <div class="p-4 sm:px-5 sm:py-4 border-b border-[#E2E8F0] dark:border-[#252837] flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -146,14 +168,17 @@
                     </svg>
                 </div>
 
-                <!-- Filter Kategori -->
-                <select name="kategori" onchange="this.form.submit()"
-                        class="px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                    <option value="semua" {{ ($kategoriFilter ?? 'semua') === 'semua' ? 'selected' : '' }}>Semua Kategori</option>
-                    @foreach($daftarKategori as $kat)
-                        <option value="{{ $kat }}" {{ ($kategoriFilter ?? '') === $kat ? 'selected' : '' }}>{{ $kat }}</option>
-                    @endforeach
-                </select>
+                <!-- Filter Kategori Dropdown Kustom -->
+                <div class="w-full sm:w-60">
+                    <x-dropdown-kustom 
+                        nama="kategori"
+                        placeholder="-- Semua Kategori --"
+                        :opsi="$opsiFilterKategori"
+                        :nilaiAwal="$kategoriFilter ?? 'semua'"
+                        :submitOnChange="true"
+                        warnaFokus="amber"
+                    />
+                </div>
 
                 <button type="submit" class="px-3.5 py-2 text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition-colors">
                     Cari
@@ -173,7 +198,7 @@
 
         <!-- Tabel Sparepart -->
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="tabel-bertingkat w-full text-left text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500 dark:text-slate-400">
                     <tr>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Kode & Nama Sparepart</th>
@@ -288,215 +313,150 @@
         </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- 5. MODAL FORM: TAMBAH MASTER SPAREPART -->
-    <!-- ========================================================================= -->
-    <div x-show="modalTambahTerbuka" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="modalTambahTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-8">
-            
-            <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                    </div>
-                    <div>
-                        <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Tambah Suku Cadang Sparepart Baru</h2>
-                        <p class="text-[11px] text-slate-400">Pendaftaran item katalog inventaris bengkel truk.</p>
-                    </div>
-                </div>
-                <button @click="modalTambahTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+    <!-- Modal Tambah Master Sparepart -->
+    <div x-show="modalTambahTerbuka" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="modalTambahTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-visible shadow-xl my-8">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Tambah Suku Cadang Baru</h3>
+                <button @click="modalTambahTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none">&times;</button>
             </div>
 
-            <form action="{{ route('operasional.bengkel.sparepart.simpan') }}" method="POST" class="p-6 space-y-4">
+            <form action="{{ route('operasional.bengkel.sparepart.simpan') }}" method="POST" class="p-5 space-y-3.5 text-xs">
                 @csrf
-
-                <!-- Generator Kode Part -->
-                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837]">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-                        <div>
-                            <label class="text-xs font-bold text-slate-800 dark:text-slate-200">
-                                Kode Sparepart <span class="text-rose-500">*</span>
-                            </label>
-                            <div class="text-[10px] text-slate-400 font-mono mt-0.5" x-text="keteranganKodePart"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Kode Sparepart <span class="text-rose-500">*</span></label>
+                            <span class="text-[10px] text-amber-600 dark:text-amber-400 font-semibold px-1.5 py-0.5 bg-amber-50 dark:bg-amber-950/50 rounded-md">Otomatis</span>
                         </div>
-                        
-                        <div class="flex items-center gap-1.5 shrink-0">
-                            <button type="button" @click="buatKodeOtomatis('gap')"
-                                    class="px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/30 hover:bg-amber-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                <span>Daur Ulang (PRT-001)</span>
-                            </button>
-                            <button type="button" @click="buatKodeOtomatis('acak')"
-                                    class="px-2.5 py-1 text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                <span>Kode Acak</span>
-                            </button>
-                        </div>
+                        <input type="text" name="kode_sparepart" x-model="formTambah.kode_sparepart" required placeholder="PRT-001"
+                               class="w-full px-3 py-2 rounded-xl bg-amber-50/50 dark:bg-[#1C1E2A] border border-amber-200 dark:border-amber-900/50 text-amber-900 dark:text-amber-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
 
-                    <input type="text" name="kode_sparepart" x-model="formTambah.kode_sparepart" required placeholder="Contoh: PRT-001 atau PRT-OLI-15W40"
-                           class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-amber-600 dark:text-amber-400 uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kategori Sparepart <span class="text-rose-500">*</span></label>
+                        <x-dropdown-kustom 
+                            nama="kategori_part"
+                            placeholder="-- Pilih Kategori --"
+                            :opsi="$opsiKategoriPart"
+                            :wajib="true"
+                            warnaFokus="amber"
+                            modelBind="formTambah.kategori_part"
+                        />
+                    </div>
                 </div>
 
-                <!-- Nama Sparepart -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Suku Cadang / Sparepart <span class="text-rose-500">*</span></label>
-                    <input type="text" name="nama_sparepart" x-model="formTambah.nama_sparepart" required placeholder="Contoh: Oli Mesin Diesel Meditran SX 15W-40"
-                           class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Suku Cadang / Sparepart <span class="text-rose-500">*</span></label>
+                    <input type="text" name="nama_sparepart" x-model="formTambah.nama_sparepart" required placeholder="Oli Mesin Diesel Meditran SX 15W-40"
+                           class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <!-- Kategori Part -->
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Kategori Sparepart <span class="text-rose-500">*</span></label>
-                        <select name="kategori_part" x-model="formTambah.kategori_part" required
-                                class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                            <option value="Pelumas & Oli">Pelumas & Oli</option>
-                            <option value="Ban & Roda">Ban & Roda</option>
-                            <option value="Pengereman">Pengereman (Kampas/Brake)</option>
-                            <option value="Filter">Filter (Oli/Solar/Udara)</option>
-                            <option value="Elektrikal & Aki">Elektrikal & Aki</option>
-                            <option value="Mesin & Transmisi">Mesin & Transmisi</option>
-                            <option value="Suspensi & Sasis">Suspensi & Sasis</option>
-                            <option value="Lainnya">Lainnya / Aksesoris</option>
-                        </select>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Satuan Barang <span class="text-rose-500">*</span></label>
+                        <input type="text" name="satuan" x-model="formTambah.satuan" required placeholder="Pcs / Set / Drum / Liter"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
 
-                    <!-- Satuan -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Satuan Barang <span class="text-rose-500">*</span></label>
-                        <input type="text" name="satuan" x-model="formTambah.satuan" required placeholder="Contoh: Pcs, Set, Drum, Liter"
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                    </div>
-
-                    <!-- Stok Awal -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Stok Awal Fisik <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Stok Awal Fisik <span class="text-rose-500">*</span></label>
                         <input type="number" name="stok_part" x-model="formTambah.stok_part" min="0" required placeholder="10"
-                               class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                    </div>
-
-                    <!-- Harga Beli Satuan -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Beli Standar (Rp) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="harga_satuan" x-model="formTambah.harga_satuan" step="1000" min="0" required placeholder="150000"
-                               class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-emerald-600 dark:text-emerald-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30 font-mono">
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    <button type="button" @click="modalTambahTerbuka = false"
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 active:scale-95 rounded-xl transition-all shadow-md shadow-amber-600/20">
-                        Simpan Sparepart
-                    </button>
+                <div>
+                    <x-input-rupiah 
+                        nama="harga_satuan" 
+                        label="Harga Beli Standar (Rp)" 
+                        modelBind="formTambah.harga_satuan" 
+                        :wajib="true" 
+                        placeholder="150.000" 
+                    />
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" @click="modalTambahTerbuka = false" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl transition-all shadow-sm">Simpan Sparepart</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- 6. MODAL FORM: EDIT MASTER SPAREPART -->
-    <!-- ========================================================================= -->
-    <div x-show="modalEditTerbuka" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="modalEditTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-8">
-            
-            <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                    </div>
-                    <div>
-                        <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Ubah Data Suku Cadang</h2>
-                        <p class="text-[11px] text-slate-400">Kode: <span class="font-mono font-bold text-amber-600" x-text="formEdit.kode_sparepart"></span></p>
-                    </div>
-                </div>
-                <button @click="modalEditTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+    <!-- Modal Edit Master Sparepart -->
+    <div x-show="modalEditTerbuka" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="modalEditTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-visible shadow-xl my-8">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Ubah Data Suku Cadang: <span class="font-mono text-amber-600" x-text="formEdit.kode_sparepart"></span></h3>
+                <button @click="modalEditTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none">&times;</button>
             </div>
 
-            <form :action="'{{ url('operasional/bengkel/sparepart') }}/' + formEdit.kode_sparepart" method="POST" class="p-6 space-y-4">
+            <form :action="'{{ url('operasional/bengkel/sparepart') }}/' + formEdit.kode_sparepart" method="POST" class="p-5 space-y-3.5 text-xs">
                 @csrf
                 @method('PUT')
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kode Sparepart (Terkunci)</label>
+                        <input type="text" :value="formEdit.kode_sparepart" disabled
+                               class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 font-mono font-semibold cursor-not-allowed">
+                    </div>
 
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Kode Sparepart (Terkunci)</label>
-                    <input type="text" :value="formEdit.kode_sparepart" disabled
-                           class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 cursor-not-allowed">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kategori Sparepart <span class="text-rose-500">*</span></label>
+                        <x-dropdown-kustom 
+                            nama="kategori_part"
+                            placeholder="-- Pilih Kategori --"
+                            :opsi="$opsiKategoriPart"
+                            :wajib="true"
+                            warnaFokus="amber"
+                            modelBind="formEdit.kategori_part"
+                        />
+                    </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Suku Cadang <span class="text-rose-500">*</span></label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Suku Cadang <span class="text-rose-500">*</span></label>
                     <input type="text" name="nama_sparepart" x-model="formEdit.nama_sparepart" required
-                           class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                           class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Kategori Sparepart <span class="text-rose-500">*</span></label>
-                        <select name="kategori_part" x-model="formEdit.kategori_part" required
-                                class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                            <option value="Pelumas & Oli">Pelumas & Oli</option>
-                            <option value="Ban & Roda">Ban & Roda</option>
-                            <option value="Pengereman">Pengereman (Kampas/Brake)</option>
-                            <option value="Filter">Filter (Oli/Solar/Udara)</option>
-                            <option value="Elektrikal & Aki">Elektrikal & Aki</option>
-                            <option value="Mesin & Transmisi">Mesin & Transmisi</option>
-                            <option value="Suspensi & Sasis">Suspensi & Sasis</option>
-                            <option value="Lainnya">Lainnya / Aksesoris</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Satuan Barang <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Satuan Barang <span class="text-rose-500">*</span></label>
                         <input type="text" name="satuan" x-model="formEdit.satuan" required
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Kuantitas Stok <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kuantitas Stok <span class="text-rose-500">*</span></label>
                         <input type="number" name="stok_part" x-model="formEdit.stok_part" min="0" required
-                               class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Beli Satuan (Rp) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="harga_satuan" x-model="formEdit.harga_satuan" step="1000" min="0" required
-                               class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-emerald-600 dark:text-emerald-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30 font-mono">
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    <button type="button" @click="modalEditTerbuka = false"
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 active:scale-95 rounded-xl transition-all shadow-md shadow-amber-600/20">
-                        Simpan Perubahan
-                    </button>
+                <div>
+                    <x-input-rupiah 
+                        nama="harga_satuan" 
+                        label="Harga Beli Satuan (Rp)" 
+                        modelBind="formEdit.harga_satuan" 
+                        :wajib="true" 
+                    />
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" @click="modalEditTerbuka = false" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl transition-all shadow-sm">Simpan Perubahan</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- 7. MODAL MUTASI & PENYESUAIAN STOK CEPAT -->
-    <!-- ========================================================================= -->
+    <!-- Modal Mutasi & Penyesuaian Stok Cepat -->
     <div x-show="modalMutasiTerbuka" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
         <div @click.away="modalMutasiTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6">
+             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 text-xs">
             
             <div class="flex items-center gap-2.5 mb-3">
                 <div class="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
@@ -510,7 +470,7 @@
                 </div>
             </div>
 
-            <div class="p-3 rounded-xl bg-slate-50 dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] mb-4 flex justify-between items-center text-xs">
+            <div class="p-3 rounded-xl bg-slate-50 dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] mb-4 flex justify-between items-center">
                 <span class="text-slate-500">Stok Fisik Saat Ini:</span>
                 <strong class="font-mono text-slate-900 dark:text-slate-100 text-sm" x-text="mutasiData.stok_sekarang + ' ' + mutasiData.satuan"></strong>
             </div>
@@ -520,24 +480,26 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tipe Aksi Mutasi <span class="text-rose-500">*</span></label>
-                    <select name="tipe_mutasi" x-model="mutasiData.tipe" required
-                            class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                        <option value="masuk">➕ Tambah Stok Masuk (Penerimaan Toko)</option>
-                        <option value="keluar">➖ Kurang Stok Keluar (Pemakaian Servis / Rusak)</option>
-                        <option value="atur">⚙️ Set Kuantitas Fisik Langsung (Hasil Opname)</option>
-                    </select>
+                    <x-dropdown-kustom 
+                        nama="tipe_mutasi"
+                        placeholder="-- Pilih Tipe Mutasi --"
+                        :opsi="$opsiTipeMutasiPart"
+                        :wajib="true"
+                        warnaFokus="amber"
+                        modelBind="mutasiData.tipe"
+                    />
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Jumlah Kuantitas <span class="text-rose-500">*</span></label>
                     <input type="number" name="jumlah" min="1" required placeholder="Contoh: 2"
-                           class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                           class="w-full px-3 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Catatan / Referensi SPK / Faktur</label>
                     <input type="text" name="keterangan" placeholder="Contoh: Pemakaian SPK-002 atau Koreksi Opname"
-                           class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                           class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                 </div>
 
                 <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E2E8F0] dark:border-[#252837]">
@@ -554,13 +516,11 @@
         </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- 8. MODAL KONFIRMASI HAPUS SPAREPART -->
-    <!-- ========================================================================= -->
+    <!-- Modal Konfirmasi Hapus Sparepart -->
     <div x-show="modalHapusTerbuka" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
         <div @click.away="modalHapusTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 text-center">
+             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 text-center">
             
             <div class="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 mx-auto flex items-center justify-center mb-3.5">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

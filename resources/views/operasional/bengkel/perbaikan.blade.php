@@ -5,8 +5,26 @@
 @section('konten')
 <div x-data="kelolaPerbaikanKendaraan()" x-init="initPerbaikan()" class="space-y-6">
 
+    @php
+        $opsiStatusPerbaikan = [
+            ['nilai' => 'Dalam Proses', 'label' => 'Dalam Proses Pengerjaan'],
+            ['nilai' => 'Menunggu Sparepart', 'label' => 'Menunggu Suku Cadang'],
+            ['nilai' => 'Selesai', 'label' => 'Selesai Servis'],
+            ['nilai' => 'Dibatalkan', 'label' => 'Dibatalkan'],
+        ];
+        $opsiStatusFilterPerbaikan = array_merge([
+            ['nilai' => 'semua', 'label' => 'Semua Status SPK']
+        ], $opsiStatusPerbaikan);
+
+        $opsiKendaraan = ($daftarKendaraan ?? collect())->map(fn($knd) => [
+            'nilai' => $knd->kode_aset,
+            'label' => $knd->nama_aset . ' (' . ($knd->merek_aset ?? 'Truk') . ')',
+            'sub'   => 'Plat/Kode: ' . $knd->kode_aset
+        ])->toArray();
+    @endphp
+
     <!-- 1. Header Modul -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#14161F] p-4 sm:p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
+    <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#14161F] p-4 sm:p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
         <div>
             <div class="flex items-center gap-2 mb-1.5">
                 <span class="px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase rounded-md bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20 font-mono">
@@ -77,7 +95,7 @@
     @endif
 
     <!-- 3. Ringkasan 4 Kartu KPI SPK Perbaikan -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <div class="wadah-bertingkat grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <!-- Total SPK -->
         <div class="bg-white dark:bg-[#14161F] p-4 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm flex items-center gap-3.5">
             <div class="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
@@ -132,7 +150,7 @@
     </div>
 
     <!-- 4. Tabel SPK Perbaikan & Filter -->
-    <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         
         <!-- Filter Bar -->
         <div class="p-4 sm:px-5 sm:py-4 border-b border-[#E2E8F0] dark:border-[#252837] flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -146,15 +164,17 @@
                     </svg>
                 </div>
 
-                <!-- Filter Status -->
-                <select name="status" onchange="this.form.submit()"
-                        class="px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500/30">
-                    <option value="semua" {{ ($statusFilter ?? 'semua') === 'semua' ? 'selected' : '' }}>Semua Status</option>
-                    <option value="Dalam Proses" {{ ($statusFilter ?? '') === 'Dalam Proses' ? 'selected' : '' }}>Dalam Proses</option>
-                    <option value="Selesai" {{ ($statusFilter ?? '') === 'Selesai' ? 'selected' : '' }}>Selesai</option>
-                    <option value="Menunggu Sparepart" {{ ($statusFilter ?? '') === 'Menunggu Sparepart' ? 'selected' : '' }}>Menunggu Sparepart</option>
-                    <option value="Dibatalkan" {{ ($statusFilter ?? '') === 'Dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
-                </select>
+                <!-- Filter Status Dropdown Kustom -->
+                <div class="w-full sm:w-60">
+                    <x-dropdown-kustom 
+                        nama="status"
+                        placeholder="-- Semua Status SPK --"
+                        :opsi="$opsiStatusFilterPerbaikan"
+                        :nilaiAwal="$statusFilter ?? 'semua'"
+                        :submitOnChange="true"
+                        warnaFokus="red"
+                    />
+                </div>
 
                 <button type="submit" class="px-3.5 py-2 text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition-colors">
                     Cari
@@ -171,10 +191,9 @@
                 Menampilkan <strong class="text-slate-700 dark:text-slate-300">{{ count($daftarPerbaikan) }}</strong> SPK Servis
             </div>
         </div>
-
         <!-- Tabel SPK Perbaikan -->
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="tabel-bertingkat w-full text-left text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500 dark:text-slate-400">
                     <tr>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">No. SPK & Tanggal</th>
@@ -323,298 +342,255 @@
         </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- 5. MODAL FORM: BUAT SPK PERBAIKAN -->
-    <!-- ========================================================================= -->
-    <div x-show="modalTambahTerbuka" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="modalTambahTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl my-8">
-            
-            <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 flex items-center justify-center font-bold">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                    </div>
-                    <div>
-                        <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Terbitkan Surat Perintah Kerja (SPK)</h2>
-                        <p class="text-[11px] text-slate-400">Pencatatan perbaikan armada truk dan rincian biaya bengkel.</p>
-                    </div>
-                </div>
-                <button @click="modalTambahTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+    <!-- Modal Tambah SPK Perbaikan -->
+    <div x-show="modalTambahTerbuka" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="modalTambahTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-visible shadow-xl my-8">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Terbitkan Surat Perintah Kerja (SPK)</h3>
+                <button @click="modalTambahTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none">&times;</button>
             </div>
 
-            <form action="{{ route('operasional.bengkel.perbaikan.simpan') }}" method="POST" class="p-6 space-y-4">
+            <form action="{{ route('operasional.bengkel.perbaikan.simpan') }}" method="POST" class="p-5 space-y-3.5 text-xs">
                 @csrf
-
-                <!-- Generator Nomor SPK -->
-                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837]">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-                        <div>
-                            <label class="text-xs font-bold text-slate-800 dark:text-slate-200">
-                                Nomor SPK Perbaikan <span class="text-rose-500">*</span>
-                            </label>
-                            <div class="text-[10px] text-slate-400 font-mono mt-0.5" x-text="keteranganKodeSPK"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Nomor SPK Perbaikan <span class="text-rose-500">*</span></label>
+                            <span class="text-[10px] text-red-600 dark:text-red-400 font-semibold px-1.5 py-0.5 bg-red-50 dark:bg-red-950/50 rounded-md">Otomatis</span>
                         </div>
-                        
-                        <div class="flex items-center gap-1.5 shrink-0">
-                            <button type="button" @click="buatNomorSPK('gap')"
-                                    class="px-2.5 py-1 text-[11px] font-semibold text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                <span>Daur Ulang (SPK-001)</span>
-                            </button>
-                            <button type="button" @click="buatNomorSPK('acak')"
-                                    class="px-2.5 py-1 text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                <span>Format Tanggal</span>
-                            </button>
-                        </div>
+                        <input type="text" name="nomor_spk_perbaikan" x-model="formTambah.nomor_spk_perbaikan" required placeholder="SPK-001"
+                               class="w-full px-3 py-2 rounded-xl bg-red-50/50 dark:bg-[#1C1E2A] border border-red-200 dark:border-red-900/50 text-red-900 dark:text-red-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-red-500/30">
                     </div>
 
-                    <input type="text" name="nomor_spk_perbaikan" x-model="formTambah.nomor_spk_perbaikan" required placeholder="Contoh: SPK-001 atau SPK-20260902-8K2"
-                           class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-red-600 dark:text-red-400 uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-red-500/30">
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <!-- Armada Truk -->
-                    <div class="sm:col-span-2">
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Armada Truk (Plat Nomor) <span class="text-rose-500">*</span></label>
-                        <select name="kode_aset" x-model="formTambah.kode_aset" required
-                                class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500/30">
-                            <option value="">-- Pilih Truk Armada --</option>
-                            @foreach($daftarKendaraan as $knd)
-                                <option value="{{ $knd->kode_aset }}">
-                                    {{ $knd->nama_aset }} ({{ $knd->merek_aset ?? 'Truk' }}) - {{ $knd->kode_aset }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Tanggal Masuk -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Masuk Servis <span class="text-rose-500">*</span></label>
-                        <input type="date" name="tanggal_masuk" x-model="formTambah.tanggal_masuk" required
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500/30">
-                    </div>
-
-                    <!-- Tanggal Selesai -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Selesai (Opsional)</label>
-                        <input type="date" name="tanggal_selesai" x-model="formTambah.tanggal_selesai"
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500/30">
-                    </div>
-
-                    <!-- Bengkel Pelaksana -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Bengkel Pelaksana <span class="text-rose-500">*</span></label>
-                        <input type="text" name="bengkel_pelaksana" x-model="formTambah.bengkel_pelaksana" required placeholder="Contoh: Bengkel Internal PBJ / Bengkel Hino"
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500/30">
-                    </div>
-
-                    <!-- Status Servis -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Pengerjaan <span class="text-rose-500">*</span></label>
-                        <select name="status_perbaikan" x-model="formTambah.status_perbaikan" required
-                                class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500/30">
-                            <option value="Dalam Proses">Dalam Proses Pengerjaan</option>
-                            <option value="Menunggu Sparepart">Menunggu Suku Cadang</option>
-                            <option value="Selesai">Selesai Servis</option>
-                            <option value="Dibatalkan">Dibatalkan</option>
-                        </select>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Armada Truk <span class="text-rose-500">*</span></label>
+                        <x-dropdown-kustom 
+                            nama="kode_aset"
+                            placeholder="-- Pilih Truk Armada --"
+                            :opsi="$opsiKendaraan"
+                            :wajib="true"
+                            warnaFokus="red"
+                            modelBind="formTambah.kode_aset"
+                        />
                     </div>
                 </div>
 
-                <!-- Keluhan Kerusakan -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Masuk Servis <span class="text-rose-500">*</span></label>
+                        <x-input-tanggal 
+                            nama="tanggal_masuk" 
+                            modelBind="formTambah.tanggal_masuk" 
+                            placeholder="Pilih Tanggal Masuk"
+                            :wajib="true"
+                            warnaFokus="red"
+                        />
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Selesai <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
+                        <x-input-tanggal 
+                            nama="tanggal_selesai" 
+                            modelBind="formTambah.tanggal_selesai" 
+                            placeholder="Pilih Tanggal Selesai"
+                            :wajib="false"
+                            warnaFokus="red"
+                        />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Bengkel Pelaksana <span class="text-rose-500">*</span></label>
+                        <input type="text" name="bengkel_pelaksana" x-model="formTambah.bengkel_pelaksana" required placeholder="Bengkel Internal PBJ"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500/30">
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Pengerjaan <span class="text-rose-500">*</span></label>
+                        <x-dropdown-kustom 
+                            nama="status_perbaikan"
+                            placeholder="-- Status Pengerjaan --"
+                            :opsi="$opsiStatusPerbaikan"
+                            :wajib="true"
+                            warnaFokus="red"
+                            modelBind="formTambah.status_perbaikan"
+                        />
+                    </div>
+                </div>
+
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Keluhan / Indikasi Kerusakan <span class="text-rose-500">*</span></label>
-                    <textarea name="keluhan_kerusakan" x-model="formTambah.keluhan_kerusakan" rows="2" required placeholder="Deskripsikan keluhan pengemudi / kerusakan kendaraan..."
-                              class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500/30"></textarea>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keluhan / Indikasi Kerusakan <span class="text-rose-500">*</span></label>
+                    <textarea name="keluhan_kerusakan" x-model="formTambah.keluhan_kerusakan" rows="2" required placeholder="Deskripsikan keluhan pengemudi / kerusakan armada..."
+                              class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500/30"></textarea>
                 </div>
 
-                <!-- Tindakan Perbaikan -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tindakan Perbaikan / Suku Cadang yang Diganti</label>
-                    <textarea name="tindakan_perbaikan" x-model="formTambah.tindakan_perbaikan" rows="2" placeholder="Rincian tindakan montir dan suku cadang yang diganti..."
-                              class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500/30"></textarea>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tindakan Perbaikan / Suku Cadang <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
+                    <textarea name="tindakan_perbaikan" x-model="formTambah.tindakan_perbaikan" rows="2" placeholder="Rincian tindakan montir dan sparepart yang diganti..."
+                              class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500/30"></textarea>
                 </div>
 
-                <!-- Rincian Biaya -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Biaya Ongkos Jasa (Rp)</label>
-                        <input type="number" name="biaya_jasa" x-model.number="formTambah.biaya_jasa" step="1000" min="0" placeholder="0"
-                               class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500/30">
+                        <x-input-rupiah 
+                            nama="biaya_jasa" 
+                            label="Biaya Ongkos Jasa (Rp)" 
+                            modelBind="formTambah.biaya_jasa" 
+                            placeholder="0" 
+                        />
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Biaya Sparepart / Suku Cadang (Rp)</label>
-                        <input type="number" name="biaya_sparepart" x-model.number="formTambah.biaya_sparepart" step="1000" min="0" placeholder="0"
-                               class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500/30">
-                    </div>
-
-                    <div class="sm:col-span-2">
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pengawas Kendaraan Penanggung Jawab <span class="text-rose-500">*</span></label>
-                        <input type="text" name="pengawas_kendaraan" x-model="formTambah.pengawas_kendaraan" required placeholder="Nama pengawas kendaraan"
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500/30">
-                    </div>
-                </div>
-
-                <!-- Live Total Biaya -->
-                <div class="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 flex items-center justify-between">
-                    <div>
-                        <span class="text-[11px] text-amber-800 dark:text-amber-300 font-semibold block">Total Estimasi Biaya Servis:</span>
-                        <span class="text-[10px] text-amber-600 dark:text-amber-400 font-mono">Biaya Jasa + Biaya Sparepart</span>
-                    </div>
-                    <div class="text-right">
-                        <strong class="font-mono font-bold text-base text-amber-700 dark:text-amber-300" x-text="'Rp ' + (totalBiayaTambah).toLocaleString('id-ID')"></strong>
+                        <x-input-rupiah 
+                            nama="biaya_sparepart" 
+                            label="Biaya Sparepart (Rp)" 
+                            modelBind="formTambah.biaya_sparepart" 
+                            placeholder="0" 
+                        />
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    <button type="button" @click="modalTambahTerbuka = false"
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="px-5 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 active:scale-95 rounded-xl transition-all shadow-md shadow-red-600/20">
-                        Terbitkan SPK
-                    </button>
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pengawas Kendaraan Penanggung Jawab <span class="text-rose-500">*</span></label>
+                    <input type="text" name="pengawas_kendaraan" x-model="formTambah.pengawas_kendaraan" required placeholder="Nama pengawas armada"
+                           class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500/30">
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" @click="modalTambahTerbuka = false" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all shadow-sm">Terbitkan SPK</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- 6. MODAL FORM: EDIT SPK PERBAIKAN -->
-    <!-- ========================================================================= -->
-    <div x-show="modalEditTerbuka" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="modalEditTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl my-8">
-            
-            <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                    </div>
-                    <div>
-                        <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Ubah Data SPK Perbaikan</h2>
-                        <p class="text-[11px] text-slate-400">No. SPK: <span class="font-mono font-bold text-red-600" x-text="formEdit.nomor_spk_perbaikan"></span></p>
-                    </div>
-                </div>
-                <button @click="modalEditTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+    <!-- Modal Edit SPK Perbaikan -->
+    <div x-show="modalEditTerbuka" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="modalEditTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-visible shadow-xl my-8">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Ubah Data SPK Perbaikan: <span class="font-mono text-red-600" x-text="formEdit.nomor_spk_perbaikan"></span></h3>
+                <button @click="modalEditTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none">&times;</button>
             </div>
 
-            <form :action="'{{ url('operasional/bengkel/perbaikan') }}/' + formEdit.id_perbaikan" method="POST" class="p-6 space-y-4">
+            <form :action="'{{ url('operasional/bengkel/perbaikan') }}/' + formEdit.id_perbaikan" method="POST" class="p-5 space-y-3.5 text-xs">
                 @csrf
                 @method('PUT')
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor SPK (Terkunci)</label>
+                        <input type="text" :value="formEdit.nomor_spk_perbaikan" disabled
+                               class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 font-mono font-semibold cursor-not-allowed">
+                    </div>
 
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor SPK (Terkunci)</label>
-                    <input type="text" :value="formEdit.nomor_spk_perbaikan" disabled
-                           class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 cursor-not-allowed">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Armada Truk <span class="text-rose-500">*</span></label>
+                        <x-dropdown-kustom 
+                            nama="kode_aset"
+                            placeholder="-- Pilih Truk Armada --"
+                            :opsi="$opsiKendaraan"
+                            :wajib="true"
+                            warnaFokus="amber"
+                            modelBind="formEdit.kode_aset"
+                        />
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <div class="sm:col-span-2">
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Armada Truk <span class="text-rose-500">*</span></label>
-                        <select name="kode_aset" x-model="formEdit.kode_aset" required
-                                class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                            @foreach($daftarKendaraan as $knd)
-                                <option value="{{ $knd->kode_aset }}">
-                                    {{ $knd->nama_aset }} ({{ $knd->merek_aset ?? 'Truk' }}) - {{ $knd->kode_aset }}
-                                </option>
-                            @endforeach
-                        </select>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Masuk Servis <span class="text-rose-500">*</span></label>
+                        <x-input-tanggal 
+                            nama="tanggal_masuk" 
+                            modelBind="formEdit.tanggal_masuk" 
+                            placeholder="Pilih Tanggal Masuk"
+                            :wajib="true"
+                            warnaFokus="amber"
+                        />
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Masuk Servis <span class="text-rose-500">*</span></label>
-                        <input type="date" name="tanggal_masuk" x-model="formEdit.tanggal_masuk" required
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Selesai <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
+                        <x-input-tanggal 
+                            nama="tanggal_selesai" 
+                            modelBind="formEdit.tanggal_selesai" 
+                            placeholder="Pilih Tanggal Selesai"
+                            :wajib="false"
+                            warnaFokus="amber"
+                        />
                     </div>
+                </div>
 
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Selesai</label>
-                        <input type="date" name="tanggal_selesai" x-model="formEdit.tanggal_selesai"
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Bengkel Pelaksana <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Bengkel Pelaksana <span class="text-rose-500">*</span></label>
                         <input type="text" name="bengkel_pelaksana" x-model="formEdit.bengkel_pelaksana" required
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Pengerjaan <span class="text-rose-500">*</span></label>
-                        <select name="status_perbaikan" x-model="formEdit.status_perbaikan" required
-                                class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                            <option value="Dalam Proses">Dalam Proses Pengerjaan</option>
-                            <option value="Menunggu Sparepart">Menunggu Suku Cadang</option>
-                            <option value="Selesai">Selesai Servis</option>
-                            <option value="Dibatalkan">Dibatalkan</option>
-                        </select>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Pengerjaan <span class="text-rose-500">*</span></label>
+                        <x-dropdown-kustom 
+                            nama="status_perbaikan"
+                            placeholder="-- Status Pengerjaan --"
+                            :opsi="$opsiStatusPerbaikan"
+                            :wajib="true"
+                            warnaFokus="amber"
+                            modelBind="formEdit.status_perbaikan"
+                        />
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Keluhan / Kerusakan <span class="text-rose-500">*</span></label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keluhan / Kerusakan <span class="text-rose-500">*</span></label>
                     <textarea name="keluhan_kerusakan" x-model="formEdit.keluhan_kerusakan" rows="2" required
-                              class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30"></textarea>
+                              class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30"></textarea>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tindakan Perbaikan</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tindakan Perbaikan <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
                     <textarea name="tindakan_perbaikan" x-model="formEdit.tindakan_perbaikan" rows="2"
-                              class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30"></textarea>
+                              class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30"></textarea>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Biaya Jasa (Rp)</label>
-                        <input type="number" name="biaya_jasa" x-model.number="formEdit.biaya_jasa" step="1000" min="0"
-                               class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                        <x-input-rupiah 
+                            nama="biaya_jasa" 
+                            label="Biaya Jasa (Rp)" 
+                            modelBind="formEdit.biaya_jasa" 
+                            placeholder="0" 
+                        />
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Biaya Sparepart (Rp)</label>
-                        <input type="number" name="biaya_sparepart" x-model.number="formEdit.biaya_sparepart" step="1000" min="0"
-                               class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                    </div>
-
-                    <div class="sm:col-span-2">
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pengawas Kendaraan <span class="text-rose-500">*</span></label>
-                        <input type="text" name="pengawas_kendaraan" x-model="formEdit.pengawas_kendaraan" required
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                        <x-input-rupiah 
+                            nama="biaya_sparepart" 
+                            label="Biaya Sparepart (Rp)" 
+                            modelBind="formEdit.biaya_sparepart" 
+                            placeholder="0" 
+                        />
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    <button type="button" @click="modalEditTerbuka = false"
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 active:scale-95 rounded-xl transition-all shadow-md shadow-amber-600/20">
-                        Simpan Perubahan
-                    </button>
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pengawas Kendaraan <span class="text-rose-500">*</span></label>
+                    <input type="text" name="pengawas_kendaraan" x-model="formEdit.pengawas_kendaraan" required
+                           class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" @click="modalEditTerbuka = false" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl transition-all shadow-sm">Simpan Perubahan</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- 7. MODAL DETAIL & CETAK DOKUMEN SPK PERBAIKAN -->
-    <!-- ========================================================================= -->
+    <!-- Modal Detail & Cetak SPK -->
     <div x-show="modalDetailTerbuka" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
         <div @click.away="modalDetailTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
+             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
             
             <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <div class="flex items-center gap-2">
@@ -694,13 +670,11 @@
         </div>
     </div>
 
-    <!-- ========================================================================= -->
     <!-- 8. MODAL KONFIRMASI HAPUS SPK PERBAIKAN -->
-    <!-- ========================================================================= -->
     <div x-show="modalHapusTerbuka" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
         <div @click.away="modalHapusTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 text-center">
+             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 text-center">
             
             <div class="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 mx-auto flex items-center justify-center mb-3.5">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

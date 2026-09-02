@@ -99,13 +99,4 @@ class WilayahController extends Controller
 
         return redirect()->route('master.wilayah.index')->with('sukses', "Wilayah '{$wilayah->nama_wilayah}' berhasil dihapus.");
     }
-
-    /**
-     * Generator Kode Wilayah Otomatis (Daur Ulang Slot vs Acak).
-     */
-    public function buatKodeOtomatis(Request $request)
-    {
-        $mode = $request->input('mode', 'gap');
-        return GeneratorKodeOtomatis::responJson('data_wilayah', 'kode_wilayah', 'WLY-', $mode, 3);
-    }
 }

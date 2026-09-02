@@ -5,8 +5,35 @@
 @section('konten')
 <div x-data="kelolaDataKSO('{{ $tabAktif ?? 'kso' }}')" x-init="initKSO()" class="space-y-6">
 
+    @php
+        $opsiStatusKso = [
+            ['nilai' => 'Aktif', 'label' => 'Kontrak Aktif'],
+            ['nilai' => 'Selesai', 'label' => 'Kontrak Selesai'],
+            ['nilai' => 'Ditangguhkan', 'label' => 'Ditangguhkan'],
+        ];
+        $opsiFilterStatusKso = [
+            ['nilai' => 'semua', 'label' => 'Semua Status KSO'],
+            ['nilai' => 'Aktif', 'label' => 'Kontrak Aktif'],
+            ['nilai' => 'Selesai', 'label' => 'Kontrak Selesai'],
+            ['nilai' => 'Ditangguhkan', 'label' => 'Ditangguhkan'],
+        ];
+
+        $opsiPilihanMitraKso = collect($pilihanMitraKso ?? [])->map(fn($pm) => [
+            'nilai' => $pm->kode_kso,
+            'label' => $pm->nama_kso . ' (' . $pm->kode_kso . ')',
+            'sub'   => 'Mitra: ' . ($pm->pihak_mitra ?? '-')
+        ])->values()->toArray();
+
+        $opsiFilterMitraKso = array_merge([
+            ['nilai' => 'semua', 'label' => 'Semua Mitra KSO']
+        ], collect($pilihanMitraKso ?? [])->map(fn($pm) => [
+            'nilai' => $pm->kode_kso,
+            'label' => '[' . $pm->kode_kso . '] ' . $pm->nama_kso
+        ])->values()->toArray());
+    @endphp
+
     <!-- 1. Header Banner Modul -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#14161F] p-4 sm:p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
+    <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#14161F] p-4 sm:p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
         <div>
             <div class="flex items-center gap-2 mb-1.5">
                 <span class="px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase rounded-md bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 font-mono">
@@ -89,7 +116,7 @@
     @endif
 
     <!-- 3. Ringkasan 4 Kartu KPI KSO -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <div class="wadah-bertingkat grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <!-- Total Mitra KSO -->
         <div class="bg-white dark:bg-[#14161F] p-4 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm flex items-center gap-3.5">
             <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
@@ -170,7 +197,7 @@
     <!-- 5. TABEL TAB 1: DATA MITRA KSO (data_kso) -->
     <!-- ========================================================================= -->
     <div x-show="tabAktif === 'kso'" class="space-y-4">
-        <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+        <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
             
             <!-- Filter Bar Tab 1 -->
             <div class="p-4 sm:px-5 sm:py-4 border-b border-[#E2E8F0] dark:border-[#252837] flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -186,14 +213,17 @@
                         </svg>
                     </div>
 
-                    <!-- Filter Status -->
-                    <select name="status_kso" onchange="this.form.submit()"
-                            class="px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
-                        <option value="semua" {{ ($statusKsoFilter ?? 'semua') === 'semua' ? 'selected' : '' }}>Semua Status KSO</option>
-                        <option value="Aktif" {{ ($statusKsoFilter ?? '') === 'Aktif' ? 'selected' : '' }}>Kontrak Aktif</option>
-                        <option value="Selesai" {{ ($statusKsoFilter ?? '') === 'Selesai' ? 'selected' : '' }}>Kontrak Selesai</option>
-                        <option value="Ditangguhkan" {{ ($statusKsoFilter ?? '') === 'Ditangguhkan' ? 'selected' : '' }}>Ditangguhkan</option>
-                    </select>
+                    <!-- Filter Status Dropdown Kustom -->
+                    <div class="w-full sm:w-56">
+                        <x-dropdown-kustom 
+                            nama="status_kso"
+                            placeholder="-- Semua Status --"
+                            :opsi="$opsiFilterStatusKso"
+                            :nilaiAwal="$statusKsoFilter ?? 'semua'"
+                            :submitOnChange="true"
+                            warnaFokus="blue"
+                        />
+                    </div>
 
                     <button type="submit" class="px-3.5 py-2 text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition-colors">
                         Cari
@@ -213,7 +243,7 @@
 
             <!-- Tabel Data KSO -->
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
+                <table class="tabel-bertingkat w-full text-left text-xs">
                     <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500 dark:text-slate-400">
                         <tr>
                             <th class="px-4 py-3 font-semibold uppercase tracking-wider">Kode & Nama Mitra KSO</th>
@@ -351,7 +381,7 @@
     <!-- 6. TABEL TAB 2: TARIF ONGKOS ANGKUT KSO (ongkos_kso) -->
     <!-- ========================================================================= -->
     <div x-show="tabAktif === 'ongkos'" class="space-y-4">
-        <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+        <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
             
             <!-- Filter Bar Tab 2 -->
             <div class="p-4 sm:px-5 sm:py-4 border-b border-[#E2E8F0] dark:border-[#252837] flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -367,16 +397,17 @@
                         </svg>
                     </div>
 
-                    <!-- Filter Mitra KSO -->
-                    <select name="filter_kso" onchange="this.form.submit()"
-                            class="px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30">
-                        <option value="semua" {{ ($filterKso ?? 'semua') === 'semua' ? 'selected' : '' }}>Semua Mitra KSO</option>
-                        @foreach($pilihanMitraKso as $pm)
-                            <option value="{{ $pm->kode_kso }}" {{ ($filterKso ?? '') === $pm->kode_kso ? 'selected' : '' }}>
-                                [{{ $pm->kode_kso }}] {{ $pm->nama_kso }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <!-- Filter Mitra KSO Dropdown Kustom -->
+                    <div class="w-full sm:w-60">
+                        <x-dropdown-kustom 
+                            nama="filter_kso"
+                            placeholder="-- Semua Mitra KSO --"
+                            :opsi="$opsiFilterMitraKso"
+                            :nilaiAwal="$filterKso ?? 'semua'"
+                            :submitOnChange="true"
+                            warnaFokus="purple"
+                        />
+                    </div>
 
                     <button type="submit" class="px-3.5 py-2 text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition-colors">
                         Cari
@@ -396,7 +427,7 @@
 
             <!-- Tabel Ongkos Angkut KSO -->
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
+                <table class="tabel-bertingkat w-full text-left text-xs">
                     <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500 dark:text-slate-400">
                         <tr>
                             <th class="px-4 py-3 font-semibold uppercase tracking-wider">Kode OA & Rute Trayek</th>
@@ -494,132 +525,103 @@
             </div>
         </div>
     </div>
-
     <!-- ========================================================================= -->
     <!-- 7. MODAL FORM: TAMBAH MITRA KSO (Tab 1) -->
     <!-- ========================================================================= -->
-    <div x-show="modalTambahKsoTerbuka" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="modalTambahKsoTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
-            
-            <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                    </div>
-                    <div>
-                        <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Daftarkan Mitra Kerja Sama Operasional (KSO)</h2>
-                        <p class="text-[11px] text-slate-400">Pencatatan data kemitraan sewa/operasional armada logistik.</p>
-                    </div>
-                </div>
-                <button @click="modalTambahKsoTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+    <div x-show="modalTambahKsoTerbuka" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="modalTambahKsoTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-visible shadow-xl my-8">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Daftarkan Mitra KSO Baru</h3>
+                <button @click="modalTambahKsoTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none">&times;</button>
             </div>
 
-            <form action="{{ route('operasional.kso.simpan') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
+            <form action="{{ route('operasional.kso.simpan') }}" method="POST" enctype="multipart/form-data" class="p-5 space-y-3.5 text-xs">
                 @csrf
-
-                <!-- Generator Kode KSO -->
-                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837]">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-                        <div>
-                            <label class="text-xs font-bold text-slate-800 dark:text-slate-200">
-                                Kode KSO <span class="text-rose-500">*</span>
-                            </label>
-                            <div class="text-[10px] text-slate-400 font-mono mt-0.5" x-text="keteranganKodeKso"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Kode KSO <span class="text-rose-500">*</span></label>
+                            <span class="text-[10px] text-blue-600 dark:text-blue-400 font-semibold px-1.5 py-0.5 bg-blue-50 dark:bg-blue-950/50 rounded-md">Otomatis</span>
                         </div>
-                        
-                        <div class="flex items-center gap-1.5 shrink-0">
-                            <button type="button" @click="buatKodeKSO('gap')"
-                                    class="px-2.5 py-1 text-[11px] font-semibold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                <span>Daur Ulang (KSO-001)</span>
-                            </button>
-                            <button type="button" @click="buatKodeKSO('acak')"
-                                    class="px-2.5 py-1 text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                <span>Format Acak</span>
-                            </button>
-                        </div>
+                        <input type="text" name="kode_kso" x-model="formKsoTambah.kode_kso" required placeholder="KSO-001"
+                               class="w-full px-3 py-2 rounded-xl bg-blue-50/50 dark:bg-[#1C1E2A] border border-blue-200 dark:border-blue-900/50 text-blue-900 dark:text-blue-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30">
                     </div>
 
-                    <input type="text" name="kode_kso" x-model="formKsoTambah.kode_kso" required placeholder="Contoh: KSO-001 atau KSO-2026-8K2"
-                           class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-blue-600 dark:text-blue-400 uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-blue-500/30">
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <!-- Nama KSO -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama KSO <span class="text-rose-500">*</span></label>
-                        <input type="text" name="nama_kso" x-model="formKsoTambah.nama_kso" required placeholder="Contoh: KSO Armada Semen Sentosa"
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
-                    </div>
-
-                    <!-- Pihak Mitra -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Perusahaan / Pihak Mitra <span class="text-rose-500">*</span></label>
-                        <input type="text" name="pihak_mitra" x-model="formKsoTambah.pihak_mitra" required placeholder="Contoh: PT Mitra Logistik Sentosa"
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
-                    </div>
-
-                    <!-- Tanggal Mulai -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Mulai Kontrak <span class="text-rose-500">*</span></label>
-                        <input type="date" name="tanggal_mulai" x-model="formKsoTambah.tanggal_mulai" required
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
-                    </div>
-
-                    <!-- Tanggal Selesai -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Selesai Kontrak <span class="text-rose-500">*</span></label>
-                        <input type="date" name="tanggal_selesai" x-model="formKsoTambah.tanggal_selesai" required
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
-                    </div>
-
-                    <!-- Nilai Kontrak -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nilai Kontrak KSO (Rp)</label>
-                        <input type="number" name="nilai_kontrak" x-model="formKsoTambah.nilai_kontrak" step="100000" placeholder="Contoh: 500000000"
-                               class="w-full px-3.5 py-2 text-xs font-mono rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
-                    </div>
-
-                    <!-- Status KSO -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Status KSO <span class="text-rose-500">*</span></label>
-                        <select name="status_kso" x-model="formKsoTambah.status_kso" required
-                                class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
-                            <option value="Aktif">Kontrak Aktif</option>
-                            <option value="Selesai">Kontrak Selesai</option>
-                            <option value="Ditangguhkan">Ditangguhkan</option>
-                        </select>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status KSO <span class="text-rose-500">*</span></label>
+                        <x-dropdown-kustom 
+                            nama="status_kso"
+                            placeholder="-- Pilih Status --"
+                            :opsi="$opsiStatusKso"
+                            :wajib="true"
+                            warnaFokus="blue"
+                            modelBind="formKsoTambah.status_kso"
+                        />
                     </div>
                 </div>
 
-                <!-- Keterangan -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama KSO <span class="text-rose-500">*</span></label>
+                        <input type="text" name="nama_kso" x-model="formKsoTambah.nama_kso" required placeholder="KSO Armada Semen Sentosa"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pihak Mitra <span class="text-rose-500">*</span></label>
+                        <input type="text" name="pihak_mitra" x-model="formKsoTambah.pihak_mitra" required placeholder="PT Mitra Logistik Sentosa"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Mulai Kontrak <span class="text-rose-500">*</span></label>
+                        <x-input-tanggal 
+                            nama="tanggal_mulai" 
+                            modelBind="formKsoTambah.tanggal_mulai" 
+                            placeholder="Pilih Tanggal Mulai"
+                            :wajib="true"
+                            warnaFokus="blue"
+                        />
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Selesai Kontrak <span class="text-rose-500">*</span></label>
+                        <x-input-tanggal 
+                            nama="tanggal_selesai" 
+                            modelBind="formKsoTambah.tanggal_selesai" 
+                            placeholder="Pilih Tanggal Selesai"
+                            :wajib="true"
+                            warnaFokus="blue"
+                        />
+                    </div>
+                </div>
+
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan / Ruang Lingkup Kerja Sama</label>
+                    <x-input-rupiah 
+                        nama="nilai_kontrak" 
+                        label="Nilai Kontrak KSO (Rp)" 
+                        modelBind="formKsoTambah.nilai_kontrak" 
+                        placeholder="500.000.000" 
+                    />
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan / Ruang Lingkup <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
                     <textarea name="keterangan" x-model="formKsoTambah.keterangan" rows="2" placeholder="Catatan kesepakatan armada, wilayah operasional..."
-                              class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30"></textarea>
+                              class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30"></textarea>
                 </div>
 
-                <!-- Unggah File Dokumen Kontrak -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Unggah Dokumen Kontrak KSO (PDF / Gambar / Doc, Max: 5MB)</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Unggah Dokumen Kontrak (PDF/Doc/Gambar) <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
                     <input type="file" name="file_kontrak_kso" accept=".pdf,.doc,.docx,image/*"
                            class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300">
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    <button type="button" @click="modalTambahKsoTerbuka = false"
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="px-5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 rounded-xl transition-all shadow-md shadow-blue-600/20">
-                        Simpan Data KSO
-                    </button>
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" @click="modalTambahKsoTerbuka = false" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all shadow-sm">Simpan Mitra KSO</button>
                 </div>
             </form>
         </div>
@@ -628,99 +630,97 @@
     <!-- ========================================================================= -->
     <!-- 8. MODAL FORM: EDIT MITRA KSO (Tab 1) -->
     <!-- ========================================================================= -->
-    <div x-show="modalEditKsoTerbuka" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="modalEditKsoTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
-            
-            <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                    </div>
-                    <div>
-                        <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Ubah Data Mitra KSO</h2>
-                        <p class="text-[11px] text-slate-400">Kode: <span class="font-mono font-bold text-blue-600" x-text="formKsoEdit.kode_kso"></span></p>
-                    </div>
-                </div>
-                <button @click="modalEditKsoTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+    <div x-show="modalEditKsoTerbuka" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="modalEditKsoTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-visible shadow-xl my-8">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Ubah Data Mitra KSO: <span class="font-mono text-blue-600" x-text="formKsoEdit.kode_kso"></span></h3>
+                <button @click="modalEditKsoTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none">&times;</button>
             </div>
 
-            <form :action="'{{ url('operasional/kso') }}/' + formKsoEdit.kode_kso" method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
+            <form :action="'{{ url('operasional/kso') }}/' + formKsoEdit.kode_kso" method="POST" enctype="multipart/form-data" class="p-5 space-y-3.5 text-xs">
                 @csrf
                 @method('PUT')
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kode KSO (Terkunci)</label>
+                        <input type="text" :value="formKsoEdit.kode_kso" disabled
+                               class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 font-mono font-semibold cursor-not-allowed">
+                    </div>
 
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Kode KSO (Terkunci)</label>
-                    <input type="text" :value="formKsoEdit.kode_kso" disabled
-                           class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 cursor-not-allowed">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status KSO <span class="text-rose-500">*</span></label>
+                        <x-dropdown-kustom 
+                            nama="status_kso"
+                            placeholder="-- Pilih Status --"
+                            :opsi="$opsiStatusKso"
+                            :wajib="true"
+                            warnaFokus="amber"
+                            modelBind="formKsoEdit.status_kso"
+                        />
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama KSO <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama KSO <span class="text-rose-500">*</span></label>
                         <input type="text" name="nama_kso" x-model="formKsoEdit.nama_kso" required
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pihak Mitra <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pihak Mitra <span class="text-rose-500">*</span></label>
                         <input type="text" name="pihak_mitra" x-model="formKsoEdit.pihak_mitra" required
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Mulai <span class="text-rose-500">*</span></label>
+                        <x-input-tanggal 
+                            nama="tanggal_mulai" 
+                            modelBind="formKsoEdit.tanggal_mulai" 
+                            placeholder="Pilih Tanggal Mulai"
+                            :wajib="true"
+                            warnaFokus="amber"
+                        />
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Mulai <span class="text-rose-500">*</span></label>
-                        <input type="date" name="tanggal_mulai" x-model="formKsoEdit.tanggal_mulai" required
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Selesai <span class="text-rose-500">*</span></label>
-                        <input type="date" name="tanggal_selesai" x-model="formKsoEdit.tanggal_selesai" required
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nilai Kontrak (Rp)</label>
-                        <input type="number" name="nilai_kontrak" x-model="formKsoEdit.nilai_kontrak" step="100000"
-                               class="w-full px-3.5 py-2 text-xs font-mono rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Status KSO <span class="text-rose-500">*</span></label>
-                        <select name="status_kso" x-model="formKsoEdit.status_kso" required
-                                class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                            <option value="Aktif">Kontrak Aktif</option>
-                            <option value="Selesai">Kontrak Selesai</option>
-                            <option value="Ditangguhkan">Ditangguhkan</option>
-                        </select>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Selesai <span class="text-rose-500">*</span></label>
+                        <x-input-tanggal 
+                            nama="tanggal_selesai" 
+                            modelBind="formKsoEdit.tanggal_selesai" 
+                            placeholder="Pilih Tanggal Selesai"
+                            :wajib="true"
+                            warnaFokus="amber"
+                        />
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan / Ruang Lingkup</label>
+                    <x-input-rupiah 
+                        nama="nilai_kontrak" 
+                        label="Nilai Kontrak (Rp)" 
+                        modelBind="formKsoEdit.nilai_kontrak" 
+                    />
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan / Ruang Lingkup <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
                     <textarea name="keterangan" x-model="formKsoEdit.keterangan" rows="2"
-                              class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30"></textarea>
+                              class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30"></textarea>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Ganti Dokumen File Kontrak (Biarkan kosong jika tidak diubah)</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Ganti File Dokumen (Biarkan kosong jika tidak diubah) <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
                     <input type="file" name="file_kontrak_kso" accept=".pdf,.doc,.docx,image/*"
                            class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 dark:file:bg-amber-900/30 dark:file:text-amber-300">
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    <button type="button" @click="modalEditKsoTerbuka = false"
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 active:scale-95 rounded-xl transition-all shadow-md shadow-amber-600/20">
-                        Simpan Perubahan
-                    </button>
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" @click="modalEditKsoTerbuka = false" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl transition-all shadow-sm">Simpan Perubahan</button>
                 </div>
             </form>
         </div>
@@ -732,7 +732,7 @@
     <div x-show="modalDetailKsoTerbuka" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
         <div @click.away="modalDetailKsoTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl my-8">
+             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl my-8">
             
             <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Detail Mitra Kerja Sama Operasional (KSO)</h3>
@@ -798,7 +798,7 @@
     <div x-show="modalHapusKsoTerbuka" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
         <div @click.away="modalHapusKsoTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 text-center">
+             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 text-center">
             
             <div class="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 mx-auto flex items-center justify-center mb-3.5">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -830,101 +830,65 @@
     <!-- ========================================================================= -->
     <!-- 11. MODAL FORM: TAMBAH ONGKOS ANGKUT KSO (Tab 2) -->
     <!-- ========================================================================= -->
-    <div x-show="modalTambahOaTerbuka" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="modalTambahOaTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-8">
-            
-            <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                    </div>
-                    <div>
-                        <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Tambah Tarif Ongkos Angkut KSO</h2>
-                        <p class="text-[11px] text-slate-400">Standarisasi tarif rute trayek per mitra armada.</p>
-                    </div>
-                </div>
-                <button @click="modalTambahOaTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+    <div x-show="modalTambahOaTerbuka" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="modalTambahOaTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-visible shadow-xl my-8">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Tambah Tarif Ongkos Angkut KSO</h3>
+                <button @click="modalTambahOaTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none">&times;</button>
             </div>
 
-            <form action="{{ route('operasional.kso.ongkos.simpan') }}" method="POST" class="p-6 space-y-4">
+            <form action="{{ route('operasional.kso.ongkos.simpan') }}" method="POST" class="p-5 space-y-3.5 text-xs">
                 @csrf
-
-                <!-- Generator Kode OA -->
-                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837]">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-                        <div>
-                            <label class="text-xs font-bold text-slate-800 dark:text-slate-200">
-                                Kode OA KSO <span class="text-rose-500">*</span>
-                            </label>
-                            <div class="text-[10px] text-slate-400 font-mono mt-0.5" x-text="keteranganKodeOa"></div>
-                        </div>
-                        
-                        <div class="flex items-center gap-1.5 shrink-0">
-                            <button type="button" @click="buatKodeOA('gap')"
-                                    class="px-2.5 py-1 text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                <span>Daur Ulang (OAK-001)</span>
-                            </button>
-                            <button type="button" @click="buatKodeOA('acak')"
-                                    class="px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/30 hover:bg-amber-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                <span>Format Acak</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <input type="text" name="kode_oa" x-model="formOaTambah.kode_oa" required placeholder="Contoh: OAK-001 atau OAK-7K2"
-                           class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-purple-600 dark:text-purple-400 uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-purple-500/30">
-                </div>
-
-                <!-- Pilih Mitra KSO -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Mitra KSO Penyelenggara <span class="text-rose-500">*</span></label>
-                    <select name="kode_kso" x-model="formOaTambah.kode_kso" required
-                            class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30">
-                        <option value="">-- Pilih Mitra KSO --</option>
-                        @foreach($pilihanMitraKso as $pm)
-                            <option value="{{ $pm->kode_kso }}">{{ $pm->nama_kso }} ({{ $pm->kode_kso }})</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Nama OA / Rute Trayek -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Rute Trayek (Nama OA) <span class="text-rose-500">*</span></label>
-                    <input type="text" name="nama_oa" x-model="formOaTambah.nama_oa" required placeholder="Contoh: Plant Cikarang ➔ Hub Karawang"
-                           class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30">
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <!-- Muatan -->
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Kapasitas Muatan Armada <span class="text-rose-500">*</span></label>
-                        <input type="text" name="muatan" x-model="formOaTambah.muatan" required placeholder="Contoh: Tronton 30 Ton (600 Zak)"
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30">
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Kode OA KSO <span class="text-rose-500">*</span></label>
+                            <span class="text-[10px] text-purple-600 dark:text-purple-400 font-semibold px-1.5 py-0.5 bg-purple-50 dark:bg-purple-950/50 rounded-md">Otomatis</span>
+                        </div>
+                        <input type="text" name="kode_oa" x-model="formOaTambah.kode_oa" required placeholder="OAK-001"
+                               class="w-full px-3 py-2 rounded-xl bg-purple-50/50 dark:bg-[#1C1E2A] border border-purple-200 dark:border-purple-900/50 text-purple-900 dark:text-purple-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-purple-500/30">
                     </div>
 
-                    <!-- Ongkos Angkut -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tarif Ongkos Angkut (Rp) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="ongkos_angkut" x-model="formOaTambah.ongkos_angkut" step="5000" min="0" required placeholder="1850000"
-                               class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-emerald-600 dark:text-emerald-400 focus:outline-none focus:ring-2 focus:ring-purple-500/30">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Mitra KSO Penyelenggara <span class="text-rose-500">*</span></label>
+                        <x-dropdown-kustom 
+                            nama="kode_kso"
+                            placeholder="-- Pilih Mitra KSO --"
+                            :opsi="$opsiPilihanMitraKso"
+                            :wajib="true"
+                            warnaFokus="purple"
+                            modelBind="formOaTambah.kode_kso"
+                        />
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    <button type="button" @click="modalTambahOaTerbuka = false"
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="px-5 py-2 text-xs font-semibold text-white bg-purple-600 hover:bg-purple-700 active:scale-95 rounded-xl transition-all shadow-md shadow-purple-600/20">
-                        Simpan Tarif OA KSO
-                    </button>
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Rute Trayek (Nama OA) <span class="text-rose-500">*</span></label>
+                    <input type="text" name="nama_oa" x-model="formOaTambah.nama_oa" required placeholder="Plant Cikarang ➔ Hub Karawang"
+                           class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kapasitas Muatan <span class="text-rose-500">*</span></label>
+                        <input type="text" name="muatan" x-model="formOaTambah.muatan" required placeholder="Tronton 30 Ton (600 Zak)"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30">
+                    </div>
+
+                    <div>
+                        <x-input-rupiah 
+                            nama="ongkos_angkut" 
+                            label="Tarif Ongkos Angkut (Rp)" 
+                            modelBind="formOaTambah.ongkos_angkut" 
+                            :wajib="true" 
+                            placeholder="1.850.000" 
+                        />
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" @click="modalTambahOaTerbuka = false" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-xl transition-all shadow-sm">Simpan Tarif OA</button>
                 </div>
             </form>
         </div>
@@ -933,75 +897,62 @@
     <!-- ========================================================================= -->
     <!-- 12. MODAL FORM: EDIT ONGKOS ANGKUT KSO (Tab 2) -->
     <!-- ========================================================================= -->
-    <div x-show="modalEditOaTerbuka" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="modalEditOaTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-8">
-            
-            <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                    </div>
-                    <div>
-                        <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">Ubah Tarif Ongkos Angkut KSO</h2>
-                        <p class="text-[11px] text-slate-400">Kode OA: <span class="font-mono font-bold text-purple-600" x-text="formOaEdit.kode_oa"></span></p>
-                    </div>
-                </div>
-                <button @click="modalEditOaTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+    <div x-show="modalEditOaTerbuka" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="modalEditOaTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-visible shadow-xl my-8">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Ubah Tarif Ongkos Angkut: <span class="font-mono text-purple-600" x-text="formOaEdit.kode_oa"></span></h3>
+                <button @click="modalEditOaTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none">&times;</button>
             </div>
 
-            <form :action="'{{ url('operasional/kso/ongkos') }}/' + formOaEdit.kode_oa" method="POST" class="p-6 space-y-4">
+            <form :action="'{{ url('operasional/kso/ongkos') }}/' + formOaEdit.kode_oa" method="POST" class="p-5 space-y-3.5 text-xs">
                 @csrf
                 @method('PUT')
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kode OA (Terkunci)</label>
+                        <input type="text" :value="formOaEdit.kode_oa" disabled
+                               class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 font-mono font-semibold cursor-not-allowed">
+                    </div>
 
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Kode OA (Terkunci)</label>
-                    <input type="text" :value="formOaEdit.kode_oa" disabled
-                           class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 cursor-not-allowed">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Mitra KSO Penyelenggara <span class="text-rose-500">*</span></label>
+                        <x-dropdown-kustom 
+                            nama="kode_kso"
+                            placeholder="-- Pilih Mitra KSO --"
+                            :opsi="$opsiPilihanMitraKso"
+                            :wajib="true"
+                            warnaFokus="amber"
+                            modelBind="formOaEdit.kode_kso"
+                        />
+                    </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Mitra KSO Penyelenggara <span class="text-rose-500">*</span></label>
-                    <select name="kode_kso" x-model="formOaEdit.kode_kso" required
-                            class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                        @foreach($pilihanMitraKso as $pm)
-                            <option value="{{ $pm->kode_kso }}">{{ $pm->nama_kso }} ({{ $pm->kode_kso }})</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Rute Trayek (Nama OA) <span class="text-rose-500">*</span></label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Rute Trayek (Nama OA) <span class="text-rose-500">*</span></label>
                     <input type="text" name="nama_oa" x-model="formOaEdit.nama_oa" required
-                           class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                           class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Kapasitas Muatan <span class="text-rose-500">*</span></label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kapasitas Muatan <span class="text-rose-500">*</span></label>
                         <input type="text" name="muatan" x-model="formOaEdit.muatan" required
-                               class="w-full px-3.5 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                           class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tarif Ongkos Angkut (Rp) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="ongkos_angkut" x-model="formOaEdit.ongkos_angkut" step="5000" min="0" required
-                               class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-emerald-600 dark:text-emerald-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                        <x-input-rupiah 
+                            nama="ongkos_angkut" 
+                            label="Tarif Ongkos Angkut (Rp)" 
+                            modelBind="formOaEdit.ongkos_angkut" 
+                            :wajib="true" 
+                        />
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    <button type="button" @click="modalEditOaTerbuka = false"
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-colors">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            class="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 active:scale-95 rounded-xl transition-all shadow-md shadow-amber-600/20">
-                        Simpan Perubahan
-                    </button>
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" @click="modalEditOaTerbuka = false" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl transition-all shadow-sm">Simpan Perubahan</button>
                 </div>
             </form>
         </div>
@@ -1013,7 +964,7 @@
     <div x-show="modalHapusOaTerbuka" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
         <div @click.away="modalHapusOaTerbuka = false"
-             class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 text-center">
+             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 text-center">
             
             <div class="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 mx-auto flex items-center justify-center mb-3.5">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

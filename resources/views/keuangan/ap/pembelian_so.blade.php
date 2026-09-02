@@ -7,29 +7,8 @@
     bukaModalTambah: false,
     jumlahZak: 500,
     hargaSatuan: 58000,
-    nomorSOOtomatis: '',
-    modeKode: 'gap',
-    sedangBuatKode: false,
-    keteranganKode: 'Slot Nomor Terkecil Tersedia (Daur Ulang Otomatis)',
-
-    async buatKode(mode = 'gap') {
-        this.modeKode = mode;
-        this.sedangBuatKode = true;
-        try {
-            const res = await fetch(`{{ route('keuangan.ap.pembelian_so.buat_kode') }}?mode=${mode}`);
-            const data = await res.json();
-            if (data.status === 'sukses') {
-                this.nomorSOOtomatis = data.kode_otomatis;
-                this.keteranganKode = data.keterangan;
-            }
-        } catch (e) {
-            console.error('Gagal generate nomor SO', e);
-        } finally {
-            this.sedangBuatKode = false;
-        }
-    },
     hitungTotal() { return this.jumlahZak * this.hargaSatuan; }
-}" x-init="buatKode('gap')">
+}">
     <!-- Flash Notification -->
     @if(session('sukses'))
         <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-center justify-between">
@@ -124,9 +103,8 @@
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Gudang / Plant</th>
                         <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Volume (Zak)</th>
                         <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Harga Beli / Zak</th>
-                        <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Total Nilai</th>
-                        <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Status SO</th>
-                        <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Aksi & Riwayat</th>
+                        <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Total Biaya</th>
+                        <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Status</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
@@ -174,18 +152,10 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-center">
-                                <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400">
-                                    {{ $so->status_so ?? 'Disetujui' }}
-                                </span>
-                                <div class="mt-1 text-[10px] text-slate-400 dark:text-slate-500 font-mono" title="Terakhir diperbarui: {{ $so->terakhir_diedit_waktu }}">
-                                    🕒 {{ $so->terakhir_diedit_relatif }}
-                                </div>
-                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="px-4 py-6 text-center text-slate-400">Belum ada transaksi pembelian SO pabrik tercatat.</td>
+                            <td colspan="8" class="px-4 py-6 text-center text-slate-400">Belum ada transaksi pembelian SO pabrik tercatat.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -194,8 +164,8 @@
     </div>
 
     <!-- Modal Buat Pembelian SO -->
-    <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-xl">
+    <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-visible shadow-xl my-8">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Buat Pembelian SO Pabrik Semen</h3>
                 <button @click="bukaModalTambah = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>
@@ -204,27 +174,7 @@
                 @csrf
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <div class="flex items-center justify-between mb-1">
-                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Nomor SO Pabrik</label>
-                            <div class="flex items-center gap-1">
-                                <button type="button" @click="buatKode('gap')" :disabled="sedangBuatKode"
-                                        :class="modeKode === 'gap' ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'"
-                                        class="text-[9px] font-semibold px-1.5 py-0.5 rounded transition-all">
-                                    Daur Ulang
-                                </button>
-                                <button type="button" @click="buatKode('acak')" :disabled="sedangBuatKode"
-                                        :class="modeKode === 'acak' ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'"
-                                        class="text-[9px] font-semibold px-1.5 py-0.5 rounded transition-all">
-                                    Acak
-                                </button>
-                            </div>
-                        </div>
-                        <input type="text" name="nomor_so" x-model="nomorSOOtomatis" required placeholder="PO-001"
-                               class="w-full px-3 py-2 rounded-xl bg-blue-50/50 dark:bg-[#1C1E2A] border border-blue-200 dark:border-blue-900/50 text-blue-900 dark:text-blue-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30">
-                        <span class="text-[9px] text-slate-400 font-mono mt-0.5 block" x-text="keteranganKode"></span>
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Customer / Alokasi Toko</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Customer / Alokasi Toko <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="kode_customer"
                             placeholder="-- Pilih Customer --"
@@ -234,7 +184,7 @@
                         />
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Gudang / Plant Pengambilan</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Gudang / Plant Pengambilan <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="kode_gudang"
                             placeholder="-- Pilih Gudang SO --"
@@ -245,18 +195,23 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Pemesanan SO</label>
-                    <input type="date" name="tanggal_so" required value="{{ date('Y-m-d') }}"
-                           class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Pemesanan SO <span class="text-rose-500">*</span></label>
+                    <x-input-tanggal 
+                        nama="tanggal_so" 
+                        nilaiAwal="{{ date('Y-m-d') }}" 
+                        placeholder="Pilih Tanggal SO"
+                        :wajib="true"
+                        warnaFokus="blue"
+                    />
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Volume Pemesanan (Zak)</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Volume Pemesanan (Zak) <span class="text-rose-500">*</span></label>
                         <input type="number" name="jumlah_zak" x-model.number="jumlahZak" required min="1" step="50"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Satuan Pabrik (Rp)</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Satuan Pabrik (Rp) <span class="text-rose-500">*</span></label>
                         <input type="number" name="harga_satuan" x-model.number="hargaSatuan" required min="1" step="500"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
                     </div>

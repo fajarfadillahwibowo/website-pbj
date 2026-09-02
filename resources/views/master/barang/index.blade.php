@@ -3,32 +3,7 @@
 @section('judul', 'Master Data Produk & Semen')
 
 @section('konten')
-<div class="space-y-5" x-data="{ 
-    bukaModalTambah: false, 
-    bukaModalEdit: false, 
-    editData: {},
-    kodeBarangOtomatis: '{{ $kodeOtomatis }}',
-    modeKode: 'gap',
-    sedangBuatKode: false,
-    keteranganKode: 'Slot Nomor Terkecil Tersedia (Daur Ulang Otomatis)',
-
-    async buatKode(mode = 'gap') {
-        this.modeKode = mode;
-        this.sedangBuatKode = true;
-        try {
-            const res = await fetch(`{{ route('master.barang.buat_kode') }}?mode=${mode}`);
-            const data = await res.json();
-            if (data.status === 'sukses') {
-                this.kodeBarangOtomatis = data.kode_otomatis;
-                this.keteranganKode = data.keterangan;
-            }
-        } catch (e) {
-            console.error('Gagal generate kode barang', e);
-        } finally {
-            this.sedangBuatKode = false;
-        }
-    }
-}">
+<div class="space-y-5" x-data="{ bukaModalTambah: false, bukaModalEdit: false, editData: {} }">
     <!-- Flash Notification -->
     @if(session('sukses'))
         <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-center justify-between">
@@ -166,9 +141,6 @@
                                         <button type="submit" class="text-red-600 dark:text-red-400 hover:underline font-medium">Hapus</button>
                                     </form>
                                 </div>
-                                <div class="mt-1 text-[10px] text-slate-400 dark:text-slate-500 font-mono" title="Terakhir diperbarui: {{ $b->terakhir_diedit_waktu }}">
-                                    🕒 {{ $b->terakhir_diedit_relatif }}
-                                </div>
                             </td>
                         </tr>
                     @empty
@@ -182,8 +154,8 @@
     </div>
 
     <!-- Modal Tambah Produk -->
-    <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
+    <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-visible shadow-xl my-8">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Tambah Produk Semen Baru</h3>
                 <button @click="bukaModalTambah = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>
@@ -193,26 +165,14 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <div class="flex items-center justify-between mb-1">
-                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Kode Produk</label>
-                            <div class="flex items-center gap-1">
-                                <button type="button" @click="buatKode('gap')" :disabled="sedangBuatKode"
-                                        :class="modeKode === 'gap' ? 'bg-amber-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'"
-                                        class="text-[9px] font-semibold px-1.5 py-0.5 rounded transition-all">
-                                    Daur Ulang
-                                </button>
-                                <button type="button" @click="buatKode('acak')" :disabled="sedangBuatKode"
-                                        :class="modeKode === 'acak' ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'"
-                                        class="text-[9px] font-semibold px-1.5 py-0.5 rounded transition-all">
-                                    Acak
-                                </button>
-                            </div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Kode Produk <span class="text-rose-500">*</span></label>
+                            <span class="text-[10px] text-amber-600 dark:text-amber-400 font-semibold px-1.5 py-0.5 bg-amber-50 dark:bg-amber-950/50 rounded-md">Otomatis</span>
                         </div>
-                        <input type="text" name="kode_barang" x-model="kodeBarangOtomatis" required placeholder="SMN-001"
+                        <input type="text" name="kode_barang" value="{{ $kodeOtomatis }}" required placeholder="SMN-001"
                                class="w-full px-3 py-2 rounded-xl bg-amber-50/50 dark:bg-[#1C1E2A] border border-amber-200 dark:border-amber-900/50 text-amber-900 dark:text-amber-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500/30">
-                        <span class="text-[9px] text-slate-400 font-mono mt-0.5 block" x-text="keteranganKode"></span>
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis Kemasan</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis Kemasan <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="jenis_barang"
                             placeholder="-- Pilih Jenis --"
@@ -223,23 +183,23 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Produk Semen</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Produk Semen <span class="text-rose-500">*</span></label>
                     <input type="text" name="nama_barang" required placeholder="Semen Tonasa PCC 40 Kg"
                            class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Satuan</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Satuan <span class="text-rose-500">*</span></label>
                     <input type="text" name="satuan_barang" required value="Zak" placeholder="Zak / Ton"
                            class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Beli Pabrik (Rp)</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Beli Pabrik (Rp) <span class="text-rose-500">*</span></label>
                         <input type="number" name="harga_pokok" required min="0" step="500" placeholder="58000"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Jual Standar (Rp)</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Jual Standar (Rp) <span class="text-rose-500">*</span></label>
                         <input type="number" name="harga_jual_standar" required min="0" step="500" placeholder="64500"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
@@ -253,8 +213,8 @@
     </div>
 
     <!-- Modal Edit Produk -->
-    <div x-show="bukaModalEdit" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="bukaModalEdit = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
+    <div x-show="bukaModalEdit" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="bukaModalEdit = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-visible shadow-xl my-8">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
                 <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Edit Produk: <span class="font-mono text-amber-600" x-text="editData.kode_barang"></span></h3>
                 <button @click="bukaModalEdit = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>
@@ -264,7 +224,7 @@
                 @method('PUT')
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis Kemasan</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis Kemasan <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="jenis_barang"
                             placeholder="-- Pilih Jenis --"
@@ -275,24 +235,24 @@
                         />
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Satuan</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Satuan <span class="text-rose-500">*</span></label>
                         <input type="text" name="satuan_barang" x-model="editData.satuan_barang" required
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Produk Semen</label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Produk Semen <span class="text-rose-500">*</span></label>
                     <input type="text" name="nama_barang" x-model="editData.nama_barang" required
                            class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Beli Pabrik (Rp)</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Beli Pabrik (Rp) <span class="text-rose-500">*</span></label>
                         <input type="number" name="harga_pokok" x-model="editData.harga_pokok" required min="0" step="500"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Jual Standar (Rp)</label>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Jual Standar (Rp) <span class="text-rose-500">*</span></label>
                         <input type="number" name="harga_jual_standar" x-model="editData.harga_jual_standar" required min="0" step="500"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
