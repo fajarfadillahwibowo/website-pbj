@@ -62,18 +62,21 @@ Route::prefix('master')->name('master.')->group(function () {
     // Customer
     Route::get('/customer', [CustomerController::class, 'index'])->name('customer.index');
     Route::post('/customer', [CustomerController::class, 'store'])->name('customer.store');
+    Route::get('/customer/api/buat-kode', [CustomerController::class, 'buatKodeOtomatis'])->name('customer.buat_kode');
     Route::put('/customer/{kode_customer}', [CustomerController::class, 'update'])->name('customer.update');
     Route::delete('/customer/{kode_customer}', [CustomerController::class, 'destroy'])->name('customer.destroy');
 
     // Barang / Semen
     Route::get('/barang', [BarangController::class, 'index'])->name('barang.index');
     Route::post('/barang', [BarangController::class, 'store'])->name('barang.store');
+    Route::get('/barang/api/buat-kode', [BarangController::class, 'buatKodeOtomatis'])->name('barang.buat_kode');
     Route::put('/barang/{kode_barang}', [BarangController::class, 'update'])->name('barang.update');
     Route::delete('/barang/{kode_barang}', [BarangController::class, 'destroy'])->name('barang.destroy');
 
     // Wilayah
     Route::get('/wilayah', [WilayahController::class, 'index'])->name('wilayah.index');
     Route::post('/wilayah', [WilayahController::class, 'store'])->name('wilayah.store');
+    Route::get('/wilayah/api/buat-kode', [WilayahController::class, 'buatKodeOtomatis'])->name('wilayah.buat_kode');
     Route::put('/wilayah/{kode_wilayah}', [WilayahController::class, 'update'])->name('wilayah.update');
     Route::delete('/wilayah/{kode_wilayah}', [WilayahController::class, 'destroy'])->name('wilayah.destroy');
 
@@ -98,32 +101,45 @@ Route::prefix('keuangan')->name('keuangan.')->group(function () {
     Route::prefix('ar')->name('ar.')->group(function () {
         Route::get('/faktur-penjualan', [FakturPenjualanController::class, 'index'])->name('faktur');
         Route::post('/faktur-penjualan', [FakturPenjualanController::class, 'store'])->name('faktur.store');
+        Route::get('/faktur-penjualan/api/buat-kode', [FakturPenjualanController::class, 'buatKodeOtomatis'])->name('faktur.buat_kode');
         Route::get('/list-piutang', [PiutangController::class, 'index'])->name('piutang');
+        Route::post('/list-piutang', [PiutangController::class, 'simpan'])->name('piutang.simpan');
+        Route::get('/list-piutang/api/buat-kode', [PiutangController::class, 'buatKodeOtomatis'])->name('piutang.buat_kode');
+        Route::get('/list-piutang/{id_piutang}', [PiutangController::class, 'ambilDetail'])->name('piutang.detail');
+        Route::put('/list-piutang/{id_piutang}', [PiutangController::class, 'perbarui'])->name('piutang.perbarui');
         Route::post('/list-piutang/{id_piutang}/bayar', [PiutangController::class, 'bayar'])->name('piutang.bayar');
+        Route::delete('/list-piutang/{id_piutang}', [PiutangController::class, 'hapus'])->name('piutang.hapus');
         Route::get('/deposit-customer', [DepositCustomerController::class, 'index'])->name('deposit');
         Route::post('/deposit-customer/topup', [DepositCustomerController::class, 'topUp'])->name('deposit.topup');
+        Route::get('/deposit-customer/api/buat-kode', [DepositCustomerController::class, 'buatKodeOtomatis'])->name('deposit.buat_kode');
     });
 
     // Account Payable (Hutang)
     Route::prefix('ap')->name('ap.')->group(function () {
         Route::get('/pembelian-so', [PembelianSOController::class, 'index'])->name('pembelian_so');
         Route::post('/pembelian-so', [PembelianSOController::class, 'store'])->name('pembelian_so.store');
+        Route::get('/pembelian-so/api/buat-kode', [PembelianSOController::class, 'buatKodeOtomatis'])->name('pembelian_so.buat_kode');
         Route::get('/pengeluaran-kas', [PengeluaranKasController::class, 'index'])->name('pengeluaran');
         Route::post('/pengeluaran-kas', [PengeluaranKasController::class, 'store'])->name('pengeluaran.store');
+        Route::get('/pengeluaran-kas/api/buat-kode', [PengeluaranKasController::class, 'buatKodeOtomatis'])->name('pengeluaran.buat_kode');
         Route::get('/list-rilisan', [HutangSupplierController::class, 'index'])->name('rilisan');
         Route::post('/list-rilisan', [HutangSupplierController::class, 'store'])->name('rilisan.store');
+        Route::get('/list-rilisan/api/buat-kode', [HutangSupplierController::class, 'buatKodeOtomatis'])->name('rilisan.buat_kode');
     });
 
     // Akuntansi & Buku Besar
     Route::prefix('akuntansi')->name('akuntansi.')->group(function () {
         Route::get('/kode-akun', [KodeAkunController::class, 'index'])->name('kode_akun');
         Route::post('/kode-akun', [KodeAkunController::class, 'store'])->name('kode_akun.store');
+        Route::get('/kode-akun/api/buat-kode', [KodeAkunController::class, 'buatKodeOtomatis'])->name('kode_akun.buat_kode');
         Route::put('/kode-akun/{kode_akun}', [KodeAkunController::class, 'update'])->name('kode_akun.update');
         Route::delete('/kode-akun/{kode_akun}', [KodeAkunController::class, 'destroy'])->name('kode_akun.destroy');
         Route::get('/jurnal-umum', [JurnalUmumController::class, 'index'])->name('jurnal');
         Route::post('/jurnal-umum', [JurnalUmumController::class, 'store'])->name('jurnal.store');
+        Route::get('/jurnal-umum/api/buat-kode', [JurnalUmumController::class, 'buatKodeOtomatis'])->name('jurnal.buat_kode');
         Route::get('/aset-perusahaan', [AsetPerusahaanController::class, 'index'])->name('aset');
         Route::post('/aset-perusahaan', [AsetPerusahaanController::class, 'store'])->name('aset.store');
+        Route::get('/aset-perusahaan/api/buat-kode', [AsetPerusahaanController::class, 'buatKodeOtomatis'])->name('aset.buat_kode');
     });
 });
 

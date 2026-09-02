@@ -382,7 +382,7 @@ class SuratJalanController extends Controller
 
             DB::table('list_gudang_so')->insert([
                 [
-                    'kode_gudang' => 'GDG-PUSAT',
+                    'kode_gudang' => 'GDG-PBJ1',
                     'nama_gudang' => 'Gudang Utama Pabrik PBJ',
                     'jenis_gudang' => 'Utama',
                     'kode_barang' => $kodeBarangSemen,
@@ -395,7 +395,7 @@ class SuratJalanController extends Controller
                     'diperbarui_pada' => now(),
                 ],
             ]);
-            $gudangPertama = 'GDG-PUSAT';
+            $gudangPertama = 'GDG-PBJ1';
         }
 
         // 4. Pastikan Sales Order ada

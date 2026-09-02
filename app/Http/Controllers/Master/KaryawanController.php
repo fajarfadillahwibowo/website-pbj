@@ -11,53 +11,11 @@ use App\Helpers\GeneratorKodeOtomatis;
 class KaryawanController extends Controller
 {
     /**
-     * Tampilkan seluruh master data karyawan (Staf, Driver, Gudang, Teknisi, Manajemen).
+     * Tampilkan seluruh master data karyawan (Selaras dengan Data Karyawan Driver).
      */
     public function index(Request $request)
     {
-        $kataKunci = $request->input('cari');
-        $filterKategori = $request->input('kategori');
-
-        $query = Karyawan::with('jabatan');
-
-        if ($filterKategori && in_array($filterKategori, ['staf', 'driver', 'teknisi', 'gudang', 'manajemen'])) {
-            $query->where('kategori_karyawan', $filterKategori);
-        }
-
-        if ($kataKunci) {
-            $query->where(function ($q) use ($kataKunci) {
-                $q->where('nama_karyawan', 'like', "%{$kataKunci}%")
-                  ->orWhere('kode_karyawan', 'like', "%{$kataKunci}%")
-                  ->orWhere('no_hp', 'like', "%{$kataKunci}%")
-                  ->orWhere('no_identitas', 'like', "%{$kataKunci}%");
-            });
-        }
-
-        $daftarKaryawan = $query->orderBy('kode_karyawan', 'asc')->get();
-        $daftarJabatan = Jabatan::orderBy('id_jabatan', 'asc')->get();
-
-        // Hitung statistik per kategori
-        $totalSemua = Karyawan::count();
-        $totalDriver = Karyawan::where('kategori_karyawan', 'driver')->count();
-        $totalStaf = Karyawan::where('kategori_karyawan', 'staf')->count();
-        $totalGudang = Karyawan::where('kategori_karyawan', 'gudang')->count();
-        $totalTeknisi = Karyawan::where('kategori_karyawan', 'teknisi')->count();
-
-        // Generator kode karyawan otomatis
-        $kodeOtomatis = GeneratorKodeOtomatis::buatKode('data_karyawan', 'kode_karyawan', 'KRY-', 3);
-
-        return view('master.karyawan.index', compact(
-            'daftarKaryawan',
-            'daftarJabatan',
-            'kataKunci',
-            'filterKategori',
-            'totalSemua',
-            'totalDriver',
-            'totalStaf',
-            'totalGudang',
-            'totalTeknisi',
-            'kodeOtomatis'
-        ));
+        return redirect()->route('operasional.armada.driver', $request->all());
     }
 
     /**
@@ -77,13 +35,16 @@ class KaryawanController extends Controller
             'nama_karyawan'     => 'required|string|max:100',
             'id_jabatan'        => 'required|integer|exists:jabatan,id_jabatan',
             'kategori_karyawan' => 'required|string|in:staf,driver,teknisi,gudang,manajemen',
-            'no_identitas'      => 'required|string|max:30',
+            'no_identitas'      => 'required|numeric|digits:16',
             'no_hp'             => 'required|string|max:25',
             'alamat'            => 'required|string',
             'status_karyawan'   => 'required|string|in:aktif,kontrak,tetap,non-aktif,berhenti',
         ], [
-            'kode_karyawan.unique' => 'Kode karyawan sudah digunakan.',
-            'id_jabatan.exists'    => 'Jabatan yang dipilih tidak valid.',
+            'kode_karyawan.unique'  => 'Kode karyawan sudah digunakan.',
+            'id_jabatan.exists'     => 'Jabatan yang dipilih tidak valid.',
+            'no_identitas.required' => 'NIK (Nomor Induk Kependudukan) wajib diisi.',
+            'no_identitas.digits'   => 'NIK wajib terdiri dari tepat 16 digit angka numerik resmi.',
+            'no_identitas.numeric'  => 'NIK hanya boleh berisi karakter angka (0-9).',
         ]);
 
         Karyawan::create([
@@ -91,7 +52,7 @@ class KaryawanController extends Controller
             'nama_karyawan'       => $request->nama_karyawan,
             'id_jabatan'          => $request->id_jabatan,
             'kategori_karyawan'   => $request->kategori_karyawan,
-            'no_identitas'        => $request->no_identitas,
+            'no_identitas'        => trim($request->no_identitas),
             'no_hp'               => $request->no_hp,
             'alamat'              => $request->alamat,
             'status_karyawan'     => $request->status_karyawan,
@@ -112,17 +73,22 @@ class KaryawanController extends Controller
             'nama_karyawan'     => 'required|string|max:100',
             'id_jabatan'        => 'required|integer|exists:jabatan,id_jabatan',
             'kategori_karyawan' => 'required|string|in:staf,driver,teknisi,gudang,manajemen',
-            'no_identitas'      => 'required|string|max:30',
+            'no_identitas'      => 'required|numeric|digits:16',
             'no_hp'             => 'required|string|max:25',
             'alamat'            => 'required|string',
             'status_karyawan'   => 'required|string|in:aktif,kontrak,tetap,non-aktif,berhenti',
+        ], [
+            'id_jabatan.exists'     => 'Jabatan yang dipilih tidak valid.',
+            'no_identitas.required' => 'NIK (Nomor Induk Kependudukan) wajib diisi.',
+            'no_identitas.digits'   => 'NIK wajib terdiri dari tepat 16 digit angka numerik resmi.',
+            'no_identitas.numeric'  => 'NIK hanya boleh berisi karakter angka (0-9).',
         ]);
 
         $karyawan->update([
             'nama_karyawan'     => $request->nama_karyawan,
             'id_jabatan'        => $request->id_jabatan,
             'kategori_karyawan' => $request->kategori_karyawan,
-            'no_identitas'      => $request->no_identitas,
+            'no_identitas'      => trim($request->no_identitas),
             'no_hp'             => $request->no_hp,
             'alamat'            => $request->alamat,
             'status_karyawan'   => $request->status_karyawan,

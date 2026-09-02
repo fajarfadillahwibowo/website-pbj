@@ -89,7 +89,7 @@
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Nama Lengkap & Kontak</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Jabatan Peran</th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Kategori</th>
-                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">No. Identitas (KTP)</th>
+                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">NIK (No. KTP)</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Alamat Domisili</th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Status</th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Aksi</th>
@@ -222,9 +222,16 @@
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. KTP / Identitas</label>
-                        <input type="text" name="no_identitas" required placeholder="321606xxxxxx0001"
-                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300">NIK / No. KTP <span class="text-rose-500">*</span></label>
+                            <span class="text-[10px] font-mono font-bold text-slate-400">16 Digit</span>
+                        </div>
+                        <input type="text" name="no_identitas" required
+                               inputmode="numeric" pattern="[0-9]{16}" minlength="16" maxlength="16"
+                               @input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0, 16)"
+                               placeholder="Contoh: 3216061205780001 (16 digit angka)"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 font-mono">
+                        <p class="text-[10px] text-slate-400 mt-0.5">Wajib tepat 16 digit angka numerik resmi KTP.</p>
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. HP / WhatsApp</label>
@@ -316,9 +323,18 @@
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. KTP / Identitas</label>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300">NIK / No. KTP <span class="text-rose-500">*</span></label>
+                            <span class="text-[10px] font-mono font-bold"
+                                  :class="(editData.no_identitas || '').length === 16 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'"
+                                  x-text="((editData.no_identitas || '').length) + '/16 Digit'"></span>
+                        </div>
                         <input type="text" name="no_identitas" x-model="editData.no_identitas" required
-                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                               inputmode="numeric" pattern="[0-9]{16}" minlength="16" maxlength="16"
+                               @input="editData.no_identitas = $el.value.replace(/[^0-9]/g, '').slice(0, 16)"
+                               placeholder="Contoh: 3216061205780001 (16 digit angka)"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 font-mono">
+                        <p class="text-[10px] text-slate-400 mt-0.5">Wajib tepat 16 digit angka numerik resmi KTP.</p>
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. HP / WhatsApp</label>

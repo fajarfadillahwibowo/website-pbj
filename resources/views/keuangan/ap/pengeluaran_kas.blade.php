@@ -3,7 +3,30 @@
 @section('judul', 'Pengeluaran Kas Operasional (AP)')
 
 @section('konten')
-<div class="space-y-5" x-data="{ bukaModalTambah: false }">
+<div class="space-y-5" x-data="{ 
+    bukaModalTambah: false,
+    nomorPengeluaranOtomatis: '',
+    modeKode: 'gap',
+    sedangBuatKode: false,
+    keteranganKode: 'Slot Nomor Terkecil Tersedia (Daur Ulang Otomatis)',
+
+    async buatKode(mode = 'gap') {
+        this.modeKode = mode;
+        this.sedangBuatKode = true;
+        try {
+            const res = await fetch(`{{ route('keuangan.ap.pengeluaran.buat_kode') }}?mode=${mode}`);
+            const data = await res.json();
+            if (data.status === 'sukses') {
+                this.nomorPengeluaranOtomatis = data.kode_otomatis;
+                this.keteranganKode = data.keterangan;
+            }
+        } catch (e) {
+            console.error('Gagal generate nomor pengeluaran', e);
+        } finally {
+            this.sedangBuatKode = false;
+        }
+    }
+}" x-init="buatKode('gap')">
     <!-- Flash Notification -->
     @if(session('sukses'))
         <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-center justify-between">
@@ -105,6 +128,7 @@
                         <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Nominal Kas Keluar</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Sumber Rekening</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Keterangan</th>
+                        <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Riwayat</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
@@ -133,10 +157,13 @@
                             <td class="px-4 py-3 text-slate-500 dark:text-slate-400 truncate max-w-xs">
                                 {{ $keluar->keterangan ?? '-' }}
                             </td>
+                            <td class="px-4 py-3 text-center font-mono text-[10px] text-slate-400" title="Waktu: {{ $keluar->terakhir_diedit_waktu }}">
+                                🕒 {{ $keluar->terakhir_diedit_relatif }}
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-6 text-center text-slate-400">Belum ada pengeluaran kas tercatat.</td>
+                            <td colspan="8" class="px-4 py-6 text-center text-slate-400">Belum ada pengeluaran kas tercatat.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -153,6 +180,26 @@
             </div>
             <form method="POST" action="{{ route('keuangan.ap.pengeluaran.store') }}" class="p-5 space-y-3.5 text-xs">
                 @csrf
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300">Nomor Bukti Kas Keluar</label>
+                        <div class="flex items-center gap-1">
+                            <button type="button" @click="buatKode('gap')" :disabled="sedangBuatKode"
+                                    :class="modeKode === 'gap' ? 'bg-rose-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'"
+                                    class="text-[9px] font-semibold px-1.5 py-0.5 rounded transition-all">
+                                Daur Ulang
+                            </button>
+                            <button type="button" @click="buatKode('acak')" :disabled="sedangBuatKode"
+                                    :class="modeKode === 'acak' ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'"
+                                    class="text-[9px] font-semibold px-1.5 py-0.5 rounded transition-all">
+                                Acak
+                            </button>
+                        </div>
+                    </div>
+                    <input type="text" name="nomor_pengeluaran" x-model="nomorPengeluaranOtomatis" required placeholder="BKK-001"
+                           class="w-full px-3 py-2 rounded-xl bg-rose-50/50 dark:bg-[#1C1E2A] border border-rose-200 dark:border-rose-900/50 text-rose-900 dark:text-rose-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-rose-500/30">
+                    <span class="text-[9px] text-slate-400 font-mono mt-0.5 block" x-text="keteranganKode"></span>
+                </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Pengeluaran</label>

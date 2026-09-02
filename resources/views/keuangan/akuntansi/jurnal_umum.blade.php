@@ -3,7 +3,30 @@
 @section('judul', 'Jurnal Umum Transaksi (Akuntansi)')
 
 @section('konten')
-<div class="space-y-5" x-data="{ bukaModalTambah: false }">
+<div class="space-y-5" x-data="{ 
+    bukaModalTambah: false,
+    nomorJurnalOtomatis: '',
+    modeKode: 'gap',
+    sedangBuatKode: false,
+    keteranganKode: 'Slot Nomor Terkecil Tersedia (Daur Ulang Otomatis)',
+
+    async buatKode(mode = 'gap') {
+        this.modeKode = mode;
+        this.sedangBuatKode = true;
+        try {
+            const res = await fetch(`{{ route('keuangan.akuntansi.jurnal.buat_kode') }}?mode=${mode}`);
+            const data = await res.json();
+            if (data.status === 'sukses') {
+                this.nomorJurnalOtomatis = data.kode_otomatis;
+                this.keteranganKode = data.keterangan;
+            }
+        } catch (e) {
+            console.error('Gagal generate nomor jurnal', e);
+        } finally {
+            this.sedangBuatKode = false;
+        }
+    }
+}" x-init="buatKode('gap')">
     <!-- Flash Notification -->
     @if(session('sukses'))
         <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-center justify-between">
@@ -95,6 +118,7 @@
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Keterangan</th>
                         <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Debet</th>
                         <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Kredit</th>
+                        <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Riwayat</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
@@ -118,10 +142,13 @@
                             <td class="px-4 py-3 text-right font-mono tabular-nums font-bold {{ $jurnal->posisi_debit_kredit === 'Kredit' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-300 dark:text-slate-700' }}">
                                 {{ $jurnal->posisi_debit_kredit === 'Kredit' ? 'Rp ' . number_format($jurnal->nominal, 0, ',', '.') : '-' }}
                             </td>
+                            <td class="px-4 py-3 text-center font-mono text-[10px] text-slate-400" title="Waktu: {{ $jurnal->terakhir_diedit_waktu }}">
+                                🕒 {{ $jurnal->terakhir_diedit_relatif }}
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-6 text-center text-slate-400">Belum ada entri ayat jurnal umum.</td>
+                            <td colspan="7" class="px-4 py-6 text-center text-slate-400">Belum ada entri ayat jurnal umum.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -138,6 +165,26 @@
             </div>
             <form method="POST" action="{{ route('keuangan.akuntansi.jurnal.store') }}" class="p-5 space-y-3.5 text-xs">
                 @csrf
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300">Nomor Jurnal</label>
+                        <div class="flex items-center gap-1">
+                            <button type="button" @click="buatKode('gap')" :disabled="sedangBuatKode"
+                                    :class="modeKode === 'gap' ? 'bg-teal-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'"
+                                    class="text-[9px] font-semibold px-1.5 py-0.5 rounded transition-all">
+                                Daur Ulang
+                            </button>
+                            <button type="button" @click="buatKode('acak')" :disabled="sedangBuatKode"
+                                    :class="modeKode === 'acak' ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'"
+                                    class="text-[9px] font-semibold px-1.5 py-0.5 rounded transition-all">
+                                Acak
+                            </button>
+                        </div>
+                    </div>
+                    <input type="text" name="nomor_jurnal" x-model="nomorJurnalOtomatis" required placeholder="JRN-001"
+                           class="w-full px-3 py-2 rounded-xl bg-teal-50/50 dark:bg-[#1C1E2A] border border-teal-200 dark:border-teal-900/50 text-teal-900 dark:text-teal-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500/30">
+                    <span class="text-[9px] text-slate-400 font-mono mt-0.5 block" x-text="keteranganKode"></span>
+                </div>
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Transaksi</label>
                     <input type="date" name="tanggal_transaksi" required value="{{ date('Y-m-d') }}"

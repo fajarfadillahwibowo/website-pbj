@@ -108,12 +108,12 @@
                     <svg class="w-4 h-4 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     <span x-show="!sidebarTerlipat" class="truncate">Data Wilayah</span>
                 </a>
-                <a x-show="bisaAkses('master_karyawan')" href="{{ route('master.karyawan.index') }}"
+                <a x-show="bisaAkses('master_karyawan')" href="{{ route('operasional.armada.driver') }}"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-2 rounded-xl transition-all duration-150 {{ request()->routeIs('master.karyawan.*') ? 'font-bold text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border-l-2 border-indigo-600' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium' }}"
-                   :title="sidebarTerlipat ? 'Data Karyawan & Seluruh Pegawai' : ''">
-                    <svg class="w-4 h-4 shrink-0 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2H9.17A3.001 3.001 0 0112 14z"/></svg>
-                    <span x-show="!sidebarTerlipat" class="truncate">Data Karyawan</span>
+                   class="flex items-center gap-2.5 py-2 rounded-xl transition-all duration-150 {{ request()->routeIs('operasional.armada.driver') || request()->routeIs('master.karyawan.*') ? 'font-bold text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border-l-2 border-indigo-600' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium' }}"
+                   :title="sidebarTerlipat ? 'Data Karyawan (Driver Supir)' : ''">
+                    <svg class="w-4 h-4 shrink-0 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    <span x-show="!sidebarTerlipat" class="truncate">Data Karyawan (Driver)</span>
                 </a>
             </div>
         </div>

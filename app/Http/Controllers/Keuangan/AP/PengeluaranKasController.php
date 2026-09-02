@@ -110,4 +110,13 @@ class PengeluaranKasController extends Controller
             return redirect()->back()->with('gagal', "Gagal mencatat pengeluaran kas: " . $e->getMessage());
         }
     }
+
+    /**
+     * Generator Nomor Pengeluaran Kas Otomatis (Daur Ulang Slot vs Acak Tanggal).
+     */
+    public function buatKodeOtomatis(Request $request)
+    {
+        $mode = $request->input('mode', 'gap');
+        return \App\Helpers\GeneratorKodeOtomatis::responJson('pengeluaran', 'nomor_pengeluaran', 'BKK-', $mode, 3, true);
+    }
 }

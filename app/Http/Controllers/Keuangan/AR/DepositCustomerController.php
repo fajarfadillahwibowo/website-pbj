@@ -96,4 +96,13 @@ class DepositCustomerController extends Controller
             return redirect()->back()->with('gagal', "Gagal memproses top-up deposit: " . $e->getMessage());
         }
     }
+
+    /**
+     * Generator Nomor Bukti Deposit Otomatis (Daur Ulang Slot vs Acak Tanggal).
+     */
+    public function buatKodeOtomatis(Request $request)
+    {
+        $mode = $request->input('mode', 'gap');
+        return \App\Helpers\GeneratorKodeOtomatis::responJson('list_deposit', 'nomor_bukti_deposit', 'DEP-', $mode, 3, true);
+    }
 }

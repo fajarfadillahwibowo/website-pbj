@@ -93,4 +93,13 @@ class AsetPerusahaanController extends Controller
 
         return redirect()->route('keuangan.akuntansi.aset')->with('sukses', "Aset {$request->nama_aset} berhasil didaftarkan.");
     }
+
+    /**
+     * Generator Kode Aset Otomatis (Daur Ulang Slot vs Acak).
+     */
+    public function buatKodeOtomatis(Request $request)
+    {
+        $mode = $request->input('mode', 'gap');
+        return \App\Helpers\GeneratorKodeOtomatis::responJson('data_aset', 'kode_aset', 'AST-', $mode, 3, false);
+    }
 }

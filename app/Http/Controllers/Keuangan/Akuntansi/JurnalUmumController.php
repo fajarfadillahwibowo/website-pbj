@@ -105,4 +105,13 @@ class JurnalUmumController extends Controller
             return redirect()->back()->with('gagal', "Gagal mencatat jurnal: " . $e->getMessage());
         }
     }
+
+    /**
+     * Generator Nomor Jurnal Otomatis (Daur Ulang Slot vs Acak Tanggal).
+     */
+    public function buatKodeOtomatis(Request $request)
+    {
+        $mode = $request->input('mode', 'gap');
+        return \App\Helpers\GeneratorKodeOtomatis::responJson('jurnal_umum', 'nomor_jurnal', 'JRN-', $mode, 3, true);
+    }
 }

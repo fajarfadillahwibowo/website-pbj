@@ -177,11 +177,13 @@
             <table class="w-full text-left text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500 dark:text-slate-400">
                     <tr>
-                        <th class="px-4 py-3 font-semibold uppercase tracking-wider">Kode & Nama Gudang</th>
-                        <th class="px-4 py-3 font-semibold uppercase tracking-wider">Komoditas Semen & Plant</th>
-                        <th class="px-4 py-3 font-semibold uppercase tracking-wider">Kuantitas Stok & Status</th>
-                        <th class="px-4 py-3 font-semibold uppercase tracking-wider">Lokasi Wilayah</th>
-                        <th class="px-4 py-3 text-right font-semibold uppercase tracking-wider">Valuasi Persediaan</th>
+                        <th class="px-4 py-3 font-semibold uppercase tracking-wider">Kode Gudang</th>
+                        <th class="px-4 py-3 font-semibold uppercase tracking-wider">Nama Gudang</th>
+                        <th class="px-4 py-3 font-semibold uppercase tracking-wider">Jenis Gudang</th>
+                        <th class="px-4 py-3 font-semibold uppercase tracking-wider">Kode Barang</th>
+                        <th class="px-4 py-3 font-semibold uppercase tracking-wider">Plant</th>
+                        <th class="px-4 py-3 text-right font-semibold uppercase tracking-wider">Harga Barang</th>
+                        <th class="px-4 py-3 text-right font-semibold uppercase tracking-wider">Stok Tersedia</th>
                         <th class="px-4 py-3 text-center font-semibold uppercase tracking-wider">Aksi & Mutasi</th>
                     </tr>
                 </thead>
@@ -189,59 +191,58 @@
                     @forelse($daftarGudang as $gdg)
                         <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
                             
-                            <!-- Kode & Nama -->
+                            <!-- 1. Kode Gudang -->
+                            <td class="px-4 py-3.5 font-mono font-bold text-amber-600 dark:text-amber-400 whitespace-nowrap">
+                                {{ $gdg->kode_gudang }}
+                            </td>
+
+                            <!-- 2. Nama Gudang -->
+                            <td class="px-4 py-3.5 font-bold text-slate-900 dark:text-slate-100">
+                                <div>{{ $gdg->nama_gudang }}</div>
+                                <div class="text-[10px] text-slate-400 font-normal">Wilayah: {{ $gdg->distrik }} ({{ $gdg->sub_distrik }})</div>
+                            </td>
+
+                            <!-- 3. Jenis Gudang -->
                             <td class="px-4 py-3.5 whitespace-nowrap">
-                                <div class="font-mono font-bold text-amber-600 dark:text-amber-400 text-sm">
-                                    {{ $gdg->kode_gudang }}
-                                </div>
-                                <div class="font-bold text-slate-900 dark:text-slate-100 text-xs mt-0.5">
-                                    {{ $gdg->nama_gudang }}
-                                </div>
-                                <span class="px-1.5 py-0.2 text-[10px] rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-mono mt-0.5 inline-block">
-                                    Tipe: {{ $gdg->jenis_gudang }}
+                                <span class="px-2 py-0.5 text-[11px] font-semibold rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono">
+                                    {{ $gdg->jenis_gudang }}
                                 </span>
                             </td>
 
-                            <!-- Komoditas & Plant -->
+                            <!-- 4. Kode Barang -->
                             <td class="px-4 py-3.5">
-                                <div class="font-semibold text-slate-900 dark:text-slate-100">
+                                <div class="font-mono font-bold text-blue-600 dark:text-blue-400">
+                                    {{ $gdg->kode_barang }}
+                                </div>
+                                <div class="text-[11px] font-medium text-slate-700 dark:text-slate-300">
                                     {{ $gdg->barang->nama_barang ?? 'Semen PCC Standar' }}
-                                </div>
-                                <div class="text-[11px] text-slate-400 font-mono mt-0.5">
-                                    Plant: <span class="text-slate-600 dark:text-slate-300">{{ $gdg->plant }}</span>
-                                </div>
-                                <div class="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">
-                                    {{ $gdg->harga_barang_rupiah }} / Zak
                                 </div>
                             </td>
 
-                            <!-- Stok & Status -->
-                            <td class="px-4 py-3.5 whitespace-nowrap">
-                                <div class="font-mono font-bold text-base text-slate-900 dark:text-slate-100">
+                            <!-- 5. Plant -->
+                            <td class="px-4 py-3.5 whitespace-nowrap font-medium text-slate-800 dark:text-slate-200">
+                                <span class="px-2 py-0.5 text-[11px] rounded bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 font-semibold">
+                                    {{ $gdg->plant }}
+                                </span>
+                            </td>
+
+                            <!-- 6. Harga Barang -->
+                            <td class="px-4 py-3.5 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                                {{ $gdg->harga_barang_rupiah }} <span class="text-[10px] text-slate-400 font-normal">/ Zak</span>
+                            </td>
+
+                            <!-- 7. Stok Tersedia -->
+                            <td class="px-4 py-3.5 text-right whitespace-nowrap">
+                                <div class="font-mono font-bold text-slate-900 dark:text-slate-100">
                                     {{ number_format($gdg->stok_tersedia, 0, ',', '.') }} <span class="text-xs font-normal text-slate-400 font-sans">Zak</span>
                                 </div>
                                 @php $stokInfo = $gdg->status_stok; @endphp
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono border {{ $stokInfo['bg'] }} mt-1 inline-block">
+                                <span class="px-1.5 py-0.2 rounded-full text-[9px] font-bold font-mono border {{ $stokInfo['bg'] }} mt-0.5 inline-block">
                                     {{ $stokInfo['label'] }}
                                 </span>
                             </td>
 
-                            <!-- Lokasi -->
-                            <td class="px-4 py-3.5">
-                                <div class="text-slate-900 dark:text-slate-100 font-medium">
-                                    {{ $gdg->distrik }}
-                                </div>
-                                <div class="text-[11px] text-slate-400">
-                                    Kec. {{ $gdg->sub_distrik }}
-                                </div>
-                            </td>
-
-                            <!-- Valuasi -->
-                            <td class="px-4 py-3.5 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
-                                {{ $gdg->total_nilai_stok_rupiah }}
-                            </td>
-
-                            <!-- Aksi & Mutasi -->
+                            <!-- 8. Aksi & Mutasi -->
                             <td class="px-4 py-3.5 text-center whitespace-nowrap">
                                 <div class="inline-flex items-center gap-1.5">
                                     <!-- Mutasi / Penyesuaian Stok Cepat -->
@@ -251,7 +252,7 @@
                                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
                                         </svg>
-                                        <span>Mutasi Stok</span>
+                                        <span>Mutasi</span>
                                     </button>
 
                                     <!-- Edit -->
@@ -285,7 +286,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-12 text-center text-slate-400">
+                            <td colspan="8" class="px-4 py-12 text-center text-slate-400">
                                 <div class="flex flex-col items-center justify-center">
                                     <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-2">
                                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -343,7 +344,7 @@
                             <button type="button" @click="buatKodeOtomatis('gap')"
                                     class="px-2.5 py-1 text-[11px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/30 hover:bg-amber-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs">
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                <span>Daur Ulang (GDG-001)</span>
+                                <span>Daur Ulang (GDG-PBJ1)</span>
                             </button>
                             <button type="button" @click="buatKodeOtomatis('acak')"
                                     class="px-2.5 py-1 text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 hover:bg-purple-200 rounded-lg transition-colors flex items-center gap-1 shadow-xs">
@@ -353,7 +354,7 @@
                         </div>
                     </div>
 
-                    <input type="text" name="kode_gudang" x-model="formTambah.kode_gudang" required placeholder="Contoh: GDG-001 atau GDG-CKR-01"
+                    <input type="text" name="kode_gudang" x-model="formTambah.kode_gudang" required placeholder="Contoh: GDG-PBJ1 atau GDG-PBJ2"
                            class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-amber-600 dark:text-amber-400 uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                 </div>
 

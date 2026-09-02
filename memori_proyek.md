@@ -98,10 +98,15 @@
 - **Rilisan Kas Bon Supir:** `HutangSupplierController.php` + `keuangan/ap/list_rilisan.blade.php`
 
 ### 6. Modul Akuntansi & Laporan Eksekutif
-- **Bagan Akun (COA):** `KodeAkunController.php` + `keuangan/akuntansi/kode_akun.blade.php`
+- **Data Kode Akun (COA):** `KodeAkunController.php` + `keuangan/akuntansi/kode_akun.blade.php` (CRUD kolom `kode_akun`, `nama_akun`, `tipe_akun`, `kelompok_akun`, `saldo` + generator gap/acak).
 - **Buku Jurnal Umum:** `JurnalUmumController.php` + `keuangan/akuntansi/jurnal_umum.blade.php`
 - **Aset Perusahaan:** `AsetPerusahaanController.php` + `keuangan/akuntansi/aset_perusahaan.blade.php`
-- **Laporan Eksekutif:** `LaporanEksekutifController.php` (`neraca`, `laba_rugi`, `arus_kas`)
+- **Laporan Eksekutif:** `LaporanEksekutifController.php` (`neraca` seimbang Aktiva vs Pasiva, `laba_rugi`, `arus_kas`).
+
+### 7. Standardisasi Tambahan (Baru Diperbarui)
+- **Standardisasi Format NIK 16 Digit:** Diterapkan validasi ketat `required|numeric|digits:16`, anti-huruf regex, dan visual counter `16/16 Digit` di Master Karyawan, Driver, dan Customer.
+- **Standardisasi Format Kode Gudang:** Format `GDG-PBJ1`, `GDG-PBJ2` (Daur Ulang) vs `GDG-PBJ7X` (Acak) dan pembersihan tuntas record `GDG-PUSAT`.
+- **Standardisasi Kolom Data Gudang:** Menampilkan kolom `kode_gudang`, `nama_gudang`, `jenis_gudang`, `kode_barang`, `plant`, `harga_barang`, dan `stok_tersedia`.
 
 ---
 

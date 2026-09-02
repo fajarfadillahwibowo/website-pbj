@@ -29,6 +29,39 @@ class PembelianSO extends Model
         'dibuat_oleh',
     ];
 
+    protected $casts = [
+        'tanggal_so' => 'date',
+        'harga_satuan' => 'decimal:2',
+        'total_harga' => 'decimal:2',
+        'dibuat_pada' => 'datetime',
+        'diperbarui_pada' => 'datetime',
+    ];
+
+    protected $appends = [
+        'total_harga_rupiah',
+        'terakhir_diedit_relatif',
+        'terakhir_diedit_waktu',
+    ];
+
+    public function getTotalHargaRupiahAttribute()
+    {
+        return 'Rp ' . number_format($this->total_harga ?? 0, 0, ',', '.');
+    }
+
+    public function getTerakhirDieditRelatifAttribute()
+    {
+        $waktu = $this->diperbarui_pada ?? $this->dibuat_pada;
+        if (!$waktu) return 'Baru dibuat';
+        return $waktu->locale('id')->diffForHumans();
+    }
+
+    public function getTerakhirDieditWaktuAttribute()
+    {
+        $waktu = $this->diperbarui_pada ?? $this->dibuat_pada;
+        if (!$waktu) return '-';
+        return $waktu->format('d/m/Y H:i:s');
+    }
+
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'kode_customer', 'kode_customer');

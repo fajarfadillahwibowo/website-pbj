@@ -180,4 +180,13 @@ class FakturPenjualanController extends Controller
             return redirect()->back()->withInput()->with('gagal', "Gagal menerbitkan faktur: " . $e->getMessage());
         }
     }
+
+    /**
+     * Generator Nomor Faktur Otomatis (Daur Ulang Slot vs Acak Tanggal).
+     */
+    public function buatKodeOtomatis(Request $request)
+    {
+        $mode = $request->input('mode', 'gap');
+        return \App\Helpers\GeneratorKodeOtomatis::responJson('penjualan', 'nomor_faktur', 'INV-', $mode, 3, true);
+    }
 }

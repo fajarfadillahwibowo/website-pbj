@@ -143,4 +143,13 @@ class CustomerController extends Controller
 
         return redirect()->route('master.customer.index')->with('sukses', "Data Customer '{$customer->nama_toko_bangunan}' berhasil dihapus.");
     }
+
+    /**
+     * Generator Kode Customer Otomatis (Daur Ulang Slot vs Acak).
+     */
+    public function buatKodeOtomatis(Request $request)
+    {
+        $mode = $request->input('mode', 'gap');
+        return GeneratorKodeOtomatis::responJson('data_customer', 'kode_customer', 'CUST-', $mode, 3);
+    }
 }

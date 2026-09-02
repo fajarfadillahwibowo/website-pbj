@@ -183,7 +183,7 @@
                     <tr>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Kode Supir</th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Nama & Jabatan</th>
-                        <th class="px-4 py-3 font-semibold uppercase tracking-wider">No. KTP</th>
+                        <th class="px-4 py-3 font-semibold uppercase tracking-wider">NIK (No. KTP)</th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">No. HP / WA</th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Alamat</th>
                         <th class="px-4 py-3 text-center font-semibold uppercase tracking-wider">Berkas</th>
@@ -443,11 +443,22 @@
                         </select>
                     </div>
 
-                    <!-- No KTP -->
+                    <!-- NIK (No. KTP) -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">No. KTP / Identitas (NIK) <span class="text-rose-500">*</span></label>
-                        <input type="text" name="no_ktp" x-model="formTambah.no_ktp" required placeholder="Contoh: 321601xxxxxxxxxx" maxlength="30"
-                               class="w-full px-3.5 py-2 text-xs font-mono rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                NIK / No. KTP <span class="text-rose-500">*</span>
+                            </label>
+                            <span class="text-[10px] font-mono font-bold"
+                                  :class="(formTambah.no_ktp || '').length === 16 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'"
+                                  x-text="((formTambah.no_ktp || '').length) + '/16 Digit'"></span>
+                        </div>
+                        <input type="text" name="no_ktp" x-model="formTambah.no_ktp" required
+                               inputmode="numeric" pattern="[0-9]{16}" minlength="16" maxlength="16"
+                               @input="formTambah.no_ktp = $el.value.replace(/[^0-9]/g, '').slice(0, 16)"
+                               placeholder="Contoh: 3216012304850001 (16 digit angka)"
+                               class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
+                        <p class="text-[10px] text-slate-400 mt-0.5">Wajib tepat 16 digit angka numerik resmi KTP.</p>
                     </div>
 
                     <!-- No HP -->
@@ -601,11 +612,22 @@
                         </select>
                     </div>
 
-                    <!-- No KTP -->
+                    <!-- NIK (No. KTP) -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">No. KTP / Identitas (NIK) <span class="text-rose-500">*</span></label>
-                        <input type="text" name="no_ktp" x-model="formEdit.no_ktp" required maxlength="30"
-                               class="w-full px-3.5 py-2 text-xs font-mono rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                NIK / No. KTP <span class="text-rose-500">*</span>
+                            </label>
+                            <span class="text-[10px] font-mono font-bold"
+                                  :class="(formEdit.no_ktp || '').length === 16 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'"
+                                  x-text="((formEdit.no_ktp || '').length) + '/16 Digit'"></span>
+                        </div>
+                        <input type="text" name="no_ktp" x-model="formEdit.no_ktp" required
+                               inputmode="numeric" pattern="[0-9]{16}" minlength="16" maxlength="16"
+                               @input="formEdit.no_ktp = $el.value.replace(/[^0-9]/g, '').slice(0, 16)"
+                               placeholder="Contoh: 3216012304850001 (16 digit angka)"
+                               class="w-full px-3.5 py-2 text-xs font-mono font-bold rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                        <p class="text-[10px] text-slate-400 mt-0.5">Wajib tepat 16 digit angka numerik resmi KTP.</p>
                     </div>
 
                     <!-- No HP -->

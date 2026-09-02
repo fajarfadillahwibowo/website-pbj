@@ -60,9 +60,16 @@ Seluruh fondasi inti telah disiapkan dan diverifikasi dengan kode status **`200 
   - [`keuangan/ar/deposit_customer.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/keuangan/ar/deposit_customer.blade.php) (Tabel `list_deposit`)
 - **Target Pengerjaan:**
   - [x] Input Faktur Penjualan Baru dengan opsi metode: `Tunai`, `Kredit (Piutang)`, atau `Potong Deposit` beserta validasi limit & auto-posting piutang.
-  - [x] List Piutang & Form Pelunasan / Cicilan Pembayaran Piutang Toko sinkron saldo & faktur.
+  - [x] **CRUD Lengkap List Piutang (SPV Keuangan & Staff AR):**
+    - [x] Tambah Catatan Piutang Baru dengan Dual-Mode Generator Nomor Faktur Otomatis (🔵 Daur Ulang Gap-Filling vs 🟣 Acak Anti-Tebak).
+    - [x] Modal Detail Interaktif dengan Visual Progress Bar Pelunasan (% & Nominal) dan Sinkronisasi Plafon Kredit Toko.
+    - [x] Analisis *Aging* Jatuh Tempo Real-Time (*"Lewat X Hari"*, *"Jatuh Tempo Hari Ini"*, *"X Hari Lagi"*, *"Lunas"*).
+    - [x] Edit Data Piutang (penyesuaian tanggal jatuh tempo, status, nominal piutang).
+    - [x] Form Pembayaran Cicilan & Pelunasan Cepat (Shortcut 25%, 50%, 75%, 100% Lunas).
+    - [x] Hapus Catatan Piutang dengan sinkronisasi pengembalian saldo piutang customer di database.
   - [x] Top Up Saldo Deposit Customer & Mutasi Saldo otomatis.
-  - [x] Filter status & dropdown kustom interaktif pada seluruh tabel dan modal AR.
+  - [x] Filter status, filter customer & dropdown kustom interaktif pada seluruh tabel dan modal AR.
+  - [x] Standarisasi Universal Generator Kode Otomatis (*Daur Ulang Slot Kosong / Gap-Filling* vs *Kode Acak Anti-Tebak*) dan Indikator **🕒 Riwayat Terakhir Diedit Real-Time** pada seluruh modul & sidebar aplikasi.
 
 ### 3.4. Modul Account Payable (AP & Pengeluaran Kas)
 - **File Controller:** [`PembelianSOController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Keuangan/AP/PembelianSOController.php), [`PengeluaranKasController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Keuangan/AP/PengeluaranKasController.php), [`HutangSupplierController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Keuangan/AP/HutangSupplierController.php)
@@ -84,9 +91,11 @@ Seluruh fondasi inti telah disiapkan dan diverifikasi dengan kode status **`200 
   - [`keuangan/akuntansi/aset_perusahaan.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/keuangan/akuntansi/aset_perusahaan.blade.php) (Tabel `data_aset`)
   - [`laporan/neraca.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/laporan/neraca.blade.php), [`laporan/laba_rugi.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/laporan/laba_rugi.blade.php), & [`laporan/arus_kas.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/laporan/arus_kas.blade.php)
 - **Target Pengerjaan:**
-  - [x] CRUD Bagan Akun Standar (COA) dengan saldo normal Debet/Kredit.
+  - [x] CRUD Data Kode Akun (Bagan Akun COA) terstruktur (`kode_akun`, `nama_akun`, `tipe_akun`, `kelompok_akun`, `saldo`), dual-mode generator (Daur Ulang vs Acak), dan proteksi hapus berelasi.
+  - [x] Laporan Posisi Keuangan (Neraca Eksekutif) komparatif Aktiva vs Pasiva, kalkulasi otomatis aset/kewajiban/modal seimbang (balance), dan ekspor cetak PDF.
   - [x] Pencatatan Jurnal Umum Double-Entry otomatis dari transaksi dan manual adjustment.
-  - [x] Ringkasan Neraca, Laba Rugi, & Arus Kas periode berjalan (Ekspor PDF/Cetak).
+  - [x] Ringkasan Laba Rugi & Arus Kas periode berjalan (Ekspor PDF/Cetak).
+  - [x] Standardisasi Validasi NIK Resmi Indonesia (tepat 16 digit angka numerik) pada Master Karyawan, Driver, Customer.
 
 ---
 
@@ -100,6 +109,8 @@ Seluruh fondasi inti telah disiapkan dan diverifikasi dengan kode status **`200 
   - [`operasional/gudang/stok.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/gudang/stok.blade.php) (Tabel `list_gudang_so`)
   - [`operasional/gudang/opname.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/gudang/opname.blade.php) (Tabel `opname_gudang`)
 - **Target Pengerjaan:**
+  - [x] Standarisasi kolom Data Gudang SPV Gudang: `kode_gudang`, `nama_gudang`, `jenis_gudang`, `kode_barang`, `plant`, `harga_barang`, `stok_tersedia`.
+  - [x] Standardisasi format kode gudang kombinasi huruf-angka (`GDG-PBJ1`, `GDG-PBJ2`) serta pembersihan record usang `GDG-PUSAT` dari database.
   - [x] Pemantauan stok per gudang dan riwayat mutasi stok (tambah masuk / kurang keluar / set fisik kuantitas).
   - [x] Formulir Stock Opname Fisik, kalkulasi selisih otomatis secara real-time, generator No. Opname cerdas, dan tombol persetujuan SPV Gudang yang langsung mensinkronkan stok fisik ke master gudang.
 

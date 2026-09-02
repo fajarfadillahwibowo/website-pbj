@@ -31,8 +31,21 @@ class Customer extends Model
         'saldo_deposit',
     ];
 
+    protected $casts = [
+        'plafon_piutang' => 'decimal:2',
+        'saldo_piutang' => 'decimal:2',
+        'saldo_deposit' => 'decimal:2',
+        'dibuat_pada' => 'datetime',
+        'diperbarui_pada' => 'datetime',
+    ];
+
     protected $appends = [
         'nama_customer',
+        'plafon_piutang_rupiah',
+        'saldo_piutang_rupiah',
+        'saldo_deposit_rupiah',
+        'terakhir_diedit_relatif',
+        'terakhir_diedit_waktu',
     ];
 
     /**
@@ -41,6 +54,35 @@ class Customer extends Model
     public function getNamaCustomerAttribute()
     {
         return $this->nama_toko_bangunan ?: ($this->nama_pemilik ?: $this->kode_customer);
+    }
+
+    public function getPlafonPiutangRupiahAttribute()
+    {
+        return 'Rp ' . number_format($this->plafon_piutang ?? 0, 0, ',', '.');
+    }
+
+    public function getSaldoPiutangRupiahAttribute()
+    {
+        return 'Rp ' . number_format($this->saldo_piutang ?? 0, 0, ',', '.');
+    }
+
+    public function getSaldoDepositRupiahAttribute()
+    {
+        return 'Rp ' . number_format($this->saldo_deposit ?? 0, 0, ',', '.');
+    }
+
+    public function getTerakhirDieditRelatifAttribute()
+    {
+        $waktu = $this->diperbarui_pada ?? $this->dibuat_pada;
+        if (!$waktu) return 'Baru dibuat';
+        return $waktu->locale('id')->diffForHumans();
+    }
+
+    public function getTerakhirDieditWaktuAttribute()
+    {
+        $waktu = $this->diperbarui_pada ?? $this->dibuat_pada;
+        if (!$waktu) return '-';
+        return $waktu->format('d/m/Y H:i:s');
     }
 
     public function wilayah()

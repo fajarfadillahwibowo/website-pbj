@@ -293,7 +293,7 @@ class StockOpnameController extends Controller
     {
         $jumlahOpname = DB::table('opname_gudang')->count();
         if ($jumlahOpname === 0) {
-            $gudangSatu = DB::table('list_gudang_so')->value('kode_gudang') ?? 'GDG-PUSAT';
+            $gudangSatu = DB::table('list_gudang_so')->value('kode_gudang') ?? 'GDG-PBJ1';
 
             DB::table('opname_gudang')->insert([
                 [

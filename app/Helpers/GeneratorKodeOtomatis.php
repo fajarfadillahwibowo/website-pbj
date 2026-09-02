@@ -3,34 +3,27 @@
 namespace App\Helpers;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\JsonResponse;
 
 class GeneratorKodeOtomatis
 {
     /**
      * Menghasilkan kode urut otomatis dengan algoritma "Gap-Filling" (mengisi celah nomor terhapus/kosong terkecil).
      *
-     * Logika Kerja:
-     * 1. Mengambil seluruh nilai kode dari kolom tabel yang sesuai dengan awalan (prefix).
-     * 2. Mengekstrak bilangan angka integer di akhir kode ke dalam array daftar nomor terpakai.
-     * 3. Melakukan perulangan sekuensial mulai dari 1 ($nomorUrut = 1, 2, 3, dst).
-     * 4. Begitu ditemukan nomor urut pertama yang TIDAK ADA di array terpakai (celah kosong / gap),
-     *    nomor tersebut langsung diambil sebagai kode baru.
-     * 5. Nomor diformat dengan panjang digit standar (contoh: 3 digit -> '001', '002', dst).
-     *
-     * Contoh Kasus:
-     * - Terdaftar: [CUST-001, CUST-002, CUST-003] -> Hasil kode baru: CUST-004
-     * - Jika CUST-002 dihapus: [CUST-001, CUST-003, CUST-004] -> Hasil kode baru: CUST-002 (mengisi celah kosong)
-     * - Jika CUST-001 dihapus: [CUST-002, CUST-003] -> Hasil kode baru: CUST-001
-     *
-     * @param string $namaTabel Nama tabel target di database
-     * @param string $namaKolom Nama kolom primary key / kode
-     * @param string $awalan Awalan prefix teks (misal: 'CUST-', 'SMN-', 'WLY-', 'KRY-', 'AST-')
-     * @param int $panjangDigit Jumlah digit nol di depan (default: 3)
-     * @return string
+     * Contoh:
+     * - Terdaftar: [CST-001, CST-003] -> Daur ulang: CST-002
+     * - Terdaftar: [CST-002, CST-003] -> Daur ulang: CST-001
      */
     public static function buatKode(string $namaTabel, string $namaKolom, string $awalan = '', int $panjangDigit = 3): string
     {
-        // 1. Ambil semua kode dari database yang berawalan prefix
+        return self::buatKodeGap($namaTabel, $namaKolom, $awalan, $panjangDigit);
+    }
+
+    /**
+     * Mode 1: Daur Ulang Slot Nomor Kosong / Terkecil (Gap-Filling)
+     */
+    public static function buatKodeGap(string $namaTabel, string $namaKolom, string $awalan = '', int $panjangDigit = 3): string
+    {
         $daftarKode = DB::table($namaTabel)
             ->where($namaKolom, 'like', $awalan . '%')
             ->pluck($namaKolom)
@@ -38,7 +31,6 @@ class GeneratorKodeOtomatis
 
         $nomorTerpakai = [];
 
-        // 2. Ekstrak angka urut
         foreach ($daftarKode as $kode) {
             $bagianSetelahPrefix = substr($kode, strlen($awalan));
             if (preg_match('/^(\d+)$/', $bagianSetelahPrefix, $cocok)) {
@@ -48,13 +40,62 @@ class GeneratorKodeOtomatis
             }
         }
 
-        // 3. Algoritma Gap-Filling: Cari angka positif terkecil (mulai dari 1) yang belum terpakai
         $nomorUrut = 1;
         while (isset($nomorTerpakai[$nomorUrut])) {
             $nomorUrut++;
         }
 
-        // 4. Gabungkan prefix dengan angka terformat padding
         return $awalan . str_pad($nomorUrut, $panjangDigit, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Mode 2: Format Acak Anti-Tebak / Format Tanggal & Acak
+     */
+    public static function buatKodeAcak(string $namaTabel, string $namaKolom, string $awalan = '', bool $pakaiTanggal = false): string
+    {
+        $karakter = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+        $panjangKarakter = strlen($karakter);
+        $kodeUnik = null;
+        $percobaan = 0;
+        $tanggalPrefix = $pakaiTanggal ? date('Ymd') . '-' : '';
+
+        do {
+            $acak = '';
+            for ($i = 0; $i < 3; $i++) {
+                $acak .= $karakter[random_int(0, $panjangKarakter - 1)];
+            }
+            $kandidat = $awalan . $tanggalPrefix . $acak;
+            $sudahAda = DB::table($namaTabel)->where($namaKolom, $kandidat)->exists();
+            if (!$sudahAda) {
+                $kodeUnik = $kandidat;
+            }
+            $percobaan++;
+        } while (!$kodeUnik && $percobaan < 50);
+
+        return $kodeUnik ?? ($awalan . $tanggalPrefix . strtoupper(bin2hex(random_bytes(2))));
+    }
+
+    /**
+     * Respon JSON Standar untuk API Controller
+     */
+    public static function responJson(string $namaTabel, string $namaKolom, string $awalan = '', string $mode = 'gap', int $panjangDigit = 3, bool $pakaiTanggal = false): JsonResponse
+    {
+        if ($mode === 'acak') {
+            $kode = self::buatKodeAcak($namaTabel, $namaKolom, $awalan, $pakaiTanggal);
+            return response()->json([
+                'status' => 'sukses',
+                'mode' => 'acak',
+                'kode_otomatis' => $kode,
+                'keterangan' => $pakaiTanggal ? 'Format Tanggal & Acak Anti-Tebak' : 'Format Acak Anti-Tebak'
+            ]);
+        }
+
+        $kode = self::buatKodeGap($namaTabel, $namaKolom, $awalan, $panjangDigit);
+        return response()->json([
+            'status' => 'sukses',
+            'mode' => 'gap',
+            'kode_otomatis' => $kode,
+            'keterangan' => 'Slot Nomor Terkecil Tersedia (Daur Ulang Otomatis)'
+        ]);
     }
 }

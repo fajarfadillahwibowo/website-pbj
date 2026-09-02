@@ -8,8 +8,29 @@
     metode: 'Kredit / Piutang',
     bruto: 35000000,
     diskon: 0,
+    nomorFakturOtomatis: '',
+    modeKode: 'gap',
+    sedangBuatKode: false,
+    keteranganKode: 'Slot Nomor Terkecil Tersedia (Daur Ulang Otomatis)',
+
+    async buatKode(mode = 'gap') {
+        this.modeKode = mode;
+        this.sedangBuatKode = true;
+        try {
+            const res = await fetch(`{{ route('keuangan.ar.faktur.buat_kode') }}?mode=${mode}`);
+            const data = await res.json();
+            if (data.status === 'sukses') {
+                this.nomorFakturOtomatis = data.kode_otomatis;
+                this.keteranganKode = data.keterangan;
+            }
+        } catch (e) {
+            console.error('Gagal generate nomor faktur', e);
+        } finally {
+            this.sedangBuatKode = false;
+        }
+    },
     hitungNetto() { return Math.max(0, this.bruto - this.diskon); }
-}">
+}" x-init="buatKode('gap')">
     <!-- Flash Notification -->
     @if(session('sukses'))
         <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-center justify-between">
@@ -146,6 +167,7 @@
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Metode Bayar</th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Status</th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Jatuh Tempo</th>
+                        <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Aksi & Riwayat</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
@@ -186,10 +208,18 @@
                             <td class="px-4 py-3 text-center font-mono text-slate-500">
                                 {{ $faktur->tanggal_jatuh_tempo ? date('d/m/Y', strtotime($faktur->tanggal_jatuh_tempo)) : '-' }}
                             </td>
+                            <td class="px-4 py-3 text-center">
+                                <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400">
+                                    {{ $faktur->status_persetujuan ?? 'Disetujui' }}
+                                </span>
+                                <div class="mt-1 text-[10px] text-slate-400 dark:text-slate-500 font-mono" title="Terakhir diperbarui: {{ $faktur->terakhir_diedit_waktu }}">
+                                    🕒 {{ $faktur->terakhir_diedit_relatif }}
+                                </div>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-4 py-6 text-center text-slate-400">Belum ada faktur penjualan tercatat.</td>
+                            <td colspan="9" class="px-4 py-6 text-center text-slate-400">Belum ada faktur penjualan tercatat.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -208,6 +238,25 @@
                 @csrf
                 <div class="grid grid-cols-2 gap-3">
                     <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Nomor Faktur</label>
+                            <div class="flex items-center gap-1">
+                                <button type="button" @click="buatKode('gap')" :disabled="sedangBuatKode"
+                                        :class="modeKode === 'gap' ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'"
+                                        class="text-[9px] font-semibold px-1.5 py-0.5 rounded transition-all">
+                                    Daur Ulang
+                                </button>
+                                <button type="button" @click="buatKode('acak')" :disabled="sedangBuatKode"
+                                        :class="modeKode === 'acak' ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'"
+                                        class="text-[9px] font-semibold px-1.5 py-0.5 rounded transition-all">
+                                    Acak
+                                </button>
+                            </div>
+                        </div>
+                        <input type="text" name="nomor_faktur" x-model="nomorFakturOtomatis" required placeholder="INV-001"
+                               class="w-full px-3 py-2 rounded-xl bg-emerald-50/50 dark:bg-[#1C1E2A] border border-emerald-200 dark:border-emerald-900/50 text-emerald-900 dark:text-emerald-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+                        <span class="text-[9px] text-slate-400 font-mono mt-0.5 block" x-text="keteranganKode"></span>
+                    </div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Customer / Mitra Toko</label>
                         <x-dropdown-kustom 
                             nama="kode_customer"
