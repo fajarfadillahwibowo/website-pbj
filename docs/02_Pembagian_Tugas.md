@@ -17,6 +17,7 @@ Seluruh fondasi antarmuka, arsitektur data, dan relasi bisnis telah selesai diba
 - [x] **Penyatuan Kategori Properti (`AST-TNH`):** Penggabungan kategori tanah dan bangunan gedung ke dalam satu kategori terpadu *Tanah & Bangunan Properti*, dilengkapi field wajib `keterangan` fasilitas di atas tanah dan opsi penyusutan PSAK 16.
 - [x] **Formulir Pendaftaran Aset Format Landscape:** Modal pendaftaran aset telah diubah menjadi canvas melebar (`max-w-5xl`) dengan 2 kolom terpisah (Data Pokok/Finansial di kiri, Spesifikasi Objek Fisik di kanan) yang menampung seluruh atribut armada ERD kendaraan secara lengkap.
 - [x] **Navigasi Dinamis SPA (Single Page Application):** Navigasi sidebar parsial yang persisten tanpa *full page reload*, tanpa bug *jump-to-top*, serta dilengkapi proteksi status *Read-Only* bagi peran di luar wewenang modifikasi data.
+- [x] **Restrukturisasi Menu Laporan Laba dan Rugi:** Penempatan seksi Laporan Eksekutif Finansial di posisi teratas (tepat di bawah Dashboard) dengan micro-badge `P&L` untuk peran SPV Keuangan dan Direktur & Manager.
 
 ---
 
@@ -47,7 +48,7 @@ Agar kedua pengembang dapat bekerja secara simultan tanpa risiko konflik penggab
 
 ---
 
-## 3. Checklist Tugas Rinci DEVELOPER 1 (Rencana Kerja Besok)
+## 3. Checklist Tugas Rinci DEVELOPER 1
 
 **Branch Kerja:** `web-dev1`  
 **Peran PRD:** Super Admin, SPV Keuangan, Staff AR, Staff AP, Direktur & Manager  
@@ -98,7 +99,7 @@ Agar kedua pengembang dapat bekerja secara simultan tanpa risiko konflik penggab
 
 ---
 
-## 4. Checklist Tugas Rinci DEVELOPER 2 (Rencana Kerja Besok)
+## 4. Checklist Tugas Rinci DEVELOPER 2
 
 **Branch Kerja:** `web-dev2`  
 **Peran PRD:** Dispatcher, SPV Operasional, SPV Gudang, Pengawas Driver, Pengawas Kendaraan  
@@ -134,89 +135,7 @@ Agar kedua pengembang dapat bekerja secara simultan tanpa risiko konflik penggab
 
 ---
 
-<<<<<<< HEAD
-## 🚚 6. Checklist Tugas Rinci DEVELOPER 2 (Status: ✅ 100% Selesai & Terverifikasi)
-
-**Tanggung Jawab:** Menyelesaikan logika pengiriman, alokasi armada truk, penugasan driver supir, mutasi stok gudang semen, stock opname, kemitraan KSO, master data ongkos angkut, dan bengkel servis.
-
-### 6.1. Modul Gudang & Manajemen Persediaan (SPV Gudang)
-- **File Controller:** [`StokGudangController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Gudang/StokGudangController.php), [`StockOpnameController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Gudang/StockOpnameController.php)
-- **File View:**
-  - [`operasional/gudang/stok.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/gudang/stok.blade.php) (Tabel `list_gudang_so`)
-  - [`operasional/gudang/opname.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/gudang/opname.blade.php) (Tabel `opname_gudang`)
-- **Target Pengerjaan:**
-  - [x] Pemantauan stok per gudang dan riwayat mutasi stok (tambah masuk / kurang keluar / set fisik kuantitas).
-  - [x] Formulir Stock Opname Fisik, kalkulasi selisih otomatis secara real-time, generator No. Opname cerdas, dan tombol persetujuan SPV Gudang yang langsung mensinkronkan stok fisik ke master gudang.
-
-### 6.2. Modul Armada Kendaraan & Data Driver (Pengawas Driver & Pengawas Kendaraan)
-- **File Controller:** [`KendaraanController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Armada/KendaraanController.php), [`DriverController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Armada/DriverController.php)
-- **File View:**
-  - [`operasional/armada/kendaraan.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/armada/kendaraan.blade.php) (Tabel `data_aset` & `data_jenis_aset`)
-  - [`operasional/armada/driver.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/armada/driver.blade.php) (Tabel `data_karyawan` filter driver)
-- **Target Pengerjaan:**
-  - [x] CRUD Kendaraan: Plat nomor/kode aset, nama aset, merek, jenis aset, kapasitas zak/tonase, tanggal KIR & pajak, harga pembelian, serta integrasi tab Data Jenis Aset dalam satu halaman.
-  - [x] CRUD Driver / Sopir: Generator kode supir cerdas (Mode Daur Ulang Slot Kosong vs Kode Acak Anti-Tebak), manajemen status supir (`Standby`, `Jalan`, `Cuti/Izin`), serta label **🕒 Riwayat Terakhir Diedit Real-Time** pada tiap baris.
-  - [x] **Format Khusus NIK / No. KTP 16 Digit:** Validasi input angka 16 digit khas Indonesia dengan pesan error dinamis pada modal tambah/edit supir.
-  - [x] **Upload Berkas Karyawan (Foto KTP & Dokumen Kontrak Kerja):** Fitur upload file maksimal 2 MB dengan validasi tipe file, pratinjau gambar instan, dan tautan unduh/lihat dokumen terintegrasi.
-  - [x] **Penyelarasan Fitur CRUD 'Data Jenis Aset':** CRUD jenis aset pada Data Kendaraan (Dispatcher) 100% selaras dan konsisten dengan master Aset Perusahaan (SPV Keuangan).
-  - [x] **Pembatasan RBAC Role SPV Operasional:** Modul *Data Karyawan (Driver)* diset menjadi **Read-Only (Hanya Lihat)** untuk SPV Operasional dengan proteksi frontend (sembunyikan tombol Tambah/Edit/Hapus) dan proteksi backend `DriverController.php`. SPV Operasional hanya memantau data driver armada dan tidak dapat melihat karyawan selain driver.
-
-### 6.3. Modul Dispatcher, Surat Jalan & Ongkos Angkut (Dispatcher & SPV Operasional)
-- **File Controller:** [`SuratJalanController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Pengiriman/SuratJalanController.php), [`OngkosAngkutController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Pengiriman/OngkosAngkutController.php), [`KSOController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/KSO/KSOController.php)
-- **File View:**
-  - [`operasional/pengiriman/surat_jalan.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/pengiriman/surat_jalan.blade.php) (Tabel `pengiriman`)
-  - [`operasional/pengiriman/ongkos_angkut.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/pengiriman/ongkos_angkut.blade.php) (Tabel `data_ongkos_angkut`)
-  - [`operasional/kso/index.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/kso/index.blade.php) (Tabel `data_kso` & `ongkos_kso`)
-- **Target Pengerjaan:**
-  - [x] Pembuatan Surat Jalan (SJ) pengiriman semen dengan generator nomor surat jalan otomatis.
-  - [x] Dropdown pemilihan supir yang berstatus *Standby* & armada truk yang siap jalan.
-  - [x] Perhitungan otomatis ongkos angkut berdasarkan tarif trayek dan jumlah muatan.
-  - [x] Update status pengiriman (`Draft` -> `Muat` -> `Jalan` -> `Terkirim/Selesai`).
-  - [x] Cetak dokumen Surat Jalan resmi format jalan sopir PT Putra Balkom Jaya.
-  - [x] **CRUD Master Data Ongkos Angkut (9 Atribut):** Implementasi modul tarif pengiriman distribusi dengan kolom lengkap: `kode_oa`, `nama_oa`, `kode_gudang`, `kontrak_oa`, `muatan_oa`, `harga_oa`, `harga_kso`, `harga_kso_khusus`, `wilayah_oa` dilengkapi filter pencarian, smart auto-numbering, dan kalkulator KPI.
-  - [x] **Keterangan Riwayat Terakhir Diedit pada Ongkos Angkut:** Menampilkan badge waktu dan tanggal pembaruan data terakhir pada kolom aksi untuk transparansi audit SPV Operasional.
-  - [x] **Integrasi & Penyelarasan Penuh Kode Gudang dengan SPV Gudang:** Sinkronisasi master fasilitas gudang (`list_gudang_so`) ke master tarif OA (`data_ongkos_angkut`), validasi integritas data referensial `exists:list_gudang_so,kode_gudang`, pencarian multi-kolom menembus atribut gudang (nama gudang, plant, distrik), live sync card info gudang terpilih pada modal tambah/edit, serta kartu detail terintegrasi dengan stok fisik real-time.
-  - [x] **CRUD Data KSO (Kerja Sama Operasional) & Ongkos KSO:** 2 Tab terpadu untuk master kemitraan KSO (upload file kontrak, nilai kontrak, masa aktif) dan standardisasi tarif trayek rute ongkos angkut KSO (`ongkos_kso`).
-
-### 6.4. Modul Bengkel & Perbaikan Kendaraan (Pengawas Kendaraan)
-- **File Controller:** [`PerbaikanKendaraanController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Bengkel/PerbaikanKendaraanController.php), [`PembelianSparepartController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Bengkel/PembelianSparepartController.php), [`SparepartController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Bengkel/SparepartController.php)
-- **File View:**
-  - [`operasional/bengkel/perbaikan.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/bengkel/perbaikan.blade.php) (Tabel `perbaikan_kendaraan`)
-  - [`operasional/bengkel/pembelian_sparepart.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/bengkel/pembelian_sparepart.blade.php) (Tabel `pembelian_sparepart`)
-  - [`operasional/bengkel/sparepart.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/bengkel/sparepart.blade.php) (Tabel `list_sparepart`)
-- **Target Pengerjaan:**
-  - [x] Pembuatan Surat Perintah Kerja (SPK) servis kendaraan bengkel, generator nomor SPK otomatis, live kalkulasi biaya jasa + sparepart, ubah status cepat, dan cetak lembar SPK resmi.
-  - [x] CRUD Faktur Pembelian & Pengadaan Sparepart dari supplier dengan live kalkulator total bayar dan auto-sync penambahan kuantitas fisik ke master stok sparepart.
-  - [x] CRUD Katalog & Stok Sparepart Truk dengan 4 kartu KPI, modal mutasi cepat (masuk/keluar/atur), dan badge level ketersediaan stok (`Aman`, `Menipis`, `Habis`).
-
-### 6.5. Modul Branding Perusahaan & Arsitektur Navigasi SPA Terpadu (Lintas Seluruh Role)
-- **File Inti:** [`resources/views/layouts/app.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/layouts/app.blade.php), [`resources/views/layouts/sidebar.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/layouts/sidebar.blade.php), [`resources/views/layouts/header.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/layouts/header.blade.php)
-- **Target Pengerjaan:**
-  - [x] **Revisi Identitas Perusahaan & Logo HD PT Putra Balkom Jaya:** Penyesuaian nama PT menjadi "PT Putra Balkom Jaya" dan logo HD diposisikan di atas nama PT dengan kualitas grafis tinggi tanpa terpotong.
-  - [x] **Revisi Sub-Teks Identitas Perusahaan:** Penyesuaian keterangan di bawah nama PT menjadi 'Distribusi & Logistik' di seluruh antarmuka (sidebar, form login, lembar cetak surat jalan).
-  - [x] **Mesin SPA Dynamic Content Swapping (Sidebar Tidak Kerefresh):** Navigasi sidebar berjalan secara parsial tanpa full page reload pada seluruh 29 menu dan seluruh 10 role/aktor.
-  - [x] **Eliminasi Tuntas Bug Layar Melompat ke Atas (Jump-to-Top):** Menghilangkan scroll jump saat mengklik menu bawah (seperti *Laporan Laba Rugi* atau *Laporan Neraca* pada role SPV Keuangan), posisi scroll sidebar tersimpan dan dipulihkan 100% presisi.
-  - [x] **Indikator Loading Bar Halus:** Progres bar gradien modern (YouTube/GitHub style) di bagian paling atas layar saat transisi konten.
-  - [x] **Sinkronisasi State Role Instan:** State role sinkron secara real-time antara frontend (`localStorage`) dan sesi backend Laravel via `/api/sinkronisasi-role`.
-  - [x] **Dukungan Penuh Browser History (`popstate`) & Form Filter GET:** Tombol Back/Forward browser dan form pencarian filter berjalan mulus tanpa reload sidebar.
-  - [x] **Restrukturisasi & Penyelarasan Menu Laporan Laba dan Rugi:** Memindahkan seksi Laporan Eksekutif Finansial ke posisi teratas (tepat di bawah Dashboard) khusus untuk peran SPV Keuangan dan Direktur & Manager, merevisi penulisan menjadi "Laporan Laba dan Rugi" dengan micro-badge `P&L` serta penempatan prioritas di atas Laporan Neraca untuk keterbacaan dan interaktivitas maksimal.
-
----
-
-## 7. Timeline Jadwal Kerja Harian Besok
-
-| Waktu | Sesi Kerja | Fokus Developer 1 (`web-dev1`) | Fokus Developer 2 (`web-dev2`) |
-|---|---|---|---|
-| **08.30 - 09.00** | Sinkronisasi Awal | `git checkout web-dev1` & `git pull origin main` | `git checkout web-dev2` & `git pull origin main` |
-| **09.00 - 12.00** | Sesi Pagi (Inti Otomasi) | Membangun `MesinJurnalOtomatis.php` & validasi debit-kredit | Integrasi pengurangan kuota SO pada Surat Jalan & validasi kuota |
-| **12.00 - 13.00** | Istirahat Siang | - | - |
-| **13.00 - 15.30** | Sesi Siang (Integrasi & Cetak) | Integrasi auto-journal pada Faktur Penjualan, SO & Kas AP | Pembuatan template cetak Surat Jalan & cetak SPK Bengkel |
-| **15.30 - 16.30** | Pengujian & Verifikasi | Pengujian entri jurnal seimbang & saldo berjalan COA | Pengujian alur pengiriman semen & pemotongan stok part bengkel |
-| **16.30 - 17.00** | Push & Penggabungan | Push branch `web-dev1` & persiapan Pull Request ke `main` | Push branch `web-dev2` & persiapan Pull Request ke `main` |
-
----
-
-## 6. Alur Kerja Git & Standar Commit (Branching Protocol)
+## 5. Alur Kerja Git & Standar Commit (Branching Protocol)
 
 ```text
 [origin/main] ─────────────────────────────────────────────────────────────► [origin/main]
@@ -227,7 +146,7 @@ Agar kedua pengembang dapat bekerja secara simultan tanpa risiko konflik penggab
 ```
 
 ### Panduan Sinkronisasi:
-1. **Sebelum Mulai Kerja:**
+1. **Sebelum Mulai Bekerja:**
    ```powershell
    git checkout web-dev1 # atau web-dev2
    git pull origin main
@@ -237,5 +156,5 @@ Agar kedua pengembang dapat bekerja secara simultan tanpa risiko konflik penggab
    - `feat(ar): integrasi auto journal pada faktur penjualan`
    - `feat(operasional): integrasi pengurangan kuota so pada surat jalan`
    - `feat(cetak): template cetak surat jalan resmi format supir`
-3. **Penyelesaian Akhir Hari:**
-   Lakukan pengujian lokal (`php artisan test` atau uji coba web di browser), pastikan respons HTTP 200 OK tanpa error sintaks, kemudian lakukan push ke branch masing-masing sebelum proses merge ke branch `main`.
+3. **Penyelesaian Tugas & Penggabungan:**
+   Lakukan pengujian lokal (`php artisan test` atau uji coba web di browser), pastikan seluruh respons HTTP 200 OK tanpa error, kemudian lakukan push ke branch masing-masing sebelum proses merge ke branch `main`.
