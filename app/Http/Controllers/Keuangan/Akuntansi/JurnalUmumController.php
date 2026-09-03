@@ -68,42 +68,23 @@ class JurnalUmumController extends Controller
         ]);
 
         $nominal = (float) $request->nominal;
-        $nomorJurnal = GeneratorKodeOtomatis::buatKodeTransaksi('jurnal_umum', 'nomor_jurnal', 'JU-', $request->tanggal_transaksi);
+        $referensi = $request->referensi ?: ('ADJ-' . date('Ymd-His'));
 
-        DB::beginTransaction();
         try {
-            // Sisi Debit
-            DB::table('jurnal_umum')->insert([
-                'nomor_jurnal'        => $nomorJurnal,
-                'tanggal_transaksi'   => $request->tanggal_transaksi,
-                'kode_akun'           => $request->kode_akun_debit,
-                'posisi'              => 'Debit',
-                'nominal'             => $nominal,
-                'keterangan'          => $request->keterangan,
-                'referensi_transaksi' => $request->referensi ?? 'MANUAL-ADJ',
-                'dibuat_oleh'         => 'spv_keuangan',
-                'dibuat_pada'         => now(),
-            ]);
-
-            // Sisi Kredit
-            DB::table('jurnal_umum')->insert([
-                'nomor_jurnal'        => $nomorJurnal,
-                'tanggal_transaksi'   => $request->tanggal_transaksi,
-                'kode_akun'           => $request->kode_akun_kredit,
-                'posisi'              => 'Kredit',
-                'nominal'             => $nominal,
-                'keterangan'          => $request->keterangan,
-                'referensi_transaksi' => $request->referensi ?? 'MANUAL-ADJ',
-                'dibuat_oleh'         => 'spv_keuangan',
-                'dibuat_pada'         => now(),
-            ]);
-
-            DB::commit();
+            $nomorJurnal = \App\Services\Keuangan\MesinJurnalOtomatis::catatJurnal(
+                $referensi,
+                $request->tanggal_transaksi,
+                [
+                    ['kode_akun' => $request->kode_akun_debit, 'posisi' => 'Debit', 'nominal' => $nominal, 'keterangan' => $request->keterangan],
+                    ['kode_akun' => $request->kode_akun_kredit, 'posisi' => 'Kredit', 'nominal' => $nominal, 'keterangan' => $request->keterangan],
+                ],
+                $request->keterangan,
+                auth()->user()->username ?? 'spv_keuangan'
+            );
 
             return redirect()->route('keuangan.akuntansi.jurnal')->with('sukses', "Entri Jurnal {$nomorJurnal} (Double-Entry Rp " . number_format($nominal, 0, ',', '.') . ") berhasil dicatat secara seimbang.");
         } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->with('gagal', "Gagal mencatat jurnal: " . $e->getMessage());
+            return redirect()->back()->withInput()->with('gagal', "Gagal mencatat jurnal: " . $e->getMessage());
         }
     }
 }

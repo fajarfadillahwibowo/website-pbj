@@ -31,6 +31,9 @@
     2. Menyatukan kategori tanah dan gedung menjadi satu kategori efisien: **Tanah & Bangunan Properti (`AST-TNH`)** dengan penambahan kolom `keterangan` (deskripsi bangunan gedung/fasilitas di atas tanah), luas, nomor dokumen legalitas/sertifikat, serta tombol sakelar penyusutan: "Ada Bangunan Gedung (20 Tahun / 5%)" vs "Tanah Kosong Saja (Bebas Penyusutan)".
     3. Melengkapi seluruh atribut armada fisik kendaraan sesuai ERD pada modal tambah, modal edit, dan modal detail, serta menghubungkannya otomatis ke tabel `data_kendaraan`.
     4. Menjalankan pengujian live browser otomatis (snapshot DOM & verifikasi respons 200 OK) tanpa ada kendala.
+- **[TERSELESAIKAN] Undefined property: stdClass::$posisi_debit_kredit pada view `keuangan/akuntansi/jurnal_umum.blade.php:115`**:
+  - *Penyebab:* Penulisan nama kolom pada view blade menggunakan `$jurnal->posisi_debit_kredit`, sedangkan nama kolom master di tabel database `jurnal_umum` adalah `posisi` (ENUM 'Debit', 'Kredit'). Selain itu nama akun hasil join diakses melalui relasi model yang belum eager loaded.
+  - *Solusi:* Memperbaiki pemanggilan menjadi `$jurnal->posisi` dan `$jurnal->nama_akun`, serta menghubungkan method `JurnalUmumController@store` langsung ke `MesinJurnalOtomatis::catatJurnal` agar saldo akun COA otomatis termutasi saat ada entri manual. Halaman telah lulus inspeksi live browser dengan status **SEIMBANG (BALANCED)**.
 
 
 ---

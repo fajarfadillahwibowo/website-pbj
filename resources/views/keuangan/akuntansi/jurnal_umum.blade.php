@@ -107,16 +107,16 @@
                                 {{ date('d/m/Y', strtotime($jurnal->tanggal_transaksi)) }}
                             </td>
                             <td class="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">
-                                <span class="font-mono text-slate-500">{{ $jurnal->kode_akun }}</span> - {{ $jurnal->akun->nama_akun ?? '' }}
+                                <span class="font-mono text-slate-500">{{ $jurnal->kode_akun }}</span> - {{ $jurnal->nama_akun ?? ($jurnal->akun->nama_akun ?? '') }}
                             </td>
                             <td class="px-4 py-3 text-slate-600 dark:text-slate-400 truncate max-w-xs">
                                 {{ $jurnal->keterangan }}
                             </td>
-                            <td class="px-4 py-3 text-right font-mono tabular-nums font-bold {{ $jurnal->posisi_debit_kredit === 'Debit' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-300 dark:text-slate-700' }}">
-                                {{ $jurnal->posisi_debit_kredit === 'Debit' ? 'Rp ' . number_format($jurnal->nominal, 0, ',', '.') : '-' }}
+                            <td class="px-4 py-3 text-right font-mono tabular-nums font-bold {{ ($jurnal->posisi ?? '') === 'Debit' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-300 dark:text-slate-700' }}">
+                                {{ ($jurnal->posisi ?? '') === 'Debit' ? 'Rp ' . number_format($jurnal->nominal, 0, ',', '.') : '-' }}
                             </td>
-                            <td class="px-4 py-3 text-right font-mono tabular-nums font-bold {{ $jurnal->posisi_debit_kredit === 'Kredit' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-300 dark:text-slate-700' }}">
-                                {{ $jurnal->posisi_debit_kredit === 'Kredit' ? 'Rp ' . number_format($jurnal->nominal, 0, ',', '.') : '-' }}
+                            <td class="px-4 py-3 text-right font-mono tabular-nums font-bold {{ ($jurnal->posisi ?? '') === 'Kredit' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-300 dark:text-slate-700' }}">
+                                {{ ($jurnal->posisi ?? '') === 'Kredit' ? 'Rp ' . number_format($jurnal->nominal, 0, ',', '.') : '-' }}
                             </td>
                         </tr>
                     @empty
