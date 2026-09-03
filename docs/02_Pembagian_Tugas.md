@@ -47,7 +47,7 @@ Agar kedua pengembang dapat bekerja secara simultan tanpa risiko konflik penggab
 
 ---
 
-## 3. Checklist Tugas Rinci DEVELOPER 1 (Rencana Kerja Besok)
+## 3. Checklist Tugas Rinci DEVELOPER 1
 
 **Branch Kerja:** `web-dev1`  
 **Peran PRD:** Super Admin, SPV Keuangan, Staff AR, Staff AP, Direktur & Manager  
@@ -98,7 +98,7 @@ Agar kedua pengembang dapat bekerja secara simultan tanpa risiko konflik penggab
 
 ---
 
-## 4. Checklist Tugas Rinci DEVELOPER 2 (Rencana Kerja Besok)
+## 4. Checklist Tugas Rinci DEVELOPER 2
 
 **Branch Kerja:** `web-dev2`  
 **Peran PRD:** Dispatcher, SPV Operasional, SPV Gudang, Pengawas Driver, Pengawas Kendaraan  
@@ -134,20 +134,7 @@ Agar kedua pengembang dapat bekerja secara simultan tanpa risiko konflik penggab
 
 ---
 
-## 5. Timeline Jadwal Kerja Harian Besok
-
-| Waktu | Sesi Kerja | Fokus Developer 1 (`web-dev1`) | Fokus Developer 2 (`web-dev2`) |
-|---|---|---|---|
-| **08.30 - 09.00** | Sinkronisasi Awal | `git checkout web-dev1` & `git pull origin main` | `git checkout web-dev2` & `git pull origin main` |
-| **09.00 - 12.00** | Sesi Pagi (Inti Otomasi) | Membangun `MesinJurnalOtomatis.php` & validasi debit-kredit | Integrasi pengurangan kuota SO pada Surat Jalan & validasi kuota |
-| **12.00 - 13.00** | Istirahat Siang | - | - |
-| **13.00 - 15.30** | Sesi Siang (Integrasi & Cetak) | Integrasi auto-journal pada Faktur Penjualan, SO & Kas AP | Pembuatan template cetak Surat Jalan & cetak SPK Bengkel |
-| **15.30 - 16.30** | Pengujian & Verifikasi | Pengujian entri jurnal seimbang & saldo berjalan COA | Pengujian alur pengiriman semen & pemotongan stok part bengkel |
-| **16.30 - 17.00** | Push & Penggabungan | Push branch `web-dev1` & persiapan Pull Request ke `main` | Push branch `web-dev2` & persiapan Pull Request ke `main` |
-
----
-
-## 6. Alur Kerja Git & Standar Commit (Branching Protocol)
+## 5. Alur Kerja Git & Standar Commit (Branching Protocol)
 
 ```text
 [origin/main] ─────────────────────────────────────────────────────────────► [origin/main]
@@ -158,7 +145,7 @@ Agar kedua pengembang dapat bekerja secara simultan tanpa risiko konflik penggab
 ```
 
 ### Panduan Sinkronisasi:
-1. **Sebelum Mulai Kerja:**
+1. **Sebelum Mulai Bekerja:**
    ```powershell
    git checkout web-dev1 # atau web-dev2
    git pull origin main
@@ -168,5 +155,5 @@ Agar kedua pengembang dapat bekerja secara simultan tanpa risiko konflik penggab
    - `feat(ar): integrasi auto journal pada faktur penjualan`
    - `feat(operasional): integrasi pengurangan kuota so pada surat jalan`
    - `feat(cetak): template cetak surat jalan resmi format supir`
-3. **Penyelesaian Akhir Hari:**
-   Lakukan pengujian lokal (`php artisan test` atau uji coba web di browser), pastikan respons HTTP 200 OK tanpa error sintaks, kemudian lakukan push ke branch masing-masing sebelum proses merge ke branch `main`.
+3. **Penyelesaian Tugas & Penggabungan:**
+   Lakukan pengujian lokal (`php artisan test` atau uji coba web di browser), pastikan seluruh respons HTTP 200 OK tanpa error, kemudian lakukan push ke branch masing-masing sebelum proses merge ke branch `main`.
