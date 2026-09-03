@@ -46,6 +46,19 @@ Berikut adalah rekapitulasi perubahan yang telah diterapkan setelah sinkronisasi
    - Method `apakahReadOnly(kodeModul)` pada `resources/views/layouts/app.blade.php`.
    - Proteksi tombol aksi dan badge indikator *Mode Lihat Saja (Read-Only)* pada `faktur_penjualan.blade.php`, `pembelian_so.blade.php`, `pengeluaran_kas.blade.php`, dan `list_rilisan.blade.php`.
    - Pemutakhiran sidebar dengan penanda status baca.
+5. **Keterangan Riwayat Terakhir Diedit pada Data Ongkos Angkut (SPV Operasional)**:
+   - Menambahkan kolom keterangan riwayat pembaruan data terakhir (*timestamp last edited*) pada kolom aksi master tarif ongkos angkut selaras dengan modul master lainnya.
+6. **Standardisasi NIK 16 Digit & Upload Berkas Karyawan Driver (Dispatcher)**:
+   - Pembuatan format khusus No. KTP/NIK 16 digit khas Indonesia dengan validasi otomatis.
+   - Penambahan fitur upload Foto KTP dan Dokumen Kontrak Kerja supir (maksimal 2 MB) lengkap dengan pratinjau instan dan tombol unduh dokumen.
+7. **Penyelarasan Fitur CRUD 'Data Jenis Aset' Antar-Modul**:
+   - Menyelaraskan 100% fitur CRUD database *Data Jenis Aset* pada halaman Data Kendaraan (Dispatcher) dengan fitur pada *Aset Perusahaan* (SPV Keuangan).
+8. **Revisi Identitas Perusahaan & Logo HD PT Putra Balkom Jaya**:
+   - Pemutakhiran nama perusahaan menjadi "Putra Balkom Jaya" di seluruh antarmuka dan penambahan logo resmi beresolusi tinggi (HD) di atas nama PT tanpa pengurangan resolusi atau pemotongan.
+9. **Mesin Dynamic Content Swapping SPA pada Seluruh Sidebar & Semua Role**:
+   - Pengubahan navigasi sidebar menjadi SPA dinamis parsial: saat menu diklik, hanya konten fitur (`<main id="kontenUtama">`) yang terefresh, sedangkan sidebar tetap persisten dan tidak pernah terefresh.
+   - Mengeliminasi tuntas bug layar melompat ke atas (*jump-to-top bug*) pada seluruh 10 role/aktor.
+   - Indikator loading bar halus (*YouTube/GitHub style*), dukungan tombol navigasi browser (*Back/Forward*), dan pencarian filter GET tanpa reload sidebar.
 
 ---
 
@@ -155,6 +168,9 @@ Berikut adalah daftar pekerjaan yang belum dieksekusi dan dijadwalkan untuk taha
 - **Target Pengerjaan:**
   - [x] CRUD Kendaraan: Plat nomor/kode aset, nama aset, merek, jenis aset, kapasitas zak/tonase, tanggal KIR & pajak, harga pembelian, serta integrasi tab Data Jenis Aset dalam satu halaman.
   - [x] CRUD Driver / Sopir: Generator kode supir cerdas (Mode Daur Ulang Slot Kosong vs Kode Acak Anti-Tebak), manajemen status supir (`Standby`, `Jalan`, `Cuti/Izin`), serta label **🕒 Riwayat Terakhir Diedit Real-Time** pada tiap baris.
+  - [x] **Format Khusus NIK / No. KTP 16 Digit:** Validasi input angka 16 digit khas Indonesia dengan pesan error dinamis pada modal tambah/edit supir.
+  - [x] **Upload Berkas Karyawan (Foto KTP & Dokumen Kontrak Kerja):** Fitur upload file maksimal 2 MB dengan validasi tipe file, pratinjau gambar instan, dan tautan unduh/lihat dokumen terintegrasi.
+  - [x] **Penyelarasan Fitur CRUD 'Data Jenis Aset':** CRUD jenis aset pada Data Kendaraan (Dispatcher) 100% selaras dan konsisten dengan master Aset Perusahaan (SPV Keuangan).
   - [x] **Pembatasan RBAC Role SPV Operasional:** Modul *Data Karyawan (Driver)* diset menjadi **Read-Only (Hanya Lihat)** untuk SPV Operasional dengan proteksi frontend (sembunyikan tombol Tambah/Edit/Hapus) dan proteksi backend `DriverController.php`. SPV Operasional hanya memantau data driver armada dan tidak dapat melihat karyawan selain driver.
 
 ### 6.3. Modul Dispatcher, Surat Jalan & Ongkos Angkut (Dispatcher & SPV Operasional)
@@ -170,6 +186,7 @@ Berikut adalah daftar pekerjaan yang belum dieksekusi dan dijadwalkan untuk taha
   - [x] Update status pengiriman (`Draft` -> `Muat` -> `Jalan` -> `Terkirim/Selesai`).
   - [x] Cetak dokumen Surat Jalan resmi format jalan sopir PT Putra Balkom Jaya.
   - [x] **CRUD Master Data Ongkos Angkut (9 Atribut):** Implementasi modul tarif pengiriman distribusi dengan kolom lengkap: `kode_oa`, `nama_oa`, `kode_gudang`, `kontrak_oa`, `muatan_oa`, `harga_oa`, `harga_kso`, `harga_kso_khusus`, `wilayah_oa` dilengkapi filter pencarian, smart auto-numbering, dan kalkulator KPI.
+  - [x] **Keterangan Riwayat Terakhir Diedit pada Ongkos Angkut:** Menampilkan badge waktu dan tanggal pembaruan data terakhir pada kolom aksi untuk transparansi audit SPV Operasional.
   - [x] **CRUD Data KSO (Kerja Sama Operasional) & Ongkos KSO:** 2 Tab terpadu untuk master kemitraan KSO (upload file kontrak, nilai kontrak, masa aktif) dan standardisasi tarif trayek rute ongkos angkut KSO (`ongkos_kso`).
 
 ### 6.4. Modul Bengkel & Perbaikan Kendaraan (Pengawas Kendaraan)
@@ -182,6 +199,16 @@ Berikut adalah daftar pekerjaan yang belum dieksekusi dan dijadwalkan untuk taha
   - [x] Pembuatan Surat Perintah Kerja (SPK) servis kendaraan bengkel, generator nomor SPK otomatis, live kalkulasi biaya jasa + sparepart, ubah status cepat, dan cetak lembar SPK resmi.
   - [x] CRUD Faktur Pembelian & Pengadaan Sparepart dari supplier dengan live kalkulator total bayar dan auto-sync penambahan kuantitas fisik ke master stok sparepart.
   - [x] CRUD Katalog & Stok Sparepart Truk dengan 4 kartu KPI, modal mutasi cepat (masuk/keluar/atur), dan badge level ketersediaan stok (`Aman`, `Menipis`, `Habis`).
+
+### 6.5. Modul Branding Perusahaan & Arsitektur Navigasi SPA Terpadu (Lintas Seluruh Role)
+- **File Inti:** [`resources/views/layouts/app.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/layouts/app.blade.php), [`resources/views/layouts/sidebar.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/layouts/sidebar.blade.php), [`resources/views/layouts/header.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/layouts/header.blade.php)
+- **Target Pengerjaan:**
+  - [x] **Revisi Identitas Perusahaan & Logo HD PT Putra Balkom Jaya:** Penyesuaian nama PT menjadi "PT Putra Balkom Jaya" dan logo HD diposisikan di atas nama PT dengan kualitas grafis tinggi tanpa terpotong.
+  - [x] **Mesin SPA Dynamic Content Swapping (Sidebar Tidak Kerefresh):** Navigasi sidebar berjalan secara parsial tanpa full page reload pada seluruh 29 menu dan seluruh 10 role/aktor.
+  - [x] **Eliminasi Tuntas Bug Layar Melompat ke Atas (Jump-to-Top):** Menghilangkan scroll jump saat mengklik menu bawah (seperti *Laporan Laba Rugi* atau *Laporan Neraca* pada role SPV Keuangan), posisi scroll sidebar tersimpan dan dipulihkan 100% presisi.
+  - [x] **Indikator Loading Bar Halus:** Progres bar gradien modern (YouTube/GitHub style) di bagian paling atas layar saat transisi konten.
+  - [x] **Sinkronisasi State Role Instan:** State role sinkron secara real-time antara frontend (`localStorage`) dan sesi backend Laravel via `/api/sinkronisasi-role`.
+  - [x] **Dukungan Penuh Browser History (`popstate`) & Form Filter GET:** Tombol Back/Forward browser dan form pencarian filter berjalan mulus tanpa reload sidebar.
 
 ---
 
