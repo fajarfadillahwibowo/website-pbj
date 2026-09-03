@@ -43,11 +43,11 @@
                     </div>
                     <div class="flex justify-between py-1 border-b border-[#EEF0F4] dark:border-[#252837]">
                         <span class="text-slate-600 dark:text-slate-400">Persediaan Stok Semen Gudang</span>
-                        <span class="font-mono tabular-nums font-semibold text-slate-900 dark:text-slate-100">Rp 625.000.000</span>
+                        <span class="font-mono tabular-nums font-semibold text-slate-900 dark:text-slate-100">Rp {{ number_format($totalPersediaan ?? 0, 0, ',', '.') }}</span>
                     </div>
                     <div class="flex justify-between py-1 border-b border-[#EEF0F4] dark:border-[#252837]">
                         <span class="text-slate-600 dark:text-slate-400">Uang Muka / Kas Bon Supir</span>
-                        <span class="font-mono tabular-nums font-semibold text-slate-900 dark:text-slate-100">Rp 18.000.000</span>
+                        <span class="font-mono tabular-nums font-semibold text-slate-900 dark:text-slate-100">Rp {{ number_format($totalUangMukaSupir ?? 0, 0, ',', '.') }}</span>
                     </div>
                     <div class="flex justify-between py-1.5 font-bold text-xs bg-[#F8FAFC] dark:bg-[#1C1E2A] px-2 rounded-lg text-slate-800 dark:text-slate-200">
                         <span>Total Aktiva Lancar:</span>
@@ -66,7 +66,7 @@
                     </div>
                     <div class="flex justify-between py-1 border-b border-[#EEF0F4] dark:border-[#252837]">
                         <span class="text-slate-600 dark:text-slate-400">Akumulasi Penyusutan Aset Tetap</span>
-                        <span class="font-mono tabular-nums font-semibold text-rose-600 dark:text-rose-400">- Rp 220.000.000</span>
+                        <span class="font-mono tabular-nums font-semibold text-rose-600 dark:text-rose-400">- Rp {{ number_format($totalAkumulasiPenyusutan ?? 0, 0, ',', '.') }}</span>
                     </div>
                     <div class="flex justify-between py-1.5 font-bold text-xs bg-[#F8FAFC] dark:bg-[#1C1E2A] px-2 rounded-lg text-slate-800 dark:text-slate-200">
                         <span>Total Nilai Buku Aktiva Tetap:</span>
@@ -76,9 +76,9 @@
             </div>
 
             <!-- TOTAL AKTIVA -->
-            <div class="flex justify-between py-3 font-bold text-sm bg-emerald-50 dark:bg-emerald-500/10 p-3.5 rounded-xl text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/20">
-                <span class="uppercase">TOTAL AKTIVA (ASET)</span>
-                <span class="font-mono tabular-nums text-base">Rp {{ number_format($totalAktiva ?? 0, 0, ',', '.') }}</span>
+            <div class="flex justify-between items-center py-3.5 font-bold text-sm bg-emerald-50 dark:bg-emerald-500/10 p-4 rounded-xl text-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30">
+                <span class="uppercase tracking-wider font-extrabold text-xs text-emerald-900 dark:text-emerald-300">TOTAL AKTIVA (ASET)</span>
+                <span class="font-mono tabular-nums text-base font-extrabold text-emerald-950 dark:text-emerald-200">Rp {{ number_format($totalAktiva ?? 0, 0, ',', '.') }}</span>
             </div>
         </div>
 
@@ -95,7 +95,7 @@
                 <div class="space-y-1.5 text-xs pl-2">
                     <div class="flex justify-between py-1 border-b border-[#EEF0F4] dark:border-[#252837]">
                         <span class="text-slate-600 dark:text-slate-400">Hutang Dagang Pabrik Semen (AP)</span>
-                        <span class="font-mono tabular-nums font-semibold text-slate-900 dark:text-slate-100">Rp 320.000.000</span>
+                        <span class="font-mono tabular-nums font-semibold text-slate-900 dark:text-slate-100">Rp {{ number_format($totalHutangDagang ?? 0, 0, ',', '.') }}</span>
                     </div>
                     <div class="flex justify-between py-1 border-b border-[#EEF0F4] dark:border-[#252837]">
                         <span class="text-slate-600 dark:text-slate-400">Titipan Saldo Deposit Customer</span>
@@ -103,7 +103,7 @@
                     </div>
                     <div class="flex justify-between py-1 border-b border-[#EEF0F4] dark:border-[#252837]">
                         <span class="text-slate-600 dark:text-slate-400">Hutang Biaya Gaji & Akrual</span>
-                        <span class="font-mono tabular-nums font-semibold text-slate-900 dark:text-slate-100">Rp 42.000.000</span>
+                        <span class="font-mono tabular-nums font-semibold text-slate-900 dark:text-slate-100">Rp {{ number_format($totalHutangGaji ?? 0, 0, ',', '.') }}</span>
                     </div>
                     <div class="flex justify-between py-1.5 font-bold text-xs bg-[#F8FAFC] dark:bg-[#1C1E2A] px-2 rounded-lg text-slate-800 dark:text-slate-200">
                         <span>Total Kewajiban:</span>
@@ -118,11 +118,11 @@
                 <div class="space-y-1.5 text-xs pl-2">
                     <div class="flex justify-between py-1 border-b border-[#EEF0F4] dark:border-[#252837]">
                         <span class="text-slate-600 dark:text-slate-400">Modal Disetor Pemilik</span>
-                        <span class="font-mono tabular-nums font-semibold text-slate-900 dark:text-slate-100">Rp 2.500.000.000</span>
+                        <span class="font-mono tabular-nums font-semibold text-slate-900 dark:text-slate-100">Rp {{ number_format($modalDisetor ?? 0, 0, ',', '.') }}</span>
                     </div>
                     <div class="flex justify-between py-1 border-b border-[#EEF0F4] dark:border-[#252837]">
                         <span class="text-slate-600 dark:text-slate-400">Laba Ditahan & Laba Berjalan</span>
-                        <span class="font-mono tabular-nums font-semibold text-slate-900 dark:text-slate-100">Rp {{ number_format(max(0, $totalModal - 2500000000), 0, ',', '.') }}</span>
+                        <span class="font-mono tabular-nums font-semibold text-slate-900 dark:text-slate-100">Rp {{ number_format($labaDitahan ?? 0, 0, ',', '.') }}</span>
                     </div>
                     <div class="flex justify-between py-1.5 font-bold text-xs bg-[#F8FAFC] dark:bg-[#1C1E2A] px-2 rounded-lg text-slate-800 dark:text-slate-200">
                         <span>Total Ekuitas Bersih:</span>
@@ -132,9 +132,9 @@
             </div>
 
             <!-- TOTAL PASSIVA -->
-            <div class="flex justify-between py-3 font-bold text-sm bg-blue-50 dark:bg-blue-500/10 p-3.5 rounded-xl text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-500/20">
-                <span class="uppercase">TOTAL PASSIVA (KEWAJIBAN + MODAL)</span>
-                <span class="font-mono tabular-nums text-base">Rp {{ number_format(($totalKewajiban + $totalModal) ?? 0, 0, ',', '.') }}</span>
+            <div class="flex justify-between items-center py-3.5 font-bold text-sm bg-blue-50 dark:bg-blue-500/10 p-4 rounded-xl text-blue-950 dark:text-blue-300 border border-blue-300 dark:border-blue-500/30">
+                <span class="uppercase tracking-wider font-extrabold text-xs text-blue-900 dark:text-blue-300">TOTAL PASSIVA (KEWAJIBAN + MODAL)</span>
+                <span class="font-mono tabular-nums text-base font-extrabold text-blue-950 dark:text-blue-200">Rp {{ number_format(($totalKewajiban + $totalModal) ?? 0, 0, ',', '.') }}</span>
             </div>
         </div>
     </div>
