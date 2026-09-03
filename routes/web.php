@@ -280,3 +280,16 @@ Route::prefix('laporan')->name('laporan.')->group(function () {
     Route::get('/laba-rugi', [LaporanEksekutifController::class, 'labaRugi'])->name('laba_rugi');
     Route::get('/arus-kas', [LaporanEksekutifController::class, 'arusKas'])->name('arus_kas');
 });
+
+// API Sinkronisasi Role / Jabatan Aktif Sesi Backend
+Route::post('/api/sinkronisasi-role', function (\Illuminate\Http\Request $request) {
+    $kodeJabatan = $request->input('kode_jabatan');
+    if ($kodeJabatan) {
+        session(['kode_jabatan' => $kodeJabatan]);
+    }
+    return response()->json([
+        'status' => 'sukses',
+        'pesan' => 'Role berhasil disinkronkan ke sesi backend',
+        'kode_jabatan' => session('kode_jabatan')
+    ]);
+})->name('api.sinkronisasi_role');

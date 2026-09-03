@@ -14,7 +14,7 @@
 
         <div class="flex items-center gap-2 min-w-0">
             <span class="text-xs text-slate-400 font-medium hidden md:inline">Portal /</span>
-            <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+            <span id="judulHalamanAktif" class="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
                 @yield('judul', 'Dashboard Terpadu')
             </span>
             <span class="text-[10px] px-2 py-0.5 rounded-md font-mono font-semibold bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 truncate"

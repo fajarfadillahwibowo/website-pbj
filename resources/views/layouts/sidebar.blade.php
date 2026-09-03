@@ -21,7 +21,7 @@
                 </button>
 
                 <!-- Logo Perusahaan HD di ATAS Nama PT -->
-                <a href="{{ route('dashboard') }}" class="flex flex-col items-center gap-2 group w-full">
+                <a href="{{ route('dashboard') }}" @click="tanganiKlikSidebar($event, $el)" class="flex flex-col items-center gap-2 group w-full">
                     <div class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center p-1 rounded-2xl bg-white dark:bg-[#1C1E2A] shadow-xs border border-slate-100 dark:border-slate-800/80 group-hover:scale-105 transition-transform">
                         <img src="{{ asset('images/logo-pbj.png') }}" 
                              alt="Logo PT Putra Balkom Jaya" 
@@ -50,14 +50,17 @@
     </div>
 
     <!-- Navigasi Menu Dinamis Sesuai RBAC -->
-    <nav class="flex-1 overflow-y-auto py-3 px-2 space-y-4 text-xs">
+    <nav id="navigasiSidebar"
+         @scroll.debounce.150ms="sessionStorage.setItem('posisi_scroll_sidebar', $el.scrollTop)"
+         class="flex-1 overflow-y-auto py-3 px-2 space-y-4 text-xs scroll-smooth">
 
         <!-- 1. Menu Utama -->
         <div>
             <div x-show="!sidebarTerlipat" class="px-2.5 mb-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Utama</div>
             <a href="{{ route('dashboard') }}"
+               @click="tanganiKlikSidebar($event, $el)"
                :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-               class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('dashboard') ? 'font-bold text-blue-700 dark:text-blue-400 bg-blue-50/90 dark:bg-blue-500/10 border-l-[3.5px] border-blue-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+               class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('dashboard') ? 'link-sidebar-aktif font-bold text-blue-700 dark:text-blue-400 bg-blue-50/90 dark:bg-blue-500/10 border-l-[3.5px] border-blue-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                :title="sidebarTerlipat ? 'Ringkasan Dashboard' : ''">
                 <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('dashboard') ? 'bg-blue-600 text-white shadow-xs shadow-blue-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-500/20 group-hover:text-blue-600 dark:group-hover:text-blue-400' }}">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -76,8 +79,9 @@
             </div>
             <div class="space-y-1">
                 <a href="{{ route('superadmin.kelola_akun') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('superadmin.kelola_akun') ? 'font-bold text-purple-700 dark:text-purple-400 bg-purple-50/90 dark:bg-purple-500/10 border-l-[3.5px] border-purple-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('superadmin.kelola_akun') ? 'link-sidebar-aktif font-bold text-purple-700 dark:text-purple-400 bg-purple-50/90 dark:bg-purple-500/10 border-l-[3.5px] border-purple-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Kelola Akun & RBAC' : ''">
                     <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('superadmin.kelola_akun') ? 'bg-purple-600 text-white shadow-xs shadow-purple-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-purple-50 dark:group-hover:bg-purple-500/20 group-hover:text-purple-600 dark:group-hover:text-purple-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197"/></svg>
@@ -94,8 +98,9 @@
             </div>
             <div class="space-y-1">
                 <a x-show="bisaAkses('master_customer')" href="{{ route('master.customer.index') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('master.customer.*') ? 'font-bold text-cyan-700 dark:text-cyan-400 bg-cyan-50/90 dark:bg-cyan-500/10 border-l-[3.5px] border-cyan-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('master.customer.*') ? 'link-sidebar-aktif font-bold text-cyan-700 dark:text-cyan-400 bg-cyan-50/90 dark:bg-cyan-500/10 border-l-[3.5px] border-cyan-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Data Customer (Entitas Pemilik)' : ''">
                     <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('master.customer.*') ? 'bg-cyan-600 text-white shadow-xs shadow-cyan-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-cyan-50 dark:group-hover:bg-cyan-500/20 group-hover:text-cyan-600 dark:group-hover:text-cyan-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -103,8 +108,9 @@
                     <span x-show="!sidebarTerlipat" class="truncate">Data Customer</span>
                 </a>
                 <a x-show="bisaAkses('master_customer')" href="{{ route('master.toko_bangunan.index') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('master.toko_bangunan.*') ? 'font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50/90 dark:bg-emerald-500/10 border-l-[3.5px] border-emerald-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('master.toko_bangunan.*') ? 'link-sidebar-aktif font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50/90 dark:bg-emerald-500/10 border-l-[3.5px] border-emerald-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Data Toko Bangunan & Proyek' : ''">
                     <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('master.toko_bangunan.*') ? 'bg-emerald-600 text-white shadow-xs shadow-emerald-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/20 group-hover:text-emerald-600 dark:group-hover:text-emerald-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
@@ -112,8 +118,9 @@
                     <span x-show="!sidebarTerlipat" class="truncate">Toko & Proyek</span>
                 </a>
                 <a x-show="bisaAkses('master_barang')" href="{{ route('master.barang.index') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('master.barang.*') ? 'font-bold text-amber-700 dark:text-amber-400 bg-amber-50/90 dark:bg-amber-500/10 border-l-[3.5px] border-amber-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('master.barang.*') ? 'link-sidebar-aktif font-bold text-amber-700 dark:text-amber-400 bg-amber-50/90 dark:bg-amber-500/10 border-l-[3.5px] border-amber-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Data Barang / Semen' : ''">
                     <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('master.barang.*') ? 'bg-amber-600 text-white shadow-xs shadow-amber-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-amber-50 dark:group-hover:bg-amber-500/20 group-hover:text-amber-600 dark:group-hover:text-amber-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/></svg>
@@ -121,8 +128,9 @@
                     <span x-show="!sidebarTerlipat" class="truncate">Data Barang</span>
                 </a>
                 <a x-show="bisaAkses('master_wilayah')" href="{{ route('master.wilayah.index') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('master.wilayah.*') ? 'font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50/90 dark:bg-emerald-500/10 border-l-[3.5px] border-emerald-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('master.wilayah.*') ? 'link-sidebar-aktif font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50/90 dark:bg-emerald-500/10 border-l-[3.5px] border-emerald-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Data Wilayah & Zonasi' : ''">
                     <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('master.wilayah.*') ? 'bg-emerald-600 text-white shadow-xs shadow-emerald-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/20 group-hover:text-emerald-600 dark:group-hover:text-emerald-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -130,8 +138,9 @@
                     <span x-show="!sidebarTerlipat" class="truncate">Data Wilayah</span>
                 </a>
                 <a x-show="bisaAkses('master_karyawan')" href="{{ route('master.karyawan.index') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('master.karyawan.*') ? 'font-bold text-indigo-700 dark:text-indigo-400 bg-indigo-50/90 dark:bg-indigo-500/10 border-l-[3.5px] border-indigo-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('master.karyawan.*') ? 'link-sidebar-aktif font-bold text-indigo-700 dark:text-indigo-400 bg-indigo-50/90 dark:bg-indigo-500/10 border-l-[3.5px] border-indigo-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Data Karyawan & Seluruh Pegawai' : ''">
                     <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('master.karyawan.*') ? 'bg-indigo-600 text-white shadow-xs shadow-indigo-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/20 group-hover:text-indigo-600 dark:group-hover:text-indigo-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2H9.17A3.001 3.001 0 0112 14z"/></svg>
@@ -148,10 +157,11 @@
             </div>
             <div class="space-y-1">
                 <a x-show="bisaAkses('ar_faktur')" href="{{ route('keuangan.ar.faktur') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('keuangan.ar.faktur') ? 'font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50/90 dark:bg-emerald-500/10 border-l-[3.5px] border-emerald-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('keuangan.ar.faktur*') ? 'link-sidebar-aktif font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50/90 dark:bg-emerald-500/10 border-l-[3.5px] border-emerald-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Penjualan (Faktur AR)' : ''">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.ar.faktur') ? 'bg-emerald-600 text-white shadow-xs shadow-emerald-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/20 group-hover:text-emerald-600 dark:group-hover:text-emerald-400' }}">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.ar.faktur*') ? 'bg-emerald-600 text-white shadow-xs shadow-emerald-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/20 group-hover:text-emerald-600 dark:group-hover:text-emerald-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     </div>
                     <div x-show="!sidebarTerlipat" class="flex items-center justify-between w-full min-w-0">
@@ -160,10 +170,11 @@
                     </div>
                 </a>
                 <a x-show="bisaAkses('ar_piutang')" href="{{ route('keuangan.ar.piutang') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('keuangan.ar.piutang') ? 'font-bold text-amber-700 dark:text-amber-400 bg-amber-50/90 dark:bg-amber-500/10 border-l-[3.5px] border-amber-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('keuangan.ar.piutang*') ? 'link-sidebar-aktif font-bold text-amber-700 dark:text-amber-400 bg-amber-50/90 dark:bg-amber-500/10 border-l-[3.5px] border-amber-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'List Piutang Pelanggan' : ''">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.ar.piutang') ? 'bg-amber-600 text-white shadow-xs shadow-amber-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-amber-50 dark:group-hover:bg-amber-500/20 group-hover:text-amber-600 dark:group-hover:text-amber-400' }}">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.ar.piutang*') ? 'bg-amber-600 text-white shadow-xs shadow-amber-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-amber-50 dark:group-hover:bg-amber-500/20 group-hover:text-amber-600 dark:group-hover:text-amber-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
                     <div x-show="!sidebarTerlipat" class="flex items-center justify-between w-full min-w-0">
@@ -172,10 +183,11 @@
                     </div>
                 </a>
                 <a x-show="bisaAkses('ar_deposit')" href="{{ route('keuangan.ar.deposit') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('keuangan.ar.deposit') ? 'font-bold text-sky-700 dark:text-sky-400 bg-sky-50/90 dark:bg-sky-500/10 border-l-[3.5px] border-sky-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('keuangan.ar.deposit*') ? 'link-sidebar-aktif font-bold text-sky-700 dark:text-sky-400 bg-sky-50/90 dark:bg-sky-500/10 border-l-[3.5px] border-sky-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'List Deposit Pelanggan' : ''">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.ar.deposit') ? 'bg-sky-600 text-white shadow-xs shadow-sky-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-sky-50 dark:group-hover:bg-sky-500/20 group-hover:text-sky-600 dark:group-hover:text-sky-400' }}">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.ar.deposit*') ? 'bg-sky-600 text-white shadow-xs shadow-sky-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-sky-50 dark:group-hover:bg-sky-500/20 group-hover:text-sky-600 dark:group-hover:text-sky-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
                     </div>
                     <div x-show="!sidebarTerlipat" class="flex items-center justify-between w-full min-w-0">
@@ -184,10 +196,11 @@
                     </div>
                 </a>
                 <a x-show="bisaAkses('ap_pengeluaran')" href="{{ route('keuangan.ap.pengeluaran') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('keuangan.ap.pengeluaran') ? 'font-bold text-rose-700 dark:text-rose-400 bg-rose-50/90 dark:bg-rose-500/10 border-l-[3.5px] border-rose-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('keuangan.ap.pengeluaran*') ? 'link-sidebar-aktif font-bold text-rose-700 dark:text-rose-400 bg-rose-50/90 dark:bg-rose-500/10 border-l-[3.5px] border-rose-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Pengeluaran Kas/Bank' : ''">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.ap.pengeluaran') ? 'bg-rose-600 text-white shadow-xs shadow-rose-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-rose-50 dark:group-hover:bg-rose-500/20 group-hover:text-rose-600 dark:group-hover:text-rose-400' }}">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.ap.pengeluaran*') ? 'bg-rose-600 text-white shadow-xs shadow-rose-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-rose-50 dark:group-hover:bg-rose-500/20 group-hover:text-rose-600 dark:group-hover:text-rose-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
                     <div x-show="!sidebarTerlipat" class="flex items-center justify-between w-full min-w-0">
@@ -196,10 +209,11 @@
                     </div>
                 </a>
                 <a x-show="bisaAkses('ap_rilisan')" href="{{ route('keuangan.ap.rilisan') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('keuangan.ap.rilisan') ? 'font-bold text-amber-700 dark:text-amber-400 bg-amber-50/90 dark:bg-amber-500/10 border-l-[3.5px] border-amber-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('keuangan.ap.rilisan*') ? 'link-sidebar-aktif font-bold text-amber-700 dark:text-amber-400 bg-amber-50/90 dark:bg-amber-500/10 border-l-[3.5px] border-amber-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Rilisan / Berita Acara Penerimaan' : ''">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.ap.rilisan') ? 'bg-amber-600 text-white shadow-xs shadow-amber-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-amber-50 dark:group-hover:bg-amber-500/20 group-hover:text-amber-600 dark:group-hover:text-amber-400' }}">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.ap.rilisan*') ? 'bg-amber-600 text-white shadow-xs shadow-amber-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-amber-50 dark:group-hover:bg-amber-500/20 group-hover:text-amber-600 dark:group-hover:text-amber-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
                     <div x-show="!sidebarTerlipat" class="flex items-center justify-between w-full min-w-0">
@@ -208,10 +222,11 @@
                     </div>
                 </a>
                 <a x-show="bisaAkses('ap_pembelian')" href="{{ route('keuangan.ap.pembelian_so') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('keuangan.ap.pembelian_so') ? 'font-bold text-blue-700 dark:text-blue-400 bg-blue-50/90 dark:bg-blue-500/10 border-l-[3.5px] border-blue-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('keuangan.ap.pembelian_so*') ? 'link-sidebar-aktif font-bold text-blue-700 dark:text-blue-400 bg-blue-50/90 dark:bg-blue-500/10 border-l-[3.5px] border-blue-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Pembelian SO Pabrik' : ''">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.ap.pembelian_so') ? 'bg-blue-600 text-white shadow-xs shadow-blue-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-500/20 group-hover:text-blue-600 dark:group-hover:text-blue-400' }}">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.ap.pembelian_so*') ? 'bg-blue-600 text-white shadow-xs shadow-blue-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-500/20 group-hover:text-blue-600 dark:group-hover:text-blue-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                     </div>
                     <div x-show="!sidebarTerlipat" class="flex items-center justify-between w-full min-w-0">
@@ -220,10 +235,11 @@
                     </div>
                 </a>
                 <a x-show="bisaAkses('list_so')" href="{{ route('keuangan.ap.list_so') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('keuangan.ap.list_so') ? 'font-bold text-indigo-700 dark:text-indigo-400 bg-indigo-50/90 dark:bg-indigo-500/10 border-l-[3.5px] border-indigo-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('keuangan.ap.list_so*') ? 'link-sidebar-aktif font-bold text-indigo-700 dark:text-indigo-400 bg-indigo-50/90 dark:bg-indigo-500/10 border-l-[3.5px] border-indigo-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Monitoring List SO Semen' : ''">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.ap.list_so') ? 'bg-indigo-600 text-white shadow-xs shadow-indigo-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/20 group-hover:text-indigo-600 dark:group-hover:text-indigo-400' }}">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.ap.list_so*') ? 'bg-indigo-600 text-white shadow-xs shadow-indigo-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/20 group-hover:text-indigo-600 dark:group-hover:text-indigo-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     </div>
                     <div x-show="!sidebarTerlipat" class="flex items-center justify-between w-full min-w-0">
@@ -232,10 +248,11 @@
                     </div>
                 </a>
                 <a x-show="bisaAkses('akun_coa')" href="{{ route('keuangan.akuntansi.kode_akun') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('keuangan.akuntansi.kode_akun') ? 'font-bold text-violet-700 dark:text-violet-400 bg-violet-50/90 dark:bg-violet-500/10 border-l-[3.5px] border-violet-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('keuangan.akuntansi.kode_akun*') ? 'link-sidebar-aktif font-bold text-violet-700 dark:text-violet-400 bg-violet-50/90 dark:bg-violet-500/10 border-l-[3.5px] border-violet-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Data Kode Akun (COA)' : ''">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.akuntansi.kode_akun') ? 'bg-violet-600 text-white shadow-xs shadow-violet-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-violet-50 dark:group-hover:bg-violet-500/20 group-hover:text-violet-600 dark:group-hover:text-violet-400' }}">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.akuntansi.kode_akun*') ? 'bg-violet-600 text-white shadow-xs shadow-violet-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-violet-50 dark:group-hover:bg-violet-500/20 group-hover:text-violet-600 dark:group-hover:text-violet-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                     </div>
                     <div x-show="!sidebarTerlipat" class="flex items-center justify-between w-full min-w-0">
@@ -244,10 +261,11 @@
                     </div>
                 </a>
                 <a x-show="bisaAkses('akun_jurnal')" href="{{ route('keuangan.akuntansi.jurnal') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('keuangan.akuntansi.jurnal') ? 'font-bold text-teal-700 dark:text-teal-400 bg-teal-50/90 dark:bg-teal-500/10 border-l-[3.5px] border-teal-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('keuangan.akuntansi.jurnal*') ? 'link-sidebar-aktif font-bold text-teal-700 dark:text-teal-400 bg-teal-50/90 dark:bg-teal-500/10 border-l-[3.5px] border-teal-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Jurnal Umum Akuntansi' : ''">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.akuntansi.jurnal') ? 'bg-teal-600 text-white shadow-xs shadow-teal-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-teal-50 dark:group-hover:bg-teal-500/20 group-hover:text-teal-600 dark:group-hover:text-teal-400' }}">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.akuntansi.jurnal*') ? 'bg-teal-600 text-white shadow-xs shadow-teal-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-teal-50 dark:group-hover:bg-teal-500/20 group-hover:text-teal-600 dark:group-hover:text-teal-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                     </div>
                     <div x-show="!sidebarTerlipat" class="flex items-center justify-between w-full min-w-0">
@@ -256,10 +274,11 @@
                     </div>
                 </a>
                 <a x-show="bisaAkses('akun_aset')" href="{{ route('keuangan.akuntansi.aset') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('keuangan.akuntansi.aset') ? 'font-bold text-indigo-700 dark:text-indigo-400 bg-indigo-50/90 dark:bg-indigo-500/10 border-l-[3.5px] border-indigo-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('keuangan.akuntansi.aset*') ? 'link-sidebar-aktif font-bold text-indigo-700 dark:text-indigo-400 bg-indigo-50/90 dark:bg-indigo-500/10 border-l-[3.5px] border-indigo-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Aset Perusahaan' : ''">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.akuntansi.aset') ? 'bg-indigo-600 text-white shadow-xs shadow-indigo-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/20 group-hover:text-indigo-600 dark:group-hover:text-indigo-400' }}">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('keuangan.akuntansi.aset*') ? 'bg-indigo-600 text-white shadow-xs shadow-indigo-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/20 group-hover:text-indigo-600 dark:group-hover:text-indigo-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                     </div>
                     <div x-show="!sidebarTerlipat" class="flex items-center justify-between w-full min-w-0">
@@ -277,8 +296,9 @@
             </div>
             <div class="space-y-1">
                 <a x-show="bisaAkses('kirim_ongkos')" href="{{ route('operasional.pengiriman.ongkos_angkut') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.pengiriman.ongkos_angkut*') ? 'font-bold text-blue-700 dark:text-blue-400 bg-blue-50/90 dark:bg-blue-500/10 border-l-[3.5px] border-blue-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.pengiriman.ongkos_angkut*') ? 'link-sidebar-aktif font-bold text-blue-700 dark:text-blue-400 bg-blue-50/90 dark:bg-blue-500/10 border-l-[3.5px] border-blue-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Data Ongkos Angkut (Master Tarif OA)' : ''">
                     <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('operasional.pengiriman.ongkos_angkut*') ? 'bg-blue-600 text-white shadow-xs shadow-blue-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-500/20 group-hover:text-blue-600 dark:group-hover:text-blue-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
@@ -286,28 +306,31 @@
                     <span x-show="!sidebarTerlipat" class="truncate">Data Ongkos Angkut</span>
                 </a>
                 <a x-show="bisaAkses('gudang_opname')" href="{{ route('operasional.gudang.opname') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.gudang.opname') ? 'font-bold text-teal-700 dark:text-teal-400 bg-teal-50/90 dark:bg-teal-500/10 border-l-[3.5px] border-teal-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.gudang.opname*') ? 'link-sidebar-aktif font-bold text-teal-700 dark:text-teal-400 bg-teal-50/90 dark:bg-teal-500/10 border-l-[3.5px] border-teal-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Opname Gudang' : ''">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('operasional.gudang.opname') ? 'bg-teal-600 text-white shadow-xs shadow-teal-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-teal-50 dark:group-hover:bg-teal-500/20 group-hover:text-teal-600 dark:group-hover:text-teal-400' }}">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('operasional.gudang.opname*') ? 'bg-teal-600 text-white shadow-xs shadow-teal-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-teal-50 dark:group-hover:bg-teal-500/20 group-hover:text-teal-600 dark:group-hover:text-teal-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                     </div>
                     <span x-show="!sidebarTerlipat" class="truncate">Stok Opname Gudang</span>
                 </a>
                 <a x-show="bisaAkses('gudang_stok')" href="{{ route('operasional.gudang.stok') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.gudang.stok') ? 'font-bold text-amber-700 dark:text-amber-400 bg-amber-50/90 dark:bg-amber-500/10 border-l-[3.5px] border-amber-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.gudang.stok*') ? 'link-sidebar-aktif font-bold text-amber-700 dark:text-amber-400 bg-amber-50/90 dark:bg-amber-500/10 border-l-[3.5px] border-amber-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? (jabatanAktif === 'STAFF_AP' ? 'List Gudang SO' : 'Gudang & Stok Semen') : ''">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('operasional.gudang.stok') ? 'bg-amber-600 text-white shadow-xs shadow-amber-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-amber-50 dark:group-hover:bg-amber-500/20 group-hover:text-amber-600 dark:group-hover:text-amber-400' }}">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('operasional.gudang.stok*') ? 'bg-amber-600 text-white shadow-xs shadow-amber-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-amber-50 dark:group-hover:bg-amber-500/20 group-hover:text-amber-600 dark:group-hover:text-amber-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/></svg>
                     </div>
                     <span x-show="!sidebarTerlipat" class="truncate" x-text="jabatanAktif === 'STAFF_AP' ? 'List Gudang SO' : 'Data Gudang'">Data Gudang</span>
                 </a>
                 <a x-show="bisaAkses('armada_driver')" href="{{ route('operasional.armada.driver') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.armada.driver') ? 'font-bold text-indigo-700 dark:text-indigo-400 bg-indigo-50/90 dark:bg-indigo-500/10 border-l-[3.5px] border-indigo-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.armada.driver*') ? 'link-sidebar-aktif font-bold text-indigo-700 dark:text-indigo-400 bg-indigo-50/90 dark:bg-indigo-500/10 border-l-[3.5px] border-indigo-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? (jabatanAktif === 'SPV_OPERASIONAL' ? 'Data Karyawan (Driver) - Hanya Lihat' : 'Data Karyawan (Driver Supir)') : ''">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('operasional.armada.driver') ? 'bg-indigo-600 text-white shadow-xs shadow-indigo-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/20 group-hover:text-indigo-600 dark:group-hover:text-indigo-400' }}">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('operasional.armada.driver*') ? 'bg-indigo-600 text-white shadow-xs shadow-indigo-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/20 group-hover:text-indigo-600 dark:group-hover:text-indigo-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                     </div>
                     <div x-show="!sidebarTerlipat" class="flex items-center justify-between w-full min-w-0">
@@ -316,28 +339,31 @@
                     </div>
                 </a>
                 <a x-show="bisaAkses('armada_truk')" href="{{ route('operasional.armada.kendaraan') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.armada.kendaraan') ? 'font-bold text-orange-700 dark:text-orange-400 bg-orange-50/90 dark:bg-orange-500/10 border-l-[3.5px] border-orange-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.armada.kendaraan*') ? 'link-sidebar-aktif font-bold text-orange-700 dark:text-orange-400 bg-orange-50/90 dark:bg-orange-500/10 border-l-[3.5px] border-orange-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Data Kendaraan & Jenis Aset' : ''">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('operasional.armada.kendaraan') ? 'bg-orange-600 text-white shadow-xs shadow-orange-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-orange-50 dark:group-hover:bg-orange-500/20 group-hover:text-orange-600 dark:group-hover:text-orange-400' }}">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('operasional.armada.kendaraan*') ? 'bg-orange-600 text-white shadow-xs shadow-orange-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-orange-50 dark:group-hover:bg-orange-500/20 group-hover:text-orange-600 dark:group-hover:text-orange-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1"/></svg>
                     </div>
                     <span x-show="!sidebarTerlipat" class="truncate">Data Kendaraan</span>
                 </a>
                 <a x-show="bisaAkses('kirim_sj')" href="{{ route('operasional.pengiriman.surat_jalan') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.pengiriman.surat_jalan') ? 'font-bold text-sky-700 dark:text-sky-400 bg-sky-50/90 dark:bg-sky-500/10 border-l-[3.5px] border-sky-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.pengiriman.surat_jalan*') ? 'link-sidebar-aktif font-bold text-sky-700 dark:text-sky-400 bg-sky-50/90 dark:bg-sky-500/10 border-l-[3.5px] border-sky-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Pengiriman & Surat Jalan' : ''">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('operasional.pengiriman.surat_jalan') ? 'bg-sky-600 text-white shadow-xs shadow-sky-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-sky-50 dark:group-hover:bg-sky-500/20 group-hover:text-sky-600 dark:group-hover:text-sky-400' }}">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('operasional.pengiriman.surat_jalan*') ? 'bg-sky-600 text-white shadow-xs shadow-sky-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-sky-50 dark:group-hover:bg-blue-500/20 group-hover:text-sky-600 dark:group-hover:text-sky-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1"/></svg>
                     </div>
                     <span x-show="!sidebarTerlipat" class="truncate">Pengiriman</span>
                 </a>
                 <a x-show="bisaAkses('ops_kso')" href="{{ route('operasional.kso') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.kso') ? 'font-bold text-blue-700 dark:text-blue-400 bg-blue-50/90 dark:bg-blue-500/10 border-l-[3.5px] border-blue-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.kso*') ? 'link-sidebar-aktif font-bold text-blue-700 dark:text-blue-400 bg-blue-50/90 dark:bg-blue-500/10 border-l-[3.5px] border-blue-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Data KSO (Kerja Sama Operasional)' : ''">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('operasional.kso') ? 'bg-blue-600 text-white shadow-xs shadow-blue-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-500/20 group-hover:text-blue-600 dark:group-hover:text-blue-400' }}">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('operasional.kso*') ? 'bg-blue-600 text-white shadow-xs shadow-blue-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-500/20 group-hover:text-blue-600 dark:group-hover:text-blue-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                     </div>
                     <span x-show="!sidebarTerlipat" class="truncate">Data KSO</span>
@@ -345,28 +371,31 @@
 
                 <!-- Sub-Modul Khusus Bengkel -->
                 <a x-show="bisaAkses('bengkel_perbaikan')" href="{{ route('operasional.bengkel.perbaikan') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.bengkel.perbaikan') ? 'font-bold text-red-700 dark:text-red-400 bg-red-50/90 dark:bg-red-500/10 border-l-[3.5px] border-red-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.bengkel.perbaikan*') ? 'link-sidebar-aktif font-bold text-red-700 dark:text-red-400 bg-red-50/90 dark:bg-red-500/10 border-l-[3.5px] border-red-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Perbaikan Kendaraan (SPK)' : ''">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('operasional.bengkel.perbaikan') ? 'bg-red-600 text-white shadow-xs shadow-red-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-red-50 dark:group-hover:bg-red-500/20 group-hover:text-red-600 dark:group-hover:text-red-400' }}">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('operasional.bengkel.perbaikan*') ? 'bg-red-600 text-white shadow-xs shadow-red-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-red-50 dark:group-hover:bg-red-500/20 group-hover:text-red-600 dark:group-hover:text-red-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     </div>
                     <span x-show="!sidebarTerlipat" class="truncate">Perbaikan Kendaraan (SPK)</span>
                 </a>
                 <a x-show="bisaAkses('bengkel_pembelian_sparepart')" href="{{ route('operasional.bengkel.pembelian_sparepart') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.bengkel.pembelian_sparepart') ? 'font-bold text-rose-700 dark:text-rose-400 bg-rose-50/90 dark:bg-rose-500/10 border-l-[3.5px] border-rose-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.bengkel.pembelian_sparepart*') ? 'link-sidebar-aktif font-bold text-rose-700 dark:text-rose-400 bg-rose-50/90 dark:bg-rose-500/10 border-l-[3.5px] border-rose-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Pembelian Sparepart' : ''">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('operasional.bengkel.pembelian_sparepart') ? 'bg-rose-600 text-white shadow-xs shadow-rose-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-rose-50 dark:group-hover:bg-rose-500/20 group-hover:text-rose-600 dark:group-hover:text-rose-400' }}">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('operasional.bengkel.pembelian_sparepart*') ? 'bg-rose-600 text-white shadow-xs shadow-rose-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-rose-50 dark:group-hover:bg-rose-500/20 group-hover:text-rose-600 dark:group-hover:text-rose-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                     </div>
                     <span x-show="!sidebarTerlipat" class="truncate">Pembelian Sparepart</span>
                 </a>
                 <a x-show="bisaAkses('bengkel_sparepart')" href="{{ route('operasional.bengkel.sparepart') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.bengkel.sparepart') ? 'font-bold text-amber-700 dark:text-amber-400 bg-amber-50/90 dark:bg-amber-500/10 border-l-[3.5px] border-amber-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.bengkel.sparepart*') ? 'link-sidebar-aktif font-bold text-amber-700 dark:text-amber-400 bg-amber-50/90 dark:bg-amber-500/10 border-l-[3.5px] border-amber-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'List Sparepart' : ''">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('operasional.bengkel.sparepart') ? 'bg-amber-600 text-white shadow-xs shadow-amber-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-amber-50 dark:group-hover:bg-amber-500/20 group-hover:text-amber-600 dark:group-hover:text-amber-400' }}">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('operasional.bengkel.sparepart*') ? 'bg-amber-600 text-white shadow-xs shadow-amber-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-amber-50 dark:group-hover:bg-amber-500/20 group-hover:text-amber-600 dark:group-hover:text-amber-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7c-2 0-3 1-3 3zm0 5h16"/></svg>
                     </div>
                     <span x-show="!sidebarTerlipat" class="truncate">List Sparepart</span>
@@ -381,19 +410,21 @@
             </div>
             <div class="space-y-1">
                 <a x-show="bisaAkses('laporan_neraca')" href="{{ route('laporan.neraca') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('laporan.neraca') ? 'font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50/90 dark:bg-emerald-500/10 border-l-[3.5px] border-emerald-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('laporan.neraca*') ? 'link-sidebar-aktif font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50/90 dark:bg-emerald-500/10 border-l-[3.5px] border-emerald-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Laporan Neraca' : ''">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('laporan.neraca') ? 'bg-emerald-600 text-white shadow-xs shadow-emerald-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/20 group-hover:text-emerald-600 dark:group-hover:text-emerald-400' }}">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('laporan.neraca*') ? 'bg-emerald-600 text-white shadow-xs shadow-emerald-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/20 group-hover:text-emerald-600 dark:group-hover:text-emerald-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                     </div>
                     <span x-show="!sidebarTerlipat" class="truncate">Laporan Neraca</span>
                 </a>
                 <a x-show="bisaAkses('laporan_laba_rugi')" href="{{ route('laporan.laba_rugi') }}"
+                   @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
-                   class="flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('laporan.laba_rugi') ? 'font-bold text-blue-700 dark:text-blue-400 bg-blue-50/90 dark:bg-blue-500/10 border-l-[3.5px] border-blue-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
+                   class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('laporan.laba_rugi*') ? 'link-sidebar-aktif font-bold text-blue-700 dark:text-blue-400 bg-blue-50/90 dark:bg-blue-500/10 border-l-[3.5px] border-blue-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Laporan Laba Rugi' : ''">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('laporan.laba_rugi') ? 'bg-blue-600 text-white shadow-xs shadow-blue-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-500/20 group-hover:text-blue-600 dark:group-hover:text-blue-400' }}">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('laporan.laba_rugi*') ? 'bg-blue-600 text-white shadow-xs shadow-blue-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-500/20 group-hover:text-blue-600 dark:group-hover:text-blue-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                     </div>
                     <span x-show="!sidebarTerlipat" class="truncate">Laporan Laba Rugi</span>
