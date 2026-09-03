@@ -24,12 +24,13 @@
 - **[TERSELESAIKAN] Kontras warna teks pada header modal detail 360 derajat**:
   - *Penyebab:* Warna teks `text-slate-900` tersamar di beberapa container putih.
   - *Solusi:* Mempertegas dengan `text-slate-900 font-extrabold dark:text-white` dan `text-slate-600 dark:text-slate-300 font-medium`.
-- **[TERSELESAIKAN] Warna angka redup/pucat (faint) pada kartu metrik finansial aset dan kebingungan istilah kolom tabel**:
-  - *Penyebab:* Angka pada kartu `Total Harga Perolehan` dan `Beban Susut / Bulan` menggunakan utilitas warna yang redup dan rentan tertimpa varian gelap/terang, serta istilah kolom `RELASI ARMADA` kurang intuitif bagi pengguna.
-  - *Solusi:* 
-    1. Mengubah angka `Total Harga Perolehan` menjadi `text-slate-900 dark:text-white font-extrabold` (hitam pekat di mode terang, putih bersih di mode gelap).
-    2. Mengubah angka `Beban Susut / Bulan` dari amber pucat menjadi `text-orange-600 dark:text-orange-400 font-extrabold` (warna oranye tajam berstandar kontras WCAG AAA).
-    3. Mengubah header kolom tabel dari `RELASI ARMADA` menjadi `Armada Fisik Terhubung` lengkap dengan ikon truk dan tooltip penjelas keterkaitan unit fisik kendaraan operasional di lapangan.
+- **[TERSELESAIKAN] Format formulir input aset tegak sempit serta belum memuat atribut armada ERD dan kategori tanah-bangunan terpisah**:
+  - *Penyebab:* Modal input awal berformat vertikal (`max-w-xl`) yang sempit dan belum menampung kolom-kolom spesifikasi fisik armada sesuai diagram ERD (`jenis_kendaraan`, `muatan`, `no_rangka`, `tahun_pembuatan`, `tanggal_kir`, `tanggal_pajak`, `nama_pemilik`), serta kategori Tanah dan Bangunan terpisah padahal di lapangan bangunan selalu berdiri di atas tanah perusahaan.
+  - *Solusi:*
+    1. Mengubah form modal pendaftaran aset menjadi format **Landscape / Melebar (`max-w-5xl`)** dengan pembagian 2 kolom lapang: Sisi Kiri untuk data pokok akuntansi & finansial PSAK 16, Sisi Kanan untuk spesifikasi fisik objek lapangan.
+    2. Menyatukan kategori tanah dan gedung menjadi satu kategori efisien: **Tanah & Bangunan Properti (`AST-TNH`)** dengan penambahan kolom `keterangan` (deskripsi bangunan gedung/fasilitas di atas tanah), luas, nomor dokumen legalitas/sertifikat, serta tombol sakelar penyusutan: "Ada Bangunan Gedung (20 Tahun / 5%)" vs "Tanah Kosong Saja (Bebas Penyusutan)".
+    3. Melengkapi seluruh atribut armada fisik kendaraan sesuai ERD pada modal tambah, modal edit, dan modal detail, serta menghubungkannya otomatis ke tabel `data_kendaraan`.
+    4. Menjalankan pengujian live browser otomatis (snapshot DOM & verifikasi respons 200 OK) tanpa ada kendala.
 
 
 ---

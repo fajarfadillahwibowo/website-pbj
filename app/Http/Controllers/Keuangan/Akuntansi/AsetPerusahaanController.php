@@ -109,25 +109,29 @@ class AsetPerusahaanController extends Controller
         $kodeAkunAkum = '1207';
         $kodeAkunBeban= '6108';
 
-        if ($jenisAset === 'AST-TNH') {
-            // Tanah: Tidak Mengalami Depresiasi
-            $umurManfaat = 0;
-            $tarifSusut  = 0.00;
-            $metodeSusut = 'Tidak Disusutkan';
-            $kodeAkunAset = '1200';
-            $kodeAkunAkum = null;
-            $kodeAkunBeban= null;
-        } elseif ($jenisAset === 'AST-BDG') {
-            // Bangunan & Gedung: 20 Tahun, Garis Lurus 5%
-            $umurManfaat = $umurManfaat ?: 20;
-            $tarifSusut  = $tarifSusut ?: 5.00;
-            $kodeAkunAset = '1204';
-            $kodeAkunAkum = '1205';
-            $kodeAkunBeban= '6106';
+        if ($jenisAset === 'AST-TNH' || $jenisAset === 'AST-BDG') {
+            // Tanah & Bangunan Properti (Jika ada bangunan disusutkan, jika murni tanah tidak disusutkan)
+            $jenisAset = 'AST-TNH';
+            if ($umurManfaat > 0) {
+                $umurManfaat = $umurManfaat ?: 20;
+                $tarifSusut  = $tarifSusut ?: 5.00;
+                $metodeSusut = 'Garis Lurus';
+                $kodeAkunAset = '1204'; // Bangunan & Gedung
+                $kodeAkunAkum = '1205';
+                $kodeAkunBeban= '6106';
+            } else {
+                $umurManfaat = 0;
+                $tarifSusut  = 0.00;
+                $metodeSusut = 'Tidak Disusutkan';
+                $kodeAkunAset = '1200'; // Tanah & Lahan
+                $kodeAkunAkum = null;
+                $kodeAkunBeban= null;
+            }
         } elseif ($jenisAset === 'AST-TRK') {
             // Armada Truk & Tronton: 8 Tahun, Garis Lurus 12.5%
             $umurManfaat = $umurManfaat ?: 8;
             $tarifSusut  = $tarifSusut ?: 12.50;
+            $metodeSusut = 'Garis Lurus';
             $kodeAkunAset = '1201';
             $kodeAkunAkum = '1202';
             $kodeAkunBeban= '6105';
@@ -135,6 +139,7 @@ class AsetPerusahaanController extends Controller
             // Mesin & Fasilitas Gudang: 8 Tahun, Garis Lurus 12.5%
             $umurManfaat = $umurManfaat ?: 8;
             $tarifSusut  = $tarifSusut ?: 12.50;
+            $metodeSusut = 'Garis Lurus';
             $kodeAkunAset = '1203';
             $kodeAkunAkum = '1208';
             $kodeAkunBeban= '6107';
@@ -142,10 +147,21 @@ class AsetPerusahaanController extends Controller
             // Peralatan & Inventaris Kantor: 4 Tahun, Garis Lurus 25%
             $umurManfaat = $umurManfaat ?: 4;
             $tarifSusut  = $tarifSusut ?: 25.00;
+            $metodeSusut = 'Garis Lurus';
             $kodeAkunAset = '1206';
             $kodeAkunAkum = '1207';
             $kodeAkunBeban= '6108';
         }
+
+        $namaPemilik = $request->filled('nama_pemilik') ? trim($request->nama_pemilik) : 'PT Putra Balkom Jaya';
+        $statusAset  = $request->filled('status_aset') ? $request->status_aset : 'aktif';
+        $jenisKendaraan = $request->input('jenis_kendaraan');
+        $merekAset   = $request->input('merek_aset');
+        $muatan      = $request->input('muatan');
+        $tahunPembuatan = $request->filled('tahun_pembuatan') ? (int) $request->tahun_pembuatan : null;
+        $tanggalKir  = $request->input('tanggal_kir') ?: null;
+        $tanggalPajak= $request->input('tanggal_pajak') ?: null;
+        $keterangan  = $request->input('keterangan');
 
         DB::beginTransaction();
         try {
@@ -181,8 +197,12 @@ class AsetPerusahaanController extends Controller
                         : ($jumlahUnit === 1 && $request->filled('no_polisi') 
                             ? strtoupper(trim($request->no_polisi)) 
                             : ('B ' . (9000 + $i) . ' PBJ'));
-                    $noMesinUnit = !empty($rincianSekarang['no_mesin']) ? strtoupper(trim($rincianSekarang['no_mesin'])) : ($request->no_mesin ?? '-');
-                    $noRangkaUnit = !empty($rincianSekarang['no_rangka']) ? strtoupper(trim($rincianSekarang['no_rangka'])) : ($request->no_rangka ?? '-');
+                    $noMesinUnit = !empty($rincianSekarang['no_mesin']) 
+                        ? strtoupper(trim($rincianSekarang['no_mesin'])) 
+                        : ($request->filled('no_mesin') ? strtoupper(trim($request->no_mesin)) : '-');
+                    $noRangkaUnit = !empty($rincianSekarang['no_rangka']) 
+                        ? strtoupper(trim($rincianSekarang['no_rangka'])) 
+                        : ($request->filled('no_rangka') ? strtoupper(trim($request->no_rangka)) : '-');
                 }
 
                 // 1. Simpan ke Master Aset Tetap Akuntansi
@@ -202,14 +222,18 @@ class AsetPerusahaanController extends Controller
                     'kode_akun_beban'      => $kodeAkunBeban,
                     'akumulasi_penyusutan' => 0.00,
                     'nilai_buku'           => $hargaSatuan,
-                    'status_aset'          => 'aktif',
-                    'nama_pemilik'         => 'PT Pura Balkom Jaya Utama',
+                    'status_aset'          => $statusAset,
+                    'nama_pemilik'         => $namaPemilik,
                     'no_polisi'            => $platNomorUnit ?? '-',
                     'no_mesin'             => $noMesinUnit,
                     'no_rangka'            => $noRangkaUnit,
-                    'merek_aset'           => $request->merek_aset ?? '-',
-                    'jenis_kendaraan'      => $request->jenis_kendaraan ?? '-',
-                    'muatan'               => $request->muatan ?? '-',
+                    'merek_aset'           => $merekAset ?? '-',
+                    'jenis_kendaraan'      => $jenisKendaraan ?? '-',
+                    'muatan'               => $muatan ?? '-',
+                    'tahun_pembuatan'      => $tahunPembuatan,
+                    'tanggal_kir'          => $tanggalKir,
+                    'tanggal_pajak'        => $tanggalPajak,
+                    'keterangan'           => $keterangan,
                 ]);
 
                 // 2. Relasi Otomatis Armada Truk ke data_kendaraan
@@ -222,12 +246,15 @@ class AsetPerusahaanController extends Controller
                         'no_polisi'        => $platNomorUnit,
                         'no_mesin'         => $noMesinUnit !== '-' ? $noMesinUnit : null,
                         'no_rangka'        => $noRangkaUnit !== '-' ? $noRangkaUnit : null,
-                        'merek_kendaraan'  => $request->merek_aset ?? 'Hino',
-                        'jenis_kendaraan'  => $request->jenis_kendaraan ?? 'Colt Diesel Double',
-                        'tipe_armada'      => $request->jenis_kendaraan ?? 'Colt Diesel Double',
-                        'muatan'           => $request->muatan ?? '200 Zak (8 Ton)',
-                        'status_kendaraan' => 'aktif',
-                        'nama_pemilik'     => 'PT Pura Balkom Jaya Utama',
+                        'merek_kendaraan'  => $merekAset ?? 'Hino',
+                        'jenis_kendaraan'  => $jenisKendaraan ?? 'Tronton Wingbox',
+                        'tipe_armada'      => $jenisKendaraan ?? 'Tronton Wingbox',
+                        'muatan'           => $muatan ?? '25 Ton',
+                        'tahun_pembuatan'  => $tahunPembuatan,
+                        'tanggal_kir'      => $tanggalKir,
+                        'tanggal_pajak'    => $tanggalPajak,
+                        'status_kendaraan' => $statusAset,
+                        'nama_pemilik'     => $namaPemilik,
                     ]);
                 }
             }
@@ -402,15 +429,46 @@ class AsetPerusahaanController extends Controller
             'harga_aset'        => 'required|numeric|min:0',
         ]);
 
-        DB::table('data_aset')->where('kode_aset', $kode_aset)->update([
+        $updateData = [
             'kode_jenis_aset'   => $request->kode_jenis_aset,
             'nama_aset'         => trim($request->nama_aset),
             'tanggal_pembelian' => $request->tanggal_pembelian,
             'harga_aset'        => $request->harga_aset,
             'no_polisi'         => !empty($request->no_polisi) ? strtoupper(trim($request->no_polisi)) : '-',
             'status_aset'       => $request->status_aset ?? 'aktif',
+            'nama_pemilik'      => $request->filled('nama_pemilik') ? trim($request->nama_pemilik) : 'PT Putra Balkom Jaya',
+            'merek_aset'        => $request->input('merek_aset'),
+            'jenis_kendaraan'   => $request->input('jenis_kendaraan'),
+            'muatan'            => $request->input('muatan'),
+            'no_mesin'          => $request->input('no_mesin'),
+            'no_rangka'         => $request->input('no_rangka'),
+            'tahun_pembuatan'   => $request->filled('tahun_pembuatan') ? (int) $request->tahun_pembuatan : null,
+            'tanggal_kir'       => $request->input('tanggal_kir') ?: null,
+            'tanggal_pajak'     => $request->input('tanggal_pajak') ?: null,
+            'keterangan'        => $request->input('keterangan'),
             'diperbarui_pada'   => now(),
-        ]);
+        ];
+
+        DB::table('data_aset')->where('kode_aset', $kode_aset)->update($updateData);
+
+        // Jika bertipe truk atau memiliki record kendaraan, sinkronkan ke data_kendaraan
+        if ($request->kode_jenis_aset === 'AST-TRK' || DB::table('data_kendaraan')->where('kode_aset', $kode_aset)->exists()) {
+            DB::table('data_kendaraan')->where('kode_aset', $kode_aset)->update([
+                'no_polisi'        => !empty($request->no_polisi) ? strtoupper(trim($request->no_polisi)) : null,
+                'merek_kendaraan'  => $request->input('merek_aset') ?? 'Hino',
+                'jenis_kendaraan'  => $request->input('jenis_kendaraan') ?? 'Tronton Wingbox',
+                'tipe_armada'      => $request->input('jenis_kendaraan') ?? 'Tronton Wingbox',
+                'muatan'           => $request->input('muatan'),
+                'no_mesin'         => $request->input('no_mesin'),
+                'no_rangka'        => $request->input('no_rangka'),
+                'tahun_pembuatan'  => $request->filled('tahun_pembuatan') ? (int) $request->tahun_pembuatan : null,
+                'tanggal_kir'      => $request->input('tanggal_kir') ?: null,
+                'tanggal_pajak'    => $request->input('tanggal_pajak') ?: null,
+                'status_kendaraan' => $request->status_aset ?? 'aktif',
+                'nama_pemilik'     => $request->filled('nama_pemilik') ? trim($request->nama_pemilik) : 'PT Putra Balkom Jaya',
+                'diperbarui_pada'  => now(),
+            ]);
+        }
 
         return redirect()->route('keuangan.akuntansi.aset')->with('sukses', "Data aset {$request->nama_aset} ({$kode_aset}) berhasil diperbarui.");
     }
