@@ -1,23 +1,35 @@
-<header class="h-14 bg-white dark:bg-[#14161F] border-b border-[#E2E8F0] dark:border-[#252837] px-4 sm:px-5 flex items-center justify-between shrink-0 z-20 select-none">
+<header class="h-14 bg-white dark:bg-[#14161F] border-b border-[#E2E8F0] dark:border-[#252837] px-3 sm:px-5 flex items-center justify-between shrink-0 z-20 select-none" style="padding-left: max(0.75rem, env(safe-area-inset-left)); padding-right: max(0.75rem, env(safe-area-inset-right));">
 
     <!-- Tombol Toggle Sidebar & Breadcrumb / Judul Ruang Kerja -->
-    <div class="flex items-center gap-2.5 min-w-0">
-        <button @click="sidebarTerlipat = !sidebarTerlipat"
-                class="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-white transition-colors shrink-0"
-                title="Buka/Tutup Sidebar">
-            <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <div class="flex items-center gap-2 min-w-0 flex-1">
+        <!-- Tombol Hamburger Mobile (muncul di < lg, buka drawer) -->
+        <button @click="sidebarMobileTerbuka = true"
+                class="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-white transition-colors shrink-0"
+                title="Buka Menu Navigasi"
+                aria-label="Buka menu navigasi">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
             </svg>
         </button>
 
-        <div class="h-4 w-px bg-slate-200 dark:bg-[#252837] hidden sm:block"></div>
+        <!-- Tombol Toggle Sidebar Desktop (sembunyikan di mobile) -->
+        <button @click="sidebarTerlipat = !sidebarTerlipat"
+                class="hidden lg:flex p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-900 dark:hover:text-white transition-colors shrink-0"
+                title="Buka/Tutup Sidebar"
+                aria-label="Toggle sidebar">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+        </button>
 
-        <div class="flex items-center gap-2 min-w-0">
-            <span class="text-xs text-slate-400 font-medium hidden md:inline">Portal /</span>
-            <span id="judulHalamanAktif" class="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+        <div class="h-4 w-px bg-slate-200 dark:bg-[#252837] hidden sm:block shrink-0"></div>
+
+        <div class="flex items-center gap-1.5 min-w-0 flex-1">
+            <span class="text-xs text-slate-400 font-medium hidden xl:inline shrink-0">Portal /</span>
+            <span id="judulHalamanAktif" class="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 truncate max-w-[120px] sm:max-w-xs lg:max-w-sm">
                 @yield('judul', 'Dashboard Terpadu')
             </span>
-            <span class="text-[10px] px-2 py-0.5 rounded-md font-mono font-semibold bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 truncate"
+            <span class="text-[10px] px-1.5 py-0.5 rounded-md font-mono font-semibold bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 truncate hidden sm:inline-block shrink-0"
                   x-text="labelJabatan">
                 SPV Keuangan
             </span>
@@ -25,7 +37,7 @@
     </div>
 
     <!-- Header Actions -->
-    <div class="flex items-center gap-2 sm:gap-2.5">
+    <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
 
         <!-- Custom Enterprise Compact Role Selector Dropdown -->
         <div class="relative">
@@ -33,11 +45,11 @@
             <!-- Compact Trigger Button -->
             <button @click="dropdownRoleTerbuka = !dropdownRoleTerbuka"
                     type="button"
-                    class="inline-flex items-center gap-1.5 h-8 px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#F4F6F9] dark:bg-[#1C1E2A] hover:bg-slate-200/80 dark:hover:bg-[#252837] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/30">
+                    class="inline-flex items-center gap-1 sm:gap-1.5 h-8 px-2 sm:px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#F4F6F9] dark:bg-[#1C1E2A] hover:bg-slate-200/80 dark:hover:bg-[#252837] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/30">
                 <span class="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 shrink-0"></span>
-                <span class="text-[10px] uppercase tracking-wider text-slate-400 font-mono hidden xl:inline">Role:</span>
+                <span class="text-[10px] uppercase tracking-wider text-slate-400 font-mono hidden 2xl:inline">Role:</span>
                 <span class="px-1 py-0.2 rounded bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-mono text-[10px] font-bold" x-text="roleAktifObj.no"></span>
-                <span class="max-w-[110px] sm:max-w-[140px] truncate font-medium text-xs" x-text="roleAktifObj.nama"></span>
+                <span class="max-w-[70px] sm:max-w-[110px] lg:max-w-[140px] truncate font-medium text-xs hidden sm:inline" x-text="roleAktifObj.nama"></span>
                 <svg class="w-3 h-3 text-slate-400 transition-transform duration-200 shrink-0"
                      :class="dropdownRoleTerbuka ? 'rotate-180 text-blue-600' : ''"
                      fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -45,7 +57,7 @@
                 </svg>
             </button>
 
-            <!-- Compact Dropdown Popover Panel -->
+            <!-- Compact Dropdown Popover Panel (posisi right untuk cegah overflow kiri) -->
             <div x-show="dropdownRoleTerbuka"
                  x-cloak
                  @click.outside="dropdownRoleTerbuka = false"
@@ -55,7 +67,7 @@
                  x-transition:leave="transition ease-in duration-75"
                  x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                  x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
-                 class="absolute right-0 mt-1.5 w-64 rounded-xl bg-white dark:bg-[#181B26] border border-[#E2E8F0] dark:border-[#2A2E3D] dropdown-shadow z-50 overflow-hidden">
+                 class="absolute right-0 mt-1.5 w-60 sm:w-64 rounded-xl bg-white dark:bg-[#181B26] border border-[#E2E8F0] dark:border-[#2A2E3D] dropdown-shadow z-50 overflow-hidden">
                 
                 <!-- Micro Header -->
                 <div class="px-3 py-2 bg-[#F8FAFC] dark:bg-[#141620] border-b border-[#E2E8F0] dark:border-[#252837] flex items-center justify-between">

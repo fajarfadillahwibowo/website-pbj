@@ -1,8 +1,7 @@
 <!-- ================================================================
      SIDEBAR NAVIGASI ENTERPRISE BERDASARKAN HAK AKSES JABATAN (RBAC)
 ================================================================ -->
-<aside :class="sidebarTerlipat ? 'w-16' : 'w-64'"
-       class="flex flex-col bg-white dark:bg-[#14161F] border-r border-[#E2E8F0] dark:border-[#252837] shrink-0 transition-all duration-200 z-30 overflow-hidden select-none">
+<aside :class="{'w-64': !sidebarTerlipat, 'w-16': sidebarTerlipat, 'sidebar-mobile-terbuka': sidebarMobileTerbuka}" class="sidebar-panel flex flex-col bg-white dark:bg-[#14161F] border-r border-[#E2E8F0] dark:border-[#252837] shrink-0 transition-all duration-200 overflow-hidden select-none">
 
     <!-- Header Sidebar: Logo & Nama Perusahaan -->
     <div class="border-b border-[#E2E8F0] dark:border-[#252837] shrink-0 transition-all duration-200"
@@ -11,9 +10,18 @@
         <!-- Kondisi 1: Sidebar Terbuka (Expanded) -->
         <template x-if="!sidebarTerlipat">
             <div class="relative flex flex-col items-center text-center">
-                <!-- Tombol Ciutkan di pojok kanan atas -->
+                <!-- Tombol Close Mobile (Hanya muncul di < lg) -->
+                <button @click="sidebarMobileTerbuka = false"
+                        class="absolute -top-1 left-0 lg:hidden p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-600 dark:hover:text-slate-300 transition-colors shrink-0 z-10"
+                        title="Tutup Menu"
+                        aria-label="Tutup sidebar">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+                <!-- Tombol Ciutkan di pojok kanan atas (Desktop Only) -->
                 <button @click="sidebarTerlipat = true"
-                        class="absolute -top-1 right-0 p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-600 dark:hover:text-slate-300 transition-colors shrink-0 z-10"
+                        class="absolute -top-1 right-0 hidden lg:block p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-600 dark:hover:text-slate-300 transition-colors shrink-0 z-10"
                         title="Ciutkan Sidebar">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
@@ -52,7 +60,8 @@
     <!-- Navigasi Menu Dinamis Sesuai RBAC -->
     <nav id="navigasiSidebar"
          @scroll.debounce.150ms="sessionStorage.setItem('posisi_scroll_sidebar', $el.scrollTop)"
-         class="flex-1 overflow-y-auto py-3 px-2 space-y-4 text-xs scroll-smooth">
+         class="flex-1 overflow-y-auto py-3 px-2 space-y-4 text-xs scroll-smooth"
+         style="-webkit-overflow-scrolling: touch;">
 
         <!-- 1. Menu Utama -->
         <div>

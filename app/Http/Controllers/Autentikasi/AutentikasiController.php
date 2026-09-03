@@ -43,6 +43,7 @@ class AutentikasiController extends Controller
         // 1. Cek Akun Super Admin
         $super = SuperAccount::where('username', $username)->first();
         if ($super && Hash::check($password, $super->password)) {
+            $request->session()->regenerate();
             session([
                 'super_admin_id'  => $super->id_super_account,
                 'nama_pengguna'   => $super->username,
