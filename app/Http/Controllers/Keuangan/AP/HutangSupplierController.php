@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Master\Karyawan;
 use App\Helpers\GeneratorKodeOtomatis;
+use App\Services\Keuangan\MesinJurnalOtomatis;
 
 class HutangSupplierController extends Controller
 {
@@ -85,6 +86,16 @@ class HutangSupplierController extends Controller
                 'dibuat_oleh'         => 'staff_ap',
                 'dibuat_pada'         => now(),
             ]);
+
+            // Auto-Journal ke Jurnal Umum Akuntansi (Debit Kas Bon Supir 1107, Kredit Kas/Bank Sumber)
+            MesinJurnalOtomatis::jurnalRilisanUangJalan(
+                $nomorRilisan,
+                $request->tanggal_rilisan,
+                $nominal,
+                $request->id_rekening_sumber,
+                auth()->user()->username ?? 'staff_ap',
+                "Rilisan uang jalan driver: {$driver->nama_karyawan} ({$driver->kode_karyawan})"
+            );
 
             DB::commit();
 

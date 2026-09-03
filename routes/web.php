@@ -110,6 +110,7 @@ Route::prefix('keuangan')->name('keuangan.')->group(function () {
     Route::prefix('ar')->name('ar.')->group(function () {
         Route::get('/faktur-penjualan', [FakturPenjualanController::class, 'index'])->name('faktur');
         Route::post('/faktur-penjualan', [FakturPenjualanController::class, 'store'])->name('faktur.store');
+        Route::get('/faktur-penjualan/{nomor_faktur}/cetak', [FakturPenjualanController::class, 'cetak'])->name('faktur.cetak');
         Route::get('/list-piutang', [PiutangController::class, 'index'])->name('piutang');
         Route::post('/list-piutang/{id_piutang}/bayar', [PiutangController::class, 'bayar'])->name('piutang.bayar');
         Route::get('/deposit-customer', [DepositCustomerController::class, 'index'])->name('deposit');

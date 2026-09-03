@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Keuangan\PengeluaranKas;
 use App\Helpers\GeneratorKodeOtomatis;
+use App\Services\Keuangan\MesinJurnalOtomatis;
 
 class PengeluaranKasController extends Controller
 {
@@ -102,6 +103,17 @@ class PengeluaranKasController extends Controller
                 'dibuat_oleh'         => 'staff_ap',
                 'dibuat_pada'         => now(),
             ]);
+
+            // Auto-Journal ke Jurnal Umum Akuntansi (Debit Akun Beban, Kredit Kas/Bank Sumber)
+            MesinJurnalOtomatis::jurnalPengeluaranKas(
+                $nomorPengeluaran,
+                $request->tanggal_pengeluaran,
+                $request->kode_akun,
+                $nominal,
+                $request->id_rekening_sumber,
+                auth()->user()->username ?? 'staff_ap',
+                $request->keterangan
+            );
 
             DB::commit();
 

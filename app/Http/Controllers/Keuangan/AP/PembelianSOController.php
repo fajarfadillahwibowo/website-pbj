@@ -8,6 +8,7 @@ use App\Models\Keuangan\PembelianSO;
 use App\Models\Master\Customer;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\GeneratorKodeOtomatis;
+use App\Services\Keuangan\MesinJurnalOtomatis;
 
 class PembelianSOController extends Controller
 {
@@ -79,19 +80,38 @@ class PembelianSOController extends Controller
         $totalHarga = $jumlahZak * $hargaSatuan;
         $nomorSO = GeneratorKodeOtomatis::buatKodeTransaksi('pembelian_so', 'nomor_so', 'SO-PBJ-', $request->tanggal_so);
 
-        DB::table('pembelian_so')->insert([
-            'nomor_so'      => $nomorSO,
-            'tanggal_so'    => $request->tanggal_so,
-            'kode_customer' => $request->kode_customer,
-            'kode_gudang'   => $request->kode_gudang,
-            'jumlah_zak'    => $jumlahZak,
-            'harga_satuan'  => $hargaSatuan,
-            'total_harga'   => $totalHarga,
-            'status_so'     => 'disetujui',
-            'dibuat_oleh'   => 'staff_ap',
-            'dibuat_pada'   => now(),
-        ]);
+        DB::beginTransaction();
+        try {
+            DB::table('pembelian_so')->insert([
+                'nomor_so'      => $nomorSO,
+                'tanggal_so'    => $request->tanggal_so,
+                'kode_customer' => $request->kode_customer,
+                'kode_gudang'   => $request->kode_gudang,
+                'jumlah_zak'    => $jumlahZak,
+                'harga_satuan'  => $hargaSatuan,
+                'total_harga'   => $totalHarga,
+                'status_so'     => 'disetujui',
+                'dibuat_oleh'   => 'staff_ap',
+                'dibuat_pada'   => now(),
+            ]);
 
-        return redirect()->route('keuangan.ap.pembelian_so')->with('sukses', "Sales Order {$nomorSO} ({$jumlahZak} Zak - Rp " . number_format($totalHarga, 0, ',', '.') . ") berhasil diterbitkan.");
+            // Auto-Journal ke Jurnal Umum Akuntansi (Debit Persediaan Semen, Kredit Kas/Bank/Hutang)
+            MesinJurnalOtomatis::jurnalPembelianSO(
+                $nomorSO,
+                $request->tanggal_so,
+                $totalHarga,
+                1,
+                'Transfer',
+                auth()->user()->username ?? 'staff_ap',
+                "Penebusan Semen SO {$nomorSO} ({$jumlahZak} Zak)"
+            );
+
+            DB::commit();
+
+            return redirect()->route('keuangan.ap.pembelian_so')->with('sukses', "Sales Order {$nomorSO} ({$jumlahZak} Zak - Rp " . number_format($totalHarga, 0, ',', '.') . ") berhasil diterbitkan.");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('gagal', "Gagal menerbitkan Sales Order: " . $e->getMessage());
+        }
     }
 }

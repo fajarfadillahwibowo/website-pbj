@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Keuangan\Piutang;
 use App\Models\Keuangan\FakturPenjualan;
 use App\Models\Master\Customer;
+use App\Services\Keuangan\MesinJurnalOtomatis;
 
 class PiutangController extends Controller
 {
@@ -95,6 +96,17 @@ class PiutangController extends Controller
                     'status_pembayaran' => $fakturSisaBaru == 0 ? 'Lunas' : 'Belum Lunas',
                 ]);
             }
+
+            // Auto-Journal ke Jurnal Umum Akuntansi (Debit Kas/Bank, Kredit Piutang)
+            $nomorFaktur = $piutang->penjualan ? $piutang->penjualan->nomor_faktur : "PIUTANG-{$piutang->id_piutang}";
+            MesinJurnalOtomatis::jurnalPelunasanPiutang(
+                $nomorFaktur,
+                date('Y-m-d'),
+                $jumlahBayar,
+                null,
+                auth()->user()->username ?? 'staff_ar',
+                "Penerimaan Pelunasan/Cicilan Piutang {$nomorFaktur} - {$piutang->customer->nama_pemilik}"
+            );
 
             DB::commit();
 

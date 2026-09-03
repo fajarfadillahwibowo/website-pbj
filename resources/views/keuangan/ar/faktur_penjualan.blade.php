@@ -150,6 +150,7 @@
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Metode Bayar</th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Status</th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Jatuh Tempo</th>
+                        <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider w-24">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
@@ -190,10 +191,16 @@
                             <td class="px-4 py-3 text-center font-mono text-slate-500">
                                 {{ $faktur->tanggal_jatuh_tempo ? date('d/m/Y', strtotime($faktur->tanggal_jatuh_tempo)) : '-' }}
                             </td>
+                            <td class="px-4 py-3 text-center">
+                                <a href="{{ route('keuangan.ar.faktur.cetak', $faktur->nomor_faktur) }}" target="_blank" class="inline-flex items-center gap-1 px-2 py-1 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-500/10 dark:hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 font-semibold text-[10px] rounded-lg border border-indigo-200 dark:border-indigo-500/30 transition-all shadow-2xs" title="Cetak Dokumen Faktur Resmi">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                    Cetak
+                                </a>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-4 py-6 text-center text-slate-400">Belum ada faktur penjualan tercatat.</td>
+                            <td colspan="9" class="px-4 py-6 text-center text-slate-400">Belum ada faktur penjualan tercatat.</td>
                         </tr>
                     @endforelse
                 </tbody>

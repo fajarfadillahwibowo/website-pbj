@@ -12,6 +12,7 @@ use App\Models\Master\Customer;
 use App\Models\Master\TokoBangunan;
 use App\Models\Master\Barang;
 use App\Helpers\GeneratorKodeOtomatis;
+use App\Services\Keuangan\MesinJurnalOtomatis;
 
 class FakturPenjualanController extends Controller
 {
@@ -195,6 +196,17 @@ class FakturPenjualanController extends Controller
                 ]);
             }
 
+            // Auto-Journal ke Jurnal Umum Akuntansi (Double-Entry Seimbang)
+            $nomorJurnal = MesinJurnalOtomatis::jurnalFakturPenjualan(
+                $nomorFaktur,
+                $request->tanggal_penjualan,
+                $metode,
+                $totalNetto,
+                $metode === 'Transfer' ? 1 : null,
+                auth()->user()->username ?? 'staff_ar',
+                "Faktur Penjualan {$nomorFaktur} - {$customer->nama_pemilik}"
+            );
+
             DB::commit();
 
             return redirect()->route('keuangan.ar.faktur')->with('sukses', "Faktur Penjualan {$nomorFaktur} ({$metode}) senilai Rp " . number_format($totalNetto, 0, ',', '.') . " berhasil diterbitkan.");
@@ -202,5 +214,17 @@ class FakturPenjualanController extends Controller
             DB::rollBack();
             return redirect()->back()->withInput()->with('gagal', "Gagal menerbitkan faktur: " . $e->getMessage());
         }
+    }
+
+    /**
+     * Cetak dokumen Faktur Penjualan / Invoice resmi PT Putra Balkom Jaya.
+     */
+    public function cetak($nomor_faktur)
+    {
+        $faktur = FakturPenjualan::with(['customer', 'tokoBangunan'])
+            ->where('nomor_faktur', $nomor_faktur)
+            ->firstOrFail();
+
+        return view('keuangan.ar.cetak_faktur', compact('faktur'));
     }
 }

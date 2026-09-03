@@ -55,47 +55,48 @@ Agar kedua pengembang dapat bekerja secara simultan tanpa risiko konflik penggab
 **Fokus Utama:** Implementasi Mesin Jurnal Otomatis Terpadu, Auto-Journal pada seluruh transaksi harian, pemutakhiran saldo COA real-time, dan cetak invoice faktur penjualan resmi.
 
 ### 3.1. Mesin Otomasi Jurnal Terpadu (Auto-Journal Engine)
-- [ ] **Class Terpusat `App\Services\Keuangan\MesinJurnalOtomatis.php`:**
-  - [ ] Method `catatJurnal($nomorReferensi, $tanggal, array $barisJurnal, $keterangan, $pembuat)`
-  - [ ] Pembungkus transaksi database atomik (`DB::transaction`) untuk menjamin konsistensi data.
-  - [ ] Validasi keseimbangan otomatis ($\sum \text{Debit} == \sum \text{Kredit}$) sebelum data tersimpan ke tabel `jurnal_umum`. Jika tidak seimbang, transaksi dibatalkan (*rollback*) dengan notifikasi error.
-  - [ ] Mekanisme *Idempotency Guard*: Mencegah duplikasi jurnal jika transaksi dengan `referensi_transaksi` yang sama diproses ulang.
-  - [ ] Pemutakhiran otomatis nilai `saldo_berjalan` pada tabel `data_kode_akun` berdasarkan posisi normal akun (Debit/Kredit).
+- [x] **Class Terpusat `App\Services\Keuangan\MesinJurnalOtomatis.php`:**
+  - [x] Method `catatJurnal($nomorReferensi, $tanggal, array $barisJurnal, $keterangan, $pembuat)`
+  - [x] Pembungkus transaksi database atomik (`DB::transaction`) untuk menjamin konsistensi data.
+  - [x] Validasi keseimbangan otomatis ($\sum \text{Debit} == \sum \text{Kredit}$) sebelum data tersimpan ke tabel `jurnal_umum`. Jika tidak seimbang, transaksi dibatalkan (*rollback*) dengan notifikasi error.
+  - [x] Mekanisme *Idempotency Guard*: Mencegah duplikasi jurnal jika transaksi dengan `referensi_transaksi` yang sama diproses ulang.
+  - [x] Pemutakhiran otomatis nilai `saldo_berjalan` pada tabel `data_kode_akun` berdasarkan posisi normal akun (Debit/Kredit).
 
 ### 3.2. Integrasi Transaksi Penjualan & Piutang (AR)
-- [ ] **Faktur Penjualan Baru (`FakturPenjualanController@store`):**
-  - [ ] **Penjualan Tunai / Transfer:**
-    - Debit: Kas Operasional (`1111`) atau Bank Mandiri/BRI (`1121`/`1122`)
+- [x] **Faktur Penjualan Baru (`FakturPenjualanController@store`):**
+  - [x] **Penjualan Tunai / Transfer:**
+    - Debit: Kas Operasional (`1101`) atau Bank Mandiri/BRI/BCA (`1102`/`1103`/`1104`)
     - Kredit: Pendapatan Penjualan Semen (`4101`)
-  - [ ] **Penjualan Kredit / Piutang Tempo:**
-    - Debit: Piutang Usaha (`1131`)
+  - [x] **Penjualan Kredit / Piutang Tempo:**
+    - Debit: Piutang Usaha (`1105`)
     - Kredit: Pendapatan Penjualan Semen (`4101`)
     - Otomasi pemotongan sisa plafon kredit customer pada `data_customer`.
-  - [ ] **Penjualan Potong Deposit Customer:**
-    - Debit: Hutang Deposit Customer (`2131`)
+  - [x] **Penjualan Potong Deposit Customer:**
+    - Debit: Titipan Saldo Deposit Customer (`2102`)
     - Kredit: Pendapatan Penjualan Semen (`4101`)
     - Otomasi pemotongan `saldo_deposit` customer dan pencatatan mutasi di `list_deposit`.
-- [ ] **Pelunasan & Cicilan Piutang (`PiutangController@bayarCicilan`):**
-  - [ ] Debit: Kas/Bank (`1111`/`1121`/`1122`)
-  - [ ] Kredit: Piutang Usaha (`1131`)
-  - [ ] Pemutakhiran `sisa_piutang` pada tabel `list_piutang` dan `data_customer`.
+- [x] **Pelunasan & Cicilan Piutang (`PiutangController@bayar`):**
+  - [x] Debit: Kas/Bank (`1101`/`1102`/`1103`/`1104`)
+  - [x] Kredit: Piutang Usaha (`1105`)
+  - [x] Pemutakhiran `sisa_piutang` pada tabel `list_piutang` dan `data_customer`.
 
 ### 3.3. Integrasi Transaksi Pembelian & Kas Keluar (AP)
-- [ ] **Penebusan SO ke Pabrik SIG (`PembelianSOController@store`):**
-  - [ ] Debit: Persediaan Semen Dalam Perjalanan / Uang Muka Pembelian (`1142`)
-  - [ ] Kredit: Kas/Bank atau Hutang Usaha SIG (`2111`)
-- [ ] **Pengeluaran Kas Operasional (`PengeluaranKasController@store`):**
-  - [ ] Debit: Akun Beban sesuai pilihan COA (Beban BBM `5101`, Beban Tol `5102`, Beban Kantor `6101`, dll.)
-  - [ ] Kredit: Rekening Sumber Kas/Bank terpilih (`1111`/`1121`/`1122`)
-- [ ] **Rilisan Uang Jalan Supir (`HutangSupplierController@store`):**
-  - [ ] Debit: Kas Bon Uang Jalan Driver (`1107`)
-  - [ ] Kredit: Rekening Kas/Bank Operasional
+- [x] **Penebusan SO ke Pabrik SIG (`PembelianSOController@store`):**
+  - [x] Debit: Persediaan Semen Zak & Curah (`1106`)
+  - [x] Kredit: Kas/Bank atau Hutang Usaha SIG (`2101`)
+- [x] **Pengeluaran Kas Operasional (`PengeluaranKasController@store`):**
+  - [x] Debit: Akun Beban sesuai pilihan COA (Beban BBM `6101`, Beban Servis `6102`, Beban Kantor `6104`, dll.)
+  - [x] Kredit: Rekening Sumber Kas/Bank terpilih
+- [x] **Rilisan Uang Jalan Supir (`HutangSupplierController@store`):**
+  - [x] Debit: Uang Muka / Kas Bon Supir (`1107`)
+  - [x] Kredit: Rekening Kas/Bank Operasional
 
 ### 3.4. Cetak Dokumen Resmi Penjualan
-- [ ] **Template Faktur Penjualan / Invoice PBJ (`resources/views/keuangan/ar/cetak_faktur.blade.php`):**
-  - [ ] Header resmi PT Putra Balkom Jaya (logo, alamat, kontak).
-  - [ ] Rincian barang semen, kuantitas zak/ton, harga satuan, PPN/diskon, dan total pembayaran.
-  - [ ] Rincian tujuan kirim toko bangunan/proyek cabang dan tanda tangan penerima/pengirim.
+- [x] **Template Faktur Penjualan / Invoice PBJ (`resources/views/keuangan/ar/cetak_faktur.blade.php`):**
+  - [x] Header resmi PT Putra Balkom Jaya (logo, alamat, kontak).
+  - [x] Rincian barang semen, kuantitas zak/ton, harga satuan, PPN/diskon, dan total pembayaran.
+  - [x] Rincian tujuan kirim toko bangunan/proyek cabang dan tanda tangan penerima/pengirim.
+  - [x] Tombol aksi cetak instan terintegrasi pada tabel daftar faktur penjualan.
 
 ---
 
