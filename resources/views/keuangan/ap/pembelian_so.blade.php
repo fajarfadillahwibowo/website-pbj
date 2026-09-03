@@ -211,12 +211,12 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Volume Pemesanan (Zak) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="jumlah_zak" x-model.number="jumlahZak" required min="1" step="50"
+                        <input type="number" name="jumlah_zak" x-model.number="jumlahZak" required min="1" step="any" placeholder="200"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Satuan Pabrik (Rp) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="harga_satuan" x-model.number="hargaSatuan" required min="1" step="500"
+                        <input type="number" name="harga_satuan" x-model.number="hargaSatuan" required min="0" step="any" placeholder="55000"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
                     </div>
                 </div>

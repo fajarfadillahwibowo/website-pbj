@@ -195,12 +195,12 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Beli Pabrik (Rp) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="harga_pokok" required min="0" step="500" placeholder="58000"
+                        <input type="number" name="harga_pokok" required min="0" step="any" placeholder="58000"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Jual Standar (Rp) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="harga_jual_standar" required min="0" step="500" placeholder="64500"
+                        <input type="number" name="harga_jual_standar" required min="0" step="any" placeholder="64500"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
                 </div>
@@ -248,12 +248,12 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Beli Pabrik (Rp) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="harga_pokok" x-model="editData.harga_pokok" required min="0" step="500"
+                        <input type="number" name="harga_pokok" x-model="editData.harga_pokok" required min="0" step="any"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Jual Standar (Rp) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="harga_jual_standar" x-model="editData.harga_jual_standar" required min="0" step="500"
+                        <input type="number" name="harga_jual_standar" x-model="editData.harga_jual_standar" required min="0" step="any"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
                 </div>
