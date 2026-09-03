@@ -99,7 +99,8 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
-                    @forelse($riwayatTerbaru ?? [] as $susut)
+                    @forelse($riwayatTerbaru as $susut)
+                        @php /** @var \App\Models\Keuangan\RiwayatPenyusutan $susut */ @endphp
                         <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50">
                             <td class="px-3 py-2 font-mono font-medium text-indigo-600 dark:text-indigo-400">{{ $susut->nomor_penyusutan }}</td>
                             <td class="px-3 py-2 font-semibold text-slate-900 dark:text-slate-100">{{ $susut->aset->nama_aset ?? $susut->kode_aset }}</td>
@@ -167,7 +168,8 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
-                    @forelse($daftarAset ?? [] as $aset)
+                    @forelse($daftarAset as $aset)
+                        @php /** @var \App\Models\Keuangan\AsetPerusahaan $aset */ @endphp
                         <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
                             <td class="px-4 py-3 font-mono font-medium text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
                                 {{ $aset->kode_aset }}
@@ -259,176 +261,332 @@
         </div>
     </div>
 
-    <!-- Modal 1: Tambah Aset Baru Komprehensif -->
+    <!-- Modal 1: Tambah Aset Baru Komprehensif (Canvas Landscape) -->
     <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-xl overflow-visible shadow-xl my-8">
-            <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <div>
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Daftarkan Aset Tetap Baru</h3>
-                    <p class="text-[11px] text-slate-400">Pencatatan aktiva tetap finansial, kuantitas unit, dan pengaturan depresiasi akuntansi.</p>
+        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-4xl lg:max-w-5xl overflow-hidden shadow-2xl my-6">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837] bg-slate-50/70 dark:bg-[#1C1E2A]/70">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Daftarkan Aset Tetap Baru</h3>
+                        <p class="text-[11px] text-slate-500">Pencatatan aktiva tetap finansial, armada operasional, dan parameter depresiasi PSAK 16.</p>
+                    </div>
                 </div>
                 <button @click="bukaModalTambah = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg font-bold">&times;</button>
             </div>
-            <form method="POST" action="{{ route('keuangan.akuntansi.aset.store') }}" class="p-5 space-y-4 text-xs">
+
+            <form method="POST" action="{{ route('keuangan.akuntansi.aset.store') }}" class="p-6 space-y-4 text-xs">
                 @csrf
-                <div class="grid grid-cols-3 gap-3">
-                    <div>
-                        <div class="flex items-center justify-between mb-1">
-                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Kode Aset</label>
-                            <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold px-1.5 py-0.5 bg-indigo-50 dark:bg-indigo-950/50 rounded-md">Auto</span>
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- KOLOM KIRI: Identitas, Finansial & Depresiasi PSAK 16 (5 Kolom) -->
+                    <div class="lg:col-span-5 space-y-3.5 border-b lg:border-b-0 lg:border-r border-[#E2E8F0] dark:border-[#252837] pb-4 lg:pb-0 lg:pr-6">
+                        <div class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider flex items-center gap-1.5 mb-1">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <span>1. Data Pokok & Finansial Aset</span>
                         </div>
-                        <input type="text" name="kode_aset" value="{{ $kodeOtomatis }}" :disabled="jumlahUnit > 1" placeholder="AST-001"
-                               class="w-full px-3 py-2 rounded-xl bg-indigo-50/50 dark:bg-[#1C1E2A] border border-indigo-200 dark:border-indigo-900/50 text-indigo-900 dark:text-indigo-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Golongan Aset <span class="text-rose-500">*</span></label>
-                        <select name="kode_jenis_aset" x-model="pilihanJenis" @change="aturKategori($event.target.value)" required
-                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 font-medium">
-                            <option value="AST-TRK">1. Kendaraan Armada (Truk / Tronton / Mobil Operasional)</option>
-                            <option value="AST-TNH">2. Tanah & Lahan (Lahan Usaha - Bebas Penyusutan)</option>
-                            <option value="AST-BDG">3. Bangunan & Gedung (Gedung Kantor / Gudang Semen / Pos)</option>
-                            <option value="AST-GDG">4. Mesin & Alat Gudang (Forklift / Genset / Conveyor / Timbangan)</option>
-                            <option value="AST-OFC">5. Elektronik & Inventaris Kantor (Komputer / Printer / AC / Meja)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <div class="flex items-center justify-between mb-1">
-                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Jumlah Unit <span class="text-rose-500">*</span></label>
-                            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold" x-show="jumlahUnit > 1" x-text="jumlahUnit + ' Unit'"></span>
-                        </div>
-                        <input type="number" name="jumlah_unit" x-model.number="jumlahUnit" @input="sinkronkanRincian()" min="1" max="50" required
-                               class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                    </div>
-                </div>
 
-                <!-- Panduan Klasifikasi Golongan Aset -->
-                <div class="px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#1C1E2A] border border-slate-200 dark:border-[#252837] text-[11px] text-slate-600 dark:text-slate-300 flex items-start gap-2 shadow-2xs">
-                    <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <div class="leading-relaxed">
-                        <span class="font-bold text-slate-800 dark:text-slate-200">Panduan Objek Fisik Terpilih: </span>
-                        <span x-show="pilihanJenis === 'AST-TRK'">Truk Tronton Wingbox, Hino Dutro, Fuso, Colt Diesel, Pick Up (Otomatis tercatat di Armada Operasional).</span>
-                        <span x-show="pilihanJenis === 'AST-TNH'">Lahan Gudang Transit, Tanah Kantor Cabang (Nilai Tetap, Permanen Bebas Depresiasi).</span>
-                        <span x-show="pilihanJenis === 'AST-BDG'">Gedung Kantor Utama, Bangunan Gudang Semen, Mess Karyawan, Pos Satpam (Masa Manfaat 20 Thn / 5%).</span>
-                        <span x-show="pilihanJenis === 'AST-GDG'">Forklift Diesel/Elektrik, Genset Pabrik, Mesin Conveyor, Hand Pallet, Timbangan Truk (Masa Manfaat 8 Thn / 12.5%).</span>
-                        <span x-show="pilihanJenis === 'AST-OFC'">Komputer PC, Laptop Kantor, Printer Laser, Server Data, Mesin Absensi, AC Ruangan, Meja & Kursi (Masa Manfaat 4 Thn / 25%).</span>
-                    </div>
-                </div>
-
-                <!-- Notifikasi Mode Batch -->
-                <div x-show="jumlahUnit > 1" x-cloak class="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-[11px] flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span>Mode Batch: Sistem akan otomatis membuat <strong x-text="jumlahUnit"></strong> entitas aset sekuensial (#01 s/d #<span x-text="jumlahUnit < 10 ? '0' + jumlahUnit : jumlahUnit"></span>) untuk pelacakan depresiasi dan audit mandiri.</span>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Tipe / Model Aset <span class="text-rose-500">*</span></label>
-                    <input type="text" name="nama_aset" required placeholder="Contoh: Hino Dutro 130 HD / Laptop ThinkPad E14 / Forklift 3.5 Ton"
-                           class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                </div>
-                <!-- Bagian Khusus Armada Truk (Kendaraan) -->
-                <div x-show="pilihanJenis === 'AST-TRK'" x-cloak class="p-3.5 bg-blue-50/70 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 rounded-xl space-y-3">
-                    <div class="flex items-center justify-between text-blue-800 dark:text-blue-300 font-semibold text-[11px]">
-                        <div class="flex items-center gap-1.5">
-                            <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
-                            <span>Sinkronisasi Otomatis ke Master Kendaraan Operasional</span>
-                        </div>
-                        <span class="text-[10px] text-blue-600 dark:text-blue-400 font-mono" x-text="jumlahUnit + ' Unit Armada Truk'"></span>
-                    </div>
-
-                    <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Merek Truk / Pabrikan</label>
-                        <input type="text" name="merek_aset" placeholder="Contoh: Hino / Mitsubishi Fuso / Isuzu Giga"
-                               class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
-                    </div>
-
-                    <!-- Input Tunggal (Jika 1 Unit) -->
-                    <div x-show="jumlahUnit === 1" class="grid grid-cols-2 gap-3">
-                        <x-input-plat-nomor nama="no_polisi" :wajib="false" label="Plat Nomor Polisi" />
-                        <div>
-                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Mesin (Opsional)</label>
-                            <input type="text" name="no_mesin" placeholder="W04D-xxxxxx"
-                                   class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 font-mono uppercase">
-                        </div>
-                    </div>
-
-                    <!-- Input Rincian per Unit (Jika Lebih dari 1 Unit) -->
-                    <div x-show="jumlahUnit > 1" class="space-y-2 max-h-48 overflow-y-auto pr-1">
-                        <div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Daftar Plat Nomor & Mesin Masing-Masing Armada:</div>
-                        <template x-for="(unit, index) in rincianUnit" :key="index">
-                            <div class="p-2.5 rounded-xl bg-white dark:bg-[#14161F] border border-blue-200 dark:border-blue-900/50 space-y-1.5 shadow-xs">
-                                <div class="flex items-center justify-between">
-                                    <span class="font-bold text-blue-700 dark:text-blue-400 font-mono text-[11px]" x-text="'Armada Unit #' + (index + 1)"></span>
-                                    <span class="text-[10px] text-slate-400 font-mono" x-text="'Auto KND-' + (index + 1)"></span>
-                                </div>
-                                <div class="grid grid-cols-3 gap-2">
-                                    <div>
-                                        <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-0.5">Plat Nomor</label>
-                                        <input type="text" :name="'rincian_unit[' + index + '][no_polisi]'" x-model="unit.no_polisi" placeholder="B 1234 PBJ"
-                                               class="w-full px-2.5 py-1.5 rounded-lg bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-slate-200 dark:border-slate-700 font-mono uppercase text-xs focus:ring-1 focus:ring-blue-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-0.5">No. Mesin</label>
-                                        <input type="text" :name="'rincian_unit[' + index + '][no_mesin]'" x-model="unit.no_mesin" placeholder="Opsional"
-                                               class="w-full px-2.5 py-1.5 rounded-lg bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-slate-200 dark:border-slate-700 font-mono uppercase text-xs">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-0.5">No. Rangka</label>
-                                        <input type="text" :name="'rincian_unit[' + index + '][no_rangka]'" x-model="unit.no_rangka" placeholder="Opsional"
-                                               class="w-full px-2.5 py-1.5 rounded-lg bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-slate-200 dark:border-slate-700 font-mono uppercase text-xs">
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-
-                <!-- Bagian Finansial & Penyusutan Akuntansi -->
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <x-input-rupiah nama="harga_perolehan" label="Harga Satuan per Unit (Rp)" :wajib="true" placeholder="350.000.000" />
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Perolehan <span class="text-rose-500">*</span></label>
-                        <x-input-tanggal nama="tanggal_pembelian" nilaiAwal="{{ date('Y-m-d') }}" placeholder="Pilih Tanggal Beli" :wajib="true" warnaFokus="indigo" />
-                    </div>
-                </div>
-
-                <!-- Parameter Depresiasi Otomatis -->
-                <div class="p-3 bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] rounded-xl space-y-3">
-                    <div class="flex items-center justify-between">
-                        <span class="font-semibold text-slate-800 dark:text-slate-200 text-[11px]">Parameter Penyusutan (PSAK 16)</span>
-                        <span class="text-[10px] font-mono text-indigo-600 dark:text-indigo-400 font-semibold" x-text="'Metode: ' + metodeSusut"></span>
-                    </div>
-                    <input type="hidden" name="metode_penyusutan" :value="metodeSusut">
-
-                    <template x-if="pilihanJenis === 'AST-TNH'">
-                        <div class="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-[11px] flex items-center gap-2">
-                            <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span>Aktiva Tanah tidak disusutkan. Nilai buku akan tetap sama sepanjang waktu.</span>
-                        </div>
-                    </template>
-
-                    <template x-if="pilihanJenis !== 'AST-TNH'">
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Masa Manfaat (Tahun)</label>
-                                <input type="number" name="umur_manfaat" x-model="umurManfaat" min="1" max="50" required
-                                       class="w-full px-3 py-1.5 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 font-mono">
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300">Kode Aset</label>
+                                    <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold px-1.5 py-0.5 bg-indigo-50 dark:bg-indigo-950/50 rounded-md">Auto</span>
+                                </div>
+                                <input type="text" name="kode_aset" value="{{ $kodeOtomatis }}" :disabled="jumlahUnit > 1" placeholder="AST-001"
+                                       class="w-full px-3 py-2 rounded-xl bg-indigo-50/50 dark:bg-[#1C1E2A] border border-indigo-200 dark:border-indigo-900/50 text-indigo-900 dark:text-indigo-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
                             </div>
                             <div>
-                                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Tarif Susut / Tahun (%)</label>
-                                <input type="number" step="0.01" name="tarif_penyusutan" x-model="tarifSusut" min="0" max="100" required
-                                       class="w-full px-3 py-1.5 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 font-mono">
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300">Jumlah Unit <span class="text-rose-500">*</span></label>
+                                    <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold" x-show="jumlahUnit > 1" x-text="jumlahUnit + ' Unit'"></span>
+                                </div>
+                                <input type="number" name="jumlah_unit" x-model.number="jumlahUnit" @input="sinkronkanRincian()" min="1" max="50" required
+                                       class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
                             </div>
                         </div>
-                    </template>
-                </div>
 
-                <div class="flex items-center justify-end gap-2 pt-2 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    <button @click="bukaModalTambah = false" type="button" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
-                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm">Simpan Aset</button>
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Golongan Kategori Aset <span class="text-rose-500">*</span></label>
+                            <select name="kode_jenis_aset" x-model="pilihanJenis" @change="aturKategori($event.target.value)" required
+                                    class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 font-medium">
+                                <option value="AST-TRK">1. Kendaraan Armada (Truk / Tronton / Mobil Operasional)</option>
+                                <option value="AST-TNH">2. Tanah & Bangunan Properti (Lahan, Kantor, Gudang Semen, Pos)</option>
+                                <option value="AST-GDG">3. Mesin & Alat Gudang (Forklift / Genset / Conveyor / Timbangan)</option>
+                                <option value="AST-OFC">4. Elektronik & Perabot Kantor (Komputer / Printer / AC / Meja)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Tipe / Model Aset <span class="text-rose-500">*</span></label>
+                            <input type="text" name="nama_aset" required placeholder="Contoh: Hino Dutro 130 HD / Lahan & Gudang Semen Palembang / Forklift 3.5T"
+                                   class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Entitas Pemilik / STNK <span class="text-rose-500">*</span></label>
+                                <input type="text" name="nama_pemilik" value="PT Putra Balkom Jaya" required
+                                       class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 font-medium">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Operasional <span class="text-rose-500">*</span></label>
+                                <select name="status_aset" class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 font-medium">
+                                    <option value="aktif">Aktif</option>
+                                    <option value="dalam_perbaikan">Dalam Perbaikan</option>
+                                    <option value="rusak">Rusak</option>
+                                    <option value="non-aktif">Non-Aktif</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <x-input-rupiah nama="harga_perolehan" label="Harga Perolehan Satuan (Rp)" :wajib="true" placeholder="350.000.000" />
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Perolehan <span class="text-rose-500">*</span></label>
+                                <x-input-tanggal nama="tanggal_pembelian" nilaiAwal="{{ date('Y-m-d') }}" placeholder="Pilih Tanggal Beli" :wajib="true" warnaFokus="indigo" />
+                            </div>
+                        </div>
+
+                        <!-- Parameter Depresiasi Otomatis PSAK 16 -->
+                        <div class="p-3 bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] rounded-xl space-y-2.5 shadow-2xs">
+                            <div class="flex items-center justify-between">
+                                <span class="font-semibold text-slate-800 dark:text-slate-200 text-[11px]">Parameter Penyusutan (PSAK 16)</span>
+                                <span class="text-[10px] font-mono text-indigo-600 dark:text-indigo-400 font-semibold" x-text="'Metode: ' + metodeSusut"></span>
+                            </div>
+                            <input type="hidden" name="metode_penyusutan" :value="metodeSusut">
+
+                            <!-- Khusus Tanah & Bangunan Properti: Pilihan Penyusutan -->
+                            <template x-if="pilihanJenis === 'AST-TNH'">
+                                <div class="space-y-2">
+                                    <div class="text-[10px] text-slate-500">
+                                        Tanah murni bebas penyusutan. Porsi bangunan gedung disusutkan 20 Tahun (5%/tahun).
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <button type="button" @click="umurManfaat = 20; tarifSusut = 5.0; metodeSusut = 'Garis Lurus'"
+                                                :class="umurManfaat > 0 ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-[#14161F] text-slate-600 dark:text-slate-400'"
+                                                class="p-2 rounded-lg border text-left text-[11px] font-semibold transition-all">
+                                            <div>Ada Bangunan Gedung</div>
+                                            <div class="text-[10px] font-normal opacity-80">Susut 20 Th / 5%</div>
+                                        </button>
+                                        <button type="button" @click="umurManfaat = 0; tarifSusut = 0; metodeSusut = 'Tidak Disusutkan'"
+                                                :class="umurManfaat === 0 ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-[#14161F] text-slate-600 dark:text-slate-400'"
+                                                class="p-2 rounded-lg border text-left text-[11px] font-semibold transition-all">
+                                            <div>Tanah Kosong Saja</div>
+                                            <div class="text-[10px] font-normal opacity-80">Bebas Penyusutan</div>
+                                        </button>
+                                    </div>
+                                    <input type="hidden" name="umur_manfaat" :value="umurManfaat">
+                                    <input type="hidden" name="tarif_penyusutan" :value="tarifSusut">
+                                </div>
+                            </template>
+
+                            <!-- Kategori Selain Tanah -->
+                            <template x-if="pilihanJenis !== 'AST-TNH'">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-0.5 text-[10px]">Masa Manfaat (Th)</label>
+                                        <input type="number" name="umur_manfaat" x-model="umurManfaat" min="1" max="50" required
+                                               class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 font-mono text-xs">
+                                    </div>
+                                    <div>
+                                        <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-0.5 text-[10px]">Tarif Susut / Th (%)</label>
+                                        <input type="number" step="0.01" name="tarif_penyusutan" x-model="tarifSusut" min="0" max="100" required
+                                               class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 font-mono text-xs">
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- KOLOM KANAN: Spesifikasi Fisik Sesuai Diagram ERD (7 Kolom) -->
+                    <div class="lg:col-span-7 space-y-3.5">
+                        <div class="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider flex items-center gap-1.5 mb-1">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                            <span>2. Spesifikasi Objek Fisik & Lapangan</span>
+                        </div>
+
+                        <!-- A. KONDISIONAL KENDARAAN ARMADA TRUK -->
+                        <div x-show="pilihanJenis === 'AST-TRK'" x-cloak class="p-4 bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 rounded-2xl space-y-3">
+                            <div class="flex items-center justify-between text-blue-900 dark:text-blue-300 font-bold text-xs">
+                                <div class="flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                                    <span>Spesifikasi Fisik Armada Kendaraan Logistik (ERD)</span>
+                                </div>
+                                <span class="text-[10px] text-blue-600 dark:text-blue-400 font-mono" x-text="jumlahUnit + ' Unit Armada'"></span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis / Tipe Kendaraan <span class="text-rose-500">*</span></label>
+                                    <select name="jenis_kendaraan" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 font-medium">
+                                        <option value="Tronton Wingbox">Tronton Wingbox</option>
+                                        <option value="Tronton Bak Terbuka">Tronton Bak Terbuka</option>
+                                        <option value="Dump Truck">Dump Truck</option>
+                                        <option value="Truk Trailer Gandeng 40ft">Truk Trailer Gandeng 40ft</option>
+                                        <option value="Truk Tangki Semen Curah (Bulk)">Truk Tangki Semen Curah (Bulk)</option>
+                                        <option value="Colt Diesel Double (CDD)">Colt Diesel Double (CDD)</option>
+                                        <option value="Engkel Box (CDE)">Engkel Box (CDE)</option>
+                                        <option value="Pick Up L300">Pick Up L300</option>
+                                        <option value="Kendaraan Operasional Kantor">Kendaraan Operasional Kantor</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Merek Truk / Pabrikan</label>
+                                    <input type="text" name="merek_aset" placeholder="Contoh: Hino / Mitsubishi Fuso / Isuzu"
+                                           class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kapasitas Muatan (Tonase / Sak)</label>
+                                    <input type="text" name="muatan" placeholder="Contoh: 25 Ton / 500 Sak Semen"
+                                           class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tahun Pembuatan Kendaraan</label>
+                                    <input type="number" name="tahun_pembuatan" placeholder="Contoh: 2023" min="1990" max="{{ date('Y') + 1 }}"
+                                           class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 font-mono">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Masa Berlaku Uji KIR</label>
+                                    <x-input-tanggal nama="tanggal_kir" placeholder="Pilih Tanggal KIR" :wajib="false" warnaFokus="blue" />
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jatuh Tempo Pajak STNK</label>
+                                    <x-input-tanggal nama="tanggal_pajak" placeholder="Pilih Tanggal Pajak" :wajib="false" warnaFokus="blue" />
+                                </div>
+                            </div>
+
+                            <!-- Input 1 Unit: Plat Nomor, Mesin, Rangka -->
+                            <div x-show="jumlahUnit === 1" class="space-y-2.5 pt-1 border-t border-blue-200/60 dark:border-blue-900/40">
+                                <x-input-plat-nomor nama="no_polisi" :wajib="false" label="Plat Nomor Polisi Kendaraan" />
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Mesin (Opsional)</label>
+                                        <input type="text" name="no_mesin" placeholder="W04D-xxxxxx"
+                                               class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 font-mono uppercase">
+                                    </div>
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Rangka (Opsional)</label>
+                                        <input type="text" name="no_rangka" placeholder="MHK-xxxxxx"
+                                               class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 font-mono uppercase">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Input Multi-Unit: Rincian Plat & Identitas Per Unit -->
+                            <div x-show="jumlahUnit > 1" class="space-y-2 max-h-56 overflow-y-auto pr-1 pt-1 border-t border-blue-200/60 dark:border-blue-900/40">
+                                <div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Rincian Plat Nomor, Mesin, & Rangka per Unit Truk:</div>
+                                <template x-for="(unit, index) in rincianUnit" :key="index">
+                                    <div class="p-2.5 rounded-xl bg-white dark:bg-[#14161F] border border-blue-200 dark:border-blue-900/50 space-y-1.5 shadow-2xs">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-bold text-blue-700 dark:text-blue-400 font-mono text-[11px]" x-text="'Armada Unit #' + (index + 1)"></span>
+                                            <span class="text-[10px] text-slate-400 font-mono" x-text="'Auto KND-' + (index + 1)"></span>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-2">
+                                            <div>
+                                                <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-0.5">Plat Nomor</label>
+                                                <input type="text" :name="'rincian_unit[' + index + '][no_polisi]'" x-model="unit.no_polisi" placeholder="B 1234 PBJ"
+                                                       class="w-full px-2.5 py-1.5 rounded-lg bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-slate-200 dark:border-slate-700 font-mono uppercase text-xs focus:ring-1 focus:ring-blue-500">
+                                            </div>
+                                            <div>
+                                                <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-0.5">No. Mesin</label>
+                                                <input type="text" :name="'rincian_unit[' + index + '][no_mesin]'" x-model="unit.no_mesin" placeholder="Opsional"
+                                                       class="w-full px-2.5 py-1.5 rounded-lg bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-slate-200 dark:border-slate-700 font-mono uppercase text-xs">
+                                            </div>
+                                            <div>
+                                                <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-0.5">No. Rangka</label>
+                                                <input type="text" :name="'rincian_unit[' + index + '][no_rangka]'" x-model="unit.no_rangka" placeholder="Opsional"
+                                                       class="w-full px-2.5 py-1.5 rounded-lg bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-slate-200 dark:border-slate-700 font-mono uppercase text-xs">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- B. KONDISIONAL TANAH & BANGUNAN PROPERTI -->
+                        <div x-show="pilihanJenis === 'AST-TNH'" x-cloak class="p-4 bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/40 rounded-2xl space-y-3">
+                            <div class="flex items-center gap-1.5 text-emerald-900 dark:text-emerald-300 font-bold text-xs">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                <span>Spesifikasi Aset Properti (Tanah & Bangunan Usaha)</span>
+                            </div>
+
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                                    Keterangan Aset / Bangunan di Atas Tanah <span class="text-rose-500">*</span>
+                                </label>
+                                <textarea name="keterangan" rows="3" placeholder="Jelaskan objek atau fasilitas yang berdiri di atas tanah ini, misal: Gedung Kantor Pusat 2 Lantai (Luas 450 m²), Bangunan Gudang Semen (Luas 1.200 m²), Pos Satpam & Lapangan Parkir Truk. Jika tanah kosong, tuliskan: 'Lahan Kosong Siap Bangun'."
+                                          class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 text-xs focus:ring-2 focus:ring-emerald-500/30"></textarea>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Luas Tanah / Bangunan</label>
+                                    <input type="text" name="muatan" placeholder="Contoh: Tanah 2.500 m² / Gedung 1.200 m²"
+                                           class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Dokumen Legalitas & Sertifikat</label>
+                                    <input type="text" name="no_mesin" placeholder="Contoh: SHM No. 1234 / HGB No. 5678"
+                                           class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- C. KONDISIONAL MESIN GUDANG ATAU ELEKTRONIK KANTOR -->
+                        <div x-show="pilihanJenis === 'AST-GDG' || pilihanJenis === 'AST-OFC'" x-cloak class="p-4 bg-slate-50 dark:bg-[#1C1E2A] border border-slate-200 dark:border-[#252837] rounded-2xl space-y-3">
+                            <div class="flex items-center gap-1.5 text-slate-800 dark:text-slate-200 font-bold text-xs">
+                                <svg class="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <span>Spesifikasi Teknis & Lokasi Penempatan</span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Merek / Pabrikan</label>
+                                    <input type="text" name="merek_aset" placeholder="Contoh: Toyota / Lenovo / Canon"
+                                           class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Seri / Serial Number</label>
+                                    <input type="text" name="no_mesin" placeholder="Contoh: SN-883921-X"
+                                           class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 font-mono uppercase">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Lokasi Penempatan Gudang / Ruangan</label>
+                                    <input type="text" name="muatan" placeholder="Contoh: Gudang Transit Semen / Kantor Lt. 2"
+                                           class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tahun Pengadaan / Produksi</label>
+                                    <input type="number" name="tahun_pembuatan" placeholder="2024" min="2000" max="{{ date('Y') }}"
+                                           class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 font-mono">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Catatan Kondisi / Garansi</label>
+                                <textarea name="keterangan" rows="2" placeholder="Catatan spesifikasi teknis, garansi servis, atau kondisi aset."
+                                          class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 text-xs"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Tombol Submit & Batal di Sudut Kanan Bawah -->
+                        <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E2E8F0] dark:border-[#252837]">
+                            <button @click="bukaModalTambah = false" type="button" class="px-5 py-2.5 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
+                            <button type="submit" class="px-6 py-2.5 font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-md shadow-indigo-600/20">Simpan & Daftarkan Aset</button>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>
@@ -487,121 +645,287 @@
         </div>
     </div>
 
-    <!-- Modal Detail Aset -->
+    <!-- Modal Detail Aset (Canvas Landscape) -->
     <div x-show="modalDetailTerbuka" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="modalDetailTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-8">
+        <div @click.away="modalDetailTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-3xl lg:max-w-4xl overflow-hidden shadow-2xl my-8">
             <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837] bg-slate-50 dark:bg-[#1C1E2A]">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-xs">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                     </div>
                     <div>
-                        <h2 class="text-base font-bold text-slate-900 dark:text-slate-100" x-text="detailAset.nama_aset"></h2>
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-base font-bold text-slate-900 dark:text-slate-100" x-text="detailAset.nama_aset"></h2>
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase"
+                                  :class="detailAset.status_aset === 'aktif' ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 border border-emerald-200 dark:border-emerald-800' : 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 border border-amber-200 dark:border-amber-800'"
+                                  x-text="detailAset.status_aset || 'aktif'"></span>
+                        </div>
                         <p class="text-xs text-indigo-600 dark:text-indigo-400 font-mono font-semibold" x-text="detailAset.kode_aset"></p>
                     </div>
                 </div>
-                <button @click="modalDetailTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                <button @click="modalDetailTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-lg font-bold">
+                    &times;
                 </button>
             </div>
             <div class="p-6 space-y-4 text-xs">
-                <div class="grid grid-cols-2 gap-3">
+                <!-- Grid Informasi Utama Finansial -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div class="p-3 bg-slate-50 dark:bg-[#1C1E2A] rounded-xl border border-[#E2E8F0] dark:border-[#252837]">
-                        <div class="text-[10px] text-slate-400 font-semibold uppercase">Kategori Jenis</div>
+                        <div class="text-[10px] text-slate-400 font-semibold uppercase">Golongan Aset</div>
                         <div class="text-xs font-bold text-slate-800 dark:text-slate-200 mt-0.5" x-text="detailAset.jenis_aset || detailAset.kode_jenis_aset"></div>
-                    </div>
-                    <div class="p-3 bg-slate-50 dark:bg-[#1C1E2A] rounded-xl border border-[#E2E8F0] dark:border-[#252837]">
-                        <div class="text-[10px] text-slate-400 font-semibold uppercase">Nomor Polisi</div>
-                        <div class="text-xs font-mono font-bold text-slate-800 dark:text-slate-200 mt-0.5" x-text="detailAset.no_polisi || '-'"></div>
                     </div>
                     <div class="p-3 bg-slate-50 dark:bg-[#1C1E2A] rounded-xl border border-[#E2E8F0] dark:border-[#252837]">
                         <div class="text-[10px] text-slate-400 font-semibold uppercase">Harga Perolehan</div>
                         <div class="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400 mt-0.5" x-text="'Rp ' + Number(detailAset.harga_aset || 0).toLocaleString('id-ID')"></div>
                     </div>
                     <div class="p-3 bg-slate-50 dark:bg-[#1C1E2A] rounded-xl border border-[#E2E8F0] dark:border-[#252837]">
-                        <div class="text-[10px] text-slate-400 font-semibold uppercase">Tanggal Pembelian</div>
-                        <div class="text-xs font-mono font-bold text-slate-800 dark:text-slate-200 mt-0.5" x-text="detailAset.tanggal_pembelian || '-'"></div>
+                        <div class="text-[10px] text-slate-400 font-semibold uppercase">Akumulasi Susut</div>
+                        <div class="text-xs font-mono font-bold text-rose-600 dark:text-rose-400 mt-0.5" x-text="'Rp ' + Number(detailAset.akumulasi_penyusutan || 0).toLocaleString('id-ID')"></div>
                     </div>
                     <div class="p-3 bg-slate-50 dark:bg-[#1C1E2A] rounded-xl border border-[#E2E8F0] dark:border-[#252837]">
-                        <div class="text-[10px] text-slate-400 font-semibold uppercase">Status Operasional</div>
-                        <div class="text-xs font-bold uppercase mt-0.5 text-emerald-600 dark:text-emerald-400" x-text="detailAset.status_aset || 'aktif'"></div>
+                        <div class="text-[10px] text-slate-400 font-semibold uppercase">Nilai Buku Saat Ini</div>
+                        <div class="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 mt-0.5" x-text="'Rp ' + Number(detailAset.nilai_buku || detailAset.harga_aset || 0).toLocaleString('id-ID')"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="p-3 bg-slate-50 dark:bg-[#1C1E2A] rounded-xl border border-[#E2E8F0] dark:border-[#252837]">
+                        <div class="text-[10px] text-slate-400 font-semibold uppercase">Tanggal Perolehan</div>
+                        <div class="text-xs font-mono font-bold text-slate-800 dark:text-slate-200 mt-0.5" x-text="detailAset.tanggal_pembelian ? detailAset.tanggal_pembelian.substring(0, 10) : '-'"></div>
+                    </div>
+                    <div class="p-3 bg-slate-50 dark:bg-[#1C1E2A] rounded-xl border border-[#E2E8F0] dark:border-[#252837]">
+                        <div class="text-[10px] text-slate-400 font-semibold uppercase">Metode PSAK 16</div>
+                        <div class="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-0.5" x-text="(detailAset.metode_penyusutan || 'Garis Lurus') + ' (' + (detailAset.umur_manfaat || 0) + ' Th)'"></div>
+                    </div>
+                    <div class="p-3 bg-slate-50 dark:bg-[#1C1E2A] rounded-xl border border-[#E2E8F0] dark:border-[#252837]">
+                        <div class="text-[10px] text-slate-400 font-semibold uppercase">Tarif Depresiasi</div>
+                        <div class="text-xs font-mono font-bold text-slate-800 dark:text-slate-200 mt-0.5" x-text="(detailAset.tarif_penyusutan || 0) + '% / Thn'"></div>
                     </div>
                     <div class="p-3 bg-slate-50 dark:bg-[#1C1E2A] rounded-xl border border-[#E2E8F0] dark:border-[#252837]">
                         <div class="text-[10px] text-slate-400 font-semibold uppercase">Entitas Pemilik</div>
                         <div class="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-0.5" x-text="detailAset.nama_pemilik || 'PT Putra Balkom Jaya'"></div>
                     </div>
                 </div>
+
+                <!-- Spesifikasi Armada Truk (Jika Tersedia) -->
+                <div class="p-4 bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 rounded-2xl space-y-3"
+                     x-show="detailAset.kode_jenis_aset === 'AST-TRK' || detailAset.no_polisi !== '-'">
+                    <div class="flex items-center gap-1.5 text-blue-900 dark:text-blue-300 font-bold text-xs">
+                        <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                        <span>Data Spesifikasi Armada Fisik Kendaraan (ERD)</span>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="p-2.5 bg-white dark:bg-[#14161F] rounded-xl border border-blue-100 dark:border-blue-900/30">
+                            <div class="text-[10px] text-slate-400 font-semibold uppercase">Plat Nomor Polisi</div>
+                            <div class="text-xs font-mono font-bold text-blue-700 dark:text-blue-400 mt-0.5" x-text="detailAset.no_polisi || '-'"></div>
+                        </div>
+                        <div class="p-2.5 bg-white dark:bg-[#14161F] rounded-xl border border-blue-100 dark:border-blue-900/30">
+                            <div class="text-[10px] text-slate-400 font-semibold uppercase">Jenis / Tipe Armada</div>
+                            <div class="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-0.5" x-text="detailAset.jenis_kendaraan || '-'"></div>
+                        </div>
+                        <div class="p-2.5 bg-white dark:bg-[#14161F] rounded-xl border border-blue-100 dark:border-blue-900/30">
+                            <div class="text-[10px] text-slate-400 font-semibold uppercase">Merek Truk</div>
+                            <div class="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-0.5" x-text="detailAset.merek_aset || '-'"></div>
+                        </div>
+                        <div class="p-2.5 bg-white dark:bg-[#14161F] rounded-xl border border-blue-100 dark:border-blue-900/30">
+                            <div class="text-[10px] text-slate-400 font-semibold uppercase">Kapasitas Muatan</div>
+                            <div class="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-0.5" x-text="detailAset.muatan || '-'"></div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="p-2.5 bg-white dark:bg-[#14161F] rounded-xl border border-blue-100 dark:border-blue-900/30">
+                            <div class="text-[10px] text-slate-400 font-semibold uppercase">Nomor Mesin</div>
+                            <div class="text-xs font-mono font-semibold text-slate-800 dark:text-slate-200 mt-0.5" x-text="detailAset.no_mesin || '-'"></div>
+                        </div>
+                        <div class="p-2.5 bg-white dark:bg-[#14161F] rounded-xl border border-blue-100 dark:border-blue-900/30">
+                            <div class="text-[10px] text-slate-400 font-semibold uppercase">Nomor Rangka</div>
+                            <div class="text-xs font-mono font-semibold text-slate-800 dark:text-slate-200 mt-0.5" x-text="detailAset.no_rangka || '-'"></div>
+                        </div>
+                        <div class="p-2.5 bg-white dark:bg-[#14161F] rounded-xl border border-blue-100 dark:border-blue-900/30">
+                            <div class="text-[10px] text-slate-400 font-semibold uppercase">Berlaku Uji KIR</div>
+                            <div class="text-xs font-mono font-semibold text-slate-800 dark:text-slate-200 mt-0.5" x-text="detailAset.tanggal_kir ? detailAset.tanggal_kir.substring(0, 10) : '-'"></div>
+                        </div>
+                        <div class="p-2.5 bg-white dark:bg-[#14161F] rounded-xl border border-blue-100 dark:border-blue-900/30">
+                            <div class="text-[10px] text-slate-400 font-semibold uppercase">Jatuh Tempo Pajak</div>
+                            <div class="text-xs font-mono font-semibold text-slate-800 dark:text-slate-200 mt-0.5" x-text="detailAset.tanggal_pajak ? detailAset.tanggal_pajak.substring(0, 10) : '-'"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Keterangan Tambahan / Fasilitas Bangunan di Atas Tanah -->
+                <div class="p-3.5 bg-slate-50 dark:bg-[#1C1E2A] rounded-xl border border-[#E2E8F0] dark:border-[#252837]"
+                     x-show="detailAset.keterangan">
+                    <div class="text-[10px] text-slate-400 font-semibold uppercase mb-1">Keterangan Aset / Fasilitas Bangunan di Atas Tanah</div>
+                    <div class="text-xs text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed" x-text="detailAset.keterangan"></div>
+                </div>
+
                 <div class="flex justify-end pt-2">
-                    <button @click="modalDetailTerbuka = false" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-all">Tutup</button>
+                    <button @click="modalDetailTerbuka = false" class="px-5 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Tutup</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal Edit Aset -->
+    <!-- Modal Edit Aset (Canvas Landscape) -->
     <div x-show="modalEditTerbuka" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="modalEditTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-xl my-8">
-            <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Ubah Data Aset Perusahaan</h3>
-                <button @click="modalEditTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>
+        <div @click.away="modalEditTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-3xl lg:max-w-4xl overflow-hidden shadow-2xl my-8">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837] bg-slate-50 dark:bg-[#1C1E2A]">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-xs">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Ubah Data Aset Perusahaan</h3>
+                        <p class="text-[11px] text-slate-400">Pembaruan data inventaris aktiva tetap dan spesifikasi operasional.</p>
+                    </div>
+                </div>
+                <button @click="modalEditTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg font-bold">&times;</button>
             </div>
-            <form :action="'{{ url('keuangan/akuntansi/aset-perusahaan') }}/' + formEdit.kode_aset" method="POST" class="p-5 space-y-3.5 text-xs">
+            <form :action="'{{ url('keuangan/akuntansi/aset-perusahaan') }}/' + formEdit.kode_aset" method="POST" class="p-6 space-y-4 text-xs">
                 @csrf
                 @method('PUT')
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kode Aset (Terkunci)</label>
-                        <input type="text" :value="formEdit.kode_aset" disabled
-                               class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 font-mono font-semibold cursor-not-allowed">
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                    <!-- Sisi Kiri: Data Identitas & Finansial (6 Kolom) -->
+                    <div class="lg:col-span-6 space-y-3">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kode Aset (Terkunci)</label>
+                                <input type="text" :value="formEdit.kode_aset" disabled
+                                       class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-[#E2E8F0] dark:border-[#252837] text-slate-500 font-mono font-semibold cursor-not-allowed">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kategori Jenis <span class="text-rose-500">*</span></label>
+                                <select name="kode_jenis_aset" x-model="formEdit.kode_jenis_aset" required
+                                        class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                                    <option value="AST-TRK">1. Kendaraan Armada Truk</option>
+                                    <option value="AST-TNH">2. Tanah & Bangunan Properti</option>
+                                    <option value="AST-GDG">3. Mesin & Alat Gudang</option>
+                                    <option value="AST-OFC">4. Elektronik & Perabot Kantor</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Tipe / Model Aset <span class="text-rose-500">*</span></label>
+                            <input type="text" name="nama_aset" x-model="formEdit.nama_aset" required
+                                   class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Entitas Pemilik STNK</label>
+                                <input type="text" name="nama_pemilik" x-model="formEdit.nama_pemilik" required
+                                       class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Operasional</label>
+                                <select name="status_aset" x-model="formEdit.status_aset"
+                                        class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
+                                    <option value="aktif">Aktif</option>
+                                    <option value="dalam_perbaikan">Dalam Perbaikan</option>
+                                    <option value="rusak">Rusak</option>
+                                    <option value="non-aktif">Non-Aktif</option>
+                                    <option value="dijual">Dijual</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Pembelian <span class="text-rose-500">*</span></label>
+                                <input type="date" name="tanggal_pembelian" x-model="formEdit.tanggal_pembelian" required
+                                       class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Perolehan (Rp) <span class="text-rose-500">*</span></label>
+                                <input type="number" name="harga_aset" x-model="formEdit.harga_aset" required min="0"
+                                       class="w-full px-3 py-2 rounded-xl font-mono bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kategori Jenis <span class="text-rose-500">*</span></label>
-                        <select name="kode_jenis_aset" x-model="formEdit.kode_jenis_aset" required
-                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                            @foreach($daftarJenis ?? [] as $j)
-                                <option value="{{ $j->kode_jenis_aset }}">{{ $j->jenis_aset }}</option>
-                            @endforeach
-                        </select>
+
+                    <!-- Sisi Kanan: Spesifikasi Fisik & ERD (6 Kolom) -->
+                    <div class="lg:col-span-6 space-y-3">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Plat Nomor Polisi</label>
+                                <input type="text" name="no_polisi" x-model="formEdit.no_polisi" placeholder="B 1234 PBJ"
+                                       class="w-full px-3 py-2 rounded-xl font-mono uppercase bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis / Tipe Kendaraan</label>
+                                <select name="jenis_kendaraan" x-model="formEdit.jenis_kendaraan"
+                                        class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
+                                    <option value="">-- Pilih Jenis --</option>
+                                    <option value="Tronton Wingbox">Tronton Wingbox</option>
+                                    <option value="Tronton Bak Terbuka">Tronton Bak Terbuka</option>
+                                    <option value="Dump Truck">Dump Truck</option>
+                                    <option value="Truk Trailer Gandeng 40ft">Truk Trailer Gandeng 40ft</option>
+                                    <option value="Truk Tangki Semen Curah (Bulk)">Truk Tangki Semen Curah (Bulk)</option>
+                                    <option value="Colt Diesel Double (CDD)">Colt Diesel Double (CDD)</option>
+                                    <option value="Engkel Box (CDE)">Engkel Box (CDE)</option>
+                                    <option value="Pick Up L300">Pick Up L300</option>
+                                    <option value="Kendaraan Operasional Kantor">Kendaraan Operasional Kantor</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Merek Pabrikan</label>
+                                <input type="text" name="merek_aset" x-model="formEdit.merek_aset" placeholder="Hino / Isuzu / Fuso"
+                                       class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kapasitas Muatan</label>
+                                <input type="text" name="muatan" x-model="formEdit.muatan" placeholder="25 Ton / 500 Sak"
+                                       class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-700 dark:text-slate-300 mb-1">No. Mesin</label>
+                                <input type="text" name="no_mesin" x-model="formEdit.no_mesin" placeholder="W04D-xxx"
+                                       class="w-full px-2.5 py-1.5 rounded-xl font-mono uppercase bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-700 dark:text-slate-300 mb-1">No. Rangka</label>
+                                <input type="text" name="no_rangka" x-model="formEdit.no_rangka" placeholder="MHK-xxx"
+                                       class="w-full px-2.5 py-1.5 rounded-xl font-mono uppercase bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Tahun Buat</label>
+                                <input type="number" name="tahun_pembuatan" x-model="formEdit.tahun_pembuatan" placeholder="2023"
+                                       class="w-full px-2.5 py-1.5 rounded-xl font-mono bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Uji KIR</label>
+                                <input type="date" name="tanggal_kir" x-model="formEdit.tanggal_kir"
+                                       class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jatuh Tempo Pajak</label>
+                                <input type="date" name="tanggal_pajak" x-model="formEdit.tanggal_pajak"
+                                       class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan Aset / Bangunan di Atas Tanah</label>
+                            <textarea name="keterangan" x-model="formEdit.keterangan" rows="2" placeholder="Catatan fasilitas bangunan atau keterangan aset..."
+                                      class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200"></textarea>
+                        </div>
                     </div>
                 </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Aset <span class="text-rose-500">*</span></label>
-                    <input type="text" name="nama_aset" x-model="formEdit.nama_aset" required
-                           class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Plat / No. Polisi</label>
-                        <input type="text" name="no_polisi" x-model="formEdit.no_polisi" placeholder="B 1234 ABC"
-                               class="w-full px-3 py-2 rounded-xl font-mono uppercase bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Aset</label>
-                        <select name="status_aset" x-model="formEdit.status_aset"
-                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                            <option value="aktif">Aktif</option>
-                            <option value="dalam_perbaikan">Dalam Perbaikan</option>
-                            <option value="rusak">Rusak</option>
-                            <option value="non-aktif">Non-Aktif</option>
-                            <option value="dijual">Dijual</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Pembelian <span class="text-rose-500">*</span></label>
-                        <input type="date" name="tanggal_pembelian" x-model="formEdit.tanggal_pembelian" required
-                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Perolehan (Rp) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="harga_aset" x-model="formEdit.harga_aset" required min="0"
-                               class="w-full px-3 py-2 rounded-xl font-mono bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                    </div>
-                </div>
-                <div class="flex items-center justify-end gap-2 pt-2 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    <button @click="modalEditTerbuka = false" type="button" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-all">Batal</button>
-                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl transition-all shadow-sm">Simpan Perubahan</button>
+
+                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E2E8F0] dark:border-[#252837]">
+                    <button @click="modalEditTerbuka = false" type="button" class="px-5 py-2.5 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-6 py-2.5 font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl transition-all shadow-md shadow-amber-600/20">Simpan Perubahan</button>
                 </div>
             </form>
         </div>
@@ -648,9 +972,19 @@
                 kode_jenis_aset: '',
                 nama_aset: '',
                 no_polisi: '',
+                merek_aset: '',
+                jenis_kendaraan: '',
+                muatan: '',
+                no_mesin: '',
+                no_rangka: '',
+                tahun_pembuatan: '',
+                tanggal_kir: '',
+                tanggal_pajak: '',
+                nama_pemilik: '',
                 tanggal_pembelian: '',
                 harga_aset: 0,
-                status_aset: 'aktif'
+                status_aset: 'aktif',
+                keterangan: ''
             },
             hapusData: { kode: '', nama: '' },
 
@@ -668,10 +1002,7 @@
             aturKategori(kode) {
                 this.pilihanJenis = kode;
                 if (kode === 'AST-TNH') {
-                    this.umurManfaat = 0;
-                    this.tarifSusut = 0;
-                    this.metodeSusut = 'Tidak Disusutkan';
-                } else if (kode === 'AST-BDG') {
+                    // Tanah & Bangunan: Default 20 tahun (5%) jika ada bangunan
                     this.umurManfaat = 20;
                     this.tarifSusut = 5.0;
                     this.metodeSusut = 'Garis Lurus';
@@ -709,10 +1040,20 @@
                             kode_aset: d.kode_aset,
                             kode_jenis_aset: d.kode_jenis_aset,
                             nama_aset: d.nama_aset,
-                            no_polisi: d.no_polisi === '-' ? '' : d.no_polisi,
-                            tanggal_pembelian: d.tanggal_pembelian,
+                            no_polisi: d.no_polisi === '-' ? '' : (d.no_polisi || ''),
+                            merek_aset: d.merek_aset === '-' ? '' : (d.merek_aset || ''),
+                            jenis_kendaraan: d.jenis_kendaraan === '-' ? '' : (d.jenis_kendaraan || ''),
+                            muatan: d.muatan === '-' ? '' : (d.muatan || ''),
+                            no_mesin: d.no_mesin === '-' ? '' : (d.no_mesin || ''),
+                            no_rangka: d.no_rangka === '-' ? '' : (d.no_rangka || ''),
+                            tahun_pembuatan: d.tahun_pembuatan || '',
+                            tanggal_kir: d.tanggal_kir ? d.tanggal_kir.substring(0, 10) : '',
+                            tanggal_pajak: d.tanggal_pajak ? d.tanggal_pajak.substring(0, 10) : '',
+                            nama_pemilik: d.nama_pemilik || 'PT Putra Balkom Jaya',
+                            tanggal_pembelian: d.tanggal_pembelian ? d.tanggal_pembelian.substring(0, 10) : '',
                             harga_aset: d.harga_aset,
-                            status_aset: d.status_aset || 'aktif'
+                            status_aset: d.status_aset || 'aktif',
+                            keterangan: d.keterangan || ''
                         };
                         this.modalEditTerbuka = true;
                     }

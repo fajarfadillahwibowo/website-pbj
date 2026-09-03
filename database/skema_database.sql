@@ -528,8 +528,7 @@ CREATE TABLE `data_jenis_aset` (
 
 INSERT INTO `data_jenis_aset` (`kode_jenis_aset`, `jenis_aset`, `keterangan`) VALUES
 ('AST-TRK', 'Kendaraan Armada Truk', 'Truk tronton, fuso, colt diesel, dan kendaraan logistik'),
-('AST-TNH', 'Tanah & Lahan Properti', 'Tanah kavling, lahan gudang usaha (bebas penyusutan)'),
-('AST-BDG', 'Bangunan & Gedung', 'Gedung kantor pusat, bangunan gudang semen, dan mess staf'),
+('AST-TNH', 'Tanah & Bangunan Properti', 'Tanah kavling, bangunan gedung kantor, gudang semen, pos satpam, dan fasilitas properti'),
 ('AST-GDG', 'Mesin & Alat Berat Gudang', 'Forklift, genset gudang, conveyor, timbangan truk'),
 ('AST-OFC', 'Elektronik & Perabot Kantor', 'Laptop, PC komputer, printer, AC, meja kursi kantor')
 ON DUPLICATE KEY UPDATE `jenis_aset` = VALUES(`jenis_aset`), `keterangan` = VALUES(`keterangan`);
@@ -563,6 +562,7 @@ CREATE TABLE `data_aset` (
     `tanggal_pajak` DATE DEFAULT NULL,
     `status_aset` ENUM('aktif', 'rusak', 'dalam_perbaikan', 'dijual', 'non-aktif') NOT NULL DEFAULT 'aktif',
     `nama_pemilik` VARCHAR(100) NOT NULL,
+    `keterangan` TEXT DEFAULT NULL,
     `dibuat_pada` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `diperbarui_pada` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`kode_aset`),

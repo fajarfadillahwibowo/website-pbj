@@ -43,10 +43,16 @@ class AsetPerusahaan extends Model
         'merek_aset',
         'jenis_kendaraan',
         'muatan',
+        'tahun_pembuatan',
+        'tanggal_kir',
+        'tanggal_pajak',
+        'keterangan',
     ];
 
     protected $casts = [
         'tanggal_pembelian' => 'date',
+        'tanggal_kir' => 'date',
+        'tanggal_pajak' => 'date',
         'harga_aset' => 'decimal:2',
         'harga_perolehan' => 'decimal:2',
         'nilai_residu' => 'decimal:2',
@@ -54,6 +60,7 @@ class AsetPerusahaan extends Model
         'akumulasi_penyusutan' => 'decimal:2',
         'nilai_buku' => 'decimal:2',
         'umur_manfaat' => 'integer',
+        'tahun_pembuatan' => 'integer',
         'dibuat_pada' => 'datetime',
         'diperbarui_pada' => 'datetime',
     ];
