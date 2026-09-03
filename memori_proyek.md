@@ -19,6 +19,9 @@
 - **Status Mesin Jurnal Otomatis Terpadu (`MesinJurnalOtomatis.php`):** ✅ **100% SELESAI, TERINTEGRASI, & TERUJI** (Otomasi pencatatan jurnal umum double-entry yang atomik dalam `DB::transaction`, validasi keseimbangan mutlak $\sum Debit == \sum Kredit$, mekanisme *Idempotency Guard* berbasis `referensi_transaksi` untuk mencegah duplikasi, serta pemutakhiran otomatis `saldo_berjalan` akun COA di tabel `data_kode_akun` secara real-time).
 - **Status Integrasi Auto-Journal pada Transaksi Harian:** ✅ **100% SELESAI & TERUJI (Faktur Penjualan Tunai/Transfer/Kredit/Deposit, Pelunasan Piutang, Penebusan SO SIG, Pengeluaran Kas AP, dan Rilisan Uang Jalan Supir)**.
 - **Status Cetak Faktur Penjualan Resmi (`cetak_faktur.blade.php`):** ✅ **100% SELESAI & TERINTEGRASI** (Kop surat resmi PT Putra Balkom Jaya, rincian produk semen zak, informasi rekening bank resmi Mandiri/BRI/BCA, kalkulasi finansial, 3 kolom pengesahan tanda tangan, dan tombol aksi cetak langsung pada tabel faktur penjualan).
+- **Status Dinamisasi Laporan Neraca Keuangan (`neraca.blade.php`):** ✅ **100% SELESAI & SINKRON REAL-TIME** (Seluruh pos neraca: kas & bank, piutang, persediaan semen, uang muka supir, aset tetap, akumulasi depresiasi, hutang dagang AP, titipan deposit, dan ekuitas membaca langsung saldo berjalan akun COA `data_kode_akun`, sehingga selalu seimbang $\text{Aktiva} \equiv \text{Passiva}$).
+- **Status Perbaikan Buku Jurnal Umum (`jurnal_umum.blade.php`):** ✅ **100% SELESAI & TERUJI** (Perbaikan properti kolom database `$jurnal->posisi` dan `$jurnal->nama_akun`, integrasi `MesinJurnalOtomatis` pada form modal input manual. Status neraca saldo **SEIMBANG (BALANCED)** dengan mutasi Rp 51.291.667).
+- **Status Standarisasi Validasi Input Nominal Rupiah (HTML5 Step Fix):** ✅ **100% SELESAI DI 9 VIEW FORM** (Seluruh input nominal diubah menjadi `min="0" step="any"` untuk mengeliminasi peringatan constraint kelipatan browser dan mengizinkan input nominal bebas).
 
 
 ---
