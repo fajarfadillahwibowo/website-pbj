@@ -20,12 +20,12 @@
 
         $opsiGudang = ($daftarGudang ?? collect())->map(fn($g) => [
             'nilai' => $g->kode_gudang,
-            'label' => $g->nama_gudang . ' (' . $g->kode_gudang . ')',
-            'sub'   => 'Plant: ' . ($g->plant ?? 'Utama') . ' | Distrik: ' . ($g->distrik ?? 'Pusat')
+            'label' => $g->kode_gudang . ' — ' . $g->nama_gudang,
+            'sub'   => 'Plant: ' . ($g->plant ?? 'Utama') . ' · ' . ($g->distrik ?? 'Pusat') . ' · Stok: ' . number_format($g->stok_tersedia ?? 0, 0, ',', '.') . ' Zak (' . ($g->jenis_gudang ?? 'Gudang') . ')'
         ])->toArray();
 
         $opsiFilterGudang = array_merge([
-            ['nilai' => 'semua', 'label' => 'Semua Gudang Asal', 'sub' => null]
+            ['nilai' => 'semua', 'label' => 'Semua Fasilitas Gudang (SPV Gudang)', 'sub' => null]
         ], $opsiGudang);
 
         $opsiWilayah = ($daftarWilayah ?? collect())->map(fn($w) => [
@@ -211,7 +211,7 @@
                     <tr>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Kode OA</th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Nama Rute / Trayek OA</th>
-                        <th class="px-4 py-3 font-semibold uppercase tracking-wider">Gudang Asal</th>
+                        <th class="px-4 py-3 font-semibold uppercase tracking-wider">Gudang Asal (SPV Gudang)</th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">No. Kontrak</th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Jenis Muatan</th>
                         <th class="px-4 py-3 text-right font-semibold uppercase tracking-wider">Harga OA</th>
@@ -244,13 +244,37 @@
                                 @endif
                             </td>
 
-                            <!-- 3. Kode Gudang -->
+                            <!-- 3. Kode Gudang (Tersinkronisasi dengan SPV Gudang) -->
                             <td class="px-4 py-3.5 whitespace-nowrap">
-                                @if($oa->kode_gudang)
-                                    <span class="font-mono text-slate-800 dark:text-slate-200 font-semibold">{{ $oa->kode_gudang }}</span>
-                                    <div class="text-[10px] text-slate-400 truncate max-w-[130px]">{{ $oa->gudang->nama_gudang ?? 'Gudang Semen' }}</div>
+                                @if($oa->kode_gudang && $oa->gudang)
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="font-mono font-bold text-amber-600 dark:text-amber-400 text-xs px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
+                                            {{ $oa->kode_gudang }}
+                                        </span>
+                                        <span class="text-[9px] px-1.5 py-0.5 rounded font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/60 dark:border-slate-700/60">
+                                            {{ $oa->gudang->jenis_gudang ?? 'Gudang' }}
+                                        </span>
+                                    </div>
+                                    <div class="font-semibold text-slate-900 dark:text-slate-100 text-xs mt-1 truncate max-w-[170px]" title="{{ $oa->gudang->nama_gudang }}">
+                                        {{ $oa->gudang->nama_gudang }}
+                                    </div>
+                                    <div class="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
+                                        <span>Plant: {{ $oa->gudang->plant ?? 'Plant Utama' }}</span>
+                                        <span>·</span>
+                                        <span class="font-mono font-medium {{ ($oa->gudang->stok_tersedia ?? 0) <= 1000 ? 'text-rose-500 font-bold' : 'text-emerald-600 dark:text-emerald-400' }}">
+                                            {{ number_format($oa->gudang->stok_tersedia ?? 0, 0, ',', '.') }} Zak
+                                        </span>
+                                    </div>
+                                @elseif($oa->kode_gudang)
+                                    <span class="font-mono font-bold text-amber-600 dark:text-amber-400 text-xs px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
+                                        {{ $oa->kode_gudang }}
+                                    </span>
+                                    <div class="text-[10px] text-slate-400 mt-0.5 italic">Gudang Mandiri</div>
                                 @else
-                                    <span class="text-slate-400 italic">Pusat / Pabrik</span>
+                                    <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-2 py-0.5 rounded-md border border-slate-200/50 dark:border-slate-700/50">
+                                        <svg class="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                        Pusat / Silo Langsung
+                                    </span>
                                 @endif
                             </td>
 
@@ -386,7 +410,10 @@
                 <!-- Baris 2: kode_gudang & kontrak_oa -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Gudang Asal Semen <span class="text-slate-400 font-normal">(kode_gudang)</span></label>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Gudang Asal Semen <span class="text-slate-400 font-normal">(kode_gudang)</span></label>
+                            <span class="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Sinkron SPV Gudang</span>
+                        </div>
                         <x-dropdown-kustom 
                             nama="kode_gudang"
                             placeholder="-- Pilih Gudang Asal --"
@@ -395,6 +422,21 @@
                             warnaFokus="blue"
                             modelBind="formTambah.kode_gudang"
                         />
+                        <!-- Kartu Info Real-Time Gudang Terpilih (Sinkronisasi SPV Gudang) -->
+                        <template x-if="ambilDetailGudang(formTambah.kode_gudang)">
+                            <div class="mt-2 p-2.5 rounded-xl bg-amber-50/70 dark:bg-amber-500/10 border border-amber-200/80 dark:border-amber-500/20 text-xs">
+                                <div class="flex items-center justify-between font-semibold">
+                                    <span class="text-amber-900 dark:text-amber-300 truncate" x-text="ambilDetailGudang(formTambah.kode_gudang).nama_gudang"></span>
+                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 shrink-0 ml-1" x-text="ambilDetailGudang(formTambah.kode_gudang).kode_gudang"></span>
+                                </div>
+                                <div class="mt-1.5 text-[11px] text-slate-600 dark:text-slate-400 grid grid-cols-2 gap-x-2 gap-y-1">
+                                    <div>Plant: <span class="font-semibold text-slate-800 dark:text-slate-200" x-text="ambilDetailGudang(formTambah.kode_gudang).plant || '-'"></span></div>
+                                    <div>Wilayah: <span class="font-semibold text-slate-800 dark:text-slate-200" x-text="ambilDetailGudang(formTambah.kode_gudang).distrik || '-'"></span></div>
+                                    <div>Fasilitas: <span class="font-semibold text-slate-800 dark:text-slate-200" x-text="ambilDetailGudang(formTambah.kode_gudang).jenis_gudang || '-'"></span></div>
+                                    <div>Stok Fisik: <span class="font-mono font-bold text-emerald-600 dark:text-emerald-400" x-text="(new Intl.NumberFormat('id-ID').format(ambilDetailGudang(formTambah.kode_gudang).stok_tersedia || 0)) + ' Zak'"></span></div>
+                                </div>
+                            </div>
+                        </template>
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. Kontrak OA <span class="text-slate-400 font-normal">(kontrak_oa)</span></label>
@@ -503,7 +545,10 @@
                 <!-- Baris 2: kode_gudang & kontrak_oa -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Gudang Asal Semen <span class="text-slate-400 font-normal">(kode_gudang)</span></label>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Gudang Asal Semen <span class="text-slate-400 font-normal">(kode_gudang)</span></label>
+                            <span class="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Sinkron SPV Gudang</span>
+                        </div>
                         <x-dropdown-kustom 
                             nama="kode_gudang"
                             placeholder="-- Pilih Gudang Asal --"
@@ -512,6 +557,21 @@
                             warnaFokus="amber"
                             modelBind="formEdit.kode_gudang"
                         />
+                        <!-- Kartu Info Real-Time Gudang Terpilih (Sinkronisasi SPV Gudang) -->
+                        <template x-if="ambilDetailGudang(formEdit.kode_gudang)">
+                            <div class="mt-2 p-2.5 rounded-xl bg-amber-50/70 dark:bg-amber-500/10 border border-amber-200/80 dark:border-amber-500/20 text-xs">
+                                <div class="flex items-center justify-between font-semibold">
+                                    <span class="text-amber-900 dark:text-amber-300 truncate" x-text="ambilDetailGudang(formEdit.kode_gudang).nama_gudang"></span>
+                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 shrink-0 ml-1" x-text="ambilDetailGudang(formEdit.kode_gudang).kode_gudang"></span>
+                                </div>
+                                <div class="mt-1.5 text-[11px] text-slate-600 dark:text-slate-400 grid grid-cols-2 gap-x-2 gap-y-1">
+                                    <div>Plant: <span class="font-semibold text-slate-800 dark:text-slate-200" x-text="ambilDetailGudang(formEdit.kode_gudang).plant || '-'"></span></div>
+                                    <div>Wilayah: <span class="font-semibold text-slate-800 dark:text-slate-200" x-text="ambilDetailGudang(formEdit.kode_gudang).distrik || '-'"></span></div>
+                                    <div>Fasilitas: <span class="font-semibold text-slate-800 dark:text-slate-200" x-text="ambilDetailGudang(formEdit.kode_gudang).jenis_gudang || '-'"></span></div>
+                                    <div>Stok Fisik: <span class="font-mono font-bold text-emerald-600 dark:text-emerald-400" x-text="(new Intl.NumberFormat('id-ID').format(ambilDetailGudang(formEdit.kode_gudang).stok_tersedia || 0)) + ' Zak'"></span></div>
+                                </div>
+                            </div>
+                        </template>
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. Kontrak OA <span class="text-slate-400 font-normal">(kontrak_oa)</span></label>
@@ -614,14 +674,10 @@
             <div class="p-6 space-y-4 text-xs">
                 
                 <!-- Grid Informasi Rute & Kontrak -->
-                <div class="grid grid-cols-2 gap-3.5 p-4 rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837]">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 p-4 rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837]">
                     <div>
                         <div class="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Wilayah Cakupan OA</div>
                         <div class="font-bold text-slate-800 dark:text-slate-200 mt-0.5" x-text="detailOa.wilayah_oa || '-'"></div>
-                    </div>
-                    <div>
-                        <div class="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Gudang Asal Semen</div>
-                        <div class="font-bold text-slate-800 dark:text-slate-200 mt-0.5" x-text="detailOa.gudang ? (detailOa.gudang.nama_gudang + ' (' + detailOa.kode_gudang + ')') : (detailOa.kode_gudang || 'Pabrik Utama')"></div>
                     </div>
                     <div>
                         <div class="text-[10px] font-medium text-slate-400 uppercase tracking-wider">No. Kontrak OA</div>
@@ -630,6 +686,49 @@
                     <div>
                         <div class="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Kategori Muatan</div>
                         <div class="font-bold text-blue-600 dark:text-blue-400 mt-0.5" x-text="detailOa.muatan_oa || '-'"></div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Kode Rute OA</div>
+                        <div class="font-mono font-bold text-slate-800 dark:text-slate-200 mt-0.5" x-text="detailOa.kode_oa"></div>
+                    </div>
+
+                    <!-- Panel Detail Gudang Asal (Sinkron SPV Gudang) -->
+                    <div class="sm:col-span-2 border-t border-slate-200/60 dark:border-slate-800/80 pt-3 mt-1">
+                        <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                            <span class="flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                Fasilitas Gudang Asal (Tersinkronisasi SPV Gudang)
+                            </span>
+                            <span class="font-mono text-amber-600 dark:text-amber-400 font-bold" x-text="detailOa.kode_gudang || 'Pusat / Pabrik'"></span>
+                        </div>
+                        <template x-if="detailOa.gudang">
+                            <div class="p-3 rounded-xl bg-amber-50/70 dark:bg-amber-500/10 border border-amber-200/80 dark:border-amber-500/20">
+                                <div class="flex items-center justify-between font-bold text-slate-900 dark:text-slate-100">
+                                    <span class="text-amber-900 dark:text-amber-300 text-xs" x-text="detailOa.gudang.nama_gudang"></span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-amber-200/60 dark:border-slate-700" x-text="detailOa.gudang.jenis_gudang || 'Fasilitas Utama'"></span>
+                                </div>
+                                <div class="mt-2 grid grid-cols-3 gap-2 text-[11px] text-slate-600 dark:text-slate-400">
+                                    <div>
+                                        <span class="text-[10px] text-slate-400 block">Plant Produksi:</span>
+                                        <span class="font-semibold text-slate-800 dark:text-slate-200" x-text="detailOa.gudang.plant || '-'"></span>
+                                    </div>
+                                    <div>
+                                        <span class="text-[10px] text-slate-400 block">Wilayah / Distrik:</span>
+                                        <span class="font-semibold text-slate-800 dark:text-slate-200" x-text="detailOa.gudang.distrik || '-'"></span>
+                                    </div>
+                                    <div>
+                                        <span class="text-[10px] text-slate-400 block">Stok Fisik SPV Gudang:</span>
+                                        <span class="font-mono font-bold text-emerald-600 dark:text-emerald-400" x-text="(new Intl.NumberFormat('id-ID').format(detailOa.gudang.stok_tersedia || 0)) + ' Zak'"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="!detailOa.gudang">
+                            <div class="p-2.5 rounded-xl bg-slate-100 dark:bg-[#1C1E2A] text-slate-500 italic text-[11px] flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                Rute ini tidak terikat gudang transit/buffer (distribusi langsung dari Silo / Pabrik Utama PBJ).
+                            </div>
+                        </template>
                     </div>
                 </div>
 
@@ -756,6 +855,14 @@
             hapusData: {
                 kode: '',
                 nama: ''
+            },
+
+            // Master data gudang sinkron dari SPV Gudang
+            daftarGudangLengkap: @json($daftarGudang),
+
+            ambilDetailGudang(kode) {
+                if (!kode) return null;
+                return this.daftarGudangLengkap.find(g => String(g.kode_gudang) === String(kode)) || null;
             },
 
             initOngkosAngkut() {

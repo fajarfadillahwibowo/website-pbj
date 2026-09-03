@@ -577,7 +577,7 @@
                         <img src="{{ asset('images/logo-pbj.png') }}" alt="Logo PT Putra Balkom Jaya" class="w-16 h-16 object-contain shrink-0">
                         <div>
                             <h1 class="text-xl font-extrabold tracking-tight text-slate-900 uppercase">PT PUTRA BALKOM JAYA</h1>
-                            <p class="text-xs text-slate-600 font-medium">General Contractor & Distributor Semen Curah & Zak</p>
+                            <p class="text-xs text-slate-600 font-medium">Distribusi & Logistik Semen Curah & Zak</p>
                             <p class="text-[11px] text-slate-500">Kawasan Industri Cikarang Blok B-12, Bekasi · Telp: (021) 8983-4921</p>
                         </div>
                     </div>

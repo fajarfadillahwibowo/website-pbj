@@ -30,7 +30,7 @@
                     </div>
                     <div class="w-full px-1">
                         <div class="text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight truncate">PT Putra Balkom Jaya</div>
-                        <div class="text-[10px] text-slate-400 dark:text-slate-500 font-medium font-mono mt-0.5 truncate">General Contractor & Distributor</div>
+                        <div class="text-[10px] text-slate-400 dark:text-slate-500 font-medium font-mono mt-0.5 truncate">Distribusi & Logistik</div>
                     </div>
                 </a>
             </div>

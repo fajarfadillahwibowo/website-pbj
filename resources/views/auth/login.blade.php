@@ -71,7 +71,7 @@
       </div>
       <div>
         <div class="text-base font-extrabold text-slate-900 dark:text-slate-100 leading-tight">PT Putra Balkom Jaya</div>
-        <div class="text-xs text-slate-400 font-medium mt-0.5">General Contractor & Distributor</div>
+        <div class="text-xs text-slate-400 font-medium mt-0.5">Distribusi & Logistik</div>
       </div>
     </div>
 
