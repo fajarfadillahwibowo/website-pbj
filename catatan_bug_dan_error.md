@@ -34,6 +34,9 @@
 - **[TERSELESAIKAN] Undefined property: stdClass::$posisi_debit_kredit pada view `keuangan/akuntansi/jurnal_umum.blade.php:115`**:
   - *Penyebab:* Penulisan nama kolom pada view blade menggunakan `$jurnal->posisi_debit_kredit`, sedangkan nama kolom master di tabel database `jurnal_umum` adalah `posisi` (ENUM 'Debit', 'Kredit'). Selain itu nama akun hasil join diakses melalui relasi model yang belum eager loaded.
   - *Solusi:* Memperbaiki pemanggilan menjadi `$jurnal->posisi` dan `$jurnal->nama_akun`, serta menghubungkan method `JurnalUmumController@store` langsung ke `MesinJurnalOtomatis::catatJurnal` agar saldo akun COA otomatis termutasi saat ada entri manual. Halaman telah lulus inspeksi live browser dengan status **SEIMBANG (BALANCED)**.
+- **[TERSELESAIKAN] Peringatan browser 'Please enter a valid value' saat input angka nominal Rupiah (HTML5 Step Constraint Violation)**:
+  - *Penyebab:* Elemen `<input type="number">` memiliki atribut `min="1"` yang dikombinasikan dengan `step="100000"`. Sesuai standar W3C HTML5, rumus validasi browser menghitung nilai valid sebagai $\text{min} + (k \times \text{step}) = 1 + (k \times 100.000)$, sehingga nilai yang diizinkan hanya angka yang berakhiran 1 (seperti 1, 100001, 3500001). Saat pengguna mengetik angka bulat normal seperti `3500000`, peramban menolak dan memunculkan pop-up kesalahan kelipatan.
+  - *Solusi:* Memperbaiki seluruh input nominal keuangan (Faktur Penjualan, Pelunasan Piutang, Pembelian SO, Rilisan Uang Jalan, Beban Kas, Jurnal Umum, Deposit, Master Barang, dan Customer) menggunakan atribut `min="0" step="any"`. Input kini menerima nilai nominal bebas tanpa hambatan validasi peramban.
 
 
 ---
