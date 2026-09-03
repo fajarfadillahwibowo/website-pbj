@@ -359,7 +359,9 @@
                    class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.pengiriman.surat_jalan*') ? 'link-sidebar-aktif font-bold text-sky-700 dark:text-sky-400 bg-sky-50/90 dark:bg-sky-500/10 border-l-[3.5px] border-sky-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Pengiriman & Surat Jalan' : ''">
                     <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('operasional.pengiriman.surat_jalan*') ? 'bg-sky-600 text-white shadow-xs shadow-sky-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-sky-50 dark:group-hover:bg-blue-500/20 group-hover:text-sky-600 dark:group-hover:text-sky-400' }}">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1"/></svg>
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                        </svg>
                     </div>
                     <span x-show="!sidebarTerlipat" class="truncate">Pengiriman</span>
                 </a>
