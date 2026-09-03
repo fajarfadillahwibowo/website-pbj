@@ -344,7 +344,12 @@
                    class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.armada.kendaraan*') ? 'link-sidebar-aktif font-bold text-orange-700 dark:text-orange-400 bg-orange-50/90 dark:bg-orange-500/10 border-l-[3.5px] border-orange-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
                    :title="sidebarTerlipat ? 'Data Kendaraan & Jenis Aset' : ''">
                     <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('operasional.armada.kendaraan*') ? 'bg-orange-600 text-white shadow-xs shadow-orange-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-orange-50 dark:group-hover:bg-orange-500/20 group-hover:text-orange-600 dark:group-hover:text-orange-400' }}">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1"/></svg>
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14 18V6a2 2 0 00-2-2H4a2 2 0 00-2 2v11a1 1 0 001 1h2"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14 8h4.5a1.5 1.5 0 011.2.6l2.8 3.7c.3.4.5.9.5 1.4V17a1 1 0 01-1 1h-2"/>
+                            <circle cx="8" cy="18" r="2"/>
+                            <circle cx="18" cy="18" r="2"/>
+                        </svg>
                     </div>
                     <span x-show="!sidebarTerlipat" class="truncate">Data Kendaraan</span>
                 </a>
