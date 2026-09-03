@@ -2,17 +2,26 @@
 <html lang="id"
       x-data="{
         modeGelap: localStorage.getItem('tema') === 'gelap',
-        sidebarTerlipat: false,
+        sidebarTerlipat: localStorage.getItem('sidebar_terlipat') === 'true',
+        sidebarMobileTerbuka: false,
         kunciRbac: true,
         dropdownRoleTerbuka: false,
         jabatanAktif: (function() {
-            try {
-                const tersimpan = localStorage.getItem('jabatan_aktif');
-                if (tersimpan && tersimpan !== 'null' && tersimpan !== 'undefined') {
-                    return tersimpan;
-                }
-            } catch (e) {}
-            return '{{ session('kode_jabatan', 'SUPER_ADMIN') }}';
+            @if(session()->has('kode_jabatan'))
+                const roleDariSesi = '{{ session('kode_jabatan') }}';
+                try {
+                    localStorage.setItem('jabatan_aktif', roleDariSesi);
+                } catch(e) {}
+                return roleDariSesi;
+            @else
+                try {
+                    const tersimpan = localStorage.getItem('jabatan_aktif');
+                    if (tersimpan && tersimpan !== 'null' && tersimpan !== 'undefined') {
+                        return tersimpan;
+                    }
+                } catch (e) {}
+                return 'SPV_OPERASIONAL';
+            @endif
         })(),
         
         daftarRole: [
@@ -38,6 +47,7 @@
 
         pilihRole(kode) {
           this.jabatanAktif = kode;
+          this.sidebarMobileTerbuka = false;
           try {
             localStorage.setItem('jabatan_aktif', kode);
           } catch(e) {}
@@ -52,6 +62,10 @@
             },
             body: JSON.stringify({ kode_jabatan: kode })
           }).catch(err => console.error('Sinkronisasi role gagal:', err));
+        },
+
+        tutupSidebarMobile() {
+          this.sidebarMobileTerbuka = false;
         },
 
         // Matriks Hak Akses RBAC Sesuai PRD 1.1 & Diagram Alur Peran
@@ -109,6 +123,47 @@
         }
       }"
       x-init="
+        // Deteksi ukuran layar untuk initial state sidebar
+        const initSidebarState = () => {
+          const lebarLayar = window.innerWidth;
+          if (lebarLayar < 768) {
+            // Mobile: sidebar tersembunyi (drawer)
+            sidebarMobileTerbuka = false;
+            sidebarTerlipat = true;
+          } else if (lebarLayar < 1024) {
+            // Tablet: sidebar collapsed (icon-only)
+            sidebarTerlipat = true;
+          } else {
+            // Desktop: ambil dari preferensi tersimpan
+            const tersimpan = localStorage.getItem('sidebar_terlipat');
+            if (tersimpan !== null) {
+              sidebarTerlipat = tersimpan === 'true';
+            } else {
+              sidebarTerlipat = false;
+            }
+          }
+        };
+        initSidebarState();
+
+        // Auto-tutup drawer mobile saat resize ke desktop
+        const handleResize = () => {
+          if (window.innerWidth >= 768) {
+            sidebarMobileTerbuka = false;
+            document.body.style.overflow = '';
+          }
+          if (window.innerWidth >= 1024) {
+            const tersimpan = localStorage.getItem('sidebar_terlipat');
+            if (tersimpan !== null) {
+              sidebarTerlipat = tersimpan === 'true';
+            } else {
+              sidebarTerlipat = false;
+            }
+          } else if (window.innerWidth >= 768) {
+            sidebarTerlipat = true;
+          }
+        };
+        window.addEventListener('resize', handleResize, { passive: true });
+
         $watch('jabatanAktif', v => {
           try { localStorage.setItem('jabatan_aktif', v); } catch(e) {}
           fetch('{{ route("api.sinkronisasi_role") }}', {
@@ -120,6 +175,15 @@
             body: JSON.stringify({ kode_jabatan: v })
           }).catch(() => {});
         });
+        $watch('sidebarTerlipat', v => {
+          // Hanya simpan preferensi di desktop
+          if (window.innerWidth >= 1024) {
+            try { localStorage.setItem('sidebar_terlipat', v ? 'true' : 'false'); } catch(e) {}
+          }
+        });
+        $watch('sidebarMobileTerbuka', v => {
+          document.body.style.overflow = v ? 'hidden' : '';
+        });
         this.$nextTick(() => {
           if (typeof pulihkanPosisiSidebar === 'function') {
             pulihkanPosisiSidebar();
@@ -129,7 +193,7 @@
       :class="{ 'dark': modeGelap }">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
     <title>@yield('judul', 'Sistem Informasi Akuntansi & Distribusi Semen - PT Putra Balkom Jaya')</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo-pbj.png') }}">
 
@@ -157,26 +221,192 @@
 
     <style>
       [x-cloak] { display: none !important; }
-      body { font-family: 'Inter', sans-serif; }
+      
+      /* ============================================================
+         CSS RESPONSIF ENTERPRISE — LINTAS SEMUA BROWSER & DEVICE
+      ============================================================ */
+
+      /* Font & Base Reset */
+      *, *::before, *::after { box-sizing: border-box; }
+      body { 
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        -webkit-text-size-adjust: 100%;
+        -moz-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* iOS Rubber-band-safe scrolling */
+      * {
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* Scrollbar Desktop */
       ::-webkit-scrollbar { width: 5px; height: 5px; }
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
       .dark ::-webkit-scrollbar-thumb { background: #334155; }
+
+      /* Dropdown shadow cross-browser */
       .dropdown-shadow {
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05);
       }
       .dark .dropdown-shadow {
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
       }
+
+      /* ===== SIDEBAR DRAWER RESPONSIF (MOBILE & TABLET) ===== */
+
+      /* Overlay backdrop blur untuk mobile sidebar drawer */
+      .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+        background-color: rgba(0, 0, 0, 0.5);
+        -webkit-backdrop-filter: blur(4px);
+        backdrop-filter: blur(4px);
+        touch-action: none;
+      }
+
+      /* Sidebar: Desktop = relative, Mobile = fixed drawer dari kiri */
+      aside.sidebar-panel {
+        position: relative;
+        height: 100%;
+        z-index: 30;
+        transition: width 200ms ease, transform 200ms ease;
+      }
+
+      /* Mobile: sidebar jadi drawer fixed */
+      @media (max-width: 767px) {
+        aside.sidebar-panel {
+          position: fixed;
+          top: 0;
+          left: 0;
+          bottom: 0;
+          height: 100dvh;
+          width: 280px !important;
+          z-index: 45;
+          transform: translateX(-100%);
+          box-shadow: 4px 0 30px rgba(0,0,0,0.15);
+        }
+        aside.sidebar-panel.sidebar-mobile-terbuka {
+          transform: translateX(0);
+        }
+        /* Konten utama tidak perlu margin di mobile */
+        .konten-wrapper-mobile {
+          margin-left: 0 !important;
+        }
+      }
+
+      /* Tablet: sidebar collapsed by default, dapat diexpand */
+      @media (min-width: 768px) and (max-width: 1023px) {
+        aside.sidebar-panel {
+          position: relative;
+        }
+      }
+
+      /* Safe area untuk iPhone dengan notch */
+      @supports (padding: env(safe-area-inset-left)) {
+        .konten-area-main {
+          padding-left: max(1.25rem, env(safe-area-inset-left));
+          padding-right: max(1.25rem, env(safe-area-inset-right));
+          padding-bottom: max(1rem, env(safe-area-inset-bottom));
+        }
+        header {
+          padding-left: max(1rem, env(safe-area-inset-left));
+          padding-right: max(1rem, env(safe-area-inset-right));
+        }
+      }
+
+      /* Tabel responsif di mobile (scroll horizontal) */
+      .table-container-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 0.75rem;
+      }
+
+      /* Input & Button touch-friendly (min 44px untuk iOS HIG) */
+      @media (max-width: 767px) {
+        button, a, input, select, textarea {
+          min-height: 40px;
+        }
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        input[type="number"],
+        input[type="search"],
+        select, textarea {
+          font-size: 16px !important; /* Cegah zoom otomatis iOS */
+        }
+      }
+
+      /* Card grid responsif */
+      .grid-responsive-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+        gap: 1rem;
+      }
+
+      /* Modal responsif di mobile */
+      @media (max-width: 639px) {
+        [x-ref="panelModal"],
+        .modal-panel {
+          width: 100% !important;
+          max-width: 100% !important;
+          border-radius: 1rem 1rem 0 0 !important;
+          position: fixed !important;
+          bottom: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          top: auto !important;
+          max-height: 92dvh !important;
+          overflow-y: auto !important;
+        }
+      }
+
+      /* Focus visible untuk aksesibilitas keyboard */
+      :focus-visible {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
+        border-radius: 4px;
+      }
+
+      /* Print optimasi */
+      @media print {
+        aside.sidebar-panel,
+        header,
+        #indikatorLoadingHalaman {
+          display: none !important;
+        }
+        main {
+          padding: 0 !important;
+          overflow: visible !important;
+        }
+      }
     </style>
     @stack('gaya_tambahan')
 </head>
-<body class="h-screen bg-[#F4F6F9] dark:bg-[#0C0E14] text-slate-900 dark:text-slate-100 antialiased flex overflow-hidden transition-colors duration-200">
+<body class="h-screen bg-[#F4F6F9] dark:bg-[#0C0E14] text-slate-900 dark:text-slate-100 antialiased flex overflow-hidden transition-colors duration-200" style="min-height: 100dvh; min-height: 100vh;">
 
     {{-- Indikator Loading Bar Halus (YouTube / GitHub Enterprise Style) --}}
     <div id="indikatorLoadingHalaman" 
          class="fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500 z-50 transition-all duration-300 pointer-events-none opacity-0" 
          style="width: 0%;"></div>
+
+    {{-- Overlay Backdrop Mobile (klik di luar sidebar untuk menutup) --}}
+    <div x-show="sidebarMobileTerbuka"
+         x-cloak
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click="sidebarMobileTerbuka = false"
+         class="sidebar-overlay lg:hidden"
+         aria-hidden="true">
+    </div>
 
     {{-- Sidebar Navigasi Menyeluruh --}}
     @include('layouts.sidebar')
@@ -187,7 +417,7 @@
         @include('layouts.header')
 
         {{-- Area Konten Dinamis (Hanya bagian ini yang diperbarui saat klik menu sidebar) --}}
-        <main id="kontenUtama" class="flex-1 overflow-y-auto p-5 sm:p-6 bg-[#F4F6F9] dark:bg-[#0C0E14] transition-opacity duration-150">
+        <main id="kontenUtama" class="konten-area-main flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6 bg-[#F4F6F9] dark:bg-[#0C0E14] transition-opacity duration-150">
             @yield('konten')
         </main>
     </div>
@@ -404,6 +634,16 @@
 
             event.preventDefault();
 
+            // Tutup drawer mobile saat menu diklik (UX smartphone)
+            if (window.innerWidth < 768) {
+                const htmlEl = document.documentElement;
+                const alpineData = htmlEl._x_dataStack ? htmlEl._x_dataStack[0] : null;
+                if (alpineData && typeof alpineData.sidebarMobileTerbuka !== 'undefined') {
+                    alpineData.sidebarMobileTerbuka = false;
+                }
+                document.body.style.overflow = '';
+            }
+
             // Jika URL adalah halaman yang sama, scroll halus ke atas konten
             try {
                 const urlObj = new URL(url, window.location.origin);
@@ -416,6 +656,7 @@
 
             muatKontenDinamis(url, el);
         }
+
 
         // Tangani navigasi tombol Back / Forward browser
         window.addEventListener('popstate', function(event) {
