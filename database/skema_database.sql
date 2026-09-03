@@ -905,26 +905,44 @@ INSERT INTO `hak_akses_jabatan` (`id_jabatan`, `id_modul`, `boleh_lihat`, `boleh
 (9, 28, TRUE, TRUE, TRUE, FALSE); -- List Sparepart & Pembelian
 
 -- 4. Contoh Akun Awal
+-- 4. Contoh Akun Awal & Karyawan (Sandi Default: password123)
 INSERT INTO `super_account` (`username`, `password`, `nama_pemilik`) VALUES
-('superadmin', '$2y$12$eA8jD5Q0G/JkWuCsk5/J6eN8cT7sB1gqK3p5oV2yW4rZ6m7x8y9z0', 'Administrator Kontrol Akun');
+('superadmin', '$2y$12$eKNird.ZBmxMrRiXKjlf8eeQC1azLructF.cGRmSrtfDFoLANO4R.', 'Administrator Kontrol Akun')
+ON DUPLICATE KEY UPDATE `nama_pemilik` = VALUES(`nama_pemilik`);
 
 INSERT INTO `data_wilayah` (`kode_wilayah`, `nama_wilayah`) VALUES
 ('WLY-001', 'Wilayah Jakarta & Sekitarnya'),
 ('WLY-002', 'Wilayah Jawa Barat'),
-('WLY-003', 'Wilayah Jawa Tengah');
+('WLY-003', 'Wilayah Jawa Tengah')
+ON DUPLICATE KEY UPDATE `nama_wilayah` = VALUES(`nama_wilayah`);
 
 INSERT INTO `data_semen` (`kode_barang`, `nama_barang`, `jenis_barang`, `satuan_barang`, `harga_pokok`, `harga_jual_standar`) VALUES
 ('SMN-001', 'Semen Portland Komposit 40kg', 'PCC', 'Zak', 52000.00, 58000.00),
-('SMN-002', 'Semen Portland Komposit 50kg', 'PCC', 'Zak', 64000.00, 71000.00);
+('SMN-002', 'Semen Portland Komposit 50kg', 'PCC', 'Zak', 64000.00, 71000.00)
+ON DUPLICATE KEY UPDATE `nama_barang` = VALUES(`nama_barang`), `harga_pokok` = VALUES(`harga_pokok`), `harga_jual_standar` = VALUES(`harga_jual_standar`);
 
 INSERT INTO `data_karyawan` (`kode_karyawan`, `nama_karyawan`, `id_jabatan`, `kategori_karyawan`, `no_identitas`, `alamat`, `no_hp`, `status_karyawan`, `tanggal_mulai_kerja`) VALUES
-('KRY-001', 'Siti Rahmawati', 1, 'staf', '3201234567890001', 'Jl. Merdeka No. 10', '081234567890', 'tetap', '2024-01-15'),
-('KRY-002', 'Dewi Anggraeni', 2, 'staf', '3201234567890002', 'Jl. Sudirman No. 45', '081298765432', 'tetap', '2024-02-01'),
-('KRY-003', 'Rian Hidayat', 3, 'staf', '3201234567890003', 'Jl. Gatot Subroto No. 12', '081233445566', 'tetap', '2024-02-15'),
-('KRY-004', 'Ahmad Supriyadi', 7, 'manajemen', '3201234567890004', 'Jl. Thamrin No. 88', '081122334455', 'tetap', '2023-05-01');
+('DRV-001', 'Joko Susanto', 6, 'driver', '3216010000000010', 'Jl. Logistik Cikarang Blok B4', '0813-1122-3344', 'aktif', '2024-01-01'),
+('DRV-002', 'Fajar Fadillah Wibowo', 6, 'driver', '3216010000000010', 'Jl. Logistik Cikarang Blok B4', '0813-1122-3344', 'tetap', '2026-09-02'),
+('KRY-001', 'Siti Rahmawati', 2, 'staf', '3216010000000001', 'Jl. Logistik Cikarang Blok B4', '0812-9876-0001', 'aktif', '2024-01-01'),
+('KRY-002', 'Dewi Anggraeni', 3, 'staf', '3216010000000002', 'Jl. Logistik Cikarang Blok B4', '0812-9876-0002', 'aktif', '2024-01-01'),
+('KRY-003', 'Rian Hidayat', 4, 'staf', '3216010000000003', 'Jl. Logistik Cikarang Blok B4', '0812-9876-0003', 'aktif', '2024-01-01'),
+('KRY-004', 'Bambang Wijaya', 5, 'staf', '3216010000000004', 'Jl. Logistik Cikarang Blok B4', '0812-9876-0004', 'aktif', '2024-01-01'),
+('KRY-005', 'Agus Suryanto', 6, 'staf', '3216010000000005', 'Jl. Logistik Cikarang Blok B4', '0812-9876-0005', 'aktif', '2024-01-01'),
+('KRY-006', 'Hendra Gunawan', 7, 'gudang', '3216010000000006', 'Jl. Logistik Cikarang Blok B4', '0812-9876-0006', 'aktif', '2024-01-01'),
+('KRY-007', 'Ahmad Supriyadi', 8, 'manajemen', '3216010000000007', 'Jl. Logistik Cikarang Blok B4', '0812-9876-0007', 'aktif', '2024-01-01'),
+('KRY-008', 'Wahyu Pratama', 9, 'staf', '3216010000000008', 'Jl. Logistik Cikarang Blok B4', '0812-9876-0008', 'aktif', '2024-01-01'),
+('KRY-009', 'Doni Kurniawan', 10, 'teknisi', '3216010000000009', 'Jl. Logistik Cikarang Blok B4', '0812-9876-0009', 'aktif', '2024-01-01')
+ON DUPLICATE KEY UPDATE `nama_karyawan` = VALUES(`nama_karyawan`), `id_jabatan` = VALUES(`id_jabatan`);
 
 INSERT INTO `account` (`username`, `password`, `kode_karyawan`, `id_jabatan`, `status_aktif`) VALUES
-('spv_keuangan', '$2y$12$eA8jD5Q0G/JkWuCsk5/J6eN8cT7sB1gqK3p5oV2yW4rZ6m7x8y9z0', 'KRY-001', 1, TRUE),
-('staff_ar', '$2y$12$eA8jD5Q0G/JkWuCsk5/J6eN8cT7sB1gqK3p5oV2yW4rZ6m7x8y9z0', 'KRY-002', 2, TRUE),
-('staff_ap', '$2y$12$eA8jD5Q0G/JkWuCsk5/J6eN8cT7sB1gqK3p5oV2yW4rZ6m7x8y9z0', 'KRY-003', 3, TRUE),
-('direktur', '$2y$12$eA8jD5Q0G/JkWuCsk5/J6eN8cT7sB1gqK3p5oV2yW4rZ6m7x8y9z0', 'KRY-004', 7, TRUE);
+('spv_keuangan', '$2y$12$eKNird.ZBmxMrRiXKjlf8eeQC1azLructF.cGRmSrtfDFoLANO4R.', 'KRY-001', 2, TRUE),
+('staff_ar', '$2y$12$eKNird.ZBmxMrRiXKjlf8eeQC1azLructF.cGRmSrtfDFoLANO4R.', 'KRY-002', 3, TRUE),
+('staff_ap', '$2y$12$eKNird.ZBmxMrRiXKjlf8eeQC1azLructF.cGRmSrtfDFoLANO4R.', 'KRY-003', 4, TRUE),
+('dispatcher', '$2y$12$eKNird.ZBmxMrRiXKjlf8eeQC1azLructF.cGRmSrtfDFoLANO4R.', 'KRY-004', 5, TRUE),
+('pengawas_driver', '$2y$12$eKNird.ZBmxMrRiXKjlf8eeQC1azLructF.cGRmSrtfDFoLANO4R.', 'KRY-005', 6, TRUE),
+('spv_gudang', '$2y$12$eKNird.ZBmxMrRiXKjlf8eeQC1azLructF.cGRmSrtfDFoLANO4R.', 'KRY-006', 7, TRUE),
+('direktur', '$2y$12$eKNird.ZBmxMrRiXKjlf8eeQC1azLructF.cGRmSrtfDFoLANO4R.', 'KRY-007', 8, TRUE),
+('spv_operasional', '$2y$12$eKNird.ZBmxMrRiXKjlf8eeQC1azLructF.cGRmSrtfDFoLANO4R.', 'KRY-008', 9, TRUE),
+('pengawas_kendaraan', '$2y$12$eKNird.ZBmxMrRiXKjlf8eeQC1azLructF.cGRmSrtfDFoLANO4R.', 'KRY-009', 10, TRUE)
+ON DUPLICATE KEY UPDATE `id_jabatan` = VALUES(`id_jabatan`), `status_aktif` = VALUES(`status_aktif`);
