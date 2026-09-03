@@ -83,10 +83,11 @@ class OngkosAngkut extends Model
      */
     public function getTerakhirDieditRelatifAttribute()
     {
-        if (!$this->diperbarui_pada) {
+        $waktu = $this->diperbarui_pada ?? $this->dibuat_pada;
+        if (!$waktu) {
             return 'Baru didaftarkan';
         }
-        return $this->diperbarui_pada->locale('id')->diffForHumans();
+        return $waktu->locale('id')->diffForHumans();
     }
 
     /**
@@ -94,9 +95,10 @@ class OngkosAngkut extends Model
      */
     public function getTerakhirDieditWaktuAttribute()
     {
-        if (!$this->diperbarui_pada) {
+        $waktu = $this->diperbarui_pada ?? $this->dibuat_pada;
+        if (!$waktu) {
             return '-';
         }
-        return $this->diperbarui_pada->format('d/m/Y H:i:s');
+        return $waktu->format('d/m/Y H:i:s');
     }
 }

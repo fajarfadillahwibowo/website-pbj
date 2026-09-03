@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('judul', 'Master Data Toko Bangunan & Proyek - PT Pura Balkom Jaya')
+@section('judul', 'Master Data Toko Bangunan & Proyek - PT Putra Balkom Jaya')
 
 @section('konten')
 <div x-data="kelolaTokoBangunan()" x-init="initToko()" class="space-y-6">

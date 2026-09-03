@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('judul', 'Master Data Jenis Aset - PT Pura Balkom Jaya')
+@section('judul', 'Master Data Jenis Aset - PT Putra Balkom Jaya')
 
 @section('konten')
 <div x-data="kelolaJenisAset()" x-init="initJenisAset()" class="space-y-6">

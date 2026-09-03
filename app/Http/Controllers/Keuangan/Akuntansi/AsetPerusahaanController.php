@@ -363,4 +363,68 @@ class AsetPerusahaanController extends Controller
             return redirect()->back()->with('error', 'Gagal memproses penyusutan bulanan: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Ambil detail data aset untuk modal Alpine.js.
+     */
+    public function show($kode_aset)
+    {
+        $aset = DB::table('data_aset')
+            ->leftJoin('data_jenis_aset', 'data_aset.kode_jenis_aset', '=', 'data_jenis_aset.kode_jenis_aset')
+            ->select('data_aset.*', 'data_jenis_aset.jenis_aset')
+            ->where('data_aset.kode_aset', $kode_aset)
+            ->first();
+
+        if (!$aset) {
+            return response()->json([
+                'status' => 'gagal',
+                'pesan' => 'Data aset tidak ditemukan.'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'sukses',
+            'data' => $aset
+        ]);
+    }
+
+    /**
+     * Perbarui data aset perusahaan.
+     */
+    public function update(Request $request, $kode_aset)
+    {
+        $request->validate([
+            'kode_jenis_aset'   => 'required|string|exists:data_jenis_aset,kode_jenis_aset',
+            'nama_aset'         => 'required|string|max:100',
+            'tanggal_pembelian' => 'required|date',
+            'harga_aset'        => 'required|numeric|min:0',
+        ]);
+
+        DB::table('data_aset')->where('kode_aset', $kode_aset)->update([
+            'kode_jenis_aset'   => $request->kode_jenis_aset,
+            'nama_aset'         => trim($request->nama_aset),
+            'tanggal_pembelian' => $request->tanggal_pembelian,
+            'harga_aset'        => $request->harga_aset,
+            'no_polisi'         => !empty($request->no_polisi) ? strtoupper(trim($request->no_polisi)) : '-',
+            'status_aset'       => $request->status_aset ?? 'aktif',
+            'diperbarui_pada'   => now(),
+        ]);
+
+        return redirect()->route('keuangan.akuntansi.aset')->with('sukses', "Data aset {$request->nama_aset} ({$kode_aset}) berhasil diperbarui.");
+    }
+
+    /**
+     * Hapus data aset perusahaan.
+     */
+    public function destroy($kode_aset)
+    {
+        $aset = DB::table('data_aset')->where('kode_aset', $kode_aset)->first();
+        if (!$aset) {
+            return redirect()->route('keuangan.akuntansi.aset')->with('error', 'Data aset tidak ditemukan.');
+        }
+
+        DB::table('data_aset')->where('kode_aset', $kode_aset)->delete();
+
+        return redirect()->route('keuangan.akuntansi.aset')->with('sukses', "Aset {$aset->nama_aset} ({$kode_aset}) berhasil dihapus dari inventaris.");
+    }
 }

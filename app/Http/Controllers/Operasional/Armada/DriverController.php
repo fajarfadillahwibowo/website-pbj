@@ -71,6 +71,13 @@ class DriverController extends Controller
                 ->with('error', 'Akses Ditolak! Role SPV Operasional hanya memiliki wewenang Lihat Saja (Read-Only) pada modul Driver.');
         }
 
+        // Bersihkan karakter spasi / pemisah pada no_ktp jika ada
+        if ($request->has('no_ktp')) {
+            $request->merge([
+                'no_ktp' => preg_replace('/[^0-9]/', '', (string) $request->input('no_ktp'))
+            ]);
+        }
+
         $pesanKustom = [
             'kode_karyawan.required' => 'Kode karyawan wajib diisi.',
             'kode_karyawan.unique' => 'Kode karyawan sudah terdaftar dalam sistem.',
@@ -79,11 +86,13 @@ class DriverController extends Controller
             'id_jabatan.exists' => 'Jabatan yang dipilih tidak valid.',
             'alamat.required' => 'Alamat domisili wajib diisi.',
             'no_hp.required' => 'Nomor HP / WhatsApp wajib diisi.',
-            'no_ktp.required' => 'Nomor KTP / identitas wajib diisi.',
+            'no_ktp.required' => 'Nomor KTP / NIK wajib diisi.',
+            'no_ktp.digits' => 'Nomor KTP / NIK harus terdiri dari tepat 16 digit angka khas e-KTP Indonesia.',
+            'no_ktp.numeric' => 'Nomor KTP / NIK hanya boleh berisi angka.',
             'foto_ktp.image' => 'File foto KTP harus berupa gambar (JPG, PNG, WEBP).',
-            'foto_ktp.max' => 'Ukuran foto KTP maksimal 3 MB.',
+            'foto_ktp.max' => 'Ukuran file foto KTP maksimal 2 MB.',
             'file_kontrak.mimes' => 'File kontrak harus berformat PDF, DOC, DOCX, JPG, atau PNG.',
-            'file_kontrak.max' => 'Ukuran file kontrak maksimal 5 MB.',
+            'file_kontrak.max' => 'Ukuran file kontrak maksimal 2 MB.',
             'status_karyawan.required' => 'Status karyawan wajib dipilih.',
         ];
 
@@ -93,9 +102,9 @@ class DriverController extends Controller
             'id_jabatan' => 'required|exists:jabatan,id_jabatan',
             'alamat' => 'required|string',
             'no_hp' => 'required|string|max:25',
-            'no_ktp' => 'required|string|max:30',
-            'foto_ktp' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
-            'file_kontrak' => 'nullable|file|mimes:pdf,doc,docx,jpeg,png,jpg|max:5120',
+            'no_ktp' => 'required|numeric|digits:16',
+            'foto_ktp' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'file_kontrak' => 'nullable|file|mimes:pdf,doc,docx,jpeg,png,jpg|max:2048',
             'status_karyawan' => 'required|in:aktif,kontrak,tetap,non-aktif,berhenti',
             'tanggal_mulai_kerja' => 'nullable|date',
             'tanggal_berhenti' => 'nullable|date|after_or_equal:tanggal_mulai_kerja',
@@ -162,17 +171,26 @@ class DriverController extends Controller
 
         $driver = Driver::where('kode_karyawan', $kode_karyawan)->firstOrFail();
 
+        // Bersihkan karakter spasi / pemisah pada no_ktp jika ada
+        if ($request->has('no_ktp')) {
+            $request->merge([
+                'no_ktp' => preg_replace('/[^0-9]/', '', (string) $request->input('no_ktp'))
+            ]);
+        }
+
         $pesanKustom = [
             'nama_karyawan.required' => 'Nama driver wajib diisi.',
             'id_jabatan.required' => 'Jabatan karyawan wajib dipilih.',
             'id_jabatan.exists' => 'Jabatan yang dipilih tidak valid.',
             'alamat.required' => 'Alamat domisili wajib diisi.',
             'no_hp.required' => 'Nomor HP / WhatsApp wajib diisi.',
-            'no_ktp.required' => 'Nomor KTP / identitas wajib diisi.',
+            'no_ktp.required' => 'Nomor KTP / NIK wajib diisi.',
+            'no_ktp.digits' => 'Nomor KTP / NIK harus terdiri dari tepat 16 digit angka khas e-KTP Indonesia.',
+            'no_ktp.numeric' => 'Nomor KTP / NIK hanya boleh berisi angka.',
             'foto_ktp.image' => 'File foto KTP harus berupa gambar (JPG, PNG, WEBP).',
-            'foto_ktp.max' => 'Ukuran foto KTP maksimal 3 MB.',
+            'foto_ktp.max' => 'Ukuran file foto KTP maksimal 2 MB.',
             'file_kontrak.mimes' => 'File kontrak harus berformat PDF, DOC, DOCX, JPG, atau PNG.',
-            'file_kontrak.max' => 'Ukuran file kontrak maksimal 5 MB.',
+            'file_kontrak.max' => 'Ukuran file kontrak maksimal 2 MB.',
             'status_karyawan.required' => 'Status karyawan wajib dipilih.',
         ];
 
@@ -181,16 +199,21 @@ class DriverController extends Controller
             'id_jabatan' => 'required|exists:jabatan,id_jabatan',
             'alamat' => 'required|string',
             'no_hp' => 'required|string|max:25',
-            'no_ktp' => 'required|string|max:30',
-            'foto_ktp' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
-            'file_kontrak' => 'nullable|file|mimes:pdf,doc,docx,jpeg,png,jpg|max:5120',
+            'no_ktp' => 'required|numeric|digits:16',
+            'foto_ktp' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'file_kontrak' => 'nullable|file|mimes:pdf,doc,docx,jpeg,png,jpg|max:2048',
             'status_karyawan' => 'required|in:aktif,kontrak,tetap,non-aktif,berhenti',
             'tanggal_mulai_kerja' => 'nullable|date',
             'tanggal_berhenti' => 'nullable|date',
         ], $pesanKustom);
 
         $pathFotoKtp = $driver->foto_ktp;
-        if ($request->hasFile('foto_ktp')) {
+        if ($request->boolean('hapus_foto_ktp')) {
+            if (!empty($driver->foto_ktp) && Storage::disk('public')->exists($driver->foto_ktp)) {
+                Storage::disk('public')->delete($driver->foto_ktp);
+            }
+            $pathFotoKtp = null;
+        } elseif ($request->hasFile('foto_ktp')) {
             // Hapus foto lama jika ada
             if (!empty($driver->foto_ktp) && Storage::disk('public')->exists($driver->foto_ktp)) {
                 Storage::disk('public')->delete($driver->foto_ktp);
@@ -199,7 +222,12 @@ class DriverController extends Controller
         }
 
         $pathFileKontrak = $driver->file_kontrak;
-        if ($request->hasFile('file_kontrak')) {
+        if ($request->boolean('hapus_file_kontrak')) {
+            if (!empty($driver->file_kontrak) && Storage::disk('public')->exists($driver->file_kontrak)) {
+                Storage::disk('public')->delete($driver->file_kontrak);
+            }
+            $pathFileKontrak = null;
+        } elseif ($request->hasFile('file_kontrak')) {
             // Hapus file kontrak lama jika ada
             if (!empty($driver->file_kontrak) && Storage::disk('public')->exists($driver->file_kontrak)) {
                 Storage::disk('public')->delete($driver->file_kontrak);
@@ -326,5 +354,57 @@ class DriverController extends Controller
             'kode_otomatis' => $kodeBaru,
             'keterangan' => 'Slot Nomor Terkecil Tersedia (Daur Ulang Otomatis)'
         ]);
+    }
+
+    /**
+     * Hapus berkas lampiran (foto_ktp atau file_kontrak) milik driver.
+     */
+    public function hapusBerkas($kode_karyawan, $jenis_berkas)
+    {
+        if (session('kode_jabatan') === 'SPV_OPERASIONAL') {
+            return response()->json([
+                'status' => 'gagal',
+                'pesan' => 'Akses Ditolak: SPV Operasional hanya memiliki hak akses Lihat Saja.'
+            ], 403);
+        }
+
+        $driver = Driver::where('kode_karyawan', $kode_karyawan)->first();
+        if (!$driver) {
+            return response()->json([
+                'status' => 'gagal',
+                'pesan' => 'Data driver tidak ditemukan.'
+            ], 404);
+        }
+
+        if ($jenis_berkas === 'foto_ktp') {
+            if (!empty($driver->foto_ktp) && Storage::disk('public')->exists($driver->foto_ktp)) {
+                Storage::disk('public')->delete($driver->foto_ktp);
+            }
+            $driver->update([
+                'foto_ktp' => null,
+                'diperbarui_pada' => now(),
+            ]);
+            return response()->json([
+                'status' => 'sukses',
+                'pesan' => 'Foto KTP berhasil dihapus dari sistem.'
+            ]);
+        } elseif ($jenis_berkas === 'file_kontrak') {
+            if (!empty($driver->file_kontrak) && Storage::disk('public')->exists($driver->file_kontrak)) {
+                Storage::disk('public')->delete($driver->file_kontrak);
+            }
+            $driver->update([
+                'file_kontrak' => null,
+                'diperbarui_pada' => now(),
+            ]);
+            return response()->json([
+                'status' => 'sukses',
+                'pesan' => 'Dokumen kontrak kerja berhasil dihapus dari sistem.'
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'gagal',
+            'pesan' => 'Jenis berkas tidak dikenal.'
+        ], 400);
     }
 }

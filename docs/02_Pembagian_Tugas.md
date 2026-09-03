@@ -136,33 +136,52 @@ Berikut adalah daftar pekerjaan yang belum dieksekusi dan dijadwalkan untuk taha
 
 ## 🚚 6. Checklist Tugas Rinci DEVELOPER 2 (Status: ✅ 100% Selesai & Terverifikasi)
 
-**Tanggung Jawab:** Menyelesaikan logika pengiriman, alokasi armada truk, penugasan driver supir, mutasi stok gudang semen, stock opname, kemitraan KSO, dan bengkel servis.
+**Tanggung Jawab:** Menyelesaikan logika pengiriman, alokasi armada truk, penugasan driver supir, mutasi stok gudang semen, stock opname, kemitraan KSO, master data ongkos angkut, dan bengkel servis.
 
 ### 6.1. Modul Gudang & Manajemen Persediaan (SPV Gudang)
-- **File Controller:** [`StokGudangController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Operasional/Gudang/StokGudangController.php), [`StockOpnameController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Operasional/Gudang/StockOpnameController.php)
+- **File Controller:** [`StokGudangController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Gudang/StokGudangController.php), [`StockOpnameController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Gudang/StockOpnameController.php)
+- **File View:**
+  - [`operasional/gudang/stok.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/gudang/stok.blade.php) (Tabel `list_gudang_so`)
+  - [`operasional/gudang/opname.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/gudang/opname.blade.php) (Tabel `opname_gudang`)
 - **Target Pengerjaan:**
-  - [x] Pemantauan stok per gudang dan riwayat mutasi stok.
-  - [x] Formulir Stock Opname Fisik, kalkulasi selisih otomatis, generator No. Opname, dan tombol persetujuan SPV Gudang.
+  - [x] Pemantauan stok per gudang dan riwayat mutasi stok (tambah masuk / kurang keluar / set fisik kuantitas).
+  - [x] Formulir Stock Opname Fisik, kalkulasi selisih otomatis secara real-time, generator No. Opname cerdas, dan tombol persetujuan SPV Gudang yang langsung mensinkronkan stok fisik ke master gudang.
 
 ### 6.2. Modul Armada Kendaraan & Data Driver (Pengawas Driver & Pengawas Kendaraan)
-- **File Controller:** [`KendaraanController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Operasional/Armada/KendaraanController.php), [`DriverController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Operasional/Armada/DriverController.php)
+- **File Controller:** [`KendaraanController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Armada/KendaraanController.php), [`DriverController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Armada/DriverController.php)
+- **File View:**
+  - [`operasional/armada/kendaraan.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/armada/kendaraan.blade.php) (Tabel `data_aset` & `data_jenis_aset`)
+  - [`operasional/armada/driver.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/armada/driver.blade.php) (Tabel `data_karyawan` filter driver)
 - **Target Pengerjaan:**
-  - [x] CRUD Kendaraan: Plat nomor/kode aset, nama aset, masa berlaku KIR & pajak STNK.
-  - [x] CRUD Driver: Generator kode supir (`DRV-xxx`), status supir (`Standby`, `Jalan`, `Cuti`), dan proteksi Read-Only untuk SPV Operasional.
+  - [x] CRUD Kendaraan: Plat nomor/kode aset, nama aset, merek, jenis aset, kapasitas zak/tonase, tanggal KIR & pajak, harga pembelian, serta integrasi tab Data Jenis Aset dalam satu halaman.
+  - [x] CRUD Driver / Sopir: Generator kode supir cerdas (Mode Daur Ulang Slot Kosong vs Kode Acak Anti-Tebak), manajemen status supir (`Standby`, `Jalan`, `Cuti/Izin`), serta label **🕒 Riwayat Terakhir Diedit Real-Time** pada tiap baris.
+  - [x] **Pembatasan RBAC Role SPV Operasional:** Modul *Data Karyawan (Driver)* diset menjadi **Read-Only (Hanya Lihat)** untuk SPV Operasional dengan proteksi frontend (sembunyikan tombol Tambah/Edit/Hapus) dan proteksi backend `DriverController.php`. SPV Operasional hanya memantau data driver armada dan tidak dapat melihat karyawan selain driver.
 
-### 6.3. Modul Dispatcher & Surat Jalan Pengiriman (Dispatcher & SPV Operasional)
-- **File Controller:** [`SuratJalanController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Operasional/Pengiriman/SuratJalanController.php), [`KSOController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Operasional/KSO/KSOController.php)
+### 6.3. Modul Dispatcher, Surat Jalan & Ongkos Angkut (Dispatcher & SPV Operasional)
+- **File Controller:** [`SuratJalanController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Pengiriman/SuratJalanController.php), [`OngkosAngkutController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Pengiriman/OngkosAngkutController.php), [`KSOController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/KSO/KSOController.php)
+- **File View:**
+  - [`operasional/pengiriman/surat_jalan.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/pengiriman/surat_jalan.blade.php) (Tabel `pengiriman`)
+  - [`operasional/pengiriman/ongkos_angkut.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/pengiriman/ongkos_angkut.blade.php) (Tabel `data_ongkos_angkut`)
+  - [`operasional/kso/index.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/kso/index.blade.php) (Tabel `data_kso` & `ongkos_kso`)
 - **Target Pengerjaan:**
-  - [x] Pembuatan Surat Jalan (SJ) pengiriman semen format resmi PT PBJ.
-  - [x] Dropdown supir standby & armada truk siap jalan.
-  - [x] CRUD Kemitraan KSO & Tarif Ongkos Angkut Trayek KSO (`ongkos_kso`).
+  - [x] Pembuatan Surat Jalan (SJ) pengiriman semen dengan generator nomor surat jalan otomatis.
+  - [x] Dropdown pemilihan supir yang berstatus *Standby* & armada truk yang siap jalan.
+  - [x] Perhitungan otomatis ongkos angkut berdasarkan tarif trayek dan jumlah muatan.
+  - [x] Update status pengiriman (`Draft` -> `Muat` -> `Jalan` -> `Terkirim/Selesai`).
+  - [x] Cetak dokumen Surat Jalan resmi format jalan sopir PT Putra Balkom Jaya.
+  - [x] **CRUD Master Data Ongkos Angkut (9 Atribut):** Implementasi modul tarif pengiriman distribusi dengan kolom lengkap: `kode_oa`, `nama_oa`, `kode_gudang`, `kontrak_oa`, `muatan_oa`, `harga_oa`, `harga_kso`, `harga_kso_khusus`, `wilayah_oa` dilengkapi filter pencarian, smart auto-numbering, dan kalkulator KPI.
+  - [x] **CRUD Data KSO (Kerja Sama Operasional) & Ongkos KSO:** 2 Tab terpadu untuk master kemitraan KSO (upload file kontrak, nilai kontrak, masa aktif) dan standardisasi tarif trayek rute ongkos angkut KSO (`ongkos_kso`).
 
 ### 6.4. Modul Bengkel & Perbaikan Kendaraan (Pengawas Kendaraan)
-- **File Controller:** [`PerbaikanKendaraanController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Operasional/Bengkel/PerbaikanKendaraanController.php), [`PembelianSparepartController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Operasional/Bengkel/PembelianSparepartController.php), [`SparepartController.php`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Operasional/Bengkel/SparepartController.php)
+- **File Controller:** [`PerbaikanKendaraanController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Bengkel/PerbaikanKendaraanController.php), [`PembelianSparepartController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Bengkel/PembelianSparepartController.php), [`SparepartController.php`](file:///d:/laragon/www/website-pbj/app/Http/Controllers/Operasional/Bengkel/SparepartController.php)
+- **File View:**
+  - [`operasional/bengkel/perbaikan.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/bengkel/perbaikan.blade.php) (Tabel `perbaikan_kendaraan`)
+  - [`operasional/bengkel/pembelian_sparepart.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/bengkel/pembelian_sparepart.blade.php) (Tabel `pembelian_sparepart`)
+  - [`operasional/bengkel/sparepart.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/operasional/bengkel/sparepart.blade.php) (Tabel `list_sparepart`)
 - **Target Pengerjaan:**
-  - [x] Pembuatan Surat Perintah Kerja (SPK) servis kendaraan bengkel & cetak SPK.
-  - [x] CRUD Faktur Pembelian Sparepart & auto-sync stok fisik.
-  - [x] CRUD Katalog & Stok Sparepart Truk dengan kartu KPI.
+  - [x] Pembuatan Surat Perintah Kerja (SPK) servis kendaraan bengkel, generator nomor SPK otomatis, live kalkulasi biaya jasa + sparepart, ubah status cepat, dan cetak lembar SPK resmi.
+  - [x] CRUD Faktur Pembelian & Pengadaan Sparepart dari supplier dengan live kalkulator total bayar dan auto-sync penambahan kuantitas fisik ke master stok sparepart.
+  - [x] CRUD Katalog & Stok Sparepart Truk dengan 4 kartu KPI, modal mutasi cepat (masuk/keluar/atur), dan badge level ketersediaan stok (`Aman`, `Menipis`, `Habis`).
 
 ---
 

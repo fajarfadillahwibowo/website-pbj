@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('judul', 'Master Data Customer (Entitas Pemilik & Finansial) - PT Pura Balkom Jaya')
+@section('judul', 'Master Data Customer (Entitas Pemilik & Finansial) - PT Putra Balkom Jaya')
 
 @section('konten')
 <div x-data="kelolaCustomer()" x-init="initCustomer()" class="space-y-6">

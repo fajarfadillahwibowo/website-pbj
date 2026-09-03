@@ -87,7 +87,7 @@ class KeuanganSeeder extends Seeder
                 'tanggal_kir'       => '2026-11-20',
                 'tanggal_pajak'     => '2026-10-15',
                 'status_aset'       => 'aktif',
-                'nama_pemilik'      => 'PT Pura Balkom Jaya Utama',
+                'nama_pemilik'      => 'PT Putra Balkom Jaya',
             ],
             [
                 'kode_aset'         => 'AST-002',
@@ -105,7 +105,7 @@ class KeuanganSeeder extends Seeder
                 'tanggal_kir'       => '2026-09-30',
                 'tanggal_pajak'     => '2026-08-10',
                 'status_aset'       => 'aktif',
-                'nama_pemilik'      => 'PT Pura Balkom Jaya Utama',
+                'nama_pemilik'      => 'PT Putra Balkom Jaya',
             ],
             [
                 'kode_aset'         => 'AST-003',
@@ -123,7 +123,7 @@ class KeuanganSeeder extends Seeder
                 'tanggal_kir'       => null,
                 'tanggal_pajak'     => null,
                 'status_aset'       => 'aktif',
-                'nama_pemilik'      => 'PT Pura Balkom Jaya Utama',
+                'nama_pemilik'      => 'PT Putra Balkom Jaya',
             ],
         ];
 

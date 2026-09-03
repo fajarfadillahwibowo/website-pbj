@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('judul', 'Stok Opname Fisik Gudang Semen - PT Pura Balkom Jaya')
+@section('judul', 'Stok Opname Fisik Gudang Semen - PT Putra Balkom Jaya')
 
 @section('konten')
 <div x-data="kelolaStockOpname()" x-init="initOpname()" class="space-y-6">

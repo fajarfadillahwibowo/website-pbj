@@ -138,6 +138,9 @@ Route::prefix('keuangan')->name('keuangan.')->group(function () {
         Route::get('/aset-perusahaan', [AsetPerusahaanController::class, 'index'])->name('aset');
         Route::post('/aset-perusahaan', [AsetPerusahaanController::class, 'store'])->name('aset.store');
         Route::post('/aset-perusahaan/penyusutan', [AsetPerusahaanController::class, 'prosesPenyusutanBulanan'])->name('aset.penyusutan');
+        Route::get('/aset-perusahaan/{kode_aset}', [AsetPerusahaanController::class, 'show'])->name('aset.detail');
+        Route::put('/aset-perusahaan/{kode_aset}', [AsetPerusahaanController::class, 'update'])->name('aset.update');
+        Route::delete('/aset-perusahaan/{kode_aset}', [AsetPerusahaanController::class, 'destroy'])->name('aset.destroy');
     });
 });
 
@@ -176,6 +179,13 @@ Route::prefix('operasional')->name('operasional.')->group(function () {
         Route::put('/kendaraan/{kode_aset}', [KendaraanController::class, 'perbarui'])->name('kendaraan.perbarui');
         Route::delete('/kendaraan/{kode_aset}', [KendaraanController::class, 'hapus'])->name('kendaraan.hapus');
 
+        // Sub-Fitur Aset Perusahaan di dalam Data Kendaraan (Tab Jenis Aset / Aset Perusahaan)
+        Route::post('/kendaraan-aset', [KendaraanController::class, 'simpanAset'])->name('kendaraan.aset.simpan');
+        Route::get('/kendaraan-aset/api/buat-kode', [KendaraanController::class, 'buatKodeAsetOtomatis'])->name('kendaraan.aset.buat_kode');
+        Route::get('/kendaraan-aset/{kode_aset}', [KendaraanController::class, 'ambilDetailAset'])->name('kendaraan.aset.detail');
+        Route::put('/kendaraan-aset/{kode_aset}', [KendaraanController::class, 'perbaruiAset'])->name('kendaraan.aset.perbarui');
+        Route::delete('/kendaraan-aset/{kode_aset}', [KendaraanController::class, 'hapusAset'])->name('kendaraan.aset.hapus');
+        
         // Sub-Fitur Data Jenis Aset di dalam Data Kendaraan
         Route::post('/kendaraan-jenis-aset', [KendaraanController::class, 'simpanJenisAset'])->name('kendaraan.jenis_aset.simpan');
         Route::get('/kendaraan-jenis-aset/api/buat-kode', [KendaraanController::class, 'buatKodeJenisAsetOtomatis'])->name('kendaraan.jenis_aset.buat_kode');
@@ -190,6 +200,7 @@ Route::prefix('operasional')->name('operasional.')->group(function () {
         Route::get('/driver/{kode_karyawan}', [DriverController::class, 'ambilDetail'])->name('driver.detail');
         Route::put('/driver/{kode_karyawan}', [DriverController::class, 'perbarui'])->name('driver.perbarui');
         Route::delete('/driver/{kode_karyawan}', [DriverController::class, 'hapus'])->name('driver.hapus');
+        Route::delete('/driver/{kode_karyawan}/berkas/{jenis_berkas}', [DriverController::class, 'hapusBerkas'])->name('driver.hapus_berkas');
     });
 
     // Pengiriman & Dispatcher
@@ -270,3 +281,16 @@ Route::prefix('laporan')->name('laporan.')->group(function () {
     Route::get('/laba-rugi', [LaporanEksekutifController::class, 'labaRugi'])->name('laba_rugi');
     Route::get('/arus-kas', [LaporanEksekutifController::class, 'arusKas'])->name('arus_kas');
 });
+
+// API Sinkronisasi Role / Jabatan Aktif Sesi Backend
+Route::post('/api/sinkronisasi-role', function (\Illuminate\Http\Request $request) {
+    $kodeJabatan = $request->input('kode_jabatan');
+    if ($kodeJabatan) {
+        session(['kode_jabatan' => $kodeJabatan]);
+    }
+    return response()->json([
+        'status' => 'sukses',
+        'pesan' => 'Role berhasil disinkronkan ke sesi backend',
+        'kode_jabatan' => session('kode_jabatan')
+    ]);
+})->name('api.sinkronisasi_role');

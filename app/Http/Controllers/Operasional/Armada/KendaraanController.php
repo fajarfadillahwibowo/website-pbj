@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Operasional\Kendaraan;
 use App\Models\Master\JenisAset;
+use App\Helpers\GeneratorKodeOtomatis;
 use Carbon\Carbon;
 
 class KendaraanController extends Controller
@@ -64,7 +65,7 @@ class KendaraanController extends Controller
             return $kirPerhatian || $pajakPerhatian;
         })->count();
 
-        // Query Data Jenis Aset
+        // Query Data Jenis Aset (Kategori)
         $queryJenis = JenisAset::withCount('kendaraan');
         if (!empty($kataKunci) && $tabAktif === 'jenis_aset') {
             $queryJenis->where(function ($q) use ($kataKunci) {
@@ -76,10 +77,40 @@ class KendaraanController extends Controller
         $daftarJenisAset = $queryJenis->orderBy('dibuat_pada', 'desc')->get();
         $totalJenisAset = JenisAset::count();
 
+        // Statistik Aset Perusahaan (persis seperti di sidebar Aset Perusahaan SPV Keuangan)
+        $totalNilaiAset = DB::table('data_aset')->sum('harga_aset');
+        $totalAset = DB::table('data_aset')->count();
+        $totalTrukAktif = DB::table('data_aset')->whereNotNull('no_polisi')->where('no_polisi', '!=', '-')->count();
+
+        // Generator kode aset otomatis
+        $kodeAsetOtomatis = GeneratorKodeOtomatis::buatKode('data_aset', 'kode_aset', 'AST-', 3);
+
+        // Query Data Aset Perusahaan untuk Tab Jenis Aset
+        $queryAsetPerusahaan = DB::table('data_aset')
+            ->leftJoin('data_jenis_aset', 'data_aset.kode_jenis_aset', '=', 'data_jenis_aset.kode_jenis_aset')
+            ->select('data_aset.*', 'data_jenis_aset.jenis_aset');
+
+        if (!empty($kataKunci) && $tabAktif === 'jenis_aset') {
+            $queryAsetPerusahaan->where(function ($q) use ($kataKunci) {
+                $q->where('data_aset.nama_aset', 'like', "%{$kataKunci}%")
+                  ->orWhere('data_aset.kode_aset', 'like', "%{$kataKunci}%")
+                  ->orWhere('data_aset.no_polisi', 'like', "%{$kataKunci}%");
+            });
+        }
+
+        if ($jenisFilter !== 'semua' && !empty($jenisFilter) && $tabAktif === 'jenis_aset') {
+            $queryAsetPerusahaan->where('data_aset.kode_jenis_aset', $jenisFilter);
+        }
+
+        $daftarAsetPerusahaan = $queryAsetPerusahaan->orderBy('data_aset.kode_aset', 'asc')->get();
+        $daftarSemuaJenis = DB::table('data_jenis_aset')->orderBy('jenis_aset')->get();
+
         return view('operasional.armada.kendaraan', compact(
             'tabAktif',
             'daftarKendaraan',
             'daftarJenisAset',
+            'daftarAsetPerusahaan',
+            'daftarSemuaJenis',
             'kataKunci',
             'statusFilter',
             'jenisFilter',
@@ -87,7 +118,11 @@ class KendaraanController extends Controller
             'kendaraanAktif',
             'kendaraanServis',
             'kendaraanPerhatianPajakKir',
-            'totalJenisAset'
+            'totalJenisAset',
+            'totalNilaiAset',
+            'totalAset',
+            'totalTrukAktif',
+            'kodeAsetOtomatis'
         ));
     }
 
@@ -569,6 +604,160 @@ class KendaraanController extends Controller
     }
 
     /**
+     * Simpan data aset perusahaan baru dari sub-fitur di Data Kendaraan.
+     */
+    public function simpanAset(Request $request)
+    {
+        if (!$request->filled('kode_aset')) {
+            $request->merge([
+                'kode_aset' => GeneratorKodeOtomatis::buatKode('data_aset', 'kode_aset', 'AST-', 3)
+            ]);
+        }
+
+        $pesanKustom = [
+            'kode_aset.required' => 'Kode aset wajib diisi.',
+            'kode_aset.unique' => 'Kode aset sudah terdaftar.',
+            'kode_jenis_aset.required' => 'Jenis aset wajib dipilih.',
+            'kode_jenis_aset.exists' => 'Jenis aset tidak valid.',
+            'nama_aset.required' => 'Nama aset wajib diisi.',
+            'tanggal_pembelian.required' => 'Tanggal pembelian wajib diisi.',
+            'harga_aset.required' => 'Harga perolehan aset wajib diisi.',
+            'harga_aset.numeric' => 'Harga aset harus berupa angka.',
+        ];
+
+        $validated = $request->validate([
+            'kode_aset'         => 'required|string|max:30|unique:data_aset,kode_aset',
+            'kode_jenis_aset'   => 'required|string|exists:data_jenis_aset,kode_jenis_aset',
+            'nama_aset'         => 'required|string|max:100',
+            'no_polisi'         => 'nullable|string|max:20',
+            'tanggal_pembelian' => 'required|date',
+            'harga_aset'        => 'required|numeric|min:0',
+        ], $pesanKustom);
+
+        DB::table('data_aset')->insert([
+            'kode_aset'         => strtoupper(trim($validated['kode_aset'])),
+            'kode_jenis_aset'   => $validated['kode_jenis_aset'],
+            'nama_aset'         => trim($validated['nama_aset']),
+            'tanggal_pembelian' => $validated['tanggal_pembelian'],
+            'harga_aset'        => $validated['harga_aset'],
+            'no_polisi'         => !empty($validated['no_polisi']) ? strtoupper(trim($validated['no_polisi'])) : '-',
+            'merek_aset'        => $request->merek_aset ?? '-',
+            'jenis_kendaraan'   => $request->jenis_kendaraan ?? '-',
+            'muatan'            => $request->muatan ?? '-',
+            'status_aset'       => $request->status_aset ?? 'aktif',
+            'nama_pemilik'      => $request->nama_pemilik ?? 'PT Putra Balkom Jaya',
+            'dibuat_pada'       => now(),
+            'diperbarui_pada'   => now(),
+        ]);
+
+        return redirect()->route('operasional.armada.kendaraan', ['tab' => 'jenis_aset'])
+            ->with('sukses', "Aset {$validated['nama_aset']} ({$validated['kode_aset']}) berhasil didaftarkan ke inventaris aset perusahaan!");
+    }
+
+    /**
+     * Ambil detail data aset untuk modal Alpine.js di Data Kendaraan.
+     */
+    public function ambilDetailAset($kode_aset)
+    {
+        $aset = DB::table('data_aset')
+            ->leftJoin('data_jenis_aset', 'data_aset.kode_jenis_aset', '=', 'data_jenis_aset.kode_jenis_aset')
+            ->select('data_aset.*', 'data_jenis_aset.jenis_aset')
+            ->where('data_aset.kode_aset', $kode_aset)
+            ->first();
+
+        if (!$aset) {
+            return response()->json([
+                'status' => 'gagal',
+                'pesan' => 'Data aset tidak ditemukan.'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'sukses',
+            'data' => $aset
+        ]);
+    }
+
+    /**
+     * Perbarui data aset perusahaan di Data Kendaraan.
+     */
+    public function perbaruiAset(Request $request, $kode_aset)
+    {
+        $pesanKustom = [
+            'kode_jenis_aset.required' => 'Jenis aset wajib dipilih.',
+            'nama_aset.required' => 'Nama aset wajib diisi.',
+            'tanggal_pembelian.required' => 'Tanggal pembelian wajib diisi.',
+            'harga_aset.required' => 'Harga perolehan aset wajib diisi.',
+        ];
+
+        $validated = $request->validate([
+            'kode_jenis_aset'   => 'required|string|exists:data_jenis_aset,kode_jenis_aset',
+            'nama_aset'         => 'required|string|max:100',
+            'no_polisi'         => 'nullable|string|max:20',
+            'tanggal_pembelian' => 'required|date',
+            'harga_aset'        => 'required|numeric|min:0',
+            'status_aset'       => 'nullable|string|in:aktif,non-aktif,dalam_perbaikan,rusak,dijual',
+        ], $pesanKustom);
+
+        DB::table('data_aset')->where('kode_aset', $kode_aset)->update([
+            'kode_jenis_aset'   => $validated['kode_jenis_aset'],
+            'nama_aset'         => trim($validated['nama_aset']),
+            'tanggal_pembelian' => $validated['tanggal_pembelian'],
+            'harga_aset'        => $validated['harga_aset'],
+            'no_polisi'         => !empty($validated['no_polisi']) ? strtoupper(trim($validated['no_polisi'])) : '-',
+            'status_aset'       => $validated['status_aset'] ?? 'aktif',
+            'diperbarui_pada'   => now(),
+        ]);
+
+        return redirect()->route('operasional.armada.kendaraan', ['tab' => 'jenis_aset'])
+            ->with('sukses', "Data aset {$validated['nama_aset']} ({$kode_aset}) berhasil diperbarui!");
+    }
+
+    /**
+     * Hapus data aset perusahaan di Data Kendaraan.
+     */
+    public function hapusAset($kode_aset)
+    {
+        $aset = DB::table('data_aset')->where('kode_aset', $kode_aset)->first();
+        if (!$aset) {
+            return redirect()->route('operasional.armada.kendaraan', ['tab' => 'jenis_aset'])
+                ->with('error', 'Data aset tidak ditemukan.');
+        }
+
+        DB::table('data_aset')->where('kode_aset', $kode_aset)->delete();
+
+        return redirect()->route('operasional.armada.kendaraan', ['tab' => 'jenis_aset'])
+            ->with('sukses', "Aset {$aset->nama_aset} ({$kode_aset}) berhasil dihapus!");
+    }
+
+    /**
+     * Generator kode otomatis untuk aset perusahaan.
+     */
+    public function buatKodeAsetOtomatis(Request $request)
+    {
+        $mode = $request->input('mode', 'gap');
+        if ($mode === 'acak') {
+            $karakter = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+            $acak = '';
+            for ($i = 0; $i < 4; $i++) {
+                $acak .= $karakter[random_int(0, strlen($karakter) - 1)];
+            }
+            return response()->json([
+                'status' => 'sukses',
+                'kode_otomatis' => 'AST-' . $acak,
+                'keterangan' => 'Kode Acak Anti-Tebak'
+            ]);
+        }
+
+        $kodeBaru = GeneratorKodeOtomatis::buatKode('data_aset', 'kode_aset', 'AST-', 3);
+        return response()->json([
+            'status' => 'sukses',
+            'kode_otomatis' => $kodeBaru,
+            'keterangan' => 'Slot Nomor Terkecil Tersedia'
+        ]);
+    }
+
+    /**
      * Helper inisialisasi data jenis aset dan data awal jika kosong.
      */
     private function pastikanJenisAsetTersedia(): void
@@ -611,7 +800,7 @@ class KendaraanController extends Controller
                     'tanggal_kir' => Carbon::today()->addMonths(4)->format('Y-m-d'),
                     'tanggal_pajak' => Carbon::today()->addMonths(7)->format('Y-m-d'),
                     'status_aset' => 'aktif',
-                    'nama_pemilik' => 'PT Pura Balkom Jaya',
+                    'nama_pemilik' => 'PT Putra Balkom Jaya',
                 ],
                 [
                     'kode_aset' => 'TRK-002',
@@ -629,7 +818,7 @@ class KendaraanController extends Controller
                     'tanggal_kir' => Carbon::today()->addDays(15)->format('Y-m-d'),
                     'tanggal_pajak' => Carbon::today()->addMonths(2)->format('Y-m-d'),
                     'status_aset' => 'aktif',
-                    'nama_pemilik' => 'PT Pura Balkom Jaya',
+                    'nama_pemilik' => 'PT Putra Balkom Jaya',
                 ],
                 [
                     'kode_aset' => 'TRK-003',
@@ -647,7 +836,7 @@ class KendaraanController extends Controller
                     'tanggal_kir' => Carbon::today()->subDays(5)->format('Y-m-d'),
                     'tanggal_pajak' => Carbon::today()->addMonths(5)->format('Y-m-d'),
                     'status_aset' => 'dalam_perbaikan',
-                    'nama_pemilik' => 'PT Pura Balkom Jaya',
+                    'nama_pemilik' => 'PT Putra Balkom Jaya',
                 ],
             ];
 

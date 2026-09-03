@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('judul', 'Pembelian & Pengadaan Sparepart - PT Pura Balkom Jaya')
+@section('judul', 'Pembelian & Pengadaan Sparepart - PT Putra Balkom Jaya')
 
 @section('konten')
 <div x-data="kelolaPembelianSparepart()" x-init="initPembelian()" class="space-y-6">

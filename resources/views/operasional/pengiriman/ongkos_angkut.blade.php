@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('judul', 'Data Ongkos Angkut - PT Pura Balkom Jaya')
+@section('judul', 'Data Ongkos Angkut - PT Putra Balkom Jaya')
 
 @section('konten')
 <div x-data="kelolaOngkosAngkut()" x-init="initOngkosAngkut()" class="space-y-6">
@@ -318,6 +318,15 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
                                     </button>
+                                </div>
+
+                                <!-- Riwayat Terakhir Diedit Real-Time -->
+                                <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 flex items-center justify-center gap-1 font-mono cursor-help"
+                                     title="Terakhir diperbarui: {{ $oa->terakhir_diedit_waktu }}">
+                                    <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <span>{{ $oa->terakhir_diedit_relatif }}</span>
                                 </div>
                             </td>
                         </tr>

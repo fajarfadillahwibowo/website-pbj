@@ -324,19 +324,19 @@ class MasterDataSeeder extends Seeder
             [
                 'nomor_rekening' => '8800-1234-5678',
                 'nama_bank'      => 'BCA (Bank Central Asia)',
-                'atas_nama'      => 'PT Pura Balkom Jaya Utama',
+                'atas_nama'      => 'PT Putra Balkom Jaya Utama',
                 'saldo_rekening' => 450000000.00,
             ],
             [
                 'nomor_rekening' => '1300-0987-6543-2',
                 'nama_bank'      => 'Bank Mandiri',
-                'atas_nama'      => 'PT Pura Balkom Jaya Operasional',
+                'atas_nama'      => 'PT Putra Balkom Jaya Operasional',
                 'saldo_rekening' => 280000000.00,
             ],
             [
                 'nomor_rekening' => '0012-01-000999-30-5',
                 'nama_bank'      => 'BRI (Bank Rakyat Indonesia)',
-                'atas_nama'      => 'PT Pura Balkom Jaya Penerimaan',
+                'atas_nama'      => 'PT Putra Balkom Jaya Penerimaan',
                 'saldo_rekening' => 175000000.00,
             ],
         ];

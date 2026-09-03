@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('judul', 'Monitoring List SO Semen - PT Pura Balkom Jaya')
+@section('judul', 'Monitoring List SO Semen - PT Putra Balkom Jaya')
 
 @section('konten')
 <div class="space-y-6">
