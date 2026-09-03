@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Keuangan\DepositCustomer;
 use App\Models\Master\Customer;
+use App\Helpers\GeneratorKodeOtomatis;
 
 class DepositCustomerController extends Controller
 {
@@ -71,7 +72,7 @@ class DepositCustomerController extends Controller
 
         $customer = Customer::findOrFail($request->kode_customer);
         $nominal = (float) $request->jumlah_nominal;
-        $nomorBukti = 'DEP-IN-' . date('Ymd') . '-' . rand(100, 999);
+        $nomorBukti = GeneratorKodeOtomatis::buatKodeTransaksi('list_deposit', 'nomor_bukti_deposit', 'DEP-IN-', $request->tanggal_deposit);
 
         DB::beginTransaction();
         try {

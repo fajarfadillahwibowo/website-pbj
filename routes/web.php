@@ -137,6 +137,7 @@ Route::prefix('keuangan')->name('keuangan.')->group(function () {
         Route::post('/jurnal-umum', [JurnalUmumController::class, 'store'])->name('jurnal.store');
         Route::get('/aset-perusahaan', [AsetPerusahaanController::class, 'index'])->name('aset');
         Route::post('/aset-perusahaan', [AsetPerusahaanController::class, 'store'])->name('aset.store');
+        Route::post('/aset-perusahaan/penyusutan', [AsetPerusahaanController::class, 'prosesPenyusutanBulanan'])->name('aset.penyusutan');
         Route::get('/aset-perusahaan/{kode_aset}', [AsetPerusahaanController::class, 'show'])->name('aset.detail');
         Route::put('/aset-perusahaan/{kode_aset}', [AsetPerusahaanController::class, 'update'])->name('aset.update');
         Route::delete('/aset-perusahaan/{kode_aset}', [AsetPerusahaanController::class, 'destroy'])->name('aset.destroy');

@@ -21,7 +21,7 @@ class SuratJalan extends Model
     protected $fillable = [
         'nomor_surat_jalan',
         'id_so',
-        'kode_aset',
+        'kode_kendaraan',
         'kode_driver',
         'tanggal_kirim',
         'status_pengiriman',
@@ -58,11 +58,11 @@ class SuratJalan extends Model
     }
 
     /**
-     * Relasi ke Kendaraan / Truk Armada (Data Aset).
+     * Relasi ke Kendaraan / Truk Armada (Data Kendaraan).
      */
     public function kendaraan()
     {
-        return $this->belongsTo(Kendaraan::class, 'kode_aset', 'kode_aset');
+        return $this->belongsTo(Kendaraan::class, 'kode_kendaraan', 'kode_kendaraan');
     }
 
     /**

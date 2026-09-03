@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Master\Karyawan;
+use App\Helpers\GeneratorKodeOtomatis;
 
 class HutangSupplierController extends Controller
 {
@@ -61,7 +62,7 @@ class HutangSupplierController extends Controller
 
         $driver = Karyawan::findOrFail($request->kode_driver);
         $nominal = (float) $request->nominal;
-        $nomorRilisan = 'RLS-DRV-' . date('Ymd') . '-' . rand(100, 999);
+        $nomorRilisan = GeneratorKodeOtomatis::buatKodeTransaksi('pengeluaran', 'nomor_pengeluaran', 'RLS-DRV-', $request->tanggal_rilisan);
 
         DB::beginTransaction();
         try {

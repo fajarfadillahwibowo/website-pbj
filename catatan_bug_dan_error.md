@@ -4,12 +4,33 @@
 - **[TERSELESAIKAN] Undefined property: stdClass::$nomor_transaksi_pengeluaran pada view `keuangan/ap/pengeluaran_kas.blade.php`**:
   - *Penyebab:* Nama kolom pada tabel `data_pengeluaran_kas` adalah `nomor_pengeluaran`.
   - *Solusi:* Mengubah referensi `$keluar->nomor_transaksi_pengeluaran` menjadi `$keluar->nomor_pengeluaran`.
+- **[TERSELESAIKAN] Nomor bukti transaksi keuangan menggunakan rand(100, 999) acak melompat ratusan dan rentan duplicate entry**:
+  - *Penyebab:* Penggunaan fungsi acak bawaan PHP `rand(100, 999)` pada Deposit Customer (`DEP-IN-`), Faktur Penjualan (`INV-` & `DEP-OUT-`), Pembelian SO (`SO-PBJ-`), Rilisan Driver (`RLS-DRV-`), Pengeluaran Kas (`KAS-OUT-`), dan Jurnal Umum (`JU-`).
+  - *Solusi:* Membangun metode `GeneratorKodeOtomatis::buatKodeTransaksi()` berbasis tanggal transaksi (`YYYYMMDD`) dan nomor urut sekuensial dengan algoritma gap-filling (`001`, `002`, dst.), serta merapikan data riwayat deposit lama agar tertib sekuensial.
+- **[TERSELESAIKAN] Inkonsistensi dan kesalahan struktur kolom pada file master `database/skema_database.sql`**:
+  - *Penyebab:* File SQL cadangan tidak di-update saat migrasi lanjutan dibuat. Tabel `opname_gudang` memiliki kolom yang salah total (atribut customer/kendaraan), tabel `data_ongkos_angkut` memakai kolom wilayah lama, tabel `data_toko_bangunan` & `ongkos_kso` belum ada, serta kolom baru (`kode_toko`, `nomor_lo`, dll.) belum tercatat.
+  - *Solusi:* Memperbarui seluruh definisi tabel, kolom, constraint, dan seed data RBAC pada `database/skema_database.sql` sehingga hasil verifikasi perbandingan skema dengan database aktual menunjukkan 0 perbedaan (100% sinkron).
+- **[TERSELESAIKAN] Tumpang tindih tabel aset akuntansi dengan armada operasional kendaraan & ketiadaan sistem amortisasi penyusutan PSAK 16**:
+  - *Penyebab:* Tabel `data_aset` sebelumnya menampung data fisik truk operasional (nomor mesin, nomor rangka, tanggal KIR, tanggal pajak) sekaligus menjadi foreign key transaksi pengiriman dan bengkel, sehingga penginputan aset non-kendaraan (tanah, bangunan, mesin gudang, alat kantor) menjadi rancu dan ketiadaan sistem amortisasi nilai buku.
+  - *Solusi:* 
+    1. Memisahkan tabel `data_aset` (fokus aktiva tetap finansial & depresiasi) dan `data_kendaraan` (fokus fisik armada truk operasional berelasi ke `kode_aset`).
+    2. Menambahkan tabel `riwayat_penyusutan` untuk mencatat beban depresiasi bulanan yang otomatis memposting ayat jurnal umum debit Beban Penyusutan dan kredit Akumulasi Penyusutan.
+    3. Menerapkan aturan PSAK 16: Tanah tidak disusutkan (0%), Bangunan 20 tahun (5%), Truk 8 tahun (12.5%), dan Alat Kantor 4 tahun (25%).
+    4. Mengalihkan foreign key pada `pengiriman` (Surat Jalan) dan `perbaikan_kendaraan` (SPK Bengkel) ke `data_kendaraan(kode_kendaraan)`.
+    5. Menyelaraskan seluruh Controller, Model, View Blade, dan file master `skema_database.sql` (0 perbedaan terverifikasi).
 - **[TERSELESAIKAN] Duplikasi blok form modal pada `master/customer/index.blade.php`**:
   - *Penyebab:* Patch ganda saat perapian script.
   - *Solusi:* Mengganti seluruh view dengan struktur bersih, modular, dan kontras teks tajam.
 - **[TERSELESAIKAN] Kontras warna teks pada header modal detail 360 derajat**:
   - *Penyebab:* Warna teks `text-slate-900` tersamar di beberapa container putih.
   - *Solusi:* Mempertegas dengan `text-slate-900 font-extrabold dark:text-white` dan `text-slate-600 dark:text-slate-300 font-medium`.
+- **[TERSELESAIKAN] Warna angka redup/pucat (faint) pada kartu metrik finansial aset dan kebingungan istilah kolom tabel**:
+  - *Penyebab:* Angka pada kartu `Total Harga Perolehan` dan `Beban Susut / Bulan` menggunakan utilitas warna yang redup dan rentan tertimpa varian gelap/terang, serta istilah kolom `RELASI ARMADA` kurang intuitif bagi pengguna.
+  - *Solusi:* 
+    1. Mengubah angka `Total Harga Perolehan` menjadi `text-slate-900 dark:text-white font-extrabold` (hitam pekat di mode terang, putih bersih di mode gelap).
+    2. Mengubah angka `Beban Susut / Bulan` dari amber pucat menjadi `text-orange-600 dark:text-orange-400 font-extrabold` (warna oranye tajam berstandar kontras WCAG AAA).
+    3. Mengubah header kolom tabel dari `RELASI ARMADA` menjadi `Armada Fisik Terhubung` lengkap dengan ikon truk dan tooltip penjelas keterkaitan unit fisik kendaraan operasional di lapangan.
+
 
 ---
 

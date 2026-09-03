@@ -18,7 +18,7 @@ class PerbaikanKendaraan extends Model
 
     protected $fillable = [
         'nomor_spk_perbaikan',
-        'kode_aset',
+        'kode_kendaraan',
         'tanggal_masuk',
         'tanggal_selesai',
         'keluhan_kerusakan',
@@ -53,11 +53,11 @@ class PerbaikanKendaraan extends Model
     ];
 
     /**
-     * Relasi ke Master Armada Kendaraan (data_aset)
+     * Relasi ke Master Armada Kendaraan (data_kendaraan)
      */
     public function kendaraan()
     {
-        return $this->belongsTo(Kendaraan::class, 'kode_aset', 'kode_aset');
+        return $this->belongsTo(Kendaraan::class, 'kode_kendaraan', 'kode_kendaraan');
     }
 
     /**

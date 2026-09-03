@@ -17,9 +17,9 @@
         ], $opsiStatusPerbaikan);
 
         $opsiKendaraan = ($daftarKendaraan ?? collect())->map(fn($knd) => [
-            'nilai' => $knd->kode_aset,
-            'label' => $knd->nama_aset . ' (' . ($knd->merek_aset ?? 'Truk') . ')',
-            'sub'   => 'Plat/Kode: ' . $knd->kode_aset
+            'nilai' => $knd->kode_kendaraan ?? $knd->kode_aset,
+            'label' => ($knd->no_polisi ?? '-') . ' — ' . ($knd->merek_kendaraan ?? $knd->nama_aset ?? 'Truk') . ' [' . ($knd->kode_kendaraan ?? $knd->kode_aset) . ']',
+            'sub'   => 'Plat/Kode: ' . ($knd->kode_kendaraan ?? $knd->kode_aset)
         ])->toArray();
     @endphp
 
@@ -227,10 +227,10 @@
                             <!-- Plat & Nama Truk -->
                             <td class="px-4 py-3.5 whitespace-nowrap">
                                 <div class="font-mono font-bold text-slate-900 dark:text-slate-100 text-sm">
-                                    {{ $spk->kendaraan->nama_aset ?? $spk->kode_aset }}
+                                    {{ $spk->kendaraan->no_polisi ?? '-' }}
                                 </div>
-                                <div class="text-[11px] text-slate-400 font-mono mt-0.5">
-                                    {{ $spk->kendaraan->merek_aset ?? 'Truk Semen' }} ({{ $spk->kode_aset }})
+                                <div class="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
+                                    {{ $spk->kendaraan->merek_kendaraan ?? $spk->kendaraan->nama_aset ?? 'Truk Semen' }} ({{ $spk->kode_kendaraan ?? $spk->kode_aset }})
                                 </div>
                             </td>
 
@@ -784,7 +784,7 @@
                         this.formEdit = {
                             id_perbaikan: d.id_perbaikan,
                             nomor_spk_perbaikan: d.nomor_spk_perbaikan,
-                            kode_aset: d.kode_aset,
+                            kode_aset: d.kode_kendaraan || d.kode_aset,
                             tanggal_masuk: d.tanggal_masuk ? d.tanggal_masuk.slice(0, 10) : '',
                             tanggal_selesai: d.tanggal_selesai ? d.tanggal_selesai.slice(0, 10) : '',
                             bengkel_pelaksana: d.bengkel_pelaksana,

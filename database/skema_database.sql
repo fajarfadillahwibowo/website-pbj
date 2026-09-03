@@ -176,6 +176,32 @@ CREATE TABLE `data_customer` (
         ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 3.2.1 Master Toko Bangunan & Proyek Cabang
+DROP TABLE IF EXISTS `data_toko_bangunan`;
+CREATE TABLE `data_toko_bangunan` (
+    `kode_toko` VARCHAR(30) NOT NULL,
+    `kode_customer` VARCHAR(30) NOT NULL,
+    `kode_wilayah` VARCHAR(30) NOT NULL,
+    `nama_toko_bangunan` VARCHAR(150) NOT NULL,
+    `tipe_lokasi` VARCHAR(50) NOT NULL DEFAULT 'toko_retail',
+    `penanggung_jawab` VARCHAR(100) NOT NULL DEFAULT '-',
+    `no_hp_toko` VARCHAR(25) NOT NULL DEFAULT '-',
+    `alamat_lengkap` TEXT NOT NULL,
+    `titik_koordinat` VARCHAR(100) DEFAULT NULL,
+    `status_toko` VARCHAR(30) NOT NULL DEFAULT 'aktif',
+    `dibuat_pada` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `diperbarui_pada` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`kode_toko`),
+    KEY `idx_toko_customer` (`kode_customer`),
+    KEY `idx_toko_wilayah` (`kode_wilayah`),
+    CONSTRAINT `fk_toko_customer` FOREIGN KEY (`kode_customer`) 
+        REFERENCES `data_customer` (`kode_customer`) 
+        ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT `fk_toko_wilayah` FOREIGN KEY (`kode_wilayah`) 
+        REFERENCES `data_wilayah` (`kode_wilayah`) 
+        ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- 3.3 Master Data Semen / Barang
 DROP TABLE IF EXISTS `data_semen`;
 CREATE TABLE `data_semen` (
@@ -229,6 +255,8 @@ DROP TABLE IF EXISTS `data_kso`;
 CREATE TABLE `data_kso` (
     `kode_kso` VARCHAR(30) NOT NULL,
     `nama_kso` VARCHAR(100) NOT NULL,
+    `file_kontrak_kso` VARCHAR(255) DEFAULT NULL,
+    `status_kso` ENUM('Aktif', 'Selesai', 'Ditangguhkan') NOT NULL DEFAULT 'Aktif',
     `pihak_mitra` VARCHAR(100) NOT NULL,
     `tanggal_mulai` DATE NOT NULL,
     `tanggal_selesai` DATE NOT NULL,
@@ -239,24 +267,43 @@ CREATE TABLE `data_kso` (
     PRIMARY KEY (`kode_kso`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 3.6.1 Master Tarif Ongkos KSO
+DROP TABLE IF EXISTS `ongkos_kso`;
+CREATE TABLE `ongkos_kso` (
+    `kode_oa` VARCHAR(30) NOT NULL,
+    `kode_kso` VARCHAR(30) NOT NULL,
+    `nama_oa` VARCHAR(100) NOT NULL,
+    `muatan` VARCHAR(50) NOT NULL,
+    `ongkos_angkut` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
+    `dibuat_pada` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `diperbarui_pada` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`kode_oa`),
+    KEY `idx_ongkos_kso` (`kode_kso`),
+    CONSTRAINT `fk_ongkos_kso` FOREIGN KEY (`kode_kso`) 
+        REFERENCES `data_kso` (`kode_kso`) 
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- 3.7 Master Ongkos Angkut
 DROP TABLE IF EXISTS `data_ongkos_angkut`;
 CREATE TABLE `data_ongkos_angkut` (
     `id_ongkos` INT AUTO_INCREMENT NOT NULL,
-    `kode_wilayah_asal` VARCHAR(30) NOT NULL,
-    `kode_wilayah_tujuan` VARCHAR(30) NOT NULL,
-    `tarif_per_zak` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
-    `tarif_per_ritase` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
-    `keterangan` VARCHAR(255) DEFAULT NULL,
+    `kode_oa` VARCHAR(30) NOT NULL,
+    `nama_oa` VARCHAR(150) NOT NULL,
+    `kode_gudang` VARCHAR(30) DEFAULT NULL,
+    `kontrak_oa` VARCHAR(100) DEFAULT NULL,
+    `muatan_oa` VARCHAR(100) NOT NULL DEFAULT 'Semen Zak 50kg',
+    `harga_oa` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
+    `harga_kso` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
+    `harga_kso_khusus` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
+    `wilayah_oa` VARCHAR(100) NOT NULL,
+    `keterangan` TEXT DEFAULT NULL,
+    `dibuat_pada` DATETIME DEFAULT NULL,
+    `diperbarui_pada` DATETIME DEFAULT NULL,
     PRIMARY KEY (`id_ongkos`),
-    KEY `idx_ongkos_asal` (`kode_wilayah_asal`),
-    KEY `idx_ongkos_tujuan` (`kode_wilayah_tujuan`),
-    CONSTRAINT `fk_ongkos_asal` FOREIGN KEY (`kode_wilayah_asal`) 
-        REFERENCES `data_wilayah` (`kode_wilayah`) 
-        ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT `fk_ongkos_tujuan` FOREIGN KEY (`kode_wilayah_tujuan`) 
-        REFERENCES `data_wilayah` (`kode_wilayah`) 
-        ON DELETE RESTRICT ON UPDATE CASCADE
+    UNIQUE KEY `uk_kode_oa` (`kode_oa`),
+    KEY `idx_ongkos_gudang` (`kode_gudang`),
+    KEY `idx_ongkos_wilayah` (`wilayah_oa`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================================
@@ -307,6 +354,7 @@ CREATE TABLE `penjualan` (
     `nomor_faktur` VARCHAR(50) NOT NULL,
     `tanggal_penjualan` DATE NOT NULL,
     `kode_customer` VARCHAR(30) NOT NULL,
+    `kode_toko` VARCHAR(30) DEFAULT NULL,
     `metode_pembayaran` ENUM('Tunai', 'Transfer', 'Kredit / Piutang', 'Potong Deposit') NOT NULL,
     `total_bruto` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
     `diskon` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
@@ -323,9 +371,13 @@ CREATE TABLE `penjualan` (
     PRIMARY KEY (`id_penjualan`),
     UNIQUE KEY `uk_nomor_faktur` (`nomor_faktur`),
     KEY `idx_penjualan_customer` (`kode_customer`),
+    KEY `idx_penjualan_toko` (`kode_toko`),
     CONSTRAINT `fk_penjualan_customer` FOREIGN KEY (`kode_customer`) 
         REFERENCES `data_customer` (`kode_customer`) 
         ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT `fk_penjualan_toko` FOREIGN KEY (`kode_toko`) 
+        REFERENCES `data_toko_bangunan` (`kode_toko`) 
+        ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT `fk_penjualan_rekening` FOREIGN KEY (`id_rekening`) 
         REFERENCES `data_rekening` (`id_rekening`) 
         ON DELETE SET NULL ON UPDATE CASCADE
@@ -412,10 +464,13 @@ DROP TABLE IF EXISTS `pembelian_so`;
 CREATE TABLE `pembelian_so` (
     `id_so` INT AUTO_INCREMENT NOT NULL,
     `nomor_so` VARCHAR(50) NOT NULL,
+    `nomor_lo` VARCHAR(50) DEFAULT NULL,
     `tanggal_so` DATE NOT NULL,
     `kode_customer` VARCHAR(30) NOT NULL,
     `kode_gudang` VARCHAR(30) NOT NULL,
+    `jenis_pengiriman` VARCHAR(10) NOT NULL DEFAULT 'FRC',
     `jumlah_zak` INT NOT NULL DEFAULT 0,
+    `qty_pengambilan` INT NOT NULL DEFAULT 0,
     `harga_satuan` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
     `total_harga` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
     `status_so` ENUM('draft', 'disetujui', 'diproses', 'dikirim', 'selesai', 'batal') NOT NULL DEFAULT 'draft',
@@ -438,19 +493,22 @@ CREATE TABLE `pembelian_so` (
 DROP TABLE IF EXISTS `opname_gudang`;
 CREATE TABLE `opname_gudang` (
     `id_opname` INT AUTO_INCREMENT NOT NULL,
-    `no_so` VARCHAR(50) NOT NULL,
-    `no_lo` VARCHAR(50) NOT NULL,
-    `tanggal` DATE NOT NULL,
-    `nama_pemilik` VARCHAR(100) NOT NULL,
-    `alamat` TEXT NOT NULL,
-    `no_hp` VARCHAR(30) NOT NULL,
-    `no_ktp` VARCHAR(30) NOT NULL,
-    `foto_ktp` VARCHAR(255) DEFAULT NULL,
-    `status_aset` ENUM('Tersedia', 'Dalam Pengiriman', 'Terkunci', 'Selesai') NOT NULL DEFAULT 'Tersedia',
+    `nomor_opname` VARCHAR(50) NOT NULL,
+    `kode_gudang` VARCHAR(30) NOT NULL,
+    `tanggal_opname` DATE NOT NULL,
+    `stok_sistem` INT NOT NULL DEFAULT 0,
+    `stok_fisik` INT NOT NULL DEFAULT 0,
+    `selisih` INT NOT NULL DEFAULT 0,
+    `keterangan_selisih` TEXT DEFAULT NULL,
+    `status_konfirmasi` ENUM('draft', 'dikonfirmasi_spv') NOT NULL DEFAULT 'draft',
+    `petugas_opname` VARCHAR(50) NOT NULL,
     `dibuat_pada` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    `diperbarui_pada` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id_opname`),
-    KEY `idx_opname_so` (`no_so`)
+    UNIQUE KEY `uk_nomor_opname` (`nomor_opname`),
+    KEY `idx_opname_gudang` (`kode_gudang`),
+    CONSTRAINT `fk_opname_gudang` FOREIGN KEY (`kode_gudang`) 
+        REFERENCES `list_gudang_so` (`kode_gudang`) 
+        ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================================
@@ -468,7 +526,15 @@ CREATE TABLE `data_jenis_aset` (
     PRIMARY KEY (`kode_jenis_aset`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 6.2 Master Data Aset & Kendaraan Perusahaan
+INSERT INTO `data_jenis_aset` (`kode_jenis_aset`, `jenis_aset`, `keterangan`) VALUES
+('AST-TRK', 'Kendaraan Armada Truk', 'Truk tronton, fuso, colt diesel, dan kendaraan logistik'),
+('AST-TNH', 'Tanah & Lahan Properti', 'Tanah kavling, lahan gudang usaha (bebas penyusutan)'),
+('AST-BDG', 'Bangunan & Gedung', 'Gedung kantor pusat, bangunan gudang semen, dan mess staf'),
+('AST-GDG', 'Mesin & Alat Berat Gudang', 'Forklift, genset gudang, conveyor, timbangan truk'),
+('AST-OFC', 'Elektronik & Perabot Kantor', 'Laptop, PC komputer, printer, AC, meja kursi kantor')
+ON DUPLICATE KEY UPDATE `jenis_aset` = VALUES(`jenis_aset`), `keterangan` = VALUES(`keterangan`);
+
+-- 6.2 Master Data Aset Tetap Perusahaan (Finansial & Depresiasi PSAK 16)
 DROP TABLE IF EXISTS `data_aset`;
 CREATE TABLE `data_aset` (
     `kode_aset` VARCHAR(30) NOT NULL,
@@ -476,6 +542,16 @@ CREATE TABLE `data_aset` (
     `nama_aset` VARCHAR(100) NOT NULL,
     `tanggal_pembelian` DATE NOT NULL,
     `harga_aset` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
+    `harga_perolehan` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
+    `nilai_residu` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
+    `umur_manfaat` INT NOT NULL DEFAULT 0,
+    `metode_penyusutan` VARCHAR(50) NOT NULL DEFAULT 'Garis Lurus',
+    `tarif_penyusutan` DECIMAL(5, 2) NOT NULL DEFAULT 0.00,
+    `kode_akun_aset` VARCHAR(30) DEFAULT NULL,
+    `kode_akun_akumulasi` VARCHAR(30) DEFAULT NULL,
+    `kode_akun_beban` VARCHAR(30) DEFAULT NULL,
+    `akumulasi_penyusutan` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
+    `nilai_buku` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
     `no_polisi` VARCHAR(20) DEFAULT NULL,
     `no_mesin` VARCHAR(50) DEFAULT NULL,
     `no_rangka` VARCHAR(50) DEFAULT NULL,
@@ -491,12 +567,77 @@ CREATE TABLE `data_aset` (
     `diperbarui_pada` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`kode_aset`),
     KEY `idx_aset_jenis` (`kode_jenis_aset`),
+    KEY `idx_aset_akun_aset` (`kode_akun_aset`),
+    KEY `idx_aset_akun_akumulasi` (`kode_akun_akumulasi`),
+    KEY `idx_aset_akun_beban` (`kode_akun_beban`),
     CONSTRAINT `fk_aset_jenis` FOREIGN KEY (`kode_jenis_aset`) 
         REFERENCES `data_jenis_aset` (`kode_jenis_aset`) 
+        ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT `fk_aset_akun_aset` FOREIGN KEY (`kode_akun_aset`) 
+        REFERENCES `data_kode_akun` (`kode_akun`) 
+        ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT `fk_aset_akun_akumulasi` FOREIGN KEY (`kode_akun_akumulasi`) 
+        REFERENCES `data_kode_akun` (`kode_akun`) 
+        ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT `fk_aset_akun_beban` FOREIGN KEY (`kode_akun_beban`) 
+        REFERENCES `data_kode_akun` (`kode_akun`) 
+        ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 6.3 Master Armada Kendaraan Operasional (Terpisah dari Aset Akuntansi)
+DROP TABLE IF EXISTS `data_kendaraan`;
+CREATE TABLE `data_kendaraan` (
+    `kode_kendaraan` VARCHAR(30) NOT NULL,
+    `kode_aset` VARCHAR(30) DEFAULT NULL,
+    `no_polisi` VARCHAR(20) NOT NULL,
+    `no_mesin` VARCHAR(50) DEFAULT NULL,
+    `no_rangka` VARCHAR(50) DEFAULT NULL,
+    `merek_kendaraan` VARCHAR(50) NOT NULL,
+    `jenis_kendaraan` VARCHAR(50) NOT NULL DEFAULT 'Colt Diesel Double',
+    `tipe_armada` VARCHAR(50) DEFAULT NULL,
+    `muatan` VARCHAR(50) NOT NULL DEFAULT '8-10 Ton',
+    `tahun_pembuatan` YEAR NOT NULL,
+    `tanggal_kir` DATE DEFAULT NULL,
+    `tanggal_pajak` DATE DEFAULT NULL,
+    `status_kendaraan` ENUM('aktif', 'rusak', 'dalam_perbaikan', 'non-aktif') NOT NULL DEFAULT 'aktif',
+    `nama_pemilik` VARCHAR(100) NOT NULL DEFAULT 'PT Pura Barutama',
+    `dibuat_pada` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `diperbarui_pada` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`kode_kendaraan`),
+    UNIQUE KEY `uk_kendaraan_nopol` (`no_polisi`),
+    KEY `idx_kendaraan_aset` (`kode_aset`),
+    CONSTRAINT `fk_kendaraan_aset` FOREIGN KEY (`kode_aset`) 
+        REFERENCES `data_aset` (`kode_aset`) 
+        ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 6.4 Riwayat Penyusutan Aset Tetap Bulanan
+DROP TABLE IF EXISTS `riwayat_penyusutan`;
+CREATE TABLE `riwayat_penyusutan` (
+    `id_penyusutan` BIGINT AUTO_INCREMENT NOT NULL,
+    `nomor_penyusutan` VARCHAR(50) NOT NULL,
+    `kode_aset` VARCHAR(30) NOT NULL,
+    `tanggal_penyusutan` DATE NOT NULL,
+    `periode_bulan` INT NOT NULL,
+    `periode_tahun` INT NOT NULL,
+    `beban_penyusutan` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
+    `akumulasi_penyusutan` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
+    `nilai_buku` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
+    `nomor_jurnal` VARCHAR(50) DEFAULT NULL,
+    `keterangan` VARCHAR(255) DEFAULT NULL,
+    `dibuat_oleh` VARCHAR(50) NOT NULL DEFAULT 'SPV Keuangan',
+    `dibuat_pada` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id_penyusutan`),
+    UNIQUE KEY `uk_susut_nomor` (`nomor_penyusutan`),
+    KEY `idx_susut_aset` (`kode_aset`),
+    KEY `idx_susut_periode` (`periode_bulan`, `periode_tahun`),
+    KEY `idx_susut_nomor_jurnal` (`nomor_jurnal`),
+    CONSTRAINT `fk_susut_aset` FOREIGN KEY (`kode_aset`) 
+        REFERENCES `data_aset` (`kode_aset`) 
         ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 6.3 Master List Sparepart
+-- 6.5 Master List Sparepart
 DROP TABLE IF EXISTS `list_sparepart`;
 CREATE TABLE `list_sparepart` (
     `kode_sparepart` VARCHAR(30) NOT NULL,
@@ -510,7 +651,7 @@ CREATE TABLE `list_sparepart` (
     PRIMARY KEY (`kode_sparepart`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 6.4 Pembelian Sparepart
+-- 6.6 Pembelian Sparepart
 DROP TABLE IF EXISTS `pembelian_sparepart`;
 CREATE TABLE `pembelian_sparepart` (
     `id_pembelian_part` INT AUTO_INCREMENT NOT NULL,
@@ -530,12 +671,12 @@ CREATE TABLE `pembelian_sparepart` (
         ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 6.5 Perbaikan Kendaraan
+-- 6.7 Perbaikan Kendaraan (SPK Bengkel Armada)
 DROP TABLE IF EXISTS `perbaikan_kendaraan`;
 CREATE TABLE `perbaikan_kendaraan` (
     `id_perbaikan` INT AUTO_INCREMENT NOT NULL,
     `nomor_spk_perbaikan` VARCHAR(50) NOT NULL,
-    `kode_aset` VARCHAR(30) NOT NULL,
+    `kode_kendaraan` VARCHAR(30) NOT NULL,
     `tanggal_masuk` DATE NOT NULL,
     `tanggal_selesai` DATE DEFAULT NULL,
     `keluhan_kerusakan` TEXT NOT NULL,
@@ -544,15 +685,15 @@ CREATE TABLE `perbaikan_kendaraan` (
     `biaya_sparepart` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
     `total_biaya` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
     `bengkel_pelaksana` VARCHAR(100) DEFAULT NULL,
-    `status_perbaikan` ENUM('proses', 'selesai', 'dibatalkan') NOT NULL DEFAULT 'proses',
+    `status_perbaikan` VARCHAR(50) NOT NULL DEFAULT 'Dalam Proses',
     `pengawas_kendaraan` VARCHAR(50) NOT NULL,
     `dibuat_pada` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `diperbarui_pada` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id_perbaikan`),
     UNIQUE KEY `uk_nomor_spk` (`nomor_spk_perbaikan`),
-    KEY `idx_perbaikan_aset` (`kode_aset`),
-    CONSTRAINT `fk_perbaikan_aset` FOREIGN KEY (`kode_aset`) 
-        REFERENCES `data_aset` (`kode_aset`) 
+    KEY `idx_perbaikan_kendaraan` (`kode_kendaraan`),
+    CONSTRAINT `fk_perbaikan_kendaraan` FOREIGN KEY (`kode_kendaraan`) 
+        REFERENCES `data_kendaraan` (`kode_kendaraan`) 
         ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -566,7 +707,7 @@ CREATE TABLE `pengiriman` (
     `id_pengiriman` INT AUTO_INCREMENT NOT NULL,
     `nomor_surat_jalan` VARCHAR(50) NOT NULL,
     `id_so` INT NOT NULL,
-    `kode_aset` VARCHAR(30) NOT NULL,
+    `kode_kendaraan` VARCHAR(30) NOT NULL,
     `kode_driver` VARCHAR(30) NOT NULL,
     `tanggal_kirim` DATETIME NOT NULL,
     `status_pengiriman` ENUM('menunggu', 'dalam_perjalanan', 'terkirim', 'retur') NOT NULL DEFAULT 'menunggu',
@@ -576,13 +717,13 @@ CREATE TABLE `pengiriman` (
     PRIMARY KEY (`id_pengiriman`),
     UNIQUE KEY `uk_nomor_surat_jalan` (`nomor_surat_jalan`),
     KEY `idx_kirim_so` (`id_so`),
-    KEY `idx_kirim_aset` (`kode_aset`),
+    KEY `idx_kirim_kendaraan` (`kode_kendaraan`),
     KEY `idx_kirim_driver` (`kode_driver`),
     CONSTRAINT `fk_kirim_so` FOREIGN KEY (`id_so`) 
         REFERENCES `pembelian_so` (`id_so`) 
         ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT `fk_kirim_aset` FOREIGN KEY (`kode_aset`) 
-        REFERENCES `data_aset` (`kode_aset`) 
+    CONSTRAINT `fk_kirim_kendaraan` FOREIGN KEY (`kode_kendaraan`) 
+        REFERENCES `data_kendaraan` (`kode_kendaraan`) 
         ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT `fk_kirim_driver` FOREIGN KEY (`kode_driver`) 
         REFERENCES `data_karyawan` (`kode_karyawan`) 
@@ -692,7 +833,8 @@ INSERT INTO `modul` (`id_modul`, `kode_modul`, `nama_modul`, `kategori_modul`, `
 (25, 'kso', 'Data KSO', 'Operasional', 'Kerja sama operasional mitra'),
 (26, 'rilisan', 'Rilisan', 'Operasional', 'Berita acara serah terima barang'),
 (27, 'perbaikan_kendaraan', 'Perbaikan Kendaraan', 'Operasional', 'SPK bengkel dan servis armada'),
-(28, 'sparepart', 'List Sparepart & Pembelian', 'Operasional', 'Stok dan pembelian suku cadang');
+(28, 'sparepart', 'List Sparepart & Pembelian', 'Operasional', 'Stok dan pembelian suku cadang'),
+(29, 'toko_bangunan', 'Master Toko Bangunan & Proyek', 'Master', 'Master cabang toko retail, proyek, dan gudang transit');
 
 -- 3. Matriks Hak Akses Granular Tiap Jabatan (Dashboard Ringkas & Terfokus)
 
@@ -709,15 +851,17 @@ INSERT INTO `hak_akses_jabatan` (`id_jabatan`, `id_modul`, `boleh_lihat`, `boleh
 (1, 16, TRUE, TRUE, TRUE, TRUE),  -- Aset Perusahaan
 (1, 17, TRUE, TRUE, TRUE, TRUE),  -- Data Jenis Aset
 (1, 18, TRUE, TRUE, TRUE, TRUE),  -- Data Karyawan
-(1, 20, TRUE, TRUE, TRUE, TRUE);  -- List SO
+(1, 20, TRUE, TRUE, TRUE, TRUE),  -- List SO
+(1, 29, TRUE, TRUE, TRUE, TRUE);  -- Master Toko Bangunan & Proyek
 
--- 3.2 Staff AR (HANYA Penjualan, Customer, List Piutang, List Deposit, Data Rekening)
+-- 3.2 Staff AR (HANYA Penjualan, Customer, Toko Bangunan, List Piutang, List Deposit, Data Rekening)
 INSERT INTO `hak_akses_jabatan` (`id_jabatan`, `id_modul`, `boleh_lihat`, `boleh_tambah`, `boleh_edit`, `boleh_hapus`) VALUES
 (2, 5, TRUE, TRUE, TRUE, FALSE),  -- Penjualan
 (2, 6, TRUE, TRUE, TRUE, FALSE),  -- List Piutang
 (2, 7, TRUE, TRUE, TRUE, FALSE),  -- List Deposit
 (2, 10, TRUE, TRUE, TRUE, FALSE), -- Data Rekening
-(2, 13, TRUE, TRUE, TRUE, FALSE); -- Data Customer
+(2, 13, TRUE, TRUE, TRUE, FALSE), -- Data Customer
+(2, 29, TRUE, TRUE, TRUE, FALSE); -- Master Toko Bangunan & Proyek
 
 -- 3.3 Staff AP (HANYA Pengeluaran, Rilisan, Pembelian SO, List SO, List Gudang SO)
 INSERT INTO `hak_akses_jabatan` (`id_jabatan`, `id_modul`, `boleh_lihat`, `boleh_tambah`, `boleh_edit`, `boleh_hapus`) VALUES

@@ -4,12 +4,19 @@
 - **Branch Aktif:** `web-dev1`
 - **Fokus Eksekusi:** Integrasi Arsitektur Relasi 1:N Customer (Entitas Pemilik & Finansial) ke Data Toko Bangunan / Proyek Cabang, Modul Master Toko Bangunan & Proyek (`/master/toko-bangunan`), Modul Monitoring List SO (`/keuangan/ap/list-so`), Matriks Hak Akses & Read-Only Guard, Modal Kinerja 360 Derajat, Dropdown Kustom `<x-dropdown-kustom>`, Input Tanggal Kustom `<x-input-tanggal>`, Standarisasi Wajib `*` & Opsional, serta Form Faktur Penjualan (AR).
 - **Status Master Customer & Toko Bangunan:** ✅ **100% SELESAI, TERHUBUNG, & TERVERIFIKASI**.
+- **Status Pemisahan Tabel Aset & Kendaraan:** ✅ **100% SELESAI, TERINTEGRASI & TERUJI** (`data_aset` fokus finansial aktiva tetap & depresiasi PSAK 16, sedangkan `data_kendaraan` fokus fisik armada ekspedisi truk. Modul Surat Jalan & SPK Bengkel kini merujuk ke `kode_kendaraan`).
+- **Status Input Multi-Unit / Batch Aset Sekaligus:** ✅ **100% SELESAI & TERUJI** (Dapat menginput satu tipe aset dengan menentukan `jumlah_unit`. Sistem otomatis membuat N baris aset dengan penomoran `#01, #02...`, kode unik sekuensial bebas bentrok melalui `GeneratorKodeOtomatis::buatBanyakKode()`, serta sub-form dinamis untuk plat nomor dan nomor mesin jika memilih kategori truk).
+- **Status Amortisasi Depresiasi Bulanan:** ✅ **100% SELESAI, OTOMATIS & TERUJI** (Tabel `riwayat_penyusutan`, tombol Tutup Buku Bulanan di `/keuangan/akuntansi/aset-perusahaan`, auto-posting jurnal umum debit Beban Penyusutan dan kredit Akumulasi Penyusutan).
+- **Status Penggolongan Aset & Nomenklatur Jelas:** ✅ **100% SELESAI & SANGAT KONTRAS** (1. Kendaraan Armada [Truk/Tronton/Mobil], 2. Tanah & Lahan [Lahan Usaha - Bebas Susut], 3. Bangunan & Gedung [Kantor/Gudang Semen/Pos], 4. Mesin & Alat Gudang [Forklift/Genset/Conveyor/Timbangan], 5. Elektronik & Inventaris Kantor [Komputer/Printer/AC/Meja], dilengkapi kotak panduan objek fisik real-time).
 - **Status Developer 1 & Operasional:** ✅ **100% SELESAI & TERVERIFIKASI (HTTP 200 OK pada 25 rute modul view, termasuk menu baru List SO)**.
 - **Status Modul Baru List SO (`/keuangan/ap/list-so`):** ✅ **100% SELESAI & TERVERIFIKASI** (Monitoring real-time kuota kuantitas zak semen per nomor SO/LO pabrik SIG vs realisasi pengambilan).
 - **Status Matriks Hak Akses & Read-Only:** ✅ **100% SELESAI & TERUJI** (Mode Read-Only dengan penanda status 'Lihat' di sidebar dan badge 'Mode Lihat Saja' pada form transaksi di luar wewenang modifikasi peran).
 - **Status Komponen Input Tanggal Kustom (`<x-input-tanggal>`):** ✅ **100% SELESAI & TERPASANG DI SELURUH FORM** (Desain 100% identik dengan `<x-dropdown-kustom>`: background `#F4F6F9`/`#1C1E2A`, border slate, font medium text-xs, ikon SVG kalender kustom, date picker trigger overlay, dan two-way binding Alpine.js).
 - **Status Standarisasi Penanda Wajib & Opsional:** ✅ **100% SELESAI DI SELURUH VIEW FORM** (Setiap input wajib ditandai bintang merah `<span class="text-rose-500">*</span>` dan input opsional ditandai abu-abu `<span class="text-slate-400 font-normal text-[10px]">(Opsional)</span>`).
 - **Status Bebas Pembatasan Modal (`overflow-visible`):** ✅ **100% SELESAI DI SELURUH MODAL** (Dropdown dan kalender mengambang bebas di luar batas canvas modal).
+- **Status Sinkronisasi & Merge Git ke `main`:** ✅ **100% SUKSES TERSINKRONISASI & TER-PUSH KE `origin/main` & `origin/web-dev1`** (Logika penyusutan PSAK 16, input multi-unit, arsitektur pemisahan aset, serta 5 kartu indikator finansial milik lokal dipertahankan 100% sebagai *source of truth*, dan digabungkan secara harmonis dengan fitur logo baru, navigasi SPA, serta upload berkas driver dari `origin/main`).
+- **Status Sinkronisasi Master SQL (`skema_database.sql`):** ✅ **100% SINKRON & TERVERIFIKASI (0 Perbedaan)** (Tabel `data_aset` akuntansi, `data_kendaraan`, `riwayat_penyusutan`, `pengiriman`, dan `perbaikan_kendaraan` telah selaras penuh dengan database MySQL aktual).
+
 
 ---
 
@@ -52,6 +59,17 @@
 - **Pembelian Sparepart:** `FB-SP-`
 - **KSO:** `KSO-`, `OAK-`
 - **Master Jenis Aset:** `JNS-`
+
+### 3. Generator Transaksi Keuangan Sekuensial Berbasis Tanggal (`buatKodeTransaksi`):
+- **Logika:** Menggabungkan awalan prefix modul keuangan + tanggal transaksi (`YYYYMMDD`) + nomor urut sekuensial dengan algoritma gap-filling (`001`, `002`, dst.). Reset harian secara otomatis.
+- **Daftar Modul Keuangan Terintegrasi:**
+  - **Deposit Customer (Masuk):** `DEP-IN-YYYYMMDD-001` (di [`DepositCustomerController`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/AR/DepositCustomerController.php))
+  - **Faktur Penjualan (AR):** `INV-YYYYMMDD-001` (di [`FakturPenjualanController`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/AR/FakturPenjualanController.php))
+  - **Potong Deposit Penjualan (Keluar):** `DEP-OUT-YYYYMMDD-001` (di [`FakturPenjualanController`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/AR/FakturPenjualanController.php))
+  - **Pembelian SO Semen (AP):** `SO-PBJ-YYYYMMDD-001` (di [`PembelianSOController`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/AP/PembelianSOController.php))
+  - **Pengeluaran Kas Operasional (AP):** `KAS-OUT-YYYYMMDD-001` (di [`PengeluaranKasController`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/AP/PengeluaranKasController.php))
+  - **Rilisan Uang Jalan Driver (AP):** `RLS-DRV-YYYYMMDD-001` (di [`HutangSupplierController`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/AP/HutangSupplierController.php))
+  - **Jurnal Umum Akuntansi:** `JU-YYYYMMDD-001` (di [`JurnalUmumController`](file:///c:/laragon/www/laravel1/app/Http/Controllers/Keuangan/Akuntansi/JurnalUmumController.php))
 
 ---
 

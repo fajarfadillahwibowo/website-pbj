@@ -53,8 +53,8 @@ class SuratJalanController extends Controller
                   })
                   ->orWhereHas('kendaraan', function ($qKnd) use ($kataKunci) {
                       $qKnd->where('no_polisi', 'like', "%{$kataKunci}%")
-                           ->orWhere('nama_aset', 'like', "%{$kataKunci}%")
-                           ->orWhere('kode_aset', 'like', "%{$kataKunci}%");
+                           ->orWhere('merek_kendaraan', 'like', "%{$kataKunci}%")
+                           ->orWhere('kode_kendaraan', 'like', "%{$kataKunci}%");
                   });
             });
         }
@@ -101,6 +101,9 @@ class SuratJalanController extends Controller
      */
     public function simpan(Request $request)
     {
+        $kodeKndInput = $request->input('kode_kendaraan') ?? $request->input('kode_aset');
+        $request->merge(['kode_kendaraan' => $kodeKndInput]);
+
         $pesanKustom = [
             'nomor_surat_jalan.required' => 'Nomor surat jalan wajib diisi.',
             'nomor_surat_jalan.unique' => 'Nomor surat jalan sudah terdaftar.',
@@ -108,8 +111,8 @@ class SuratJalanController extends Controller
             'id_so.exists' => 'Sales Order tidak valid.',
             'kode_driver.required' => 'Driver pengemudi wajib dipilih.',
             'kode_driver.exists' => 'Data driver tidak valid.',
-            'kode_aset.required' => 'Armada truk pengiriman wajib dipilih.',
-            'kode_aset.exists' => 'Data armada truk tidak valid.',
+            'kode_kendaraan.required' => 'Armada truk pengiriman wajib dipilih.',
+            'kode_kendaraan.exists' => 'Data armada truk tidak valid.',
             'tanggal_kirim.required' => 'Tanggal dan jam keberangkatan wajib diisi.',
             'status_pengiriman.required' => 'Status pengiriman wajib dipilih.',
         ];
@@ -118,7 +121,7 @@ class SuratJalanController extends Controller
             'nomor_surat_jalan' => 'required|string|max:50|unique:pengiriman,nomor_surat_jalan',
             'id_so' => 'required|integer|exists:pembelian_so,id_so',
             'kode_driver' => 'required|string|max:30|exists:data_karyawan,kode_karyawan',
-            'kode_aset' => 'required|string|max:30|exists:data_aset,kode_aset',
+            'kode_kendaraan' => 'required|string|max:30|exists:data_kendaraan,kode_kendaraan',
             'tanggal_kirim' => 'required|date',
             'status_pengiriman' => 'required|in:menunggu,dalam_perjalanan,terkirim,retur',
             'keterangan' => 'nullable|string',
@@ -128,7 +131,7 @@ class SuratJalanController extends Controller
             'nomor_surat_jalan' => strtoupper(trim($validated['nomor_surat_jalan'])),
             'id_so' => $validated['id_so'],
             'kode_driver' => $validated['kode_driver'],
-            'kode_aset' => $validated['kode_aset'],
+            'kode_kendaraan' => $validated['kode_kendaraan'],
             'tanggal_kirim' => $validated['tanggal_kirim'],
             'status_pengiriman' => $validated['status_pengiriman'],
             'keterangan' => $validated['keterangan'] ? trim($validated['keterangan']) : null,
@@ -153,7 +156,7 @@ class SuratJalanController extends Controller
             'salesOrder.customer',
             'salesOrder.gudang',
             'driver',
-            'kendaraan.jenisAset',
+            'kendaraan.asetPerusahaan.jenisAset',
         ])->find($id_pengiriman);
 
         if (!$pengiriman) {
@@ -176,13 +179,16 @@ class SuratJalanController extends Controller
     {
         $suratJalan = SuratJalan::findOrFail($id_pengiriman);
 
+        $kodeKndInput = $request->input('kode_kendaraan') ?? $request->input('kode_aset');
+        $request->merge(['kode_kendaraan' => $kodeKndInput]);
+
         $pesanKustom = [
             'id_so.required' => 'Sales Order (SO) tujuan wajib dipilih.',
             'id_so.exists' => 'Sales Order tidak valid.',
             'kode_driver.required' => 'Driver pengemudi wajib dipilih.',
             'kode_driver.exists' => 'Data driver tidak valid.',
-            'kode_aset.required' => 'Armada truk pengiriman wajib dipilih.',
-            'kode_aset.exists' => 'Data armada truk tidak valid.',
+            'kode_kendaraan.required' => 'Armada truk pengiriman wajib dipilih.',
+            'kode_kendaraan.exists' => 'Data armada truk tidak valid.',
             'tanggal_kirim.required' => 'Tanggal dan jam keberangkatan wajib diisi.',
             'status_pengiriman.required' => 'Status pengiriman wajib dipilih.',
         ];
@@ -190,7 +196,7 @@ class SuratJalanController extends Controller
         $validated = $request->validate([
             'id_so' => 'required|integer|exists:pembelian_so,id_so',
             'kode_driver' => 'required|string|max:30|exists:data_karyawan,kode_karyawan',
-            'kode_aset' => 'required|string|max:30|exists:data_aset,kode_aset',
+            'kode_kendaraan' => 'required|string|max:30|exists:data_kendaraan,kode_kendaraan',
             'tanggal_kirim' => 'required|date',
             'status_pengiriman' => 'required|in:menunggu,dalam_perjalanan,terkirim,retur',
             'keterangan' => 'nullable|string',
@@ -199,7 +205,7 @@ class SuratJalanController extends Controller
         $suratJalan->update([
             'id_so' => $validated['id_so'],
             'kode_driver' => $validated['kode_driver'],
-            'kode_aset' => $validated['kode_aset'],
+            'kode_kendaraan' => $validated['kode_kendaraan'],
             'tanggal_kirim' => $validated['tanggal_kirim'],
             'status_pengiriman' => $validated['status_pengiriman'],
             'keterangan' => $validated['keterangan'] ? trim($validated['keterangan']) : null,
@@ -440,7 +446,7 @@ class SuratJalanController extends Controller
         if ($jumlahPengiriman === 0) {
             $driverSatu = DB::table('data_karyawan')->where('kategori_karyawan', 'driver')->value('kode_karyawan') 
                           ?? (DB::table('data_karyawan')->value('kode_karyawan') ?? 'DRV-001');
-            $asetSatu = DB::table('data_aset')->value('kode_aset') ?? 'TRK-001';
+            $trukSatu = DB::table('data_kendaraan')->value('kode_kendaraan') ?? 'KND-001';
             $soSatu = DB::table('pembelian_so')->value('id_so') ?? 1;
 
             DB::table('pengiriman')->insert([
@@ -448,7 +454,7 @@ class SuratJalanController extends Controller
                     'id_pengiriman' => 1,
                     'nomor_surat_jalan' => 'SJ-001',
                     'id_so' => $soSatu,
-                    'kode_aset' => $asetSatu,
+                    'kode_kendaraan' => $trukSatu,
                     'kode_driver' => $driverSatu,
                     'tanggal_kirim' => Carbon::now()->subHours(3),
                     'status_pengiriman' => 'dalam_perjalanan',

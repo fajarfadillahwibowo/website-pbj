@@ -6,93 +6,362 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Keuangan\AsetPerusahaan;
+use App\Models\Keuangan\RiwayatPenyusutan;
+use App\Models\Operasional\DataKendaraan;
 use App\Helpers\GeneratorKodeOtomatis;
+use Carbon\Carbon;
 
 class AsetPerusahaanController extends Controller
 {
     /**
-     * Tampilkan daftar aset tetap perusahaan (Truk, Gudang, Peralatan).
+     * Tampilkan daftar aktiva tetap perusahaan dan kalkulasi nilai buku & depresiasi.
      */
     public function index(Request $request)
     {
         $kataKunci = $request->input('cari');
         $filterJenis = $request->input('jenis');
 
-        $query = DB::table('data_aset')
-            ->leftJoin('data_jenis_aset', 'data_aset.kode_jenis_aset', '=', 'data_jenis_aset.kode_jenis_aset')
-            ->select('data_aset.*', 'data_jenis_aset.jenis_aset');
+        $query = AsetPerusahaan::with(['jenisAset', 'dataKendaraan', 'riwayatPenyusutan']);
 
         if ($filterJenis) {
-            $query->where('data_aset.kode_jenis_aset', $filterJenis);
+            $query->where('kode_jenis_aset', $filterJenis);
         }
 
         if ($kataKunci) {
             $query->where(function ($q) use ($kataKunci) {
-                $q->where('data_aset.nama_aset', 'like', "%{$kataKunci}%")
-                  ->orWhere('data_aset.kode_aset', 'like', "%{$kataKunci}%")
-                  ->orWhere('data_aset.no_polisi', 'like', "%{$kataKunci}%");
+                $q->where('nama_aset', 'like', "%{$kataKunci}%")
+                  ->orWhere('kode_aset', 'like', "%{$kataKunci}%")
+                  ->orWhere('no_polisi', 'like', "%{$kataKunci}%");
             });
         }
 
-        $daftarAset = $query->orderBy('data_aset.kode_aset', 'asc')->get();
+        $daftarAset = $query->orderBy('kode_aset', 'asc')->get();
         $daftarJenis = DB::table('data_jenis_aset')->orderBy('jenis_aset')->get();
 
-        $totalNilaiAset = DB::table('data_aset')->sum('harga_aset');
-        $totalAset = DB::table('data_aset')->count();
-        $totalTruk = DB::table('data_aset')->where('kode_jenis_aset', 'AST-TRK')->count();
+        // 5 Indikator Finansial Aset
+        $totalNilaiPerolehan = AsetPerusahaan::sum('harga_perolehan');
+        $totalAkumulasiSusut = AsetPerusahaan::sum('akumulasi_penyusutan');
+        $totalNilaiBuku = AsetPerusahaan::sum('nilai_buku');
+        $totalUnitAset = AsetPerusahaan::count();
+
+        // Estimasi beban penyusutan bulan ini
+        $estimasiSusutBulanIni = 0;
+        foreach ($daftarAset as $aset) {
+            $estimasiSusutBulanIni += $aset->hitungPenyusutanBulanan();
+        }
 
         // Generator kode aset otomatis
         $kodeOtomatis = GeneratorKodeOtomatis::buatKode('data_aset', 'kode_aset', 'AST-', 3);
+
+        // 10 Riwayat Penyusutan Terakhir
+        $riwayatTerbaru = RiwayatPenyusutan::with('aset')
+            ->orderBy('tanggal_penyusutan', 'desc')
+            ->orderBy('id_penyusutan', 'desc')
+            ->limit(10)
+            ->get();
 
         return view('keuangan.akuntansi.aset_perusahaan', compact(
             'daftarAset',
             'daftarJenis',
             'kataKunci',
             'filterJenis',
-            'totalNilaiAset',
-            'totalAset',
-            'totalTruk',
-            'kodeOtomatis'
+            'totalNilaiPerolehan',
+            'totalAkumulasiSusut',
+            'totalNilaiBuku',
+            'totalUnitAset',
+            'estimasiSusutBulanIni',
+            'kodeOtomatis',
+            'riwayatTerbaru'
         ));
     }
 
     /**
-     * Simpan aset tetap baru.
+     * Simpan aset tetap baru dengan parameter akuntansi dan penyusutan.
      */
     public function store(Request $request)
     {
-        // Isi kode otomatis jika kosong
-        if (!$request->filled('kode_aset')) {
-            $request->merge([
-                'kode_aset' => GeneratorKodeOtomatis::buatKode('data_aset', 'kode_aset', 'AST-', 3)
-            ]);
-        }
+        $jumlahUnit = max(1, min(100, (int) ($request->jumlah_unit ?? 1)));
 
         $request->validate([
-            'kode_aset'         => 'required|string|max:30|unique:data_aset,kode_aset',
+            'kode_aset'         => 'nullable|string|max:30',
             'kode_jenis_aset'   => 'required|string|exists:data_jenis_aset,kode_jenis_aset',
             'nama_aset'         => 'required|string|max:100',
             'tanggal_pembelian' => 'required|date',
-            'harga_aset'        => 'required|numeric|min:0',
+            'harga_perolehan'   => 'required|numeric|min:0',
+            'jumlah_unit'       => 'nullable|integer|min:1|max:100',
+            'nilai_residu'      => 'nullable|numeric|min:0',
+            'metode_penyusutan' => 'required|in:Tidak Disusutkan,Garis Lurus,Saldo Menurun',
+            'umur_manfaat'      => 'nullable|integer|min:0',
+            'tarif_penyusutan'  => 'nullable|numeric|min:0',
         ]);
 
-        DB::table('data_aset')->insert([
-            'kode_aset'         => strtoupper($request->kode_aset),
-            'kode_jenis_aset'   => $request->kode_jenis_aset,
-            'nama_aset'         => $request->nama_aset,
-            'tanggal_pembelian' => $request->tanggal_pembelian,
-            'harga_aset'        => $request->harga_aset,
-            'no_polisi'         => !empty($request->no_polisi) ? strtoupper(trim($request->no_polisi)) : '-',
-            'merek_aset'        => $request->merek_aset ?? '-',
-            'jenis_kendaraan'   => $request->jenis_kendaraan ?? '-',
-            'muatan'            => $request->muatan ?? '-',
-            'status_aset'       => 'aktif',
-            'nama_pemilik'      => 'PT Putra Balkom Jaya',
-            'dibuat_pada'       => now(),
-            'diperbarui_pada'   => now(),
-        ]);
+        $hargaSatuan = (float) $request->harga_perolehan;
+        $nilaiResidu = (float) ($request->nilai_residu ?? 0);
+        $jenisAset   = $request->kode_jenis_aset;
 
-        return redirect()->route('keuangan.akuntansi.aset')->with('sukses', "Aset {$request->nama_aset} berhasil didaftarkan.");
+        // Default Atribut Akuntansi & COA Berdasarkan Golongan Aset
+        $umurManfaat = (int) ($request->umur_manfaat ?? 0);
+        $tarifSusut  = (float) ($request->tarif_penyusutan ?? 0);
+        $metodeSusut = $request->metode_penyusutan;
+
+        $kodeAkunAset = '1206';
+        $kodeAkunAkum = '1207';
+        $kodeAkunBeban= '6108';
+
+        if ($jenisAset === 'AST-TNH') {
+            // Tanah: Tidak Mengalami Depresiasi
+            $umurManfaat = 0;
+            $tarifSusut  = 0.00;
+            $metodeSusut = 'Tidak Disusutkan';
+            $kodeAkunAset = '1200';
+            $kodeAkunAkum = null;
+            $kodeAkunBeban= null;
+        } elseif ($jenisAset === 'AST-BDG') {
+            // Bangunan & Gedung: 20 Tahun, Garis Lurus 5%
+            $umurManfaat = $umurManfaat ?: 20;
+            $tarifSusut  = $tarifSusut ?: 5.00;
+            $kodeAkunAset = '1204';
+            $kodeAkunAkum = '1205';
+            $kodeAkunBeban= '6106';
+        } elseif ($jenisAset === 'AST-TRK') {
+            // Armada Truk & Tronton: 8 Tahun, Garis Lurus 12.5%
+            $umurManfaat = $umurManfaat ?: 8;
+            $tarifSusut  = $tarifSusut ?: 12.50;
+            $kodeAkunAset = '1201';
+            $kodeAkunAkum = '1202';
+            $kodeAkunBeban= '6105';
+        } elseif ($jenisAset === 'AST-GDG') {
+            // Mesin & Fasilitas Gudang: 8 Tahun, Garis Lurus 12.5%
+            $umurManfaat = $umurManfaat ?: 8;
+            $tarifSusut  = $tarifSusut ?: 12.50;
+            $kodeAkunAset = '1203';
+            $kodeAkunAkum = '1208';
+            $kodeAkunBeban= '6107';
+        } else {
+            // Peralatan & Inventaris Kantor: 4 Tahun, Garis Lurus 25%
+            $umurManfaat = $umurManfaat ?: 4;
+            $tarifSusut  = $tarifSusut ?: 25.00;
+            $kodeAkunAset = '1206';
+            $kodeAkunAkum = '1207';
+            $kodeAkunBeban= '6108';
+        }
+
+        DB::beginTransaction();
+        try {
+            // Siapkan daftar kode aset unik sekuensial
+            if ($jumlahUnit === 1 && $request->filled('kode_aset')) {
+                $daftarKodeAset = [strtoupper(trim($request->kode_aset))];
+            } else {
+                $daftarKodeAset = GeneratorKodeOtomatis::buatBanyakKode('data_aset', 'kode_aset', 'AST-', $jumlahUnit, 3);
+            }
+
+            // Jika armada truk, siapkan daftar kode kendaraan unik
+            $daftarKodeKendaraan = [];
+            if ($jenisAset === 'AST-TRK') {
+                $daftarKodeKendaraan = GeneratorKodeOtomatis::buatBanyakKode('data_kendaraan', 'kode_kendaraan', 'KND-', $jumlahUnit, 3);
+            }
+
+            $rincianUnitInput = $request->input('rincian_unit', []);
+
+            for ($i = 0; $i < $jumlahUnit; $i++) {
+                $nomorUrut = $i + 1;
+                $kodeAsetSekarang = $daftarKodeAset[$i];
+                $namaAsetUnit = $jumlahUnit > 1 ? ($request->nama_aset . ' #' . str_pad($nomorUrut, 2, '0', STR_PAD_LEFT)) : $request->nama_aset;
+
+                // Tentukan data kendaraan jika truk
+                $platNomorUnit = null;
+                $noMesinUnit = '-';
+                $noRangkaUnit = '-';
+
+                if ($jenisAset === 'AST-TRK') {
+                    $rincianSekarang = $rincianUnitInput[$i] ?? [];
+                    $platNomorUnit = !empty($rincianSekarang['no_polisi']) 
+                        ? strtoupper(trim($rincianSekarang['no_polisi'])) 
+                        : ($jumlahUnit === 1 && $request->filled('no_polisi') 
+                            ? strtoupper(trim($request->no_polisi)) 
+                            : ('B ' . (9000 + $i) . ' PBJ'));
+                    $noMesinUnit = !empty($rincianSekarang['no_mesin']) ? strtoupper(trim($rincianSekarang['no_mesin'])) : ($request->no_mesin ?? '-');
+                    $noRangkaUnit = !empty($rincianSekarang['no_rangka']) ? strtoupper(trim($rincianSekarang['no_rangka'])) : ($request->no_rangka ?? '-');
+                }
+
+                // 1. Simpan ke Master Aset Tetap Akuntansi
+                AsetPerusahaan::create([
+                    'kode_aset'            => $kodeAsetSekarang,
+                    'kode_jenis_aset'      => $jenisAset,
+                    'nama_aset'            => $namaAsetUnit,
+                    'tanggal_pembelian'    => $request->tanggal_pembelian,
+                    'harga_aset'           => $hargaSatuan,
+                    'harga_perolehan'      => $hargaSatuan,
+                    'nilai_residu'         => $nilaiResidu,
+                    'umur_manfaat'         => $umurManfaat,
+                    'metode_penyusutan'    => $metodeSusut,
+                    'tarif_penyusutan'     => $tarifSusut,
+                    'kode_akun_aset'       => $kodeAkunAset,
+                    'kode_akun_akumulasi'  => $kodeAkunAkum,
+                    'kode_akun_beban'      => $kodeAkunBeban,
+                    'akumulasi_penyusutan' => 0.00,
+                    'nilai_buku'           => $hargaSatuan,
+                    'status_aset'          => 'aktif',
+                    'nama_pemilik'         => 'PT Pura Balkom Jaya Utama',
+                    'no_polisi'            => $platNomorUnit ?? '-',
+                    'no_mesin'             => $noMesinUnit,
+                    'no_rangka'            => $noRangkaUnit,
+                    'merek_aset'           => $request->merek_aset ?? '-',
+                    'jenis_kendaraan'      => $request->jenis_kendaraan ?? '-',
+                    'muatan'               => $request->muatan ?? '-',
+                ]);
+
+                // 2. Relasi Otomatis Armada Truk ke data_kendaraan
+                if ($jenisAset === 'AST-TRK') {
+                    $kodeKndSekarang = $daftarKodeKendaraan[$i];
+
+                    DataKendaraan::create([
+                        'kode_kendaraan'   => $kodeKndSekarang,
+                        'kode_aset'        => $kodeAsetSekarang,
+                        'no_polisi'        => $platNomorUnit,
+                        'no_mesin'         => $noMesinUnit !== '-' ? $noMesinUnit : null,
+                        'no_rangka'        => $noRangkaUnit !== '-' ? $noRangkaUnit : null,
+                        'merek_kendaraan'  => $request->merek_aset ?? 'Hino',
+                        'jenis_kendaraan'  => $request->jenis_kendaraan ?? 'Colt Diesel Double',
+                        'tipe_armada'      => $request->jenis_kendaraan ?? 'Colt Diesel Double',
+                        'muatan'           => $request->muatan ?? '200 Zak (8 Ton)',
+                        'status_kendaraan' => 'aktif',
+                        'nama_pemilik'     => 'PT Pura Balkom Jaya Utama',
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            if ($jumlahUnit > 1) {
+                $pesanSukses = "Berhasil mendaftarkan {$jumlahUnit} unit aset [{$request->nama_aset}] sekaligus (Kode: {$daftarKodeAset[0]} s/d {$daftarKodeAset[$jumlahUnit-1]}).";
+            } else {
+                $pesanSukses = "Aset [{$request->nama_aset}] ({$daftarKodeAset[0]}) berhasil didaftarkan.";
+            }
+
+            if ($jenisAset === 'AST-TRK') {
+                $pesanSukses .= " Unit armada baru otomatis dicatat di Master Kendaraan Operasional.";
+            }
+
+            return redirect()->route('keuangan.akuntansi.aset')->with('sukses', $pesanSukses);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', 'Gagal mendaftarkan aset: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Proses eksekusi penyusutan bulanan untuk seluruh aktiva tetap yang aktif.
+     */
+    public function prosesPenyusutanBulanan(Request $request)
+    {
+        $bulan = (int) ($request->input('periode_bulan') ?? now()->month);
+        $tahun = (int) ($request->input('periode_tahun') ?? now()->year);
+        $tanggalPenyusutan = Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth()->format('Y-m-d');
+
+        $namaBulanList = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+        $namaBulan = $namaBulanList[$bulan] ?? 'Bulan ' . $bulan;
+
+        // Periksa apakah periode ini sudah pernah disusutkan
+        $sudahAda = RiwayatPenyusutan::where('periode_bulan', $bulan)
+            ->where('periode_tahun', $tahun)
+            ->exists();
+
+        if ($sudahAda && !$request->has('paksa')) {
+            return redirect()->back()->with('error', "Penyusutan untuk periode {$namaBulan} {$tahun} sudah pernah diproses sebelumnya.");
+        }
+
+        DB::beginTransaction();
+        try {
+            $daftarAset = AsetPerusahaan::where('status_aset', 'aktif')
+                ->where('metode_penyusutan', '!=', 'Tidak Disusutkan')
+                ->where('nilai_buku', '>', 0)
+                ->get();
+
+            $totalAsetDisusutkan = 0;
+            $totalNominalSusut   = 0.00;
+
+            foreach ($daftarAset as $aset) {
+                $nominalSusut = $aset->hitungPenyusutanBulanan();
+
+                if ($nominalSusut > 0) {
+                    $nomorPenyusutan = GeneratorKodeOtomatis::buatKodeTransaksi('riwayat_penyusutan', 'nomor_penyusutan', 'DEP-AST-', $tanggalPenyusutan);
+                    $nomorJurnal     = GeneratorKodeOtomatis::buatKodeTransaksi('jurnal_umum', 'nomor_jurnal', 'JU-', $tanggalPenyusutan);
+
+                    $akumulasiBaru = (float) $aset->akumulasi_penyusutan + $nominalSusut;
+                    $nilaiBukuBaru = max(0.00, (float) $aset->nilai_buku - $nominalSusut);
+
+                    // 1. Catat ke Jurnal Umum Double-Entry (Debit Beban, Kredit Akumulasi)
+                    if ($aset->kode_akun_beban && $aset->kode_akun_akumulasi) {
+                        // Debit Beban Penyusutan
+                        DB::table('jurnal_umum')->insert([
+                            'nomor_jurnal'        => $nomorJurnal,
+                            'tanggal_transaksi'   => $tanggalPenyusutan,
+                            'kode_akun'           => $aset->kode_akun_beban,
+                            'posisi'              => 'Debit',
+                            'nominal'             => $nominalSusut,
+                            'keterangan'          => "Beban Penyusutan {$aset->nama_aset} ({$aset->kode_aset}) - {$namaBulan} {$tahun}",
+                            'referensi_transaksi' => $nomorPenyusutan,
+                            'dibuat_oleh'         => 'spv_keuangan',
+                            'dibuat_pada'         => now(),
+                        ]);
+
+                        // Kredit Akumulasi Penyusutan
+                        DB::table('jurnal_umum')->insert([
+                            'nomor_jurnal'        => $nomorJurnal,
+                            'tanggal_transaksi'   => $tanggalPenyusutan,
+                            'kode_akun'           => $aset->kode_akun_akumulasi,
+                            'posisi'              => 'Kredit',
+                            'nominal'             => $nominalSusut,
+                            'keterangan'          => "Akumulasi Penyusutan {$aset->nama_aset} ({$aset->kode_aset}) - {$namaBulan} {$tahun}",
+                            'referensi_transaksi' => $nomorPenyusutan,
+                            'dibuat_oleh'         => 'spv_keuangan',
+                            'dibuat_pada'         => now(),
+                        ]);
+
+                        // Update saldo berjalan COA
+                        DB::table('data_kode_akun')->where('kode_akun', $aset->kode_akun_beban)->increment('saldo_berjalan', $nominalSusut);
+                        DB::table('data_kode_akun')->where('kode_akun', $aset->kode_akun_akumulasi)->increment('saldo_berjalan', $nominalSusut);
+                    }
+
+                    // 2. Simpan Riwayat Penyusutan Aset
+                    RiwayatPenyusutan::create([
+                        'nomor_penyusutan'     => $nomorPenyusutan,
+                        'kode_aset'            => $aset->kode_aset,
+                        'tanggal_penyusutan'   => $tanggalPenyusutan,
+                        'periode_bulan'        => $bulan,
+                        'periode_tahun'        => $tahun,
+                        'beban_penyusutan'     => $nominalSusut,
+                        'akumulasi_penyusutan' => $akumulasiBaru,
+                        'nilai_buku'           => $nilaiBukuBaru,
+                        'nomor_jurnal'         => $nomorJurnal,
+                        'keterangan'           => "Penyusutan Rutin Periode {$namaBulan} {$tahun}",
+                        'dibuat_oleh'          => 'spv_keuangan',
+                    ]);
+
+                    // 3. Perbarui Nilai Buku dan Akumulasi pada Master Aset
+                    $aset->update([
+                        'akumulasi_penyusutan' => $akumulasiBaru,
+                        'nilai_buku'           => $nilaiBukuBaru,
+                    ]);
+
+                    $totalAsetDisusutkan++;
+                    $totalNominalSusut += $nominalSusut;
+                }
+            }
+
+            DB::commit();
+
+            $nominalRupiah = 'Rp ' . number_format($totalNominalSusut, 0, ',', '.');
+            return redirect()->route('keuangan.akuntansi.aset')->with('sukses', "Tutup buku penyusutan periode {$namaBulan} {$tahun} berhasil diproses untuk {$totalAsetDisusutkan} unit aset dengan total beban {$nominalRupiah}. Ayat jurnal telah diposting otomatis ke Buku Besar.");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal memproses penyusutan bulanan: ' . $e->getMessage());
+        }
     }
 
     /**

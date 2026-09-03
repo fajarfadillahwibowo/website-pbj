@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Keuangan\JurnalUmum;
+use App\Helpers\GeneratorKodeOtomatis;
 
 class JurnalUmumController extends Controller
 {
@@ -67,7 +68,7 @@ class JurnalUmumController extends Controller
         ]);
 
         $nominal = (float) $request->nominal;
-        $nomorJurnal = 'JU-' . date('Ymd') . '-' . rand(100, 999);
+        $nomorJurnal = GeneratorKodeOtomatis::buatKodeTransaksi('jurnal_umum', 'nomor_jurnal', 'JU-', $request->tanggal_transaksi);
 
         DB::beginTransaction();
         try {
