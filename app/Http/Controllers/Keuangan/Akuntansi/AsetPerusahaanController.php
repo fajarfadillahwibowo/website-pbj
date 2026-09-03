@@ -47,6 +47,7 @@ class AsetPerusahaanController extends Controller
         // Estimasi beban penyusutan bulan ini
         $estimasiSusutBulanIni = 0;
         foreach ($daftarAset as $aset) {
+            /** @var \App\Models\Keuangan\AsetPerusahaan $aset */
             $estimasiSusutBulanIni += $aset->hitungPenyusutanBulanan();
         }
 
@@ -286,6 +287,7 @@ class AsetPerusahaanController extends Controller
             $totalNominalSusut   = 0.00;
 
             foreach ($daftarAset as $aset) {
+                /** @var \App\Models\Keuangan\AsetPerusahaan $aset */
                 $nominalSusut = $aset->hitungPenyusutanBulanan();
 
                 if ($nominalSusut > 0) {

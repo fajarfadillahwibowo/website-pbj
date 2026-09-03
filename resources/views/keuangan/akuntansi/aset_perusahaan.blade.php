@@ -99,7 +99,8 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
-                    @forelse($riwayatTerbaru ?? [] as $susut)
+                    @forelse($riwayatTerbaru as $susut)
+                        @php /** @var \App\Models\Keuangan\RiwayatPenyusutan $susut */ @endphp
                         <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50">
                             <td class="px-3 py-2 font-mono font-medium text-indigo-600 dark:text-indigo-400">{{ $susut->nomor_penyusutan }}</td>
                             <td class="px-3 py-2 font-semibold text-slate-900 dark:text-slate-100">{{ $susut->aset->nama_aset ?? $susut->kode_aset }}</td>
@@ -167,7 +168,8 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
-                    @forelse($daftarAset ?? [] as $aset)
+                    @forelse($daftarAset as $aset)
+                        @php /** @var \App\Models\Keuangan\AsetPerusahaan $aset */ @endphp
                         <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
                             <td class="px-4 py-3 font-mono font-medium text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
                                 {{ $aset->kode_aset }}
