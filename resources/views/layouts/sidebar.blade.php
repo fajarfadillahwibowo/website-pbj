@@ -329,14 +329,11 @@
                    @click="tanganiKlikSidebar($event, $el)"
                    :class="sidebarTerlipat ? 'justify-center px-0' : 'px-2.5'"
                    class="link-sidebar-item flex items-center gap-2.5 py-1.5 rounded-xl transition-all duration-150 group {{ request()->routeIs('operasional.armada.driver*') ? 'link-sidebar-aktif font-bold text-indigo-700 dark:text-indigo-400 bg-indigo-50/90 dark:bg-indigo-500/10 border-l-[3.5px] border-indigo-600 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-[#1E212E] hover:text-slate-900 dark:hover:text-white font-medium border-l-[3.5px] border-transparent' }}"
-                   :title="sidebarTerlipat ? (jabatanAktif === 'SPV_OPERASIONAL' ? 'Data Karyawan (Driver) - Hanya Lihat' : 'Data Karyawan (Driver Supir)') : ''">
+                   :title="sidebarTerlipat ? 'Data Karyawan (Driver Supir)' : ''">
                     <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all {{ request()->routeIs('operasional.armada.driver*') ? 'bg-indigo-600 text-white shadow-xs shadow-indigo-600/30' : 'bg-slate-100 dark:bg-[#1E212E] text-slate-500 dark:text-slate-400 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/20 group-hover:text-indigo-600 dark:group-hover:text-indigo-400' }}">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                     </div>
-                    <div x-show="!sidebarTerlipat" class="flex items-center justify-between w-full min-w-0">
-                        <span class="truncate">Data Karyawan (Driver)</span>
-                        <span x-show="jabatanAktif === 'SPV_OPERASIONAL'" class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-mono font-semibold ml-1">Lihat</span>
-                    </div>
+                    <span x-show="!sidebarTerlipat" class="truncate">Data Karyawan (Driver)</span>
                 </a>
                 <a x-show="bisaAkses('armada_truk')" href="{{ route('operasional.armada.kendaraan') }}"
                    @click="tanganiKlikSidebar($event, $el)"
