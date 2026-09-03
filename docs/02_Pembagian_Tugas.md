@@ -187,6 +187,7 @@ Berikut adalah daftar pekerjaan yang belum dieksekusi dan dijadwalkan untuk taha
   - [x] Cetak dokumen Surat Jalan resmi format jalan sopir PT Putra Balkom Jaya.
   - [x] **CRUD Master Data Ongkos Angkut (9 Atribut):** Implementasi modul tarif pengiriman distribusi dengan kolom lengkap: `kode_oa`, `nama_oa`, `kode_gudang`, `kontrak_oa`, `muatan_oa`, `harga_oa`, `harga_kso`, `harga_kso_khusus`, `wilayah_oa` dilengkapi filter pencarian, smart auto-numbering, dan kalkulator KPI.
   - [x] **Keterangan Riwayat Terakhir Diedit pada Ongkos Angkut:** Menampilkan badge waktu dan tanggal pembaruan data terakhir pada kolom aksi untuk transparansi audit SPV Operasional.
+  - [x] **Integrasi & Penyelarasan Penuh Kode Gudang dengan SPV Gudang:** Sinkronisasi master fasilitas gudang (`list_gudang_so`) ke master tarif OA (`data_ongkos_angkut`), validasi integritas data referensial `exists:list_gudang_so,kode_gudang`, pencarian multi-kolom menembus atribut gudang (nama gudang, plant, distrik), live sync card info gudang terpilih pada modal tambah/edit, serta kartu detail terintegrasi dengan stok fisik real-time.
   - [x] **CRUD Data KSO (Kerja Sama Operasional) & Ongkos KSO:** 2 Tab terpadu untuk master kemitraan KSO (upload file kontrak, nilai kontrak, masa aktif) dan standardisasi tarif trayek rute ongkos angkut KSO (`ongkos_kso`).
 
 ### 6.4. Modul Bengkel & Perbaikan Kendaraan (Pengawas Kendaraan)
@@ -204,6 +205,7 @@ Berikut adalah daftar pekerjaan yang belum dieksekusi dan dijadwalkan untuk taha
 - **File Inti:** [`resources/views/layouts/app.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/layouts/app.blade.php), [`resources/views/layouts/sidebar.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/layouts/sidebar.blade.php), [`resources/views/layouts/header.blade.php`](file:///d:/laragon/www/website-pbj/resources/views/layouts/header.blade.php)
 - **Target Pengerjaan:**
   - [x] **Revisi Identitas Perusahaan & Logo HD PT Putra Balkom Jaya:** Penyesuaian nama PT menjadi "PT Putra Balkom Jaya" dan logo HD diposisikan di atas nama PT dengan kualitas grafis tinggi tanpa terpotong.
+  - [x] **Revisi Sub-Teks Identitas Perusahaan:** Penyesuaian keterangan di bawah nama PT menjadi 'Distribusi & Logistik' di seluruh antarmuka (sidebar, form login, lembar cetak surat jalan).
   - [x] **Mesin SPA Dynamic Content Swapping (Sidebar Tidak Kerefresh):** Navigasi sidebar berjalan secara parsial tanpa full page reload pada seluruh 29 menu dan seluruh 10 role/aktor.
   - [x] **Eliminasi Tuntas Bug Layar Melompat ke Atas (Jump-to-Top):** Menghilangkan scroll jump saat mengklik menu bawah (seperti *Laporan Laba Rugi* atau *Laporan Neraca* pada role SPV Keuangan), posisi scroll sidebar tersimpan dan dipulihkan 100% presisi.
   - [x] **Indikator Loading Bar Halus:** Progres bar gradien modern (YouTube/GitHub style) di bagian paling atas layar saat transisi konten.

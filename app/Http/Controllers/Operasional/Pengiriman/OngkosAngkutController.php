@@ -22,7 +22,7 @@ class OngkosAngkutController extends Controller
 
         $query = OngkosAngkut::with('gudang');
 
-        // Filter Pencarian Multi-Kolom
+        // Filter Pencarian Multi-Kolom (Termasuk atribut Gudang dari SPV Gudang)
         if (!empty($kataKunci)) {
             $query->where(function ($q) use ($kataKunci) {
                 $q->where('kode_oa', 'like', "%{$kataKunci}%")
@@ -30,7 +30,13 @@ class OngkosAngkutController extends Controller
                   ->orWhere('kontrak_oa', 'like', "%{$kataKunci}%")
                   ->orWhere('muatan_oa', 'like', "%{$kataKunci}%")
                   ->orWhere('wilayah_oa', 'like', "%{$kataKunci}%")
-                  ->orWhere('kode_gudang', 'like', "%{$kataKunci}%");
+                  ->orWhere('kode_gudang', 'like', "%{$kataKunci}%")
+                  ->orWhereHas('gudang', function ($qG) use ($kataKunci) {
+                      $qG->where('nama_gudang', 'like', "%{$kataKunci}%")
+                         ->orWhere('plant', 'like', "%{$kataKunci}%")
+                         ->orWhere('distrik', 'like', "%{$kataKunci}%")
+                         ->orWhere('jenis_gudang', 'like', "%{$kataKunci}%");
+                  });
             });
         }
 
@@ -53,8 +59,8 @@ class OngkosAngkutController extends Controller
         $rataHargaKso = $semuaOA->avg('harga_kso') ?? 0;
         $rataHargaKsoKhusus = $semuaOA->avg('harga_kso_khusus') ?? 0;
 
-        // Data Master untuk Dropdown Pilihan
-        $daftarGudang = Gudang::orderBy('nama_gudang', 'asc')->get();
+        // Data Master untuk Dropdown Pilihan (Sinkron dengan SPV Gudang)
+        $daftarGudang = Gudang::with('barang')->orderBy('kode_gudang', 'asc')->get();
         $daftarWilayah = Wilayah::orderBy('nama_wilayah', 'asc')->get();
 
         return view('operasional.pengiriman.ongkos_angkut', compact(
@@ -90,6 +96,7 @@ class OngkosAngkutController extends Controller
             'kode_oa.required' => 'Kode Ongkos Angkut wajib diisi.',
             'kode_oa.unique' => 'Kode Ongkos Angkut sudah terdaftar dalam sistem.',
             'nama_oa.required' => 'Nama Rute / Trayek OA wajib diisi.',
+            'kode_gudang.exists' => 'Fasilitas gudang yang dipilih tidak valid atau belum terdaftar pada Master Gudang (SPV Gudang).',
             'muatan_oa.required' => 'Jenis Muatan OA wajib dipilih / diisi.',
             'harga_oa.required' => 'Harga Ongkos Angkut Standar wajib diisi.',
             'harga_kso.required' => 'Harga KSO Standar wajib diisi.',
@@ -100,7 +107,7 @@ class OngkosAngkutController extends Controller
         $validated = $request->validate([
             'kode_oa'          => 'required|string|max:30|unique:data_ongkos_angkut,kode_oa',
             'nama_oa'          => 'required|string|max:150',
-            'kode_gudang'      => 'nullable|string|max:30',
+            'kode_gudang'      => 'nullable|string|max:30|exists:list_gudang_so,kode_gudang',
             'kontrak_oa'       => 'nullable|string|max:100',
             'muatan_oa'        => 'required|string|max:100',
             'harga_oa'         => 'required|numeric|min:0',
@@ -134,7 +141,7 @@ class OngkosAngkutController extends Controller
      */
     public function ambilDetail($kode_oa)
     {
-        $oa = OngkosAngkut::with('gudang')->where('kode_oa', $kode_oa)->first();
+        $oa = OngkosAngkut::with(['gudang.barang'])->where('kode_oa', $kode_oa)->first();
 
         if (!$oa) {
             return response()->json([
@@ -161,6 +168,7 @@ class OngkosAngkutController extends Controller
 
         $pesanKustom = [
             'nama_oa.required' => 'Nama Rute / Trayek OA wajib diisi.',
+            'kode_gudang.exists' => 'Fasilitas gudang yang dipilih tidak valid atau belum terdaftar pada Master Gudang (SPV Gudang).',
             'muatan_oa.required' => 'Jenis Muatan OA wajib dipilih / diisi.',
             'harga_oa.required' => 'Harga Ongkos Angkut Standar wajib diisi.',
             'harga_kso.required' => 'Harga KSO Standar wajib diisi.',
@@ -170,7 +178,7 @@ class OngkosAngkutController extends Controller
 
         $validated = $request->validate([
             'nama_oa'          => 'required|string|max:150',
-            'kode_gudang'      => 'nullable|string|max:30',
+            'kode_gudang'      => 'nullable|string|max:30|exists:list_gudang_so,kode_gudang',
             'kontrak_oa'       => 'nullable|string|max:100',
             'muatan_oa'        => 'required|string|max:100',
             'harga_oa'         => 'required|numeric|min:0',

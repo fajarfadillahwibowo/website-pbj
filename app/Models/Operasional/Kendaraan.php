@@ -64,6 +64,21 @@ class Kendaraan extends Model
     }
 
     /**
+     * Relasi ke kategori / jenis aset kendaraan melalui aset finansial.
+     */
+    public function jenisAset()
+    {
+        return $this->hasOneThrough(
+            JenisAset::class,
+            AsetPerusahaan::class,
+            'kode_aset',       // Foreign key pada data_aset
+            'kode_jenis_aset', // Foreign key pada data_jenis_aset
+            'kode_aset',       // Local key pada data_kendaraan
+            'kode_jenis_aset'  // Local key pada data_aset
+        );
+    }
+
+    /**
      * Accessor alias nama_aset dari relasi aset finansial atau merek.
      */
     public function getNamaAsetAttribute()

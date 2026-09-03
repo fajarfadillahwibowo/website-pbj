@@ -35,11 +35,18 @@ class JenisAset extends Model
     ];
 
     /**
-     * Relasi ke unit armada kendaraan.
+     * Relasi ke unit armada kendaraan melalui aset finansial.
      */
     public function kendaraan()
     {
-        return $this->hasMany(Kendaraan::class, 'kode_jenis_aset', 'kode_jenis_aset');
+        return $this->hasManyThrough(
+            Kendaraan::class,
+            \App\Models\Keuangan\AsetPerusahaan::class,
+            'kode_jenis_aset', // Foreign key pada data_aset
+            'kode_aset',       // Foreign key pada data_kendaraan
+            'kode_jenis_aset', // Local key pada data_jenis_aset
+            'kode_aset'        // Local key pada data_aset
+        );
     }
 
     /**

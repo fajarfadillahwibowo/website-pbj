@@ -79,7 +79,7 @@ class SuratJalanController extends Controller
             $daftarDriver = Driver::orderBy('nama_karyawan', 'asc')->get();
         }
 
-        $daftarKendaraan = Kendaraan::with('jenisAset')->orderBy('nama_aset', 'asc')->get();
+        $daftarKendaraan = Kendaraan::with(['jenisAset', 'asetPerusahaan'])->orderBy('no_polisi', 'asc')->get();
         $daftarSO = PembelianSO::with(['customer', 'gudang'])->orderBy('dibuat_pada', 'desc')->get();
 
         return view('operasional.pengiriman.surat_jalan', compact(
