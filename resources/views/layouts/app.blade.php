@@ -102,7 +102,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('judul', 'Sistem Informasi Akuntansi & Distribusi Semen')</title>
+    <title>@yield('judul', 'Sistem Informasi Akuntansi & Distribusi Semen - PT Putra Balkom Jaya')</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-pbj.png') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

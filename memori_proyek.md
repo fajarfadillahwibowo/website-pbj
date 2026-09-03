@@ -1,4 +1,4 @@
-# 🧠 Memori Proyek: Website Sistem Distribusi & Keuangan PT Pura Balkom Jaya Utama (PBJ)
+# 🧠 Memori Proyek: Website Sistem Distribusi & Keuangan PT Putra Balkom Jaya (PBJ)
 
 ## 📌 Status Terkini
 - **Branch Aktif:** `web-dev1`

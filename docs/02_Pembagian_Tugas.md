@@ -168,7 +168,7 @@ Berikut adalah daftar pekerjaan yang belum dieksekusi dan dijadwalkan untuk taha
   - [x] Dropdown pemilihan supir yang berstatus *Standby* & armada truk yang siap jalan.
   - [x] Perhitungan otomatis ongkos angkut berdasarkan tarif trayek dan jumlah muatan.
   - [x] Update status pengiriman (`Draft` -> `Muat` -> `Jalan` -> `Terkirim/Selesai`).
-  - [x] Cetak dokumen Surat Jalan resmi format jalan sopir PT Pura Balkom Jaya.
+  - [x] Cetak dokumen Surat Jalan resmi format jalan sopir PT Putra Balkom Jaya.
   - [x] **CRUD Master Data Ongkos Angkut (9 Atribut):** Implementasi modul tarif pengiriman distribusi dengan kolom lengkap: `kode_oa`, `nama_oa`, `kode_gudang`, `kontrak_oa`, `muatan_oa`, `harga_oa`, `harga_kso`, `harga_kso_khusus`, `wilayah_oa` dilengkapi filter pencarian, smart auto-numbering, dan kalkulator KPI.
   - [x] **CRUD Data KSO (Kerja Sama Operasional) & Ongkos KSO:** 2 Tab terpadu untuk master kemitraan KSO (upload file kontrak, nilai kontrak, masa aktif) dan standardisasi tarif trayek rute ongkos angkut KSO (`ongkos_kso`).
 

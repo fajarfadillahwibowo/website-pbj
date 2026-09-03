@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('judul', 'Data KSO & Ongkos Angkut - PT Pura Balkom Jaya')
+@section('judul', 'Data KSO & Ongkos Angkut - PT Putra Balkom Jaya')
 
 @section('konten')
 <div x-data="kelolaDataKSO('{{ $tabAktif ?? 'kso' }}')" x-init="initKSO()" class="space-y-6">

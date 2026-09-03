@@ -1,6 +1,6 @@
 # 📋 Dokumen Koreksi & Penyelarasan Spesifikasi Sistem Akuntansi PBJ
 
-Dokumen ini merupakan hasil audit dan telaah mendalam terhadap berkas [`.agents/panduan_spesifikasi_sistem_akuntansi.md`](file:///c:/laragon/www/laravel1/.agents/panduan_spesifikasi_sistem_akuntansi.md) dibandingkan dengan arsitektur basis data, model Eloquent, controller, alur transaksi, dan antarmuka pada codebase Laravel aktual PT Pura Balkom Jaya Utama (PBJ).
+Dokumen ini merupakan hasil audit dan telaah mendalam terhadap berkas [`.agents/panduan_spesifikasi_sistem_akuntansi.md`](file:///c:/laragon/www/laravel1/.agents/panduan_spesifikasi_sistem_akuntansi.md) dibandingkan dengan arsitektur basis data, model Eloquent, controller, alur transaksi, dan antarmuka pada codebase Laravel aktual PT Putra Balkom Jaya (PBJ).
 
 ---
 

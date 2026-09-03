@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('judul', 'Surat Jalan Pengiriman Distribusi Semen - PT Pura Balkom Jaya')
+@section('judul', 'Surat Jalan Pengiriman Distribusi Semen - PT Putra Balkom Jaya')
 
 @section('konten')
 <div x-data="kelolaSuratJalan()" x-init="initSuratJalan()" class="space-y-6">
@@ -573,10 +573,13 @@
                 
                 <!-- Kop Surat Perusahaan -->
                 <div class="flex items-start justify-between border-b-2 border-slate-900 pb-4">
-                    <div>
-                        <h1 class="text-xl font-extrabold tracking-tight text-slate-900 uppercase">PT PURA BALKOM JAYA</h1>
-                        <p class="text-xs text-slate-600 font-medium">Distributor Utama & Logistik Semen Nasional (Pabrik & Retail)</p>
-                        <p class="text-[11px] text-slate-500">Kawasan Industri Cikarang Blok B-12, Bekasi · Telp: (021) 8983-4921</p>
+                    <div class="flex items-center gap-3.5">
+                        <img src="{{ asset('images/logo-pbj.png') }}" alt="Logo PT Putra Balkom Jaya" class="w-16 h-16 object-contain shrink-0">
+                        <div>
+                            <h1 class="text-xl font-extrabold tracking-tight text-slate-900 uppercase">PT PUTRA BALKOM JAYA</h1>
+                            <p class="text-xs text-slate-600 font-medium">General Contractor & Distributor Semen Curah & Zak</p>
+                            <p class="text-[11px] text-slate-500">Kawasan Industri Cikarang Blok B-12, Bekasi · Telp: (021) 8983-4921</p>
+                        </div>
                     </div>
                     <div class="text-right">
                         <div class="inline-block border-2 border-slate-900 px-3 py-1 text-center rounded-md">

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('judul', 'SPK Perbaikan & Servis Kendaraan - PT Pura Balkom Jaya')
+@section('judul', 'SPK Perbaikan & Servis Kendaraan - PT Putra Balkom Jaya')
 
 @section('konten')
 <div x-data="kelolaPerbaikanKendaraan()" x-init="initPerbaikan()" class="space-y-6">
@@ -610,10 +610,13 @@
 
             <!-- Area Lembar SPK Cetak -->
             <div id="areaCetakSPK" class="p-6 space-y-4 text-xs">
-                <div class="text-center pb-3 border-b border-[#E2E8F0] dark:border-[#252837]">
-                    <div class="font-bold text-base text-slate-900 dark:text-slate-100">PT PURA BALKOM JAYA</div>
-                    <div class="text-[11px] text-slate-500">Divisi Operasional & Pemeliharaan Armada Truk Semen</div>
-                    <div class="text-sm font-mono font-bold text-red-600 dark:text-red-400 mt-1 uppercase tracking-wider" x-text="'SURAT PERINTAH KERJA (SPK): ' + detailSPK.nomor_spk_perbaikan"></div>
+                <div class="flex items-center justify-center gap-3 pb-3 border-b border-[#E2E8F0] dark:border-[#252837]">
+                    <img src="{{ asset('images/logo-pbj.png') }}" alt="Logo PT Putra Balkom Jaya" class="w-12 h-12 object-contain shrink-0">
+                    <div class="text-center">
+                        <div class="font-bold text-base text-slate-900 dark:text-slate-100">PT PUTRA BALKOM JAYA</div>
+                        <div class="text-[11px] text-slate-500">Divisi Operasional & Pemeliharaan Armada Truk Semen</div>
+                        <div class="text-sm font-mono font-bold text-red-600 dark:text-red-400 mt-1 uppercase tracking-wider" x-text="'SURAT PERINTAH KERJA (SPK): ' + detailSPK.nomor_spk_perbaikan"></div>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-slate-50 dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837]">

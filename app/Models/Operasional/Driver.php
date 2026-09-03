@@ -43,6 +43,7 @@ class Driver extends Model
 
     protected $appends = [
         'no_ktp',
+        'no_ktp_format',
         'foto_ktp_url',
         'file_kontrak_url',
         'terakhir_diedit_relatif',
@@ -77,11 +78,31 @@ class Driver extends Model
     }
 
     /**
-     * Mutator untuk no_ktp (mengisi kolom database no_identitas).
+     * Accessor format khusus No. KTP / NIK 16 digit khas Indonesia (contoh: 3201 0203 0405 0001).
+     */
+    public function getNoKtpFormatAttribute()
+    {
+        $nik = preg_replace('/[^0-9]/', '', $this->attributes['no_identitas'] ?? '');
+        if (strlen($nik) === 16) {
+            return substr($nik, 0, 4) . ' ' . substr($nik, 4, 4) . ' ' . substr($nik, 8, 4) . ' ' . substr($nik, 12, 4);
+        }
+        return $this->attributes['no_identitas'] ?? '-';
+    }
+
+    /**
+     * Mutator untuk no_ktp (membersihkan format agar tersimpan 16 digit angka murni di database).
      */
     public function setNoKtpAttribute($value)
     {
-        $this->attributes['no_identitas'] = $value;
+        $this->attributes['no_identitas'] = $value ? preg_replace('/[^0-9]/', '', $value) : null;
+    }
+
+    /**
+     * Mutator untuk no_identitas.
+     */
+    public function setNoIdentitasAttribute($value)
+    {
+        $this->attributes['no_identitas'] = $value ? preg_replace('/[^0-9]/', '', $value) : null;
     }
 
     /**
@@ -111,10 +132,11 @@ class Driver extends Model
      */
     public function getTerakhirDieditRelatifAttribute()
     {
-        if (!$this->diperbarui_pada) {
+        $waktu = $this->diperbarui_pada ?? $this->dibuat_pada;
+        if (!$waktu) {
             return 'Baru ditambahkan';
         }
-        return $this->diperbarui_pada->locale('id')->diffForHumans();
+        return $waktu->locale('id')->diffForHumans();
     }
 
     /**
@@ -122,9 +144,10 @@ class Driver extends Model
      */
     public function getTerakhirDieditWaktuAttribute()
     {
-        if (!$this->diperbarui_pada) {
+        $waktu = $this->diperbarui_pada ?? $this->dibuat_pada;
+        if (!$waktu) {
             return '-';
         }
-        return $this->diperbarui_pada->format('d/m/Y H:i:s');
+        return $waktu->format('d/m/Y H:i:s');
     }
 }

@@ -62,15 +62,16 @@
   <div class="w-full max-w-md bg-white dark:bg-[#14161F] rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200/80 dark:border-[#252837] p-7 sm:p-9 transition-all">
     
     <!-- Header Kartu: Logo & Identitas Perusahaan -->
-    <div class="flex items-center gap-3 mb-6">
-      <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-md shadow-blue-600/20 shrink-0">
-        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-        </svg>
+    <div class="flex flex-col items-center text-center mb-6">
+      <div class="p-1 rounded-2xl bg-white dark:bg-[#1C1E2A] shadow-xs border border-slate-100 dark:border-slate-800/80 mb-3">
+        <img src="{{ asset('images/logo-pbj.png') }}" 
+             alt="Logo PT Putra Balkom Jaya" 
+             class="w-20 h-20 sm:w-24 sm:h-24 object-contain drop-shadow-sm"
+             loading="eager">
       </div>
       <div>
-        <div class="text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight">PT Pura Balkom Jaya</div>
-        <div class="text-xs text-slate-400 font-medium">Distribusi & Akuntansi</div>
+        <div class="text-base font-extrabold text-slate-900 dark:text-slate-100 leading-tight">PT Putra Balkom Jaya</div>
+        <div class="text-xs text-slate-400 font-medium mt-0.5">General Contractor & Distributor</div>
       </div>
     </div>
 
@@ -206,7 +207,7 @@
 
   <!-- Footer Bawah -->
   <div class="mt-6 text-center text-xs text-slate-400">
-    &copy; {{ date('Y') }} PT Pura Balkom Jaya. Hak cipta dilindungi.
+    &copy; {{ date('Y') }} PT Putra Balkom Jaya. Hak cipta dilindungi.
   </div>
 
 </body>

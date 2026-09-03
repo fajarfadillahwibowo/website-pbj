@@ -5,44 +5,46 @@
        class="flex flex-col bg-white dark:bg-[#14161F] border-r border-[#E2E8F0] dark:border-[#252837] shrink-0 transition-all duration-200 z-30 overflow-hidden select-none">
 
     <!-- Header Sidebar: Logo & Nama Perusahaan -->
-    <div class="h-14 flex items-center border-b border-[#E2E8F0] dark:border-[#252837] shrink-0 transition-all duration-200"
-         :class="sidebarTerlipat ? 'justify-center px-2' : 'justify-between px-3.5'">
+    <div class="border-b border-[#E2E8F0] dark:border-[#252837] shrink-0 transition-all duration-200"
+         :class="sidebarTerlipat ? 'py-3 px-2 flex flex-col items-center justify-center' : 'pt-4 pb-3.5 px-3.5'">
         
         <!-- Kondisi 1: Sidebar Terbuka (Expanded) -->
         <template x-if="!sidebarTerlipat">
-            <div class="flex items-center justify-between w-full min-w-0">
-                <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 min-w-0 overflow-hidden group">
-                    <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-700 to-blue-500 flex items-center justify-center shadow-md shadow-blue-600/30 shrink-0 group-hover:scale-105 transition-transform">
-                        <svg class="w-4.5 h-4.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                        </svg>
-                    </div>
-                    <div class="whitespace-nowrap overflow-hidden">
-                        <div class="text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight truncate">PT Pura Balkom Jaya</div>
-                        <div class="text-[10px] text-slate-400 font-medium font-mono">Akuntansi & Logistik Semen</div>
-                    </div>
-                </a>
+            <div class="relative flex flex-col items-center text-center">
+                <!-- Tombol Ciutkan di pojok kanan atas -->
                 <button @click="sidebarTerlipat = true"
-                        class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-600 dark:hover:text-slate-300 transition-colors shrink-0"
+                        class="absolute -top-1 right-0 p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252837] hover:text-slate-600 dark:hover:text-slate-300 transition-colors shrink-0 z-10"
                         title="Ciutkan Sidebar">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
                     </svg>
                 </button>
+
+                <!-- Logo Perusahaan HD di ATAS Nama PT -->
+                <a href="{{ route('dashboard') }}" class="flex flex-col items-center gap-2 group w-full">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center p-1 rounded-2xl bg-white dark:bg-[#1C1E2A] shadow-xs border border-slate-100 dark:border-slate-800/80 group-hover:scale-105 transition-transform">
+                        <img src="{{ asset('images/logo-pbj.png') }}" 
+                             alt="Logo PT Putra Balkom Jaya" 
+                             class="w-full h-full object-contain drop-shadow-xs select-none"
+                             loading="eager">
+                    </div>
+                    <div class="w-full px-1">
+                        <div class="text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight truncate">PT Putra Balkom Jaya</div>
+                        <div class="text-[10px] text-slate-400 dark:text-slate-500 font-medium font-mono mt-0.5 truncate">General Contractor & Distributor</div>
+                    </div>
+                </a>
             </div>
         </template>
 
         <!-- Kondisi 2: Sidebar Terciut (Collapsed) - Logo Utama Sekaligus Tombol Buka -->
         <template x-if="sidebarTerlipat">
             <button @click="sidebarTerlipat = false"
-                    class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 to-blue-500 hover:from-blue-600 hover:to-blue-400 flex items-center justify-center shadow-md shadow-blue-600/30 transition-transform active:scale-95 group relative"
-                    title="Klik untuk membuka Sidebar (PT Pura Balkom Jaya)">
-                <svg class="w-5 h-5 text-white transition-opacity group-hover:opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                </svg>
-                <svg class="w-4 h-4 text-white absolute inset-0 m-auto opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
-                </svg>
+                    class="w-11 h-11 p-1 rounded-xl bg-white dark:bg-[#1C1E2A] hover:bg-slate-50 dark:hover:bg-[#252837] border border-slate-100 dark:border-slate-800 shadow-sm flex items-center justify-center transition-transform active:scale-95 group relative"
+                    title="Klik untuk membuka Sidebar (PT Putra Balkom Jaya)">
+                <img src="{{ asset('images/logo-pbj.png') }}" 
+                     alt="Logo PT Putra Balkom Jaya" 
+                     class="w-full h-full object-contain drop-shadow-xs group-hover:scale-110 transition-transform"
+                     loading="eager">
             </button>
         </template>
     </div>
