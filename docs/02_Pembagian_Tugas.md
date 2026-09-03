@@ -211,6 +211,7 @@ Berikut adalah daftar pekerjaan yang belum dieksekusi dan dijadwalkan untuk taha
   - [x] **Indikator Loading Bar Halus:** Progres bar gradien modern (YouTube/GitHub style) di bagian paling atas layar saat transisi konten.
   - [x] **Sinkronisasi State Role Instan:** State role sinkron secara real-time antara frontend (`localStorage`) dan sesi backend Laravel via `/api/sinkronisasi-role`.
   - [x] **Dukungan Penuh Browser History (`popstate`) & Form Filter GET:** Tombol Back/Forward browser dan form pencarian filter berjalan mulus tanpa reload sidebar.
+  - [x] **Restrukturisasi & Penyelarasan Menu Laporan Laba dan Rugi:** Memindahkan seksi Laporan Eksekutif Finansial ke posisi teratas (tepat di bawah Dashboard) khusus untuk peran SPV Keuangan dan Direktur & Manager, merevisi penulisan menjadi "Laporan Laba dan Rugi" dengan micro-badge `P&L` serta penempatan prioritas di atas Laporan Neraca untuk keterbacaan dan interaktivitas maksimal.
 
 ---
 

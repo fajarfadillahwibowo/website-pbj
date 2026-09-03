@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('judul', 'Laporan Laba Rugi Eksekutif')
+@section('judul', 'Laporan Laba dan Rugi Eksekutif')
 
 @section('konten')
 <div class="space-y-5">
@@ -8,7 +8,7 @@
     <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
         <div>
             <div class="text-xs text-blue-600 dark:text-blue-400 font-semibold font-mono uppercase tracking-wider mb-1">Laporan Eksekutif · Direktur & Manager</div>
-            <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">Laporan Laba Rugi Komprehensif</h1>
+            <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">Laporan Laba dan Rugi Komprehensif</h1>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Ringkasan pendapatan penjualan semen, HPP pabrik, biaya operasional BBM/tol/gaji, dan laba bersih periode berjalan.</p>
         </div>
         <div class="flex items-center gap-2">

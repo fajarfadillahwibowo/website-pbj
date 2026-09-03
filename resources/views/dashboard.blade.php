@@ -346,9 +346,9 @@
                 <span class="font-semibold text-slate-800 dark:text-slate-200 group-hover:text-red-600 mt-1 truncate">SPK Servis</span>
             </a>
 
-            <a x-show="bisaAkses('laporan_neraca')" href="{{ route('laporan.neraca') }}" class="p-2.5 rounded-lg bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] hover:border-emerald-300 dark:hover:border-emerald-600 transition-all flex flex-col justify-between group">
-                <span class="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">Laporan</span>
-                <span class="font-semibold text-slate-800 dark:text-slate-200 group-hover:text-emerald-600 mt-1 truncate">Neraca & Laba Rugi</span>
+            <a x-show="bisaAkses('laporan_neraca')" href="{{ route('laporan.laba_rugi') }}" class="p-2.5 rounded-lg bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] hover:border-blue-300 dark:hover:border-blue-600 transition-all flex flex-col justify-between group">
+                <span class="text-[10px] font-mono text-blue-600 dark:text-blue-400 font-bold">Laporan</span>
+                <span class="font-semibold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 mt-1 truncate">Laba dan Rugi & Neraca</span>
             </a>
 
         </div>
