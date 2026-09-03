@@ -59,6 +59,48 @@ class GeneratorKodeOtomatis
     }
 
     /**
+     * Menghasilkan sekumpulan N kode urut otomatis sekaligus (batch generation)
+     * dengan algoritma Gap-Filling tanpa terjadi duplikasi.
+     *
+     * @param string $namaTabel Nama tabel target
+     * @param string $namaKolom Nama kolom primary key / kode
+     * @param string $awalan Awalan prefix (misal: 'AST-', 'KND-')
+     * @param int $jumlah Jumlah kode berurutan yang ingin dibuat
+     * @param int $panjangDigit Digit padding nol (default 3)
+     * @return array Daftar kode berurutan
+     */
+    public static function buatBanyakKode(string $namaTabel, string $namaKolom, string $awalan = '', int $jumlah = 1, int $panjangDigit = 3): array
+    {
+        $daftarKode = DB::table($namaTabel)
+            ->where($namaKolom, 'like', $awalan . '%')
+            ->pluck($namaKolom)
+            ->toArray();
+
+        $nomorTerpakai = [];
+        foreach ($daftarKode as $kode) {
+            $bagianSetelahPrefix = substr($kode, strlen($awalan));
+            if (preg_match('/^(\d+)$/', $bagianSetelahPrefix, $cocok)) {
+                $nomorTerpakai[(int) $cocok[1]] = true;
+            } elseif (preg_match('/(\d+)$/', $kode, $cocok)) {
+                $nomorTerpakai[(int) $cocok[1]] = true;
+            }
+        }
+
+        $hasilKode = [];
+        $nomorUrut = 1;
+
+        while (count($hasilKode) < $jumlah) {
+            if (!isset($nomorTerpakai[$nomorUrut])) {
+                $hasilKode[] = $awalan . str_pad($nomorUrut, $panjangDigit, '0', STR_PAD_LEFT);
+                $nomorTerpakai[$nomorUrut] = true;
+            }
+            $nomorUrut++;
+        }
+
+        return $hasilKode;
+    }
+
+    /**
      * Mengembalikan awalan (prefix) 3 huruf standar berdasarkan Jabatan / Peran spesifik.
      *
      * @param int|string $jabatan ID jabatan atau nama jabatan/kode jabatan
@@ -111,4 +153,51 @@ class GeneratorKodeOtomatis
     {
         return self::buatKodeJabatan($kategori, $kategori, $panjangDigit);
     }
+
+    /**
+     * Menghasilkan kode transaksi keuangan sekuensial berbasis tanggal (YYYYMMDD) dan nomor urut.
+     * Contoh: DEP-IN-20260903-001, INV-20260903-001, SO-PBJ-20260903-001, KAS-OUT-20260903-001, JU-20260903-001
+     *
+     * Logika Kerja:
+     * 1. Awalan: $prefix . $tanggalFormat . '-'
+     * 2. Ambil semua kode yang diawali awalan tersebut pada tabel target.
+     * 3. Ekstrak nomor urut numerik di bagian akhir.
+     * 4. Gunakan algoritma gap-filling sekuensial (mulai dari 1) untuk nomor berikutnya.
+     * 5. Format dengan padding digit (standar 3 digit: 001, 002, dst).
+     *
+     * @param string $namaTabel Nama tabel target di database
+     * @param string $namaKolom Nama kolom kode/nomor bukti
+     * @param string $prefix Awalan tipe (misal: 'DEP-IN-', 'DEP-OUT-', 'INV-', 'SO-PBJ-', 'KAS-OUT-', 'RLS-DRV-', 'JU-')
+     * @param string|null $tanggal Tanggal transaksi (default: hari ini Y-m-d)
+     * @param int $panjangDigit Jumlah digit nomor urut (default: 3)
+     * @return string
+     */
+    public static function buatKodeTransaksi(string $namaTabel, string $namaKolom, string $prefix, ?string $tanggal = null, int $panjangDigit = 3): string
+    {
+        $tanggalFormat = $tanggal ? date('Ymd', strtotime($tanggal)) : date('Ymd');
+        $awalanPenuh = $prefix . $tanggalFormat . '-';
+
+        $daftarKode = DB::table($namaTabel)
+            ->where($namaKolom, 'like', $awalanPenuh . '%')
+            ->pluck($namaKolom)
+            ->toArray();
+
+        $nomorTerpakai = [];
+        foreach ($daftarKode as $kode) {
+            $bagianSetelahPrefix = substr($kode, strlen($awalanPenuh));
+            if (preg_match('/^(\d+)$/', $bagianSetelahPrefix, $cocok)) {
+                $nomorTerpakai[(int) $cocok[1]] = true;
+            } elseif (preg_match('/(\d+)$/', $kode, $cocok)) {
+                $nomorTerpakai[(int) $cocok[1]] = true;
+            }
+        }
+
+        $nomorUrut = 1;
+        while (isset($nomorTerpakai[$nomorUrut])) {
+            $nomorUrut++;
+        }
+
+        return $awalanPenuh . str_pad($nomorUrut, $panjangDigit, '0', STR_PAD_LEFT);
+    }
 }
+

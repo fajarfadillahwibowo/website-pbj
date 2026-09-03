@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Keuangan\PembelianSO;
 use App\Models\Master\Customer;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\GeneratorKodeOtomatis;
 
 class PembelianSOController extends Controller
 {
@@ -76,7 +77,7 @@ class PembelianSOController extends Controller
         $jumlahZak = (int) $request->jumlah_zak;
         $hargaSatuan = (float) $request->harga_satuan;
         $totalHarga = $jumlahZak * $hargaSatuan;
-        $nomorSO = 'SO-PBJ-' . date('Ymd') . '-' . rand(100, 999);
+        $nomorSO = GeneratorKodeOtomatis::buatKodeTransaksi('pembelian_so', 'nomor_so', 'SO-PBJ-', $request->tanggal_so);
 
         DB::table('pembelian_so')->insert([
             'nomor_so'      => $nomorSO,

@@ -820,7 +820,7 @@
                             nomor_surat_jalan: d.nomor_surat_jalan,
                             id_so: d.id_so,
                             kode_driver: d.kode_driver,
-                            kode_aset: d.kode_aset,
+                            kode_aset: d.kode_kendaraan || d.kode_aset,
                             tanggal_kirim: d.tanggal_kirim ? d.tanggal_kirim.slice(0, 16) : '',
                             status_pengiriman: d.status_pengiriman,
                             keterangan: d.keterangan || ''

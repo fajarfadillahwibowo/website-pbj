@@ -11,6 +11,7 @@ use App\Models\Keuangan\DepositCustomer;
 use App\Models\Master\Customer;
 use App\Models\Master\TokoBangunan;
 use App\Models\Master\Barang;
+use App\Helpers\GeneratorKodeOtomatis;
 
 class FakturPenjualanController extends Controller
 {
@@ -108,7 +109,7 @@ class FakturPenjualanController extends Controller
         $totalNetto = max(0, $totalBruto - $diskon);
 
         $metode = $request->metode_pembayaran;
-        $nomorFaktur = 'INV-' . date('Ymd') . '-' . sprintf('%03d', rand(100, 999));
+        $nomorFaktur = GeneratorKodeOtomatis::buatKodeTransaksi('penjualan', 'nomor_faktur', 'INV-', $request->tanggal_penjualan);
 
         DB::beginTransaction();
         try {
@@ -146,7 +147,7 @@ class FakturPenjualanController extends Controller
 
                 // Catat mutasi deposit
                 DepositCustomer::create([
-                    'nomor_bukti_deposit' => 'DEP-OUT-' . date('Ymd') . '-' . rand(100, 999),
+                    'nomor_bukti_deposit' => GeneratorKodeOtomatis::buatKodeTransaksi('list_deposit', 'nomor_bukti_deposit', 'DEP-OUT-', $request->tanggal_penjualan),
                     'kode_customer'       => $customer->kode_customer,
                     'tanggal_deposit'     => $request->tanggal_penjualan,
                     'tipe_mutasi'         => 'Keluar / Terpakai',

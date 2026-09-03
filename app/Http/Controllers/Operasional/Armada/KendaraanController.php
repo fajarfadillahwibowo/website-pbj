@@ -96,73 +96,137 @@ class KendaraanController extends Controller
      */
     public function simpan(Request $request)
     {
+        $jumlahUnit = max(1, min(50, (int) ($request->jumlah_unit ?? 1)));
+
         $pesanKustom = [
-            'kode_aset.required' => 'Kode aset kendaraan wajib diisi.',
-            'kode_aset.unique' => 'Kode aset sudah terdaftar di database.',
-            'kode_jenis_aset.required' => 'Jenis aset wajib dipilih.',
-            'kode_jenis_aset.exists' => 'Jenis aset tidak valid.',
-            'nama_aset.required' => 'Nama model aset truk wajib diisi.',
+            'kode_kendaraan.unique' => 'Kode kendaraan sudah terdaftar di database.',
             'no_polisi.required' => 'Nomor plat polisi wajib diisi.',
-            'tanggal_pembelian.required' => 'Tanggal pembelian armada wajib diisi.',
-            'harga_aset.required' => 'Harga perolehan aset wajib diisi.',
-            'harga_aset.numeric' => 'Harga aset harus berupa angka.',
-            'no_mesin.required' => 'Nomor mesin kendaraan wajib diisi.',
-            'no_rangka.required' => 'Nomor rangka kendaraan wajib diisi.',
-            'merek_aset.required' => 'Merek aset truk wajib diisi.',
+            'merek_kendaraan.required' => 'Merek armada truk wajib diisi.',
             'muatan.required' => 'Kapasitas muatan wajib diisi.',
             'tahun_pembuatan.required' => 'Tahun pembuatan wajib diisi.',
-            'status_aset.required' => 'Status operasional armada wajib dipilih.',
+            'status_kendaraan.required' => 'Status operasional armada wajib dipilih.',
             'nama_pemilik.required' => 'Nama pemilik armada wajib diisi.',
         ];
 
         $validated = $request->validate([
-            'kode_aset' => 'required|string|max:30|unique:data_aset,kode_aset',
-            'kode_jenis_aset' => 'required|string|max:30|exists:data_jenis_aset,kode_jenis_aset',
-            'nama_aset' => 'required|string|max:100',
+            'kode_kendaraan' => 'nullable|string|max:30',
             'no_polisi' => 'required|string|max:20',
-            'tanggal_pembelian' => 'required|date',
-            'harga_aset' => 'required|numeric|min:0',
-            'no_mesin' => 'required|string|max:50',
-            'no_rangka' => 'required|string|max:50',
-            'merek_aset' => 'required|string|max:50',
-            'muatan' => 'required|string|max:50',
+            'kode_aset' => 'nullable|string|max:30|exists:data_aset,kode_aset',
+            'nama_aset' => 'nullable|string|max:100',
+            'merek_kendaraan' => 'required|string|max:50',
             'jenis_kendaraan' => 'nullable|string|max:50',
+            'tipe_armada' => 'nullable|string|max:50',
+            'muatan' => 'required|string|max:50',
+            'no_mesin' => 'nullable|string|max:50',
+            'no_rangka' => 'nullable|string|max:50',
             'tahun_pembuatan' => 'required|integer|min:1990|max:2099',
             'tanggal_kir' => 'nullable|date',
             'tanggal_pajak' => 'nullable|date',
-            'status_aset' => 'required|in:aktif,rusak,dalam_perbaikan,dijual,non-aktif',
+            'status_kendaraan' => 'required|in:aktif,rusak,dalam_perbaikan,non-aktif',
             'nama_pemilik' => 'required|string|max:100',
+            'harga_aset' => 'nullable|numeric|min:0',
+            'jumlah_unit' => 'nullable|integer|min:1|max:50',
         ], $pesanKustom);
 
-        Kendaraan::create([
-            'kode_aset' => trim($validated['kode_aset']),
-            'kode_jenis_aset' => $validated['kode_jenis_aset'],
-            'nama_aset' => trim($validated['nama_aset']),
-            'no_polisi' => strtoupper(trim($validated['no_polisi'])),
-            'tanggal_pembelian' => $validated['tanggal_pembelian'],
-            'harga_aset' => $validated['harga_aset'],
-            'no_mesin' => strtoupper(trim($validated['no_mesin'])),
-            'no_rangka' => strtoupper(trim($validated['no_rangka'])),
-            'merek_aset' => trim($validated['merek_aset']),
-            'muatan' => trim($validated['muatan']),
-            'jenis_kendaraan' => trim($validated['jenis_kendaraan'] ?? $validated['nama_aset']),
-            'tahun_pembuatan' => $validated['tahun_pembuatan'],
-            'tanggal_kir' => $validated['tanggal_kir'] ?? null,
-            'tanggal_pajak' => $validated['tanggal_pajak'] ?? null,
-            'status_aset' => $validated['status_aset'],
-            'nama_pemilik' => trim($validated['nama_pemilik']),
-        ]);
+        DB::beginTransaction();
+        try {
+            $hargaBeli = (float) ($validated['harga_aset'] ?? 0);
+            $namaModelDasar = $validated['nama_aset'] ?: ($validated['merek_kendaraan'] . ' ' . ($validated['jenis_kendaraan'] ?? 'Truk'));
 
-        return redirect()->route('operasional.armada.kendaraan', ['tab' => 'kendaraan'])
-            ->with('sukses', "Data armada {$validated['nama_aset']} ({$validated['no_polisi']}) berhasil ditambahkan ke database!");
+            $daftarKodeKendaraan = ($jumlahUnit === 1 && $request->filled('kode_kendaraan'))
+                ? [strtoupper(trim($request->kode_kendaraan))]
+                : GeneratorKodeOtomatis::buatBanyakKode('data_kendaraan', 'kode_kendaraan', 'KND-', $jumlahUnit, 3);
+
+            $daftarKodeAset = GeneratorKodeOtomatis::buatBanyakKode('data_aset', 'kode_aset', 'AST-', $jumlahUnit, 3);
+            $rincianUnitInput = $request->input('rincian_unit', []);
+
+            for ($i = 0; $i < $jumlahUnit; $i++) {
+                $nomorUrut = $i + 1;
+                $kodeKendaraan = $daftarKodeKendaraan[$i];
+                $kodeAset = $daftarKodeAset[$i];
+
+                $rincian = $rincianUnitInput[$i] ?? [];
+                $plat = !empty($rincian['no_polisi']) 
+                    ? strtoupper(trim($rincian['no_polisi'])) 
+                    : ($i === 0 ? strtoupper(trim($validated['no_polisi'])) : ('B ' . (9100 + $i) . ' PBJ'));
+                $mesin = !empty($rincian['no_mesin']) ? strtoupper(trim($rincian['no_mesin'])) : ($validated['no_mesin'] ? strtoupper(trim($validated['no_mesin'])) : '-');
+                $rangka = !empty($rincian['no_rangka']) ? strtoupper(trim($rincian['no_rangka'])) : ($validated['no_rangka'] ? strtoupper(trim($validated['no_rangka'])) : '-');
+
+                $namaModel = $jumlahUnit > 1 ? ($namaModelDasar . ' #' . str_pad($nomorUrut, 2, '0', STR_PAD_LEFT)) : $namaModelDasar;
+
+                // 1. Catat entitas aset finansial di data_aset
+                DB::table('data_aset')->insert([
+                    'kode_aset'            => $kodeAset,
+                    'kode_jenis_aset'      => 'AST-TRK',
+                    'nama_aset'            => $namaModel,
+                    'tanggal_pembelian'    => now()->format('Y-m-d'),
+                    'harga_aset'           => $hargaBeli,
+                    'harga_perolehan'      => $hargaBeli,
+                    'nilai_residu'         => 0.00,
+                    'umur_manfaat'         => 8,
+                    'metode_penyusutan'    => 'Garis Lurus',
+                    'tarif_penyusutan'     => 12.50,
+                    'kode_akun_aset'       => '1201',
+                    'kode_akun_akumulasi'  => '1202',
+                    'kode_akun_beban'      => '6105',
+                    'akumulasi_penyusutan' => 0.00,
+                    'nilai_buku'           => $hargaBeli,
+                    'status_aset'          => $validated['status_kendaraan'],
+                    'nama_pemilik'         => $validated['nama_pemilik'],
+                    'no_polisi'            => $plat,
+                    'no_mesin'             => $mesin,
+                    'no_rangka'            => $rangka,
+                    'merek_aset'           => trim($validated['merek_kendaraan']),
+                    'muatan'               => trim($validated['muatan']),
+                    'jenis_kendaraan'      => trim($validated['jenis_kendaraan'] ?? 'Colt Diesel Double'),
+                    'tahun_pembuatan'      => $validated['tahun_pembuatan'],
+                    'tanggal_kir'          => $validated['tanggal_kir'] ?? null,
+                    'tanggal_pajak'        => $validated['tanggal_pajak'] ?? null,
+                    'dibuat_pada'          => now(),
+                    'diperbarui_pada'      => now(),
+                ]);
+
+                // 2. Simpan ke data_kendaraan
+                DataKendaraan::create([
+                    'kode_kendaraan'   => $kodeKendaraan,
+                    'kode_aset'        => $kodeAset,
+                    'no_polisi'        => $plat,
+                    'no_mesin'         => $mesin !== '-' ? $mesin : null,
+                    'no_rangka'        => $rangka !== '-' ? $rangka : null,
+                    'merek_kendaraan'  => trim($validated['merek_kendaraan']),
+                    'jenis_kendaraan'  => trim($validated['jenis_kendaraan'] ?? 'Colt Diesel Double'),
+                    'tipe_armada'      => trim($validated['tipe_armada'] ?? ($validated['jenis_kendaraan'] ?? 'Colt Diesel Double')),
+                    'muatan'           => trim($validated['muatan']),
+                    'tahun_pembuatan'  => $validated['tahun_pembuatan'],
+                    'tanggal_kir'      => $validated['tanggal_kir'] ?? null,
+                    'tanggal_pajak'    => $validated['tanggal_pajak'] ?? null,
+                    'status_kendaraan' => $validated['status_kendaraan'],
+                    'nama_pemilik'     => trim($validated['nama_pemilik']),
+                ]);
+            }
+
+            DB::commit();
+
+            $pesan = $jumlahUnit > 1
+                ? "Berhasil menambahkan {$jumlahUnit} unit armada sekaligus (Kode: {$daftarKodeKendaraan[0]} s/d {$daftarKodeKendaraan[$jumlahUnit-1]})."
+                : "Data armada [{$daftarKodeKendaraan[0]}] berhasil ditambahkan ke database!";
+
+            return redirect()->route('operasional.armada.kendaraan', ['tab' => 'kendaraan'])->with('sukses', $pesan);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', 'Gagal menyimpan armada: ' . $e->getMessage());
+        }
     }
 
     /**
      * Ambil data detail kendaraan dalam format JSON untuk modal Alpine.js.
      */
-    public function ambilDetail($kode_aset)
+    public function ambilDetail($id)
     {
-        $kendaraan = Kendaraan::with('jenisAset')->where('kode_aset', $kode_aset)->first();
+        $kendaraan = Kendaraan::with(['asetPerusahaan.jenisAset'])
+            ->where('kode_kendaraan', $id)
+            ->orWhere('kode_aset', $id)
+            ->first();
 
         if (!$kendaraan) {
             return response()->json([
@@ -180,85 +244,96 @@ class KendaraanController extends Controller
     /**
      * Perbarui data kendaraan armada di database.
      */
-    public function perbarui(Request $request, $kode_aset)
+    public function perbarui(Request $request, $id)
     {
-        $kendaraan = Kendaraan::where('kode_aset', $kode_aset)->firstOrFail();
+        $kendaraan = Kendaraan::where('kode_kendaraan', $id)
+            ->orWhere('kode_aset', $id)
+            ->firstOrFail();
 
         $pesanKustom = [
-            'kode_jenis_aset.required' => 'Jenis aset wajib dipilih.',
-            'kode_jenis_aset.exists' => 'Jenis aset tidak valid.',
-            'nama_aset.required' => 'Nama model aset truk wajib diisi.',
             'no_polisi.required' => 'Nomor plat polisi wajib diisi.',
-            'tanggal_pembelian.required' => 'Tanggal pembelian armada wajib diisi.',
-            'harga_aset.required' => 'Harga perolehan aset wajib diisi.',
-            'harga_aset.numeric' => 'Harga aset harus berupa angka.',
-            'no_mesin.required' => 'Nomor mesin kendaraan wajib diisi.',
-            'no_rangka.required' => 'Nomor rangka kendaraan wajib diisi.',
-            'merek_aset.required' => 'Merek aset truk wajib diisi.',
+            'merek_kendaraan.required' => 'Merek armada truk wajib diisi.',
             'muatan.required' => 'Kapasitas muatan wajib diisi.',
             'tahun_pembuatan.required' => 'Tahun pembuatan wajib diisi.',
-            'status_aset.required' => 'Status operasional armada wajib dipilih.',
+            'status_kendaraan.required' => 'Status operasional armada wajib dipilih.',
             'nama_pemilik.required' => 'Nama pemilik armada wajib diisi.',
         ];
 
         $validated = $request->validate([
-            'kode_jenis_aset' => 'required|string|max:30|exists:data_jenis_aset,kode_jenis_aset',
-            'nama_aset' => 'required|string|max:100',
             'no_polisi' => 'required|string|max:20',
-            'tanggal_pembelian' => 'required|date',
-            'harga_aset' => 'required|numeric|min:0',
-            'no_mesin' => 'required|string|max:50',
-            'no_rangka' => 'required|string|max:50',
-            'merek_aset' => 'required|string|max:50',
-            'muatan' => 'required|string|max:50',
+            'nama_aset' => 'nullable|string|max:100',
+            'merek_kendaraan' => 'required|string|max:50',
             'jenis_kendaraan' => 'nullable|string|max:50',
+            'tipe_armada' => 'nullable|string|max:50',
+            'muatan' => 'required|string|max:50',
+            'no_mesin' => 'nullable|string|max:50',
+            'no_rangka' => 'nullable|string|max:50',
             'tahun_pembuatan' => 'required|integer|min:1990|max:2099',
             'tanggal_kir' => 'nullable|date',
             'tanggal_pajak' => 'nullable|date',
-            'status_aset' => 'required|in:aktif,rusak,dalam_perbaikan,dijual,non-aktif',
+            'status_kendaraan' => 'required|in:aktif,rusak,dalam_perbaikan,non-aktif',
             'nama_pemilik' => 'required|string|max:100',
         ], $pesanKustom);
 
-        $kendaraan->update([
-            'kode_jenis_aset' => $validated['kode_jenis_aset'],
-            'nama_aset' => trim($validated['nama_aset']),
-            'no_polisi' => strtoupper(trim($validated['no_polisi'])),
-            'tanggal_pembelian' => $validated['tanggal_pembelian'],
-            'harga_aset' => $validated['harga_aset'],
-            'no_mesin' => strtoupper(trim($validated['no_mesin'])),
-            'no_rangka' => strtoupper(trim($validated['no_rangka'])),
-            'merek_aset' => trim($validated['merek_aset']),
-            'muatan' => trim($validated['muatan']),
-            'jenis_kendaraan' => trim($validated['jenis_kendaraan'] ?? $validated['nama_aset']),
-            'tahun_pembuatan' => $validated['tahun_pembuatan'],
-            'tanggal_kir' => $validated['tanggal_kir'] ?? null,
-            'tanggal_pajak' => $validated['tanggal_pajak'] ?? null,
-            'status_aset' => $validated['status_aset'],
-            'nama_pemilik' => trim($validated['nama_pemilik']),
-            'diperbarui_pada' => now(),
-        ]);
+        DB::beginTransaction();
+        try {
+            $kendaraan->update([
+                'no_polisi'        => strtoupper(trim($validated['no_polisi'])),
+                'no_mesin'         => $validated['no_mesin'] ? strtoupper(trim($validated['no_mesin'])) : $kendaraan->no_mesin,
+                'no_rangka'        => $validated['no_rangka'] ? strtoupper(trim($validated['no_rangka'])) : $kendaraan->no_rangka,
+                'merek_kendaraan'  => trim($validated['merek_kendaraan']),
+                'jenis_kendaraan'  => trim($validated['jenis_kendaraan'] ?? $kendaraan->jenis_kendaraan),
+                'tipe_armada'      => trim($validated['tipe_armada'] ?? $kendaraan->tipe_armada),
+                'muatan'           => trim($validated['muatan']),
+                'tahun_pembuatan'  => $validated['tahun_pembuatan'],
+                'tanggal_kir'      => $validated['tanggal_kir'] ?? null,
+                'tanggal_pajak'    => $validated['tanggal_pajak'] ?? null,
+                'status_kendaraan' => $validated['status_kendaraan'],
+                'nama_pemilik'     => trim($validated['nama_pemilik']),
+                'diperbarui_pada'  => now(),
+            ]);
 
-        return redirect()->route('operasional.armada.kendaraan', ['tab' => 'kendaraan'])
-            ->with('sukses', "Data kendaraan {$kendaraan->nama_aset} ({$kendaraan->no_polisi}) berhasil diperbarui!");
+            // Sinkronkan ke data_aset jika berelasi
+            if ($kendaraan->kode_aset) {
+                DB::table('data_aset')->where('kode_aset', $kendaraan->kode_aset)->update([
+                    'no_polisi'       => strtoupper(trim($validated['no_polisi'])),
+                    'nama_aset'       => trim($validated['nama_aset'] ?? $kendaraan->nama_aset),
+                    'status_aset'     => $validated['status_kendaraan'],
+                    'tanggal_kir'     => $validated['tanggal_kir'] ?? null,
+                    'tanggal_pajak'   => $validated['tanggal_pajak'] ?? null,
+                    'diperbarui_pada' => now(),
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('operasional.armada.kendaraan', ['tab' => 'kendaraan'])
+                ->with('sukses', "Data kendaraan {$kendaraan->no_polisi} berhasil diperbarui!");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', 'Gagal memperbarui armada: ' . $e->getMessage());
+        }
     }
 
     /**
      * Hapus data kendaraan dari database.
      */
-    public function hapus($kode_aset)
+    public function hapus($id)
     {
-        $kendaraan = Kendaraan::where('kode_aset', $kode_aset)->firstOrFail();
-        $namaAset = $kendaraan->nama_aset;
+        $kendaraan = Kendaraan::where('kode_kendaraan', $id)
+            ->orWhere('kode_aset', $id)
+            ->firstOrFail();
         $noPolisi = $kendaraan->no_polisi;
+        $kodeKnd = $kendaraan->kode_kendaraan;
 
         try {
             $kendaraan->delete();
 
             return redirect()->route('operasional.armada.kendaraan', ['tab' => 'kendaraan'])
-                ->with('sukses', "Data armada {$namaAset} ({$noPolisi}) berhasil dihapus dari database! Slot kode {$kode_aset} kini siap didaur ulang.");
+                ->with('sukses', "Data armada [{$kodeKnd}] ({$noPolisi}) berhasil dihapus dari database!");
         } catch (\Illuminate\Database\QueryException $e) {
             return redirect()->route('operasional.armada.kendaraan', ['tab' => 'kendaraan'])
-                ->with('error', "Gagal menghapus kendaraan {$namaAset}! Data armada ini masih terikat dengan dokumen Surat Jalan, Pengiriman, atau SPK Servis Bengkel.");
+                ->with('error', "Gagal menghapus kendaraan [{$kodeKnd}]! Data armada ini masih terikat dengan dokumen Surat Jalan atau SPK Servis Bengkel.");
         }
     }
 
@@ -280,8 +355,8 @@ class KendaraanController extends Controller
                 for ($i = 0; $i < 4; $i++) {
                     $acak .= $karakter[random_int(0, $panjang - 1)];
                 }
-                $kandidat = 'TRK-' . $acak;
-                $sudahAda = DB::table('data_aset')->where('kode_aset', $kandidat)->exists();
+                $kandidat = 'KND-' . $acak;
+                $sudahAda = DB::table('data_kendaraan')->where('kode_kendaraan', $kandidat)->exists();
                 if (!$sudahAda) {
                     $kodeUnik = $kandidat;
                 }
@@ -291,19 +366,19 @@ class KendaraanController extends Controller
             return response()->json([
                 'status' => 'sukses',
                 'mode' => 'acak',
-                'kode_otomatis' => $kodeUnik ?? ('TRK-' . strtoupper(bin2hex(random_bytes(2)))),
+                'kode_otomatis' => $kodeUnik ?? ('KND-' . strtoupper(bin2hex(random_bytes(2)))),
                 'keterangan' => 'Kode Alfanumerik Acak (Anti-Tebak)'
             ]);
         }
 
         // Mode GAP FILLING: Cari slot nomor terkecil yang kosong / terhapus
-        $daftarAset = DB::table('data_aset')
-            ->where('kode_aset', 'like', 'TRK-%')
-            ->pluck('kode_aset');
+        $daftarKode = DB::table('data_kendaraan')
+            ->where('kode_kendaraan', 'like', 'KND-%')
+            ->pluck('kode_kendaraan');
 
         $nomorTerpakai = [];
-        foreach ($daftarAset as $kode) {
-            if (preg_match('/TRK-(\d+)/', $kode, $cocok)) {
+        foreach ($daftarKode as $kode) {
+            if (preg_match('/KND-(\d+)/', $kode, $cocok)) {
                 $nomorTerpakai[] = (int) $cocok[1];
             }
         }
@@ -316,7 +391,7 @@ class KendaraanController extends Controller
             $slotTersedia++;
         }
 
-        $kodeBaru = 'TRK-' . str_pad($slotTersedia, 3, '0', STR_PAD_LEFT);
+        $kodeBaru = 'KND-' . str_pad($slotTersedia, 3, '0', STR_PAD_LEFT);
 
         return response()->json([
             'status' => 'sukses',

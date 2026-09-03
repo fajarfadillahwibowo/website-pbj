@@ -52,7 +52,7 @@ class PerbaikanKendaraanController extends Controller
         $totalBiayaServis = $semuaPerbaikan->sum('total_biaya');
 
         // Master Armada Kendaraan untuk Form Dropdown
-        $daftarKendaraan = Kendaraan::orderBy('kode_aset', 'asc')->get();
+        $daftarKendaraan = Kendaraan::orderBy('kode_kendaraan', 'asc')->get();
 
         return view('operasional.bengkel.perbaikan', compact(
             'daftarPerbaikan',
@@ -71,11 +71,14 @@ class PerbaikanKendaraanController extends Controller
      */
     public function simpan(Request $request)
     {
+        $kodeKndInput = $request->input('kode_kendaraan') ?? $request->input('kode_aset');
+        $request->merge(['kode_kendaraan' => $kodeKndInput]);
+
         $pesanKustom = [
             'nomor_spk_perbaikan.required' => 'Nomor SPK perbaikan wajib diisi.',
             'nomor_spk_perbaikan.unique' => 'Nomor SPK sudah terdaftar.',
-            'kode_aset.required' => 'Armada kendaraan wajib dipilih.',
-            'kode_aset.exists' => 'Armada kendaraan tidak valid.',
+            'kode_kendaraan.required' => 'Armada kendaraan wajib dipilih.',
+            'kode_kendaraan.exists' => 'Armada kendaraan tidak valid.',
             'tanggal_masuk.required' => 'Tanggal masuk servis wajib diisi.',
             'keluhan_kerusakan.required' => 'Keluhan / indikasi kerusakan wajib diisi.',
             'bengkel_pelaksana.required' => 'Bengkel pelaksana wajib dipilih.',
@@ -85,7 +88,7 @@ class PerbaikanKendaraanController extends Controller
 
         $validated = $request->validate([
             'nomor_spk_perbaikan' => 'required|string|max:50|unique:perbaikan_kendaraan,nomor_spk_perbaikan',
-            'kode_aset' => 'required|string|max:30|exists:data_aset,kode_aset',
+            'kode_kendaraan' => 'required|string|max:30|exists:data_kendaraan,kode_kendaraan',
             'tanggal_masuk' => 'required|date',
             'tanggal_selesai' => 'nullable|date|after_or_equal:tanggal_masuk',
             'keluhan_kerusakan' => 'required|string',
@@ -103,7 +106,7 @@ class PerbaikanKendaraanController extends Controller
 
         $perbaikan = PerbaikanKendaraan::create([
             'nomor_spk_perbaikan' => strtoupper(trim($validated['nomor_spk_perbaikan'])),
-            'kode_aset' => $validated['kode_aset'],
+            'kode_kendaraan' => $validated['kode_kendaraan'],
             'tanggal_masuk' => $validated['tanggal_masuk'],
             'tanggal_selesai' => $validated['tanggal_selesai'] ?? null,
             'keluhan_kerusakan' => trim($validated['keluhan_kerusakan']),
@@ -117,7 +120,7 @@ class PerbaikanKendaraanController extends Controller
         ]);
 
         return redirect()->route('operasional.bengkel.perbaikan')
-            ->with('sukses', "SPK Perbaikan [{$perbaikan->nomor_spk_perbaikan}] untuk truk {$perbaikan->kode_aset} berhasil diterbitkan!");
+            ->with('sukses', "SPK Perbaikan [{$perbaikan->nomor_spk_perbaikan}] untuk truk {$perbaikan->kode_kendaraan} berhasil diterbitkan!");
     }
 
     /**
@@ -147,9 +150,12 @@ class PerbaikanKendaraanController extends Controller
     {
         $perbaikan = PerbaikanKendaraan::findOrFail($id_perbaikan);
 
+        $kodeKndInput = $request->input('kode_kendaraan') ?? $request->input('kode_aset');
+        $request->merge(['kode_kendaraan' => $kodeKndInput]);
+
         $pesanKustom = [
-            'kode_aset.required' => 'Armada kendaraan wajib dipilih.',
-            'kode_aset.exists' => 'Armada kendaraan tidak valid.',
+            'kode_kendaraan.required' => 'Armada kendaraan wajib dipilih.',
+            'kode_kendaraan.exists' => 'Armada kendaraan tidak valid.',
             'tanggal_masuk.required' => 'Tanggal masuk servis wajib diisi.',
             'keluhan_kerusakan.required' => 'Keluhan / kerusakan wajib diisi.',
             'bengkel_pelaksana.required' => 'Bengkel pelaksana wajib dipilih.',
@@ -158,7 +164,7 @@ class PerbaikanKendaraanController extends Controller
         ];
 
         $validated = $request->validate([
-            'kode_aset' => 'required|string|max:30|exists:data_aset,kode_aset',
+            'kode_kendaraan' => 'required|string|max:30|exists:data_kendaraan,kode_kendaraan',
             'tanggal_masuk' => 'required|date',
             'tanggal_selesai' => 'nullable|date|after_or_equal:tanggal_masuk',
             'keluhan_kerusakan' => 'required|string',
@@ -181,7 +187,7 @@ class PerbaikanKendaraanController extends Controller
         }
 
         $perbaikan->update([
-            'kode_aset' => $validated['kode_aset'],
+            'kode_kendaraan' => $validated['kode_kendaraan'],
             'tanggal_masuk' => $validated['tanggal_masuk'],
             'tanggal_selesai' => $tanggalSelesai,
             'keluhan_kerusakan' => trim($validated['keluhan_kerusakan']),
@@ -306,13 +312,13 @@ class PerbaikanKendaraanController extends Controller
     {
         $jumlahPerbaikan = DB::table('perbaikan_kendaraan')->count();
         if ($jumlahPerbaikan === 0) {
-            $trukSatu = DB::table('data_aset')->value('kode_aset') ?? 'AST-001';
+            $trukSatu = DB::table('data_kendaraan')->value('kode_kendaraan') ?? 'KND-001';
 
             DB::table('perbaikan_kendaraan')->insert([
                 [
                     'id_perbaikan' => 1,
                     'nomor_spk_perbaikan' => 'SPK-001',
-                    'kode_aset' => $trukSatu,
+                    'kode_kendaraan' => $trukSatu,
                     'tanggal_masuk' => Carbon::now()->subDays(4)->format('Y-m-d'),
                     'tanggal_selesai' => Carbon::now()->subDays(2)->format('Y-m-d'),
                     'keluhan_kerusakan' => 'Ganti oli mesin diesel berkala, kuras oli gardan, dan pengecekan rem angin.',
@@ -329,7 +335,7 @@ class PerbaikanKendaraanController extends Controller
                 [
                     'id_perbaikan' => 2,
                     'nomor_spk_perbaikan' => 'SPK-002',
-                    'kode_aset' => $trukSatu,
+                    'kode_kendaraan' => $trukSatu,
                     'tanggal_masuk' => Carbon::now()->subDays(1)->format('Y-m-d'),
                     'tanggal_selesai' => null,
                     'keluhan_kerusakan' => 'Ban belakang kiri robek terkena pecahan batu tajam di area proyek Cikarang.',

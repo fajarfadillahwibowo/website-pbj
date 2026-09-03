@@ -3,10 +3,50 @@
 @section('judul', 'Aset & Inventaris Perusahaan')
 
 @section('konten')
-<div class="space-y-5" x-data="{ bukaModalTambah: false }">
+<div class="space-y-5" x-data="{ 
+    bukaModalTambah: false,
+    bukaModalSusut: false,
+    bukaTabRiwayat: false,
+    pilihanJenis: 'AST-TRK',
+    umurManfaat: 8,
+    tarifSusut: 12.5,
+    metodeSusut: 'Garis Lurus',
+    jumlahUnit: 1,
+    rincianUnit: [{ no_polisi: '', no_mesin: '', no_rangka: '' }],
+    sinkronkanRincian() {
+        if (!this.jumlahUnit || this.jumlahUnit < 1) this.jumlahUnit = 1;
+        if (this.jumlahUnit > 50) this.jumlahUnit = 50;
+        while (this.rincianUnit.length < this.jumlahUnit) {
+            this.rincianUnit.push({ no_polisi: '', no_mesin: '', no_rangka: '' });
+        }
+        if (this.rincianUnit.length > this.jumlahUnit) {
+            this.rincianUnit = this.rincianUnit.slice(0, this.jumlahUnit);
+        }
+    },
+    aturKategori(kode) {
+        this.pilihanJenis = kode;
+        if (kode === 'AST-TNH') {
+            this.umurManfaat = 0;
+            this.tarifSusut = 0;
+            this.metodeSusut = 'Tidak Disusutkan';
+        } else if (kode === 'AST-BDG') {
+            this.umurManfaat = 20;
+            this.tarifSusut = 5.0;
+            this.metodeSusut = 'Garis Lurus';
+        } else if (kode === 'AST-TRK' || kode === 'AST-GDG') {
+            this.umurManfaat = 8;
+            this.tarifSusut = 12.5;
+            this.metodeSusut = 'Garis Lurus';
+        } else if (kode === 'AST-OFC') {
+            this.umurManfaat = 4;
+            this.tarifSusut = 25.0;
+            this.metodeSusut = 'Garis Lurus';
+        }
+    }
+}">
     <!-- Flash Notification -->
     @if(session('sukses'))
-        <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-center justify-between">
+        <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-center justify-between shadow-xs">
             <div class="flex items-center gap-2">
                 <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                 <span>{{ session('sukses') }}</span>
@@ -15,38 +55,111 @@
         </div>
     @endif
 
+    @if(session('error'))
+        <div class="p-4 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-800 dark:text-rose-300 text-xs font-medium flex items-center justify-between shadow-xs">
+            <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                <span>{{ session('error') }}</span>
+            </div>
+            <button @click="$el.parentElement.remove()" class="text-rose-500 hover:text-rose-700 text-sm font-bold">&times;</button>
+        </div>
+    @endif
+
     <!-- Header Modul Aset Perusahaan -->
     <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
         <div>
-            <div class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold font-mono uppercase tracking-wider mb-1">Buku Besar & Akuntansi · Dev 1</div>
-            <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">Inventarisasi Aset Tetap Perusahaan</h1>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pendataan aktiva tetap: Armada Truk Tronton, Wingbox, Dump Truck, Gudang, dan Mesin Operasional.</p>
+            <div class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold font-mono uppercase tracking-wider mb-1">Buku Besar & Akuntansi · Aktiva Tetap</div>
+            <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">Master Aset Tetap & Depresiasi</h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pengelolaan aktiva tetap (Tanah, Bangunan, Mesin Gudang, Truk, Alat Kantor) beserta amortisasi penyusutan bulanan.</p>
         </div>
         <div class="flex items-center gap-2">
-            <button @click="bukaModalTambah = true" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm">
+            <button @click="bukaTabRiwayat = !bukaTabRiwayat" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-[#F4F6F9] dark:bg-[#1C1E2A] hover:bg-slate-200 dark:hover:bg-[#252837] border border-[#E2E8F0] dark:border-[#252837] rounded-xl transition-all">
+                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span x-text="bukaTabRiwayat ? 'Tutup Log Susut' : 'Log Penyusutan'">Log Penyusutan</span>
+            </button>
+            <button @click="bukaModalSusut = true" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                Proses Tutup Buku Susut
+            </button>
+            <button @click="bukaModalTambah = true; aturKategori('AST-TRK')" type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm">
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                Tambah Aset
+                Tambah Aset Baru
             </button>
         </div>
     </div>
 
-    <!-- Ringkasan Statistik Aset -->
-    <div class="wadah-bertingkat grid grid-cols-3 gap-3">
-        <div class="bg-white dark:bg-[#14161F] p-3.5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837]">
-            <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Total Nilai Perolehan Aset</div>
-            <div class="text-lg font-bold text-indigo-600 dark:text-indigo-400 mt-0.5 font-mono">Rp {{ number_format($totalNilaiAset ?? 0, 0, ',', '.') }}</div>
+    <!-- 5 Kartu Indikator Finansial Aset -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div class="bg-white dark:bg-[#14161F] p-3.5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-xs">
+            <div class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Total Harga Perolehan</div>
+            <div class="text-base font-extrabold text-slate-900 dark:text-white mt-0.5 font-mono">Rp {{ number_format($totalNilaiPerolehan ?? 0, 0, ',', '.') }}</div>
+            <div class="text-[10px] text-slate-400 mt-1">Nilai beli awal aktiva</div>
         </div>
-        <div class="bg-white dark:bg-[#14161F] p-3.5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837]">
-            <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Total Unit Aset</div>
-            <div class="text-lg font-bold text-slate-900 dark:text-slate-100 mt-0.5 font-mono">{{ $totalAset ?? 0 }} Unit</div>
+        <div class="bg-white dark:bg-[#14161F] p-3.5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-xs">
+            <div class="text-[10px] text-rose-600 dark:text-rose-400 font-bold uppercase tracking-wider">Akumulasi Penyusutan</div>
+            <div class="text-base font-extrabold text-rose-600 dark:text-rose-400 mt-0.5 font-mono">Rp {{ number_format($totalAkumulasiSusut ?? 0, 0, ',', '.') }}</div>
+            <div class="text-[10px] text-slate-400 mt-1">Total depresiasi terpakai</div>
         </div>
-        <div class="bg-white dark:bg-[#14161F] p-3.5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837]">
-            <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Armada Truk Aktif</div>
-            <div class="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 font-mono">{{ $totalTruk ?? 0 }} Kendaraan</div>
+        <div class="bg-white dark:bg-[#14161F] p-3.5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-xs">
+            <div class="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">Nilai Buku Bersih</div>
+            <div class="text-base font-extrabold text-indigo-600 dark:text-indigo-400 mt-0.5 font-mono">Rp {{ number_format($totalNilaiBuku ?? 0, 0, ',', '.') }}</div>
+            <div class="text-[10px] text-slate-400 mt-1">Nilai di Neraca Keuangan</div>
+        </div>
+        <div class="bg-white dark:bg-[#14161F] p-3.5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-xs">
+            <div class="text-[10px] text-orange-600 dark:text-orange-400 font-bold uppercase tracking-wider">Beban Susut / Bulan</div>
+            <div class="text-base font-extrabold text-orange-600 dark:text-orange-400 mt-0.5 font-mono">Rp {{ number_format($estimasiSusutBulanIni ?? 0, 0, ',', '.') }}</div>
+            <div class="text-[10px] text-slate-400 mt-1">Amortisasi rutin bulanan</div>
+        </div>
+        <div class="bg-white dark:bg-[#14161F] p-3.5 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] col-span-2 md:col-span-1 shadow-xs">
+            <div class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">Total Entitas Aset</div>
+            <div class="text-base font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5 font-mono">{{ $totalUnitAset ?? 0 }} Unit</div>
+            <div class="text-[10px] text-slate-400 mt-1">Tanah, Gedung, Truk, dsb.</div>
         </div>
     </div>
 
-    <!-- Tabel Data Aset -->
+    <!-- Panel Riwayat Penyusutan Terbaru (Toggleable) -->
+    <div x-show="bukaTabRiwayat" x-cloak class="animasi-masuk bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl p-4 shadow-sm">
+        <div class="flex items-center justify-between mb-3 border-b border-[#E2E8F0] dark:border-[#252837] pb-2">
+            <div>
+                <h3 class="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">Log Riwayat Penyusutan & Jurnal Akuntansi (10 Transaksi Terakhir)</h3>
+                <p class="text-[11px] text-slate-400">Pencatatan beban depresiasi yang telah diposting otomatis ke Buku Besar.</p>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+                <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] text-slate-500 border-b border-[#E2E8F0] dark:border-[#252837]">
+                    <tr>
+                        <th class="px-3 py-2 text-left font-semibold">No. Bukti Susut</th>
+                        <th class="px-3 py-2 text-left font-semibold">Nama Aset</th>
+                        <th class="px-3 py-2 text-center font-semibold">Periode</th>
+                        <th class="px-3 py-2 text-right font-semibold">Beban Susut</th>
+                        <th class="px-3 py-2 text-right font-semibold">Sisa Nilai Buku</th>
+                        <th class="px-3 py-2 text-center font-semibold">No. Jurnal</th>
+                        <th class="px-3 py-2 text-left font-semibold">Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
+                    @forelse($riwayatTerbaru ?? [] as $susut)
+                        <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50">
+                            <td class="px-3 py-2 font-mono font-medium text-indigo-600 dark:text-indigo-400">{{ $susut->nomor_penyusutan }}</td>
+                            <td class="px-3 py-2 font-semibold text-slate-900 dark:text-slate-100">{{ $susut->aset->nama_aset ?? $susut->kode_aset }}</td>
+                            <td class="px-3 py-2 text-center font-mono">{{ sprintf('%02d', $susut->periode_bulan) }}/{{ $susut->periode_tahun }}</td>
+                            <td class="px-3 py-2 text-right font-mono font-bold text-rose-600 dark:text-rose-400">Rp {{ number_format($susut->beban_penyusutan, 0, ',', '.') }}</td>
+                            <td class="px-3 py-2 text-right font-mono font-bold text-indigo-600 dark:text-indigo-400">Rp {{ number_format($susut->nilai_buku, 0, ',', '.') }}</td>
+                            <td class="px-3 py-2 text-center font-mono font-medium text-emerald-600 dark:text-emerald-400">{{ $susut->nomor_jurnal ?? '-' }}</td>
+                            <td class="px-3 py-2 text-slate-500">{{ $susut->keterangan ?? '-' }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-3 py-4 text-center text-slate-400">Belum ada transaksi penyusutan yang pernah diproses.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Tabel Data Aset Tetap -->
     <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <form method="GET" action="{{ route('keuangan.akuntansi.aset') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
             @php
@@ -54,11 +167,6 @@
                     'nilai' => $j->kode_jenis_aset,
                     'label' => $j->jenis_aset
                 ])->toArray());
-                $opsiJenisAsetModal = ($daftarJenis ?? collect())->map(fn($j) => [
-                    'nilai' => $j->kode_jenis_aset,
-                    'label' => $j->jenis_aset,
-                    'sub'   => 'Kode: ' . $j->kode_jenis_aset
-                ])->toArray();
             @endphp
             <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                 <div class="relative w-full sm:w-64">
@@ -66,7 +174,7 @@
                            class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
                     <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
-                <div class="w-full sm:w-48">
+                <div class="w-full sm:w-56">
                     <x-dropdown-kustom 
                         nama="jenis" 
                         :nilaiAwal="$filterJenis ?? ''" 
@@ -78,7 +186,7 @@
                     />
                 </div>
             </div>
-            <span class="text-xs text-slate-400 font-mono">Tabel: data_aset</span>
+            <span class="text-xs text-slate-400 font-mono">Master Aktiva Tetap & Nilai Buku</span>
         </form>
 
         <div class="overflow-x-auto">
@@ -86,40 +194,63 @@
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Kode Aset</th>
-                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Nama Aset & Spesifikasi</th>
-                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Kategori Jenis</th>
-                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Plat / No. Polisi</th>
+                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Nama Aset & Kategori</th>
+                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Penyusutan</th>
                         <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Harga Perolehan</th>
-                        <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Tanggal Beli</th>
+                        <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Akumulasi Susut</th>
+                        <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Nilai Buku Bersih</th>
+                        <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider" title="Keterikatan fisik armada truk operasional di logistik">Armada Fisik Terhubung</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarAset ?? [] as $aset)
                         <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
-                            <td class="px-4 py-3 font-mono font-medium text-indigo-600 dark:text-indigo-400">
+                            <td class="px-4 py-3 font-mono font-medium text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
                                 {{ $aset->kode_aset }}
                             </td>
-                            <td class="px-4 py-3 font-bold text-slate-900 dark:text-slate-100">
-                                {{ $aset->nama_aset }}
-                            </td>
                             <td class="px-4 py-3">
-                                <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                                    {{ $aset->jenisAset->jenis_aset ?? $aset->kode_jenis_aset }}
-                                </span>
+                                <div class="font-bold text-slate-900 dark:text-slate-100">{{ $aset->nama_aset }}</div>
+                                <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1.5">
+                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                                        {{ $aset->jenisAset->jenis_aset ?? $aset->kode_jenis_aset }}
+                                    </span>
+                                    <span>· Beli: {{ $aset->tanggal_pembelian ? date('d/m/Y', strtotime($aset->tanggal_pembelian)) : '-' }}</span>
+                                </div>
                             </td>
-                            <td class="px-4 py-3 font-mono font-semibold text-slate-700 dark:text-slate-300">
-                                {{ $aset->no_polisi ?? '-' }}
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                @if($aset->metode_penyusutan === 'Tidak Disusutkan' || $aset->umur_manfaat == 0)
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+                                        Tanpa Penyusutan (Permanen)
+                                    </span>
+                                @else
+                                    <div class="font-medium text-slate-700 dark:text-slate-300">{{ $aset->metode_penyusutan }} ({{ $aset->umur_manfaat }} Th / {{ $aset->tarif_penyusutan }}%)</div>
+                                    <div class="text-[10px] text-amber-600 dark:text-amber-400 font-mono">Susut: Rp {{ number_format($aset->hitungPenyusutanBulanan(), 0, ',', '.') }}/bln</div>
+                                @endif
                             </td>
-                            <td class="px-4 py-3 text-right font-mono tabular-nums font-bold text-indigo-600 dark:text-indigo-400">
-                                Rp {{ number_format($aset->harga_aset, 0, ',', '.') }}
+                            <td class="px-4 py-3 text-right font-mono tabular-nums font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap">
+                                Rp {{ number_format($aset->harga_perolehan ?? $aset->harga_aset, 0, ',', '.') }}
                             </td>
-                            <td class="px-4 py-3 text-center font-mono text-slate-500">
-                                {{ $aset->tanggal_pembelian ? date('d/m/Y', strtotime($aset->tanggal_pembelian)) : '-' }}
+                            <td class="px-4 py-3 text-right font-mono tabular-nums font-bold text-rose-600 dark:text-rose-400 whitespace-nowrap">
+                                Rp {{ number_format($aset->akumulasi_penyusutan, 0, ',', '.') }}
+                            </td>
+                            <td class="px-4 py-3 text-right font-mono tabular-nums font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
+                                Rp {{ number_format($aset->nilai_buku, 0, ',', '.') }}
+                            </td>
+                            <td class="px-4 py-3 text-center whitespace-nowrap">
+                                @if($aset->dataKendaraan)
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-blue-50 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30 shadow-2xs"
+                                          title="Tercatat di Master Armada Operasional: {{ $aset->dataKendaraan->merek_kendaraan ?? 'Truk' }} ({{ $aset->dataKendaraan->no_polisi }})">
+                                        <svg class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                                        <span>{{ $aset->dataKendaraan->kode_kendaraan }} ({{ $aset->dataKendaraan->no_polisi }})</span>
+                                    </span>
+                                @else
+                                    <span class="text-slate-400 text-xs font-mono" title="Aset non-kendaraan (Bukan armada jalan)">-</span>
+                                @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-6 text-center text-slate-400">Belum ada aset tetap tercatat.</td>
+                            <td colspan="7" class="px-4 py-6 text-center text-slate-400">Belum ada aktiva tetap terdaftar.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -127,68 +258,230 @@
         </div>
     </div>
 
-    <!-- Modal Tambah Aset -->
+    <!-- Modal 1: Tambah Aset Baru Komprehensif -->
     <div x-show="bukaModalTambah" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-visible shadow-xl my-8">
+        <div @click.away="bukaModalTambah = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-xl overflow-visible shadow-xl my-8">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Tambah Aset Perusahaan</h3>
-                <button @click="bukaModalTambah = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">&times;</button>
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Daftarkan Aset Tetap Baru</h3>
+                    <p class="text-[11px] text-slate-400">Pencatatan aktiva tetap finansial, kuantitas unit, dan pengaturan depresiasi akuntansi.</p>
+                </div>
+                <button @click="bukaModalTambah = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg font-bold">&times;</button>
             </div>
-            <form method="POST" action="{{ route('keuangan.akuntansi.aset.store') }}" class="p-5 space-y-3.5 text-xs">
+            <form method="POST" action="{{ route('keuangan.akuntansi.aset.store') }}" class="p-5 space-y-4 text-xs">
                 @csrf
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-3 gap-3">
                     <div>
                         <div class="flex items-center justify-between mb-1">
-                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Kode Aset <span class="text-rose-500">*</span></label>
-                            <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold px-1.5 py-0.5 bg-indigo-50 dark:bg-indigo-950/50 rounded-md">Otomatis</span>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Kode Aset</label>
+                            <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold px-1.5 py-0.5 bg-indigo-50 dark:bg-indigo-950/50 rounded-md">Auto</span>
                         </div>
-                        <input type="text" name="kode_aset" value="{{ $kodeOtomatis }}" required placeholder="AST-001"
+                        <input type="text" name="kode_aset" value="{{ $kodeOtomatis }}" :disabled="jumlahUnit > 1" placeholder="AST-001"
                                class="w-full px-3 py-2 rounded-xl bg-indigo-50/50 dark:bg-[#1C1E2A] border border-indigo-200 dark:border-indigo-900/50 text-indigo-900 dark:text-indigo-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis Aset <span class="text-rose-500">*</span></label>
-                        <x-dropdown-kustom 
-                            nama="kode_jenis_aset"
-                            placeholder="-- Pilih Jenis Aset --"
-                            :opsi="$opsiJenisAsetModal"
-                            :wajib="true"
-                            warnaFokus="indigo"
-                        />
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Golongan Aset <span class="text-rose-500">*</span></label>
+                        <select name="kode_jenis_aset" x-model="pilihanJenis" @change="aturKategori($event.target.value)" required
+                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 font-medium">
+                            <option value="AST-TRK">1. Kendaraan Armada (Truk / Tronton / Mobil Operasional)</option>
+                            <option value="AST-TNH">2. Tanah & Lahan (Lahan Usaha - Bebas Penyusutan)</option>
+                            <option value="AST-BDG">3. Bangunan & Gedung (Gedung Kantor / Gudang Semen / Pos)</option>
+                            <option value="AST-GDG">4. Mesin & Alat Gudang (Forklift / Genset / Conveyor / Timbangan)</option>
+                            <option value="AST-OFC">5. Elektronik & Inventaris Kantor (Komputer / Printer / AC / Meja)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Jumlah Unit <span class="text-rose-500">*</span></label>
+                            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold" x-show="jumlahUnit > 1" x-text="jumlahUnit + ' Unit'"></span>
+                        </div>
+                        <input type="number" name="jumlah_unit" x-model.number="jumlahUnit" @input="sinkronkanRincian()" min="1" max="50" required
+                               class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
                     </div>
                 </div>
+
+                <!-- Panduan Klasifikasi Golongan Aset -->
+                <div class="px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#1C1E2A] border border-slate-200 dark:border-[#252837] text-[11px] text-slate-600 dark:text-slate-300 flex items-start gap-2 shadow-2xs">
+                    <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div class="leading-relaxed">
+                        <span class="font-bold text-slate-800 dark:text-slate-200">Panduan Objek Fisik Terpilih: </span>
+                        <span x-show="pilihanJenis === 'AST-TRK'">Truk Tronton Wingbox, Hino Dutro, Fuso, Colt Diesel, Pick Up (Otomatis tercatat di Armada Operasional).</span>
+                        <span x-show="pilihanJenis === 'AST-TNH'">Lahan Gudang Transit, Tanah Kantor Cabang (Nilai Tetap, Permanen Bebas Depresiasi).</span>
+                        <span x-show="pilihanJenis === 'AST-BDG'">Gedung Kantor Utama, Bangunan Gudang Semen, Mess Karyawan, Pos Satpam (Masa Manfaat 20 Thn / 5%).</span>
+                        <span x-show="pilihanJenis === 'AST-GDG'">Forklift Diesel/Elektrik, Genset Pabrik, Mesin Conveyor, Hand Pallet, Timbangan Truk (Masa Manfaat 8 Thn / 12.5%).</span>
+                        <span x-show="pilihanJenis === 'AST-OFC'">Komputer PC, Laptop Kantor, Printer Laser, Server Data, Mesin Absensi, AC Ruangan, Meja & Kursi (Masa Manfaat 4 Thn / 25%).</span>
+                    </div>
+                </div>
+
+                <!-- Notifikasi Mode Batch -->
+                <div x-show="jumlahUnit > 1" x-cloak class="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-[11px] flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Mode Batch: Sistem akan otomatis membuat <strong x-text="jumlahUnit"></strong> entitas aset sekuensial (#01 s/d #<span x-text="jumlahUnit < 10 ? '0' + jumlahUnit : jumlahUnit"></span>) untuk pelacakan depresiasi dan audit mandiri.</span>
+                    </div>
+                </div>
+
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Aset <span class="text-rose-500">*</span></label>
-                    <input type="text" name="nama_aset" required placeholder="Hino Dutro 130 HD"
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Tipe / Model Aset <span class="text-rose-500">*</span></label>
+                    <input type="text" name="nama_aset" required placeholder="Contoh: Hino Dutro 130 HD / Laptop ThinkPad E14 / Forklift 3.5 Ton"
                            class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                </div>                <div class="space-y-3">
-                    <x-input-plat-nomor 
-                        nama="no_polisi" 
-                        :wajib="false" 
-                        label="No. Polisi (Khusus Kendaraan/Truk)" 
-                    />
+                </div>
+
+                <!-- Bagian Khusus Armada Truk (Kendaraan) -->
+                <div x-show="pilihanJenis === 'AST-TRK'" x-cloak class="p-3.5 bg-blue-50/70 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 rounded-xl space-y-3">
+                    <div class="flex items-center justify-between text-blue-800 dark:text-blue-300 font-semibold text-[11px]">
+                        <div class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                            <span>Sinkronisasi Otomatis ke Master Kendaraan Operasional</span>
+                        </div>
+                        <span class="text-[10px] text-blue-600 dark:text-blue-400 font-mono" x-text="jumlahUnit + ' Unit Armada Truk'"></span>
+                    </div>
 
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Pembelian <span class="text-rose-500">*</span></label>
-                        <x-input-tanggal 
-                            nama="tanggal_pembelian" 
-                            nilaiAwal="{{ date('Y-m-d') }}" 
-                            placeholder="Pilih Tanggal Pembelian"
-                            :wajib="true"
-                            warnaFokus="indigo"
-                        />
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Merek Truk / Pabrikan</label>
+                        <input type="text" name="merek_aset" placeholder="Contoh: Hino / Mitsubishi Fuso / Isuzu Giga"
+                               class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
+                    </div>
+
+                    <!-- Input Tunggal (Jika 1 Unit) -->
+                    <div x-show="jumlahUnit === 1" class="grid grid-cols-2 gap-3">
+                        <x-input-plat-nomor nama="no_polisi" :wajib="false" label="Plat Nomor Polisi" />
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nomor Mesin (Opsional)</label>
+                            <input type="text" name="no_mesin" placeholder="W04D-xxxxxx"
+                                   class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 font-mono uppercase">
+                        </div>
+                    </div>
+
+                    <!-- Input Rincian per Unit (Jika Lebih dari 1 Unit) -->
+                    <div x-show="jumlahUnit > 1" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                        <div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Daftar Plat Nomor & Mesin Masing-Masing Armada:</div>
+                        <template x-for="(unit, index) in rincianUnit" :key="index">
+                            <div class="p-2.5 rounded-xl bg-white dark:bg-[#14161F] border border-blue-200 dark:border-blue-900/50 space-y-1.5 shadow-xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-blue-700 dark:text-blue-400 font-mono text-[11px]" x-text="'Armada Unit #' + (index + 1)"></span>
+                                    <span class="text-[10px] text-slate-400 font-mono" x-text="'Auto KND-' + (index + 1)"></span>
+                                </div>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-0.5">Plat Nomor</label>
+                                        <input type="text" :name="'rincian_unit[' + index + '][no_polisi]'" x-model="unit.no_polisi" placeholder="B 1234 PBJ"
+                                               class="w-full px-2.5 py-1.5 rounded-lg bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-slate-200 dark:border-slate-700 font-mono uppercase text-xs focus:ring-1 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-0.5">No. Mesin</label>
+                                        <input type="text" :name="'rincian_unit[' + index + '][no_mesin]'" x-model="unit.no_mesin" placeholder="Opsional"
+                                               class="w-full px-2.5 py-1.5 rounded-lg bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-slate-200 dark:border-slate-700 font-mono uppercase text-xs">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-0.5">No. Rangka</label>
+                                        <input type="text" :name="'rincian_unit[' + index + '][no_rangka]'" x-model="unit.no_rangka" placeholder="Opsional"
+                                               class="w-full px-2.5 py-1.5 rounded-lg bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-slate-200 dark:border-slate-700 font-mono uppercase text-xs">
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
                     </div>
                 </div>
-                <div>
-                    <x-input-rupiah 
-                        nama="harga_aset" 
-                        label="Harga Perolehan Unit (Rp)" 
-                        :wajib="true" 
-                        placeholder="400.000.000" 
-                    />
+
+                <!-- Bagian Finansial & Penyusutan Akuntansi -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <x-input-rupiah nama="harga_perolehan" label="Harga Satuan per Unit (Rp)" :wajib="true" placeholder="350.000.000" />
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Perolehan <span class="text-rose-500">*</span></label>
+                        <x-input-tanggal nama="tanggal_pembelian" nilaiAwal="{{ date('Y-m-d') }}" placeholder="Pilih Tanggal Beli" :wajib="true" warnaFokus="indigo" />
+                    </div>
                 </div>
-                <div class="flex items-center justify-end gap-2 pt-2">
+
+                <!-- Parameter Depresiasi Otomatis -->
+                <div class="p-3 bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] rounded-xl space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold text-slate-800 dark:text-slate-200 text-[11px]">Parameter Penyusutan (PSAK 16)</span>
+                        <span class="text-[10px] font-mono text-indigo-600 dark:text-indigo-400 font-semibold" x-text="'Metode: ' + metodeSusut"></span>
+                    </div>
+                    <input type="hidden" name="metode_penyusutan" :value="metodeSusut">
+
+                    <template x-if="pilihanJenis === 'AST-TNH'">
+                        <div class="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-[11px] flex items-center gap-2">
+                            <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span>Aktiva Tanah tidak disusutkan. Nilai buku akan tetap sama sepanjang waktu.</span>
+                        </div>
+                    </template>
+
+                    <template x-if="pilihanJenis !== 'AST-TNH'">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Masa Manfaat (Tahun)</label>
+                                <input type="number" name="umur_manfaat" x-model="umurManfaat" min="1" max="50" required
+                                       class="w-full px-3 py-1.5 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 font-mono">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Tarif Susut / Tahun (%)</label>
+                                <input type="number" step="0.01" name="tarif_penyusutan" x-model="tarifSusut" min="0" max="100" required
+                                       class="w-full px-3 py-1.5 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 font-mono">
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-[#E2E8F0] dark:border-[#252837]">
                     <button @click="bukaModalTambah = false" type="button" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
                     <button type="submit" class="px-4 py-2 font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm">Simpan Aset</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 2: Konfirmasi Tutup Buku Penyusutan Bulanan -->
+    <div x-show="bukaModalSusut" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div @click.away="bukaModalSusut = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md shadow-xl p-5">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Eksekusi Tutup Buku Penyusutan</h3>
+                    <p class="text-[11px] text-slate-500">Posting ayat jurnal beban dan akumulasi depresiasi.</p>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ route('keuangan.akuntansi.aset.penyusutan') }}" class="space-y-3.5 text-xs">
+                @csrf
+                <div class="p-3 bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] rounded-xl space-y-2">
+                    <div class="flex items-center justify-between text-slate-600 dark:text-slate-400">
+                        <span>Total Aset Aktif Tersusut:</span>
+                        <span class="font-bold text-slate-900 dark:text-slate-100">{{ $totalUnitAset ?? 0 }} Unit</span>
+                    </div>
+                    <div class="flex items-center justify-between text-slate-600 dark:text-slate-400">
+                        <span>Estimasi Total Beban Bulan Ini:</span>
+                        <span class="font-bold text-emerald-600 dark:text-emerald-400 font-mono">Rp {{ number_format($estimasiSusutBulanIni ?? 0, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Bulan Periode</label>
+                        <select name="periode_bulan" class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 font-medium">
+                            @foreach([1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',5=>'Mei',6=>'Juni',7=>'Juli',8=>'Agustus',9=>'September',10=>'Oktober',11=>'November',12=>'Desember'] as $num => $nama)
+                                <option value="{{ $num }}" {{ (int)date('m') === $num ? 'selected' : '' }}>{{ $num }} - {{ $nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tahun Periode</label>
+                        <input type="number" name="periode_tahun" value="{{ date('Y') }}" class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 font-mono">
+                    </div>
+                </div>
+
+                <p class="text-[11px] text-slate-500 leading-relaxed">
+                    Sistem akan menghitung depresiasi masing-masing aset, memotong nilai buku, dan secara otomatis memposting jurnal berpasangan (Debit Beban Penyusutan, Kredit Akumulasi Penyusutan) ke Buku Besar.
+                </p>
+
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-[#E2E8F0] dark:border-[#252837]">
+                    <button @click="bukaModalSusut = false" type="button" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all shadow-sm">Jurnal Penyusutan</button>
                 </div>
             </form>
         </div>

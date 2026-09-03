@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Keuangan\PengeluaranKas;
+use App\Helpers\GeneratorKodeOtomatis;
 
 class PengeluaranKasController extends Controller
 {
@@ -77,7 +78,7 @@ class PengeluaranKasController extends Controller
         ]);
 
         $nominal = (float) $request->total_nominal;
-        $nomorPengeluaran = 'KAS-OUT-' . date('Ymd') . '-' . rand(100, 999);
+        $nomorPengeluaran = GeneratorKodeOtomatis::buatKodeTransaksi('pengeluaran', 'nomor_pengeluaran', 'KAS-OUT-', $request->tanggal_pengeluaran);
 
         DB::beginTransaction();
         try {
