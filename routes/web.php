@@ -59,6 +59,12 @@ Route::prefix('superadmin')->name('superadmin.')->group(function () {
     Route::post('/kelola-akun/toggle-status', [KelolaAkunController::class, 'toggleStatus'])->name('kelola_akun.toggle_status');
 });
 
+/*
+|--------------------------------------------------------------------------
+| --- RUTE DEVELOPER 1: MASTER DATA, KEUANGAN, AKUNTANSI & LAPORAN ---
+|--------------------------------------------------------------------------
+*/
+
 // Modul Master Data
 Route::prefix('master')->name('master.')->group(function () {
     // Customer (Entitas Pemilik & Finansial)
@@ -144,6 +150,12 @@ Route::prefix('keuangan')->name('keuangan.')->group(function () {
         Route::delete('/aset-perusahaan/{kode_aset}', [AsetPerusahaanController::class, 'destroy'])->name('aset.destroy');
     });
 });
+
+/*
+|--------------------------------------------------------------------------
+| --- RUTE DEVELOPER 2: OPERASIONAL, LOGISTIK, ARMADA & BENGKEL ---
+|--------------------------------------------------------------------------
+*/
 
 // Modul Operasional (Gudang, Armada, Pengiriman, Bengkel, Monitoring)
 Route::prefix('operasional')->name('operasional.')->group(function () {
