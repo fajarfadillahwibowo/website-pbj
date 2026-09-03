@@ -14,6 +14,7 @@
 - **Status Komponen Input Tanggal Kustom (`<x-input-tanggal>`):** ✅ **100% SELESAI & TERPASANG DI SELURUH FORM** (Desain 100% identik dengan `<x-dropdown-kustom>`: background `#F4F6F9`/`#1C1E2A`, border slate, font medium text-xs, ikon SVG kalender kustom, date picker trigger overlay, dan two-way binding Alpine.js).
 - **Status Standarisasi Penanda Wajib & Opsional:** ✅ **100% SELESAI DI SELURUH VIEW FORM** (Setiap input wajib ditandai bintang merah `<span class="text-rose-500">*</span>` dan input opsional ditandai abu-abu `<span class="text-slate-400 font-normal text-[10px]">(Opsional)</span>`).
 - **Status Bebas Pembatasan Modal (`overflow-visible`):** ✅ **100% SELESAI DI SELURUH MODAL** (Dropdown dan kalender mengambang bebas di luar batas canvas modal).
+- **Status Sinkronisasi & Merge Git ke `main`:** ✅ **100% SUKSES TERSINKRONISASI & TER-PUSH KE `origin/main` & `origin/web-dev1`** (Logika penyusutan PSAK 16, input multi-unit, arsitektur pemisahan aset, serta 5 kartu indikator finansial milik lokal dipertahankan 100% sebagai *source of truth*, dan digabungkan secara harmonis dengan fitur logo baru, navigasi SPA, serta upload berkas driver dari `origin/main`).
 - **Status Sinkronisasi Master SQL (`skema_database.sql`):** ✅ **100% SINKRON & TERVERIFIKASI (0 Perbedaan)** (Tabel `data_aset` akuntansi, `data_kendaraan`, `riwayat_penyusutan`, `pengiriman`, dan `perbaikan_kendaraan` telah selaras penuh dengan database MySQL aktual).
 
 
