@@ -99,4 +99,43 @@ class WilayahController extends Controller
 
         return redirect()->route('master.wilayah.index')->with('sukses', "Wilayah '{$wilayah->nama_wilayah}' berhasil dihapus.");
     }
+
+    /**
+     * Hapus banyak data wilayah sekaligus (Hapus Massal).
+     */
+    public function hapusMassal(Request $request)
+    {
+        $daftarId = $request->input('daftar_id', []);
+        if (empty($daftarId) || !is_array($daftarId)) {
+            return redirect()->route('master.wilayah.index')->with('gagal', 'Tidak ada data wilayah yang dipilih untuk dihapus.');
+        }
+
+        $berhasilDihapus = 0;
+        $gagalDihapus = 0;
+
+        DB::beginTransaction();
+        try {
+            foreach ($daftarId as $kode) {
+                $wilayah = Wilayah::withCount('daftarCustomer')->find($kode);
+                if ($wilayah) {
+                    if ($wilayah->daftar_customer_count > 0) {
+                        $gagalDihapus++;
+                        continue;
+                    }
+                    $wilayah->delete();
+                    $berhasilDihapus++;
+                }
+            }
+            DB::commit();
+
+            if ($gagalDihapus > 0) {
+                return redirect()->route('master.wilayah.index')->with('sukses', "{$berhasilDihapus} wilayah berhasil dihapus. {$gagalDihapus} wilayah dilewati karena masih memiliki customer toko aktif terhubung.");
+            }
+
+            return redirect()->route('master.wilayah.index')->with('sukses', "{$berhasilDihapus} data wilayah terpilih berhasil dihapus.");
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect()->route('master.wilayah.index')->with('gagal', 'Terjadi kesalahan saat menghapus data massal: ' . $th->getMessage());
+        }
+    }
 }

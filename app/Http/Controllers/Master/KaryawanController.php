@@ -152,4 +152,34 @@ class KaryawanController extends Controller
 
         return redirect()->route('master.karyawan.index')->with('sukses', "Karyawan '{$karyawan->nama_karyawan}' berhasil dihapus.");
     }
+
+    /**
+     * Hapus banyak data karyawan sekaligus (Hapus Massal).
+     */
+    public function hapusMassal(Request $request)
+    {
+        $daftarId = $request->input('daftar_id', []);
+        if (empty($daftarId) || !is_array($daftarId)) {
+            return redirect()->route('master.karyawan.index')->with('gagal', 'Tidak ada data pegawai/driver yang dipilih untuk dihapus.');
+        }
+
+        $berhasilDihapus = 0;
+
+        DB::beginTransaction();
+        try {
+            foreach ($daftarId as $kode) {
+                $karyawan = Karyawan::find($kode);
+                if ($karyawan) {
+                    $karyawan->delete();
+                    $berhasilDihapus++;
+                }
+            }
+            DB::commit();
+
+            return redirect()->route('master.karyawan.index')->with('sukses', "{$berhasilDihapus} data pegawai / supir terpilih berhasil dihapus.");
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect()->route('master.karyawan.index')->with('gagal', 'Terjadi kesalahan saat menghapus data massal: ' . $th->getMessage());
+        }
+    }
 }

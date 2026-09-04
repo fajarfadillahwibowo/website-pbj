@@ -197,7 +197,7 @@
     <!-- 5. TABEL TAB 1: DATA MITRA KSO (data_kso) -->
     <!-- ========================================================================= -->
     <div x-show="tabAktif === 'kso'" class="space-y-4">
-        <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+        <div x-data="tabelPaginasi({ totalData: {{ count($daftarKso ?? []) }}, defaultBaris: 10 })" class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
             
             <!-- Filter Bar Tab 1 -->
             <div class="p-4 sm:px-5 sm:py-4 border-b border-[#E2E8F0] dark:border-[#252837] flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -257,7 +257,7 @@
                     </thead>
                     <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                         @forelse($daftarKso as $kso)
-                            <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                            <tr x-show="apakahBarisTampil({{ $loop->index }})" class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
                                 
                                 <!-- Kode & Nama KSO -->
                                 <td class="px-4 py-3.5 whitespace-nowrap">
@@ -374,6 +374,9 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Paginasi Terpadu -->
+            <x-paginasi-tabel :totalData="count($daftarKso ?? [])" />
         </div>
     </div>
 
@@ -381,7 +384,7 @@
     <!-- 6. TABEL TAB 2: TARIF ONGKOS ANGKUT KSO (ongkos_kso) -->
     <!-- ========================================================================= -->
     <div x-show="tabAktif === 'ongkos'" class="space-y-4">
-        <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+        <div x-data="tabelPaginasi({ totalData: {{ count($daftarOngkosKso ?? []) }}, defaultBaris: 10 })" class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
             
             <!-- Filter Bar Tab 2 -->
             <div class="p-4 sm:px-5 sm:py-4 border-b border-[#E2E8F0] dark:border-[#252837] flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -439,7 +442,7 @@
                     </thead>
                     <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                         @forelse($daftarOngkosKso as $oa)
-                            <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                            <tr x-show="apakahBarisTampil({{ $loop->index }})" class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
                                 
                                 <!-- Kode OA & Rute -->
                                 <td class="px-4 py-3.5 whitespace-nowrap">
@@ -523,6 +526,9 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Paginasi Terpadu -->
+            <x-paginasi-tabel :totalData="count($daftarOngkosKso ?? [])" />
         </div>
     </div>
     <!-- ========================================================================= -->

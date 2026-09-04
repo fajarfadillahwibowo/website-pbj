@@ -74,7 +74,7 @@
     </div>
 
     <!-- Filter Tab Kategori Karyawan & Pencarian -->
-    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div x-data="tabelPaginasi({ totalData: {{ count($daftarKaryawan ?? []) }}, defaultBaris: 10 })" class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         
         <!-- Tab Bar Kategori -->
         <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-3 border-b border-[#E2E8F0] dark:border-[#252837] bg-[#F8FAFC] dark:bg-[#1C1E2A]">
@@ -129,7 +129,8 @@
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarKaryawan as $karyawan)
-                        <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                        <tr x-show="apakahBarisTampil({{ $loop->index }})" 
+                            class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
                             <td class="px-4 py-3 font-mono font-medium text-indigo-600 dark:text-indigo-400">
                                 {{ $karyawan->kode_karyawan }}
                             </td>
@@ -163,15 +164,14 @@
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-center">
-                                <div class="inline-flex items-center gap-2">
-                                    <button @click="editData = {{ json_encode($karyawan) }}; bukaModalEdit = true" type="button" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">Edit</button>
-                                    <span class="text-slate-300 dark:text-slate-700">|</span>
-                                    <form method="POST" action="{{ route('master.karyawan.destroy', $karyawan->kode_karyawan) }}" onsubmit="return confirm('Hapus karyawan {{ $karyawan->nama_karyawan }}?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 dark:text-red-400 hover:underline font-medium">Hapus</button>
-                                    </form>
-                                </div>
+                                <x-menu-aksi-tabel 
+                                    :kodeSalin="$karyawan->kode_karyawan" 
+                                    labelSalin="Salin ID"
+                                    modulIzin="master_karyawan"
+                                    :aksiEdit="'editData = ' . json_encode($karyawan) . '; bukaModalEdit = true'"
+                                    :aksiHapus="route('master.karyawan.destroy', $karyawan->kode_karyawan)"
+                                    :pesanHapus="'Hapus karyawan ' . $karyawan->nama_karyawan . '?'"
+                                />
                             </td>
                         </tr>
                     @empty
@@ -184,6 +184,8 @@
                 </tbody>
             </table>
         </div>
+
+        <x-paginasi-tabel :totalData="count($daftarKaryawan ?? [])" />
     </div>
     @php
         $opsiKategoriKaryawan = [
@@ -257,13 +259,13 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. KTP / Identitas <span class="text-rose-500">*</span></label>
-                        <input type="text" name="no_identitas" x-model="formTambah.no_identitas" required placeholder="321606xxxxxx0001"
-                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                        <input type="text" name="no_identitas" x-model="formTambah.no_identitas" required placeholder="321606xxxxxx0001" inputmode="numeric" data-hanya-angka="true" maxlength="16"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 font-mono">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. HP / WhatsApp <span class="text-rose-500">*</span></label>
-                        <input type="text" name="no_hp" x-model="formTambah.no_hp" required placeholder="0812-xxxx-xxxx"
-                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                        <input type="text" name="no_hp" x-model="formTambah.no_hp" required placeholder="0812-xxxx-xxxx" inputmode="numeric" data-hanya-angka="true"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 font-mono">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
@@ -357,13 +359,13 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. KTP / Identitas <span class="text-rose-500">*</span></label>
-                        <input type="text" name="no_identitas" x-model="editData.no_identitas" required
-                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                        <input type="text" name="no_identitas" x-model="editData.no_identitas" required inputmode="numeric" data-hanya-angka="true" maxlength="16"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 font-mono">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. HP / WhatsApp <span class="text-rose-500">*</span></label>
-                        <input type="text" name="no_hp" x-model="editData.no_hp" required
-                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                        <input type="text" name="no_hp" x-model="editData.no_hp" required inputmode="numeric" data-hanya-angka="true"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 font-mono">
                     </div>
                 </div>
                 <div>

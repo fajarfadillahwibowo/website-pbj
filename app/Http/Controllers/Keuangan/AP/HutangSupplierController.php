@@ -65,6 +65,8 @@ class HutangSupplierController extends Controller
         $nominal = (float) $request->nominal;
         $nomorRilisan = GeneratorKodeOtomatis::buatKodeTransaksi('pengeluaran', 'nomor_pengeluaran', 'RLS-DRV-', $request->tanggal_rilisan);
 
+        $pembuat = auth()->user()->username ?? 'spv_keuangan';
+
         DB::beginTransaction();
         try {
             if ($request->id_rekening_sumber) {
@@ -83,7 +85,7 @@ class HutangSupplierController extends Controller
                 'keterangan'          => "Rilisan uang jalan untuk driver: {$driver->nama_karyawan} ({$driver->kode_karyawan}) - " . $request->keterangan,
                 'status_persetujuan'  => 'disetujui_spv',
                 'disetujui_oleh'      => 'spv_keuangan',
-                'dibuat_oleh'         => 'staff_ap',
+                'dibuat_oleh'         => $pembuat,
                 'dibuat_pada'         => now(),
             ]);
 
@@ -93,7 +95,7 @@ class HutangSupplierController extends Controller
                 $request->tanggal_rilisan,
                 $nominal,
                 $request->id_rekening_sumber,
-                auth()->user()->username ?? 'staff_ap',
+                $pembuat,
                 "Rilisan uang jalan driver: {$driver->nama_karyawan} ({$driver->kode_karyawan})"
             );
 

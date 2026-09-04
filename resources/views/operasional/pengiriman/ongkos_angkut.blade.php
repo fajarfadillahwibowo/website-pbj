@@ -204,7 +204,7 @@
     </div>
 
     <!-- 5. Tabel Data Master Ongkos Angkut -->
-    <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div x-data="tabelPaginasi({ totalData: {{ count($daftarOngkosAngkut ?? []) }}, defaultBaris: 10 })" class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
             <table class="tabel-bertingkat w-full text-left text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500 dark:text-slate-400">
@@ -223,8 +223,8 @@
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarOngkosAngkut as $oa)
-                        <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors group">
-                            
+                        <tr x-show="apakahBarisTampil({{ $loop->index }})" 
+                            class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors group">
                             <!-- 1. Kode OA -->
                             <td class="px-4 py-3.5 font-mono font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap">
                                 <span class="px-2 py-1 rounded bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20">
@@ -248,45 +248,27 @@
                             <td class="px-4 py-3.5 whitespace-nowrap">
                                 @if($oa->kode_gudang && $oa->gudang)
                                     <div class="flex items-center gap-1.5">
-                                        <span class="font-mono font-bold text-amber-600 dark:text-amber-400 text-xs px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
+                                        <span class="px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                                             {{ $oa->kode_gudang }}
                                         </span>
-                                        <span class="text-[9px] px-1.5 py-0.5 rounded font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/60 dark:border-slate-700/60">
-                                            {{ $oa->gudang->jenis_gudang ?? 'Gudang' }}
+                                        <span class="text-[11px] text-slate-500 dark:text-slate-400">
+                                            ({{ $oa->gudang->nama_gudang }})
                                         </span>
                                     </div>
-                                    <div class="font-semibold text-slate-900 dark:text-slate-100 text-xs mt-1 truncate max-w-[170px]" title="{{ $oa->gudang->nama_gudang }}">
-                                        {{ $oa->gudang->nama_gudang }}
-                                    </div>
-                                    <div class="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
-                                        <span>Plant: {{ $oa->gudang->plant ?? 'Plant Utama' }}</span>
-                                        <span>·</span>
-                                        <span class="font-mono font-medium {{ ($oa->gudang->stok_tersedia ?? 0) <= 1000 ? 'text-rose-500 font-bold' : 'text-emerald-600 dark:text-emerald-400' }}">
-                                            {{ number_format($oa->gudang->stok_tersedia ?? 0, 0, ',', '.') }} Zak
-                                        </span>
-                                    </div>
-                                @elseif($oa->kode_gudang)
-                                    <span class="font-mono font-bold text-amber-600 dark:text-amber-400 text-xs px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
-                                        {{ $oa->kode_gudang }}
-                                    </span>
-                                    <div class="text-[10px] text-slate-400 mt-0.5 italic">Gudang Mandiri</div>
                                 @else
-                                    <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-2 py-0.5 rounded-md border border-slate-200/50 dark:border-slate-700/50">
-                                        <svg class="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                                        Pusat / Silo Langsung
-                                    </span>
+                                    <span class="text-slate-400 text-[11px] italic">-</span>
                                 @endif
                             </td>
 
-                            <!-- 4. Kontrak OA -->
-                            <td class="px-4 py-3.5 font-mono text-slate-600 dark:text-slate-400 whitespace-nowrap">
-                                {{ $oa->kontrak_oa ?: '-' }}
+                            <!-- 4. No. Kontrak -->
+                            <td class="px-4 py-3.5 whitespace-nowrap font-mono text-slate-600 dark:text-slate-400">
+                                {{ $oa->no_kontrak ?: '-' }}
                             </td>
 
-                            <!-- 5. Muatan OA -->
+                            <!-- 5. Jenis Muatan -->
                             <td class="px-4 py-3.5 whitespace-nowrap">
-                                <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                                    {{ $oa->muatan_oa }}
+                                <span class="px-2 py-0.5 rounded text-[11px] font-semibold {{ $oa->muatan === 'KLINKER' ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300' }}">
+                                    {{ $oa->muatan ?: 'SEMEN ZAK' }}
                                 </span>
                             </td>
 
@@ -312,46 +294,28 @@
                                 </span>
                             </td>
 
-                            <!-- 10. Aksi -->
+                            <!-- 10. Aksi Popover Modern -->
                             <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                <div class="inline-flex items-center gap-1.5">
-                                    <!-- Detail -->
-                                    <button @click="bukaModalDetail('{{ $oa->kode_oa }}')"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
-                                            title="Lihat Detail Tarif OA">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                        </svg>
-                                    </button>
-
-                                    <!-- Edit -->
-                                    <button @click="bukaModalEdit('{{ $oa->kode_oa }}')"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
-                                            title="Ubah Data Tarif OA">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </button>
-
-                                    <!-- Hapus -->
-                                    <button @click="bukaModalHapus('{{ $oa->kode_oa }}', '{{ addslashes($oa->nama_oa) }}')"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
-                                            title="Hapus Data Tarif OA">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                <!-- Riwayat Terakhir Diedit Real-Time -->
-                                <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 flex items-center justify-center gap-1 font-mono cursor-help"
-                                     title="Terakhir diperbarui: {{ $oa->terakhir_diedit_waktu }}">
-                                    <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                    <span>{{ $oa->terakhir_diedit_relatif }}</span>
-                                </div>
+                                <x-menu-aksi-tabel 
+                                    :kodeSalin="$oa->kode_oa" 
+                                    labelSalin="Salin Kode"
+                                    modulIzin="ops_ongkos_angkut"
+                                    :aksiDetail="'bukaModalDetail(\'' . $oa->kode_oa . '\')'"
+                                    labelDetail="Detail"
+                                    :aksiEdit="'bukaModalEdit(\'' . $oa->kode_oa . '\')'"
+                                    labelEdit="Edit"
+                                >
+                                    <template x-if="!apakahReadOnly('ops_ongkos_angkut')">
+                                        <button @click="bukaModalHapus('{{ $oa->kode_oa }}', '{{ addslashes($oa->nama_oa) }}'); terbuka = false" 
+                                                type="button" 
+                                                class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors text-left border-t border-slate-100 dark:border-[#252837]">
+                                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                            <span>Hapus</span>
+                                        </button>
+                                    </template>
+                                </x-menu-aksi-tabel>
                             </td>
                         </tr>
                     @empty
@@ -372,6 +336,7 @@
                 </tbody>
             </table>
         </div>
+        <x-paginasi-tabel :totalData="count($daftarOngkosAngkut ?? [])" />
     </div>
 
     <!-- ========================================================================= -->

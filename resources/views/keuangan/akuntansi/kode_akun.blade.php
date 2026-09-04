@@ -51,7 +51,7 @@
     </div>
 
     <!-- Tabel Data Bagan Akun -->
-    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div x-data="tabelPaginasi({ totalData: {{ count($daftarAkun ?? []) }}, defaultBaris: 10 })" class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         @php
                 $opsiFilterTipeCOA = [
                     ['nilai' => '', 'label' => '-- Semua Tipe Akun --'],
@@ -114,7 +114,8 @@
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarAkun ?? [] as $acc)
-                        <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                        @php /** @var \App\Models\Keuangan\KodeAkun $acc */ @endphp
+                        <tr x-show="apakahBarisTampil({{ $loop->index }})" class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
                             <td class="px-4 py-3 font-mono font-bold text-violet-600 dark:text-violet-400">
                                 {{ $acc->kode_akun }}
                             </td>
@@ -137,7 +138,13 @@
                                 Rp {{ number_format($acc->saldo_berjalan ?? 0, 0, ',', '.') }}
                             </td>
                             <td class="px-4 py-3 text-center">
-                                <button @click="editData = {{ json_encode($acc) }}; bukaModalEdit = true" type="button" class="text-violet-600 dark:text-violet-400 hover:underline font-medium">Edit</button>
+                                <x-menu-aksi-tabel 
+                                    :kodeSalin="$acc->kode_akun"
+                                    labelSalin="Salin Kode"
+                                    modulIzin="akun_coa"
+                                    aksiEdit="editData = {{ json_encode($acc) }}; bukaModalEdit = true"
+                                    labelEdit="Edit"
+                                />
                             </td>
                         </tr>
                     @empty
@@ -148,6 +155,8 @@
                 </tbody>
             </table>
         </div>
+
+        <x-paginasi-tabel :totalData="count($daftarAkun ?? [])" />
     </div>
 
     <!-- Modal Tambah Akun -->
@@ -200,8 +209,13 @@
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Saldo Awal (Rp) <span class="text-rose-500">*</span></label>
-                    <input type="number" name="saldo_awal" value="0" min="0" step="100000" required
-                           class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500/30 font-mono">
+                    <x-input-rupiah 
+                        nama="saldo_awal"
+                        placeholder="0"
+                        nilaiAwal="0"
+                        :wajib="true"
+                        warnaFokus="violet"
+                    />
                 </div>
                 <div class="flex items-center justify-end gap-2 pt-2">
                     <button @click="bukaModalTambah = false" type="button" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>

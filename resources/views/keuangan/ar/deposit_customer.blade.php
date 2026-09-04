@@ -61,7 +61,7 @@
     </div>
 
     <!-- Tabel Mutasi Deposit -->
-    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div x-data="tabelPaginasi({ totalData: {{ count($daftarMutasi ?? []) }}, defaultBaris: 10 })" class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <form method="GET" action="{{ route('keuangan.ar.deposit') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
             @php
                 $opsiFilterTipe = [
@@ -107,11 +107,13 @@
                         <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Jumlah Nominal</th>
                         <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Saldo Akhir</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Keterangan / Ref</th>
+                        <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider w-16">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarMutasi ?? [] as $dep)
-                        <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                        @php /** @var \App\Models\Keuangan\DepositCustomer $dep */ @endphp
+                        <tr x-show="apakahBarisTampil({{ $loop->index }})" class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
                             <td class="px-4 py-3 font-mono font-medium text-sky-600 dark:text-sky-400">
                                 {{ $dep->nomor_bukti_deposit }}
                             </td>
@@ -142,15 +144,24 @@
                             <td class="px-4 py-3 text-slate-500 dark:text-slate-400 truncate max-w-xs">
                                 {{ $dep->keterangan ?? '-' }}
                             </td>
+                            <td class="px-4 py-3 text-center">
+                                <x-menu-aksi-tabel 
+                                    :kodeSalin="$dep->nomor_bukti_deposit" 
+                                    labelSalin="Salin No"
+                                    modulIzin="ar_deposit"
+                                />
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-6 text-center text-slate-400">Belum ada riwayat mutasi deposit.</td>
+                            <td colspan="8" class="px-4 py-6 text-center text-slate-400">Belum ada riwayat mutasi deposit.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+
+        <x-paginasi-tabel :totalData="count($daftarMutasi ?? [])" />
     </div>
 
     <!-- Modal Top Up Deposit -->
@@ -184,11 +195,25 @@
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jumlah Nominal Top Up (Rp) <span class="text-rose-500">*</span></label>
-                    <input type="number" name="jumlah_nominal" required min="0" step="any" placeholder="10000000"
-                           class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/30 font-mono font-semibold text-sm">
+                    <x-input-rupiah 
+                        nama="jumlah_nominal"
+                        placeholder="10.000.000"
+                        :wajib="true"
+                        warnaFokus="sky"
+                    />
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan / Referensi Bank <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Rekening Bank Penerima <span class="text-slate-400 font-normal text-[10px]">(Opsional - Default Kas Operasional)</span></label>
+                    <x-dropdown-kustom 
+                        nama="id_rekening_tujuan"
+                        placeholder="-- Pilih Rekening Penerima (Kas / Bank) --"
+                        :opsi="$opsiRekeningDeposit ?? []"
+                        :wajib="false"
+                        warnaFokus="sky"
+                    />
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan / Catatan Setoran <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
                     <input type="text" name="keterangan" placeholder="Setoran via transfer Bank BCA..."
                            class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
                 </div>

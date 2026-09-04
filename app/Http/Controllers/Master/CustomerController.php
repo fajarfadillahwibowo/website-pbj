@@ -186,6 +186,45 @@ class CustomerController extends Controller
     }
 
     /**
+     * Hapus banyak data customer sekaligus (Hapus Massal).
+     */
+    public function hapusMassal(Request $request)
+    {
+        $daftarId = $request->input('daftar_id', []);
+        if (empty($daftarId) || !is_array($daftarId)) {
+            return redirect()->route('master.customer.index')->with('gagal', 'Tidak ada data customer yang dipilih untuk dihapus.');
+        }
+
+        $berhasilDihapus = 0;
+        $gagalDihapus = 0;
+
+        DB::beginTransaction();
+        try {
+            foreach ($daftarId as $kode) {
+                $customer = Customer::find($kode);
+                if ($customer) {
+                    if ($customer->saldo_piutang > 0) {
+                        $gagalDihapus++;
+                        continue;
+                    }
+                    $customer->delete();
+                    $berhasilDihapus++;
+                }
+            }
+            DB::commit();
+
+            if ($gagalDihapus > 0) {
+                return redirect()->route('master.customer.index')->with('sukses', "{$berhasilDihapus} data customer berhasil dihapus. {$gagalDihapus} customer dilewati karena masih memiliki saldo piutang aktif.");
+            }
+
+            return redirect()->route('master.customer.index')->with('sukses', "{$berhasilDihapus} data customer terpilih berhasil dihapus.");
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect()->route('master.customer.index')->with('gagal', 'Terjadi kesalahan saat menghapus data massal: ' . $th->getMessage());
+        }
+    }
+
+    /**
      * API Generator Kode Otomatis
      */
     public function buatKodeOtomatis(Request $request)

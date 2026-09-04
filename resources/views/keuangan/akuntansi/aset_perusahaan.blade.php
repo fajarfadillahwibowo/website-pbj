@@ -105,8 +105,8 @@
                             <td class="px-3 py-2 font-mono font-medium text-indigo-600 dark:text-indigo-400">{{ $susut->nomor_penyusutan }}</td>
                             <td class="px-3 py-2 font-semibold text-slate-900 dark:text-slate-100">{{ $susut->aset->nama_aset ?? $susut->kode_aset }}</td>
                             <td class="px-3 py-2 text-center font-mono">{{ sprintf('%02d', $susut->periode_bulan) }}/{{ $susut->periode_tahun }}</td>
-                            <td class="px-3 py-2 text-right font-mono font-bold text-rose-600 dark:text-rose-400">Rp {{ number_format($susut->beban_penyusutan, 0, ',', '.') }}</td>
-                            <td class="px-3 py-2 text-right font-mono font-bold text-indigo-600 dark:text-indigo-400">Rp {{ number_format($susut->nilai_buku, 0, ',', '.') }}</td>
+                            <td class="px-3 py-2 text-right font-mono font-bold text-rose-600 dark:text-rose-400">Rp {{ number_format((float) ($susut->beban_penyusutan ?? 0), 0, ',', '.') }}</td>
+                            <td class="px-3 py-2 text-right font-mono font-bold text-indigo-600 dark:text-indigo-400">Rp {{ number_format((float) ($susut->nilai_buku ?? 0), 0, ',', '.') }}</td>
                             <td class="px-3 py-2 text-center font-mono font-medium text-emerald-600 dark:text-emerald-400">{{ $susut->nomor_jurnal ?? '-' }}</td>
                             <td class="px-3 py-2 text-slate-500">{{ $susut->keterangan ?? '-' }}</td>
                         </tr>
@@ -121,7 +121,7 @@
     </div>
 
     <!-- Tabel Data Aset Tetap -->
-    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div x-data="tabelPaginasi({ totalData: {{ count($daftarAset ?? []) }}, defaultBaris: 10 })" class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <form method="GET" action="{{ route('keuangan.akuntansi.aset') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
             @php
                 $opsiFilterJenisAset = array_merge([['nilai' => '', 'label' => '-- Semua Jenis Aset --']], ($daftarJenis ?? collect())->map(fn($j) => [
@@ -170,7 +170,8 @@
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarAset as $aset)
                         @php /** @var \App\Models\Keuangan\AsetPerusahaan $aset */ @endphp
-                        <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                        <tr x-show="apakahBarisTampil({{ $loop->index }})" 
+                            class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
                             <td class="px-4 py-3 font-mono font-medium text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
                                 {{ $aset->kode_aset }}
                             </td>
@@ -194,13 +195,13 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3 text-right font-mono tabular-nums font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap">
-                                Rp {{ number_format($aset->harga_perolehan ?? $aset->harga_aset, 0, ',', '.') }}
+                                Rp {{ number_format((float) ($aset->harga_perolehan ?? $aset->harga_aset ?? 0), 0, ',', '.') }}
                             </td>
                             <td class="px-4 py-3 text-right font-mono tabular-nums font-bold text-rose-600 dark:text-rose-400 whitespace-nowrap">
-                                Rp {{ number_format($aset->akumulasi_penyusutan, 0, ',', '.') }}
+                                Rp {{ number_format((float) ($aset->akumulasi_penyusutan ?? 0), 0, ',', '.') }}
                             </td>
                             <td class="px-4 py-3 text-right font-mono tabular-nums font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
-                                Rp {{ number_format($aset->nilai_buku, 0, ',', '.') }}
+                                Rp {{ number_format((float) ($aset->nilai_buku ?? 0), 0, ',', '.') }}
                             </td>
                             <td class="px-4 py-3 text-center whitespace-nowrap">
                                 @if($aset->dataKendaraan)
@@ -214,39 +215,22 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3 text-center whitespace-nowrap">
-                                <div class="inline-flex items-center gap-1.5">
-                                    <button @click="bukaDetail('{{ $aset->kode_aset }}')"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
-                                            title="Lihat Detail Aset">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                        </svg>
-                                    </button>
-
-                                    <button @click="bukaEdit('{{ $aset->kode_aset }}')"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
-                                            title="Ubah Data Aset">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </button>
-
-                                    <button @click="bukaHapus('{{ $aset->kode_aset }}', '{{ addslashes($aset->nama_aset) }}')"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
-                                            title="Hapus Aset">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </div>
+                                <x-menu-aksi-tabel 
+                                    :kodeSalin="$aset->kode_aset"
+                                    labelSalin="Salin Kode"
+                                    modulIzin="akun_aset"
+                                    aksiDetail="bukaDetail('{{ $aset->kode_aset }}')"
+                                    labelDetail="Detail"
+                                    aksiEdit="bukaEdit('{{ $aset->kode_aset }}')"
+                                    labelEdit="Edit"
+                                    aksiHapus="{{ route('keuangan.akuntansi.aset.destroy', $aset->kode_aset) }}"
+                                    labelHapus="Hapus"
+                                    pesanHapus="Apakah Anda yakin ingin menghapus aset {{ $aset->nama_aset }} ({{ $aset->kode_aset }})?"
+                                />
 
                                 <!-- Riwayat Diedit Real-Time -->
-                                <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 flex items-center justify-center gap-1 font-mono cursor-help"
+                                <div class="text-[9px] text-slate-400 dark:text-slate-500 mt-0.5 flex items-center justify-center gap-0.5 font-mono cursor-help"
                                      title="Terakhir diperbarui: {{ $aset->diperbarui_pada ? \Carbon\Carbon::parse($aset->diperbarui_pada)->format('d/m/Y H:i:s') : ($aset->dibuat_pada ? \Carbon\Carbon::parse($aset->dibuat_pada)->format('d/m/Y H:i:s') : '-') }}">
-                                    <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
                                     <span>{{ $aset->diperbarui_pada ? \Carbon\Carbon::parse($aset->diperbarui_pada)->locale('id')->diffForHumans() : ($aset->dibuat_pada ? \Carbon\Carbon::parse($aset->dibuat_pada)->locale('id')->diffForHumans() : 'Baru') }}</span>
                                 </div>
                             </td>
@@ -259,6 +243,8 @@
                 </tbody>
             </table>
         </div>
+
+        <x-paginasi-tabel :totalData="count($daftarAset ?? [])" />
     </div>
 
     <!-- Modal 1: Tambah Aset Baru Komprehensif (Canvas Landscape) -->
@@ -839,8 +825,13 @@
                             </div>
                             <div>
                                 <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Perolehan (Rp) <span class="text-rose-500">*</span></label>
-                                <input type="number" name="harga_aset" x-model="formEdit.harga_aset" required min="0"
-                                       class="w-full px-3 py-2 rounded-xl font-mono bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
+                                <x-input-rupiah 
+                                    nama="harga_aset"
+                                    modelBind="formEdit.harga_aset"
+                                    placeholder="350.000.000"
+                                    :wajib="true"
+                                    warnaFokus="indigo"
+                                />
                             </div>
                         </div>
                     </div>

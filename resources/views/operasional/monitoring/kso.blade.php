@@ -20,7 +20,7 @@
     </div>
 
     <!-- Tabel Data KSO -->
-    <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div x-data="tabelPaginasi({ totalData: 1, defaultBaris: 10 })" class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
             <div class="relative w-full sm:w-64">
                 <input type="text" placeholder="Cari No. Kontrak / Nama Mitra..."
@@ -44,7 +44,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
-                    <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                    <tr x-show="apakahBarisTampil(0)" class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
                         <td class="px-4 py-3 font-mono font-medium text-blue-600 dark:text-blue-400">KSO-2026-001</td>
                         <td class="px-4 py-3 font-bold text-slate-900 dark:text-slate-100">PT Logistik Nusantara Jaya</td>
                         <td class="px-4 py-3 text-center font-mono font-bold">5 Unit Tronton</td>
@@ -58,6 +58,9 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Paginasi Terpadu -->
+        <x-paginasi-tabel :totalData="1" />
     </div>
 </div>
 @endsection

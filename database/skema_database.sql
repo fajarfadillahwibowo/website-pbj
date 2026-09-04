@@ -355,6 +355,11 @@ CREATE TABLE `penjualan` (
     `tanggal_penjualan` DATE NOT NULL,
     `kode_customer` VARCHAR(30) NOT NULL,
     `kode_toko` VARCHAR(30) DEFAULT NULL,
+    `kode_barang` VARCHAR(30) DEFAULT NULL,
+    `nama_barang` VARCHAR(150) DEFAULT NULL,
+    `satuan_barang` VARCHAR(30) DEFAULT 'Zak',
+    `jumlah_zak` INT NOT NULL DEFAULT 0,
+    `harga_satuan` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
     `metode_pembayaran` ENUM('Tunai', 'Transfer', 'Kredit / Piutang', 'Potong Deposit') NOT NULL,
     `total_bruto` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
     `diskon` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
@@ -634,7 +639,7 @@ CREATE TABLE `riwayat_penyusutan` (
     KEY `idx_susut_nomor_jurnal` (`nomor_jurnal`),
     CONSTRAINT `fk_susut_aset` FOREIGN KEY (`kode_aset`) 
         REFERENCES `data_aset` (`kode_aset`) 
-        ON DELETE RESTRICT ON UPDATE CASCADE
+        ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 6.5 Master List Sparepart
