@@ -1,6 +1,9 @@
 # 📝 Pelacak Bug, Error, & Progres Terlewati Real-time
 
 ## 🔴 Daftar Bug & Error
+- **[TERSELESAIKAN] Tombol aksi popover dan timestamp melayang di atas tabel pada `operasional/gudang/stok.blade.php:278`**:
+  - *Penyebab:* Hilangnya tag pembuka `<td class="px-4 py-3.5 text-center whitespace-nowrap">` yang membungkus komponen `<x-menu-aksi-tabel>`. Sesuai spesifikasi HTML parser browser (*foster parenting rule*), elemen non-tabel yang berada langsung di dalam baris `<tr>` tanpa dibungkus `<td>` atau `<th>` otomatis dikeluarkan dan ditempatkan di atas tabel `<table>`, menyebabkan kolom 'AKSI & MUTASI' kosong dan tombol aksi melayang di atas header tabel.
+  - *Solusi:* Menambahkan kembali tag pembuka `<td class="px-4 py-3.5 text-center whitespace-nowrap">` sebelum `<x-menu-aksi-tabel>`. Tampilan tabel kembali presisi, kolom 'Aksi & Mutasi' sejajar rapi di setiap baris gudang, dan popover berfungsi normal.
 - **[TERSELESAIKAN] Syntax error, unexpected token "\" pada view `operasional/gudang/opname.blade.php:272`**:
   - *Penyebab:* Penggunaan tanda kutip ganda ter-escape `\"` di dalam ekspresi Blade `aksiEdit="{{ $opn->status_konfirmasi === 'draft' ? \"bukaModalEdit('{$opn->id_opname}')\" : null }}"`. Saat compiler Blade mengompilasinya menjadi kode PHP, karakter backslash terbawa dan menyebabkan `ParseError: syntax error, unexpected token "\"`.
   - *Solusi:* Mengubah binding atribut menjadi native Blade binding dengan prefix titik dua `:aksiEdit="$opn->status_konfirmasi === 'draft' ? 'bukaModalEdit(\'' . $opn->id_opname . '\')' : null"`. View berhasil dirender bersih (HTML 247 KB) dan semua aksi modal berfungsi lancar.
