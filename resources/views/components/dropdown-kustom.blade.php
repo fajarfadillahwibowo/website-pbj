@@ -32,61 +32,17 @@
 <div class="relative w-full" 
      @set-nilai-{{ $nama }}.window="terpilih = $event.detail; sinkronkanLabel()"
      @update-dropdown-{{ $nama }}.window="terpilih = $event.detail; sinkronkanLabel()"
-     x-data="{
-    buka: false,
-    terpilih: '{{ old($nama, $nilaiAwal) }}',
-    labelTerpilih: '',
-    daftar: {{ json_encode($daftarPilihan) }},
-    submitOtomatis: {{ $submitOnChange ? 'true' : 'false' }},
-    init() {
-        @if($modelBind)
-            try {
-                let getter = new Function('try { return (typeof this.{{ $modelBind }} !== "undefined" ? this.{{ $modelBind }} : (typeof {{ $modelBind }} !== "undefined" ? {{ $modelBind }} : null)); } catch(e){ return null; }');
-                let valAwal = getter.call(this);
-                if (valAwal !== null && valAwal !== undefined && valAwal !== '') {
-                    this.terpilih = valAwal;
-                }
-            } catch(e) {}
-            
-            try {
-                this.$watch('{{ $modelBind }}', (val) => {
-                    this.terpilih = val;
-                    this.sinkronkanLabel();
-                });
-            } catch(e) {}
-        @endif
-        this.sinkronkanLabel();
-    },
-    sinkronkanLabel() {
-        if (this.terpilih !== null && this.terpilih !== '') {
-            let item = this.daftar.find(d => String(d.nilai) === String(this.terpilih));
-            this.labelTerpilih = item ? item.label : this.terpilih;
-        } else {
-            this.labelTerpilih = '';
-        }
-    },
-    pilihItem(nilai, label) {
-        this.terpilih = nilai;
-        this.labelTerpilih = label;
-        @if($modelBind)
-            try {
-                let setter = new Function('val', 'try { this.{{ $modelBind }} = val; } catch(e){ try { {{ $modelBind }} = val; } catch(e2){} }');
-                setter.call(this, nilai);
-            } catch(e) {}
-        @endif
-        this.buka = false;
-        $dispatch('input', nilai);
-        $dispatch('change', nilai);
-        if (this.submitOtomatis) {
-            $nextTick(() => {
-                if ($el.closest('form')) $el.closest('form').submit();
-            });
-        }
-    }
-}" @click.away="buka = false">
+     x-data="komponenDropdownKustom({
+         nama: '{{ $nama }}',
+         nilaiAwal: @js(old($nama, $nilaiAwal)),
+         daftar: @js($daftarPilihan),
+         submitOnChange: @js($submitOnChange),
+         modelBind: @js($modelBind)
+     })"
+     @click.away="buka = false">
 
     <!-- Input hidden untuk submit form -->
-    <input type="hidden" name="{{ $nama }}" :value="terpilih">
+    <input type="hidden" name="{{ $nama }}" :value="terpilih" {{ $wajib ? 'required' : '' }}>
 
     <!-- Tombol Trigger Dropdown Modern & Compact -->
     <button type="button" 
