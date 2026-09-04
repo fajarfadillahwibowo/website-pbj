@@ -24,6 +24,10 @@
             'sub'   => 'Plant: ' . ($g->plant ?? 'Utama') . ' · ' . ($g->distrik ?? 'Pusat') . ' · Stok: ' . number_format($g->stok_tersedia ?? 0, 0, ',', '.') . ' Zak (' . ($g->jenis_gudang ?? 'Gudang') . ')'
         ])->toArray();
 
+        $opsiGudangForm = array_merge([
+            ['nilai' => '', 'label' => '-- Tanpa Fasilitas Gudang Tertentu (Umum) --', 'sub' => 'Tarif rute umum / lintas fasilitas distribusi']
+        ], $opsiGudang);
+
         $opsiFilterGudang = array_merge([
             ['nilai' => 'semua', 'label' => 'Semua Fasilitas Gudang (SPV Gudang)', 'sub' => null]
         ], $opsiGudang);
@@ -417,7 +421,8 @@
                         <x-dropdown-kustom 
                             nama="kode_gudang"
                             placeholder="-- Pilih Gudang Asal --"
-                            :opsi="$opsiGudang"
+                            :opsi="$opsiGudangForm"
+                            :nilaiAwal="$daftarGudang->first()->kode_gudang ?? ''"
                             :wajib="false"
                             warnaFokus="blue"
                             modelBind="formTambah.kode_gudang"
@@ -453,6 +458,7 @@
                             nama="muatan_oa"
                             placeholder="-- Pilih Jenis Muatan --"
                             :opsi="$opsiMuatan"
+                            :nilaiAwal="'Semen Zak 50kg'"
                             :wajib="true"
                             warnaFokus="blue"
                             modelBind="formTambah.muatan_oa"
@@ -552,7 +558,7 @@
                         <x-dropdown-kustom 
                             nama="kode_gudang"
                             placeholder="-- Pilih Gudang Asal --"
-                            :opsi="$opsiGudang"
+                            :opsi="$opsiGudangForm"
                             :wajib="false"
                             warnaFokus="amber"
                             modelBind="formEdit.kode_gudang"
@@ -876,8 +882,18 @@
                 this.formTambah.harga_kso = 0;
                 this.formTambah.harga_kso_khusus = 0;
                 this.formTambah.keterangan = '';
+                this.formTambah.kode_gudang = '{{ $daftarGudang->first()->kode_gudang ?? "" }}';
+                this.formTambah.muatan_oa = 'Semen Zak 50kg';
                 this.buatKodeOtomatis();
                 this.modalTambahTerbuka = true;
+
+                this.$nextTick(() => {
+                    window.dispatchEvent(new CustomEvent('set-nilai-kode_gudang', { detail: this.formTambah.kode_gudang }));
+                    window.dispatchEvent(new CustomEvent('set-nilai-muatan_oa', { detail: this.formTambah.muatan_oa }));
+                    window.dispatchEvent(new CustomEvent('set-nilai-harga_oa', { detail: 0 }));
+                    window.dispatchEvent(new CustomEvent('set-nilai-harga_kso', { detail: 0 }));
+                    window.dispatchEvent(new CustomEvent('set-nilai-harga_kso_khusus', { detail: 0 }));
+                });
             },
 
             async buatKodeOtomatis() {
@@ -917,13 +933,21 @@
                             kode_gudang: d.kode_gudang || '',
                             kontrak_oa: d.kontrak_oa || '',
                             muatan_oa: d.muatan_oa || 'Semen Zak 50kg',
-                            harga_oa: Number(d.harga_oa) || 0,
-                            harga_kso: Number(d.harga_kso) || 0,
-                            harga_kso_khusus: Number(d.harga_kso_khusus) || 0,
+                            harga_oa: Math.round(Number(d.harga_oa) || 0),
+                            harga_kso: Math.round(Number(d.harga_kso) || 0),
+                            harga_kso_khusus: Math.round(Number(d.harga_kso_khusus) || 0),
                             wilayah_oa: d.wilayah_oa || '',
                             keterangan: d.keterangan || ''
                         };
                         this.modalEditTerbuka = true;
+
+                        this.$nextTick(() => {
+                            window.dispatchEvent(new CustomEvent('set-nilai-kode_gudang', { detail: this.formEdit.kode_gudang }));
+                            window.dispatchEvent(new CustomEvent('set-nilai-muatan_oa', { detail: this.formEdit.muatan_oa }));
+                            window.dispatchEvent(new CustomEvent('set-nilai-harga_oa', { detail: this.formEdit.harga_oa }));
+                            window.dispatchEvent(new CustomEvent('set-nilai-harga_kso', { detail: this.formEdit.harga_kso }));
+                            window.dispatchEvent(new CustomEvent('set-nilai-harga_kso_khusus', { detail: this.formEdit.harga_kso_khusus }));
+                        });
                     }
                 } catch (e) {
                     alert('Gagal mengambil data ongkos angkut untuk diedit.');

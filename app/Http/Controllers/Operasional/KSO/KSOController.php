@@ -96,6 +96,11 @@ class KSOController extends Controller
      */
     public function simpanKSO(Request $request)
     {
+        if ($request->has('nilai_kontrak')) {
+            $raw = (string) $request->input('nilai_kontrak');
+            $request->merge(['nilai_kontrak' => preg_replace('/[^0-9]/', '', $raw)]);
+        }
+
         $pesanKustom = [
             'kode_kso.required' => 'Kode KSO wajib diisi.',
             'kode_kso.unique' => 'Kode KSO sudah terdaftar.',
@@ -125,20 +130,35 @@ class KSOController extends Controller
             $pathFileKontrak = $request->file('file_kontrak_kso')->store('kontrak_kso', 'public');
         }
 
-        $kso = KSO::create([
-            'kode_kso' => strtoupper(trim($validated['kode_kso'])),
-            'nama_kso' => trim($validated['nama_kso']),
-            'pihak_mitra' => trim($validated['pihak_mitra']),
-            'tanggal_mulai' => $validated['tanggal_mulai'],
-            'tanggal_selesai' => $validated['tanggal_selesai'],
-            'nilai_kontrak' => $validated['nilai_kontrak'] ?? 0,
-            'status_kso' => $validated['status_kso'],
-            'keterangan' => $validated['keterangan'] ? trim($validated['keterangan']) : null,
-            'file_kontrak_kso' => $pathFileKontrak,
-        ]);
+        $tanggalMulai = Carbon::parse($validated['tanggal_mulai'])->format('Y-m-d');
+        $tanggalSelesai = Carbon::parse($validated['tanggal_selesai'])->format('Y-m-d');
 
-        return redirect()->route('operasional.kso', ['tab' => 'kso'])
-            ->with('sukses', "Data Mitra KSO [{$kso->kode_kso}] {$kso->nama_kso} berhasil disimpan!");
+        DB::beginTransaction();
+        try {
+            $kso = KSO::create([
+                'kode_kso' => strtoupper(trim($validated['kode_kso'])),
+                'nama_kso' => trim($validated['nama_kso']),
+                'pihak_mitra' => trim($validated['pihak_mitra']),
+                'tanggal_mulai' => $tanggalMulai,
+                'tanggal_selesai' => $tanggalSelesai,
+                'nilai_kontrak' => $validated['nilai_kontrak'] ?? 0,
+                'status_kso' => $validated['status_kso'],
+                'keterangan' => $validated['keterangan'] ? trim($validated['keterangan']) : null,
+                'file_kontrak_kso' => $pathFileKontrak,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('operasional.kso', ['tab' => 'kso'])
+                ->with('sukses', "Data Mitra KSO [{$kso->kode_kso}] {$kso->nama_kso} berhasil disimpan!");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            if ($pathFileKontrak && Storage::disk('public')->exists($pathFileKontrak)) {
+                Storage::disk('public')->delete($pathFileKontrak);
+            }
+            return redirect()->back()->withInput()
+                ->with('error', 'Gagal menyimpan Data Mitra KSO: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -168,6 +188,11 @@ class KSOController extends Controller
     {
         $kso = KSO::findOrFail($kode_kso);
 
+        if ($request->has('nilai_kontrak')) {
+            $raw = (string) $request->input('nilai_kontrak');
+            $request->merge(['nilai_kontrak' => preg_replace('/[^0-9]/', '', $raw)]);
+        }
+
         $pesanKustom = [
             'nama_kso.required' => 'Nama KSO wajib diisi.',
             'pihak_mitra.required' => 'Nama pihak mitra KSO wajib diisi.',
@@ -189,27 +214,48 @@ class KSOController extends Controller
             'file_kontrak_kso' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
         ], $pesanKustom);
 
-        $pathFileKontrak = $kso->file_kontrak_kso;
+        $pathFileLama = $kso->file_kontrak_kso;
+        $pathFileKontrak = $pathFileLama;
+        $fileBaruDiunggah = false;
+
         if ($request->hasFile('file_kontrak_kso')) {
-            if ($kso->file_kontrak_kso && Storage::disk('public')->exists($kso->file_kontrak_kso)) {
-                Storage::disk('public')->delete($kso->file_kontrak_kso);
-            }
             $pathFileKontrak = $request->file('file_kontrak_kso')->store('kontrak_kso', 'public');
+            $fileBaruDiunggah = true;
         }
 
-        $kso->update([
-            'nama_kso' => trim($validated['nama_kso']),
-            'pihak_mitra' => trim($validated['pihak_mitra']),
-            'tanggal_mulai' => $validated['tanggal_mulai'],
-            'tanggal_selesai' => $validated['tanggal_selesai'],
-            'nilai_kontrak' => $validated['nilai_kontrak'] ?? 0,
-            'status_kso' => $validated['status_kso'],
-            'keterangan' => $validated['keterangan'] ? trim($validated['keterangan']) : null,
-            'file_kontrak_kso' => $pathFileKontrak,
-        ]);
+        $tanggalMulai = Carbon::parse($validated['tanggal_mulai'])->format('Y-m-d');
+        $tanggalSelesai = Carbon::parse($validated['tanggal_selesai'])->format('Y-m-d');
 
-        return redirect()->route('operasional.kso', ['tab' => 'kso'])
-            ->with('sukses', "Data Mitra KSO [{$kso->kode_kso}] berhasil diperbarui!");
+        DB::beginTransaction();
+        try {
+            $kso->update([
+                'nama_kso' => trim($validated['nama_kso']),
+                'pihak_mitra' => trim($validated['pihak_mitra']),
+                'tanggal_mulai' => $tanggalMulai,
+                'tanggal_selesai' => $tanggalSelesai,
+                'nilai_kontrak' => $validated['nilai_kontrak'] ?? 0,
+                'status_kso' => $validated['status_kso'],
+                'keterangan' => $validated['keterangan'] ? trim($validated['keterangan']) : null,
+                'file_kontrak_kso' => $pathFileKontrak,
+                'diperbarui_pada' => now(),
+            ]);
+
+            DB::commit();
+
+            if ($fileBaruDiunggah && $pathFileLama && Storage::disk('public')->exists($pathFileLama)) {
+                Storage::disk('public')->delete($pathFileLama);
+            }
+
+            return redirect()->route('operasional.kso', ['tab' => 'kso'])
+                ->with('sukses', "Data Mitra KSO [{$kso->kode_kso}] berhasil diperbarui!");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            if ($fileBaruDiunggah && $pathFileKontrak && Storage::disk('public')->exists($pathFileKontrak)) {
+                Storage::disk('public')->delete($pathFileKontrak);
+            }
+            return redirect()->back()->withInput()
+                ->with('error', 'Gagal memperbarui Data Mitra KSO: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -219,15 +265,24 @@ class KSOController extends Controller
     {
         $kso = KSO::findOrFail($kode_kso);
         $namaKso = $kso->nama_kso;
+        $fileKontrak = $kso->file_kontrak_kso;
 
-        if ($kso->file_kontrak_kso && Storage::disk('public')->exists($kso->file_kontrak_kso)) {
-            Storage::disk('public')->delete($kso->file_kontrak_kso);
+        DB::beginTransaction();
+        try {
+            $kso->delete();
+            DB::commit();
+
+            if ($fileKontrak && Storage::disk('public')->exists($fileKontrak)) {
+                Storage::disk('public')->delete($fileKontrak);
+            }
+
+            return redirect()->route('operasional.kso', ['tab' => 'kso'])
+                ->with('sukses', "Data Mitra KSO [{$kode_kso}] {$namaKso} beserta seluruh rute ongkos angkut terkait berhasil dihapus!");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->route('operasional.kso', ['tab' => 'kso'])
+                ->with('error', 'Gagal menghapus Data Mitra KSO: ' . $e->getMessage());
         }
-
-        $kso->delete();
-
-        return redirect()->route('operasional.kso', ['tab' => 'kso'])
-            ->with('sukses', "Data Mitra KSO [{$kode_kso}] {$namaKso} beserta seluruh rute ongkos angkut terkait berhasil dihapus!");
     }
 
     /**
@@ -304,6 +359,11 @@ class KSOController extends Controller
      */
     public function simpanOngkos(Request $request)
     {
+        if ($request->has('ongkos_angkut')) {
+            $raw = (string) $request->input('ongkos_angkut');
+            $request->merge(['ongkos_angkut' => preg_replace('/[^0-9]/', '', $raw)]);
+        }
+
         $pesanKustom = [
             'kode_oa.required' => 'Kode OA wajib diisi.',
             'kode_oa.unique' => 'Kode OA sudah terdaftar.',
@@ -322,16 +382,25 @@ class KSOController extends Controller
             'ongkos_angkut' => 'required|numeric|min:0',
         ], $pesanKustom);
 
-        $oa = OngkosKSO::create([
-            'kode_oa' => strtoupper(trim($validated['kode_oa'])),
-            'kode_kso' => $validated['kode_kso'],
-            'nama_oa' => trim($validated['nama_oa']),
-            'muatan' => trim($validated['muatan']),
-            'ongkos_angkut' => $validated['ongkos_angkut'],
-        ]);
+        DB::beginTransaction();
+        try {
+            $oa = OngkosKSO::create([
+                'kode_oa' => strtoupper(trim($validated['kode_oa'])),
+                'kode_kso' => $validated['kode_kso'],
+                'nama_oa' => trim($validated['nama_oa']),
+                'muatan' => trim($validated['muatan']),
+                'ongkos_angkut' => $validated['ongkos_angkut'],
+            ]);
 
-        return redirect()->route('operasional.kso', ['tab' => 'ongkos'])
-            ->with('sukses', "Tarif Ongkos Angkut KSO [{$oa->kode_oa}] {$oa->nama_oa} berhasil disimpan!");
+            DB::commit();
+
+            return redirect()->route('operasional.kso', ['tab' => 'ongkos'])
+                ->with('sukses', "Tarif Ongkos Angkut KSO [{$oa->kode_oa}] {$oa->nama_oa} berhasil disimpan!");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()
+                ->with('error', 'Gagal menyimpan tarif ongkos angkut KSO: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -361,6 +430,11 @@ class KSOController extends Controller
     {
         $oa = OngkosKSO::findOrFail($kode_oa);
 
+        if ($request->has('ongkos_angkut')) {
+            $raw = (string) $request->input('ongkos_angkut');
+            $request->merge(['ongkos_angkut' => preg_replace('/[^0-9]/', '', $raw)]);
+        }
+
         $pesanKustom = [
             'kode_kso.required' => 'Mitra KSO wajib dipilih.',
             'kode_kso.exists' => 'Mitra KSO tidak valid.',
@@ -376,15 +450,25 @@ class KSOController extends Controller
             'ongkos_angkut' => 'required|numeric|min:0',
         ], $pesanKustom);
 
-        $oa->update([
-            'kode_kso' => $validated['kode_kso'],
-            'nama_oa' => trim($validated['nama_oa']),
-            'muatan' => trim($validated['muatan']),
-            'ongkos_angkut' => $validated['ongkos_angkut'],
-        ]);
+        DB::beginTransaction();
+        try {
+            $oa->update([
+                'kode_kso' => $validated['kode_kso'],
+                'nama_oa' => trim($validated['nama_oa']),
+                'muatan' => trim($validated['muatan']),
+                'ongkos_angkut' => $validated['ongkos_angkut'],
+                'diperbarui_pada' => now(),
+            ]);
 
-        return redirect()->route('operasional.kso', ['tab' => 'ongkos'])
-            ->with('sukses', "Data Tarif Ongkos Angkut [{$oa->kode_oa}] berhasil diperbarui!");
+            DB::commit();
+
+            return redirect()->route('operasional.kso', ['tab' => 'ongkos'])
+                ->with('sukses', "Data Tarif Ongkos Angkut [{$oa->kode_oa}] berhasil diperbarui!");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()
+                ->with('error', 'Gagal memperbarui tarif ongkos angkut KSO: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -395,10 +479,18 @@ class KSOController extends Controller
         $oa = OngkosKSO::findOrFail($kode_oa);
         $namaOa = $oa->nama_oa;
 
-        $oa->delete();
+        DB::beginTransaction();
+        try {
+            $oa->delete();
+            DB::commit();
 
-        return redirect()->route('operasional.kso', ['tab' => 'ongkos'])
-            ->with('sukses', "Tarif Ongkos Angkut [{$kode_oa}] {$namaOa} berhasil dihapus!");
+            return redirect()->route('operasional.kso', ['tab' => 'ongkos'])
+                ->with('sukses', "Tarif Ongkos Angkut [{$kode_oa}] {$namaOa} berhasil dihapus!");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->route('operasional.kso', ['tab' => 'ongkos'])
+                ->with('error', 'Gagal menghapus tarif ongkos angkut KSO: ' . $e->getMessage());
+        }
     }
 
     /**

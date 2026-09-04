@@ -96,27 +96,37 @@ class StockOpnameController extends Controller
         ], $pesanKustom);
 
         $selisih = (int) $validated['stok_fisik'] - (int) $validated['stok_sistem'];
+        $tanggalOpname = Carbon::parse($validated['tanggal_opname'])->format('Y-m-d');
 
-        $opname = StockOpname::create([
-            'nomor_opname' => strtoupper(trim($validated['nomor_opname'])),
-            'kode_gudang' => $validated['kode_gudang'],
-            'tanggal_opname' => $validated['tanggal_opname'],
-            'stok_sistem' => $validated['stok_sistem'],
-            'stok_fisik' => $validated['stok_fisik'],
-            'selisih' => $selisih,
-            'keterangan_selisih' => $validated['keterangan_selisih'] ? trim($validated['keterangan_selisih']) : 'Hasil perhitungan fisik gudang',
-            'status_konfirmasi' => $validated['status_konfirmasi'],
-            'petugas_opname' => trim($validated['petugas_opname']),
-        ]);
+        DB::beginTransaction();
+        try {
+            $opname = StockOpname::create([
+                'nomor_opname' => strtoupper(trim($validated['nomor_opname'])),
+                'kode_gudang' => $validated['kode_gudang'],
+                'tanggal_opname' => $tanggalOpname,
+                'stok_sistem' => $validated['stok_sistem'],
+                'stok_fisik' => $validated['stok_fisik'],
+                'selisih' => $selisih,
+                'keterangan_selisih' => $validated['keterangan_selisih'] ? trim($validated['keterangan_selisih']) : 'Hasil perhitungan fisik gudang',
+                'status_konfirmasi' => $validated['status_konfirmasi'],
+                'petugas_opname' => trim($validated['petugas_opname']),
+            ]);
 
-        // Jika SPV langsung konfirmasi, sinkronkan kuantitas stok di tabel list_gudang_so
-        if ($validated['status_konfirmasi'] === 'dikonfirmasi_spv') {
-            Gudang::where('kode_gudang', $validated['kode_gudang'])
-                ->update(['stok_tersedia' => $validated['stok_fisik'], 'diperbarui_pada' => now()]);
+            // Jika SPV langsung konfirmasi, sinkronkan kuantitas stok di tabel list_gudang_so
+            if ($validated['status_konfirmasi'] === 'dikonfirmasi_spv') {
+                Gudang::where('kode_gudang', $validated['kode_gudang'])
+                    ->update(['stok_tersedia' => $validated['stok_fisik'], 'diperbarui_pada' => now()]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('operasional.gudang.opname')
+                ->with('sukses', "Catatan Stock Opname {$opname->nomor_opname} berhasil disimpan!");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()
+                ->with('error', 'Gagal mencatat Stock Opname: ' . $e->getMessage());
         }
-
-        return redirect()->route('operasional.gudang.opname')
-            ->with('sukses', "Catatan Stock Opname {$opname->nomor_opname} berhasil disimpan!");
     }
 
     /**
@@ -167,25 +177,35 @@ class StockOpnameController extends Controller
         ], $pesanKustom);
 
         $selisih = (int) $validated['stok_fisik'] - (int) $validated['stok_sistem'];
+        $tanggalOpname = Carbon::parse($validated['tanggal_opname'])->format('Y-m-d');
 
-        $opname->update([
-            'kode_gudang' => $validated['kode_gudang'],
-            'tanggal_opname' => $validated['tanggal_opname'],
-            'stok_sistem' => $validated['stok_sistem'],
-            'stok_fisik' => $validated['stok_fisik'],
-            'selisih' => $selisih,
-            'keterangan_selisih' => $validated['keterangan_selisih'] ? trim($validated['keterangan_selisih']) : null,
-            'status_konfirmasi' => $validated['status_konfirmasi'],
-            'petugas_opname' => trim($validated['petugas_opname']),
-        ]);
+        DB::beginTransaction();
+        try {
+            $opname->update([
+                'kode_gudang' => $validated['kode_gudang'],
+                'tanggal_opname' => $tanggalOpname,
+                'stok_sistem' => $validated['stok_sistem'],
+                'stok_fisik' => $validated['stok_fisik'],
+                'selisih' => $selisih,
+                'keterangan_selisih' => $validated['keterangan_selisih'] ? trim($validated['keterangan_selisih']) : null,
+                'status_konfirmasi' => $validated['status_konfirmasi'],
+                'petugas_opname' => trim($validated['petugas_opname']),
+            ]);
 
-        if ($validated['status_konfirmasi'] === 'dikonfirmasi_spv') {
-            Gudang::where('kode_gudang', $validated['kode_gudang'])
-                ->update(['stok_tersedia' => $validated['stok_fisik'], 'diperbarui_pada' => now()]);
+            if ($validated['status_konfirmasi'] === 'dikonfirmasi_spv') {
+                Gudang::where('kode_gudang', $validated['kode_gudang'])
+                    ->update(['stok_tersedia' => $validated['stok_fisik'], 'diperbarui_pada' => now()]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('operasional.gudang.opname')
+                ->with('sukses', "Data Stock Opname {$opname->nomor_opname} berhasil diperbarui!");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()
+                ->with('error', 'Gagal memperbarui Stock Opname: ' . $e->getMessage());
         }
-
-        return redirect()->route('operasional.gudang.opname')
-            ->with('sukses', "Data Stock Opname {$opname->nomor_opname} berhasil diperbarui!");
     }
 
     /**
@@ -195,16 +215,25 @@ class StockOpnameController extends Controller
     {
         $opname = StockOpname::findOrFail($id_opname);
 
-        $opname->update([
-            'status_konfirmasi' => 'dikonfirmasi_spv',
-        ]);
+        DB::beginTransaction();
+        try {
+            $opname->update([
+                'status_konfirmasi' => 'dikonfirmasi_spv',
+            ]);
 
-        // Sinkronkan stok fisik gudang
-        Gudang::where('kode_gudang', $opname->kode_gudang)
-            ->update(['stok_tersedia' => $opname->stok_fisik, 'diperbarui_pada' => now()]);
+            // Sinkronkan stok fisik gudang
+            Gudang::where('kode_gudang', $opname->kode_gudang)
+                ->update(['stok_tersedia' => $opname->stok_fisik, 'diperbarui_pada' => now()]);
 
-        return redirect()->route('operasional.gudang.opname')
-            ->with('sukses', "Stock Opname {$opname->nomor_opname} berhasil dikonfirmasi! Stok fisik gudang telah disinkronkan.");
+            DB::commit();
+
+            return redirect()->route('operasional.gudang.opname')
+                ->with('sukses', "Stock Opname {$opname->nomor_opname} berhasil dikonfirmasi! Kuantitas fisik gudang telah disinkronkan.");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->route('operasional.gudang.opname')
+                ->with('error', 'Gagal mengonfirmasi Stock Opname: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -215,10 +244,18 @@ class StockOpnameController extends Controller
         $opname = StockOpname::findOrFail($id_opname);
         $nomorOpname = $opname->nomor_opname;
 
-        $opname->delete();
+        DB::beginTransaction();
+        try {
+            $opname->delete();
+            DB::commit();
 
-        return redirect()->route('operasional.gudang.opname')
-            ->with('sukses', "Data Stock Opname {$nomorOpname} berhasil dihapus!");
+            return redirect()->route('operasional.gudang.opname')
+                ->with('sukses', "Data Stock Opname {$nomorOpname} berhasil dihapus!");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->route('operasional.gudang.opname')
+                ->with('error', 'Gagal menghapus Stock Opname: ' . $e->getMessage());
+        }
     }
 
     /**

@@ -133,20 +133,62 @@ class KendaraanController extends Controller
     {
         $jumlahUnit = max(1, min(50, (int) ($request->jumlah_unit ?? 1)));
 
+        // Normalisasi input jika form mengirim nama atribut alternatif
+        if ($request->filled('kode_aset') && str_starts_with($request->kode_aset, 'KND-')) {
+            if (!$request->filled('kode_kendaraan')) {
+                $request->merge(['kode_kendaraan' => $request->kode_aset]);
+            }
+            $request->merge(['kode_aset' => null]);
+        }
+
+        if (!$request->filled('merek_kendaraan') && $request->filled('merek_aset')) {
+            $request->merge(['merek_kendaraan' => $request->merek_aset]);
+        }
+
+        if (!$request->filled('status_kendaraan') && $request->filled('status_aset')) {
+            $request->merge(['status_kendaraan' => $request->status_aset]);
+        }
+
+        if ($request->input('status_kendaraan') === 'dijual') {
+            $request->merge(['status_kendaraan' => 'non-aktif']);
+        }
+
+        if (!$request->filled('nama_pemilik')) {
+            $request->merge(['nama_pemilik' => 'PT Putra Balkom Jaya']);
+        }
+
         $pesanKustom = [
-            'kode_kendaraan.unique' => 'Kode kendaraan sudah terdaftar di database.',
+            'kode_kendaraan.unique' => 'Kode armada kendaraan sudah terdaftar di sistem.',
+            'kode_kendaraan.max' => 'Kode kendaraan maksimal 30 karakter.',
+            'kode_aset.max' => 'Kode aset maksimal 30 karakter.',
             'no_polisi.required' => 'Nomor plat polisi wajib diisi.',
+            'no_polisi.max' => 'Nomor plat polisi maksimal 20 karakter.',
             'merek_kendaraan.required' => 'Merek armada truk wajib diisi.',
+            'merek_kendaraan.max' => 'Merek armada maksimal 50 karakter.',
             'muatan.required' => 'Kapasitas muatan wajib diisi.',
-            'tahun_pembuatan.required' => 'Tahun pembuatan wajib diisi.',
+            'muatan.max' => 'Kapasitas muatan maksimal 50 karakter.',
+            'tahun_pembuatan.required' => 'Tahun pembuatan armada wajib diisi.',
+            'tahun_pembuatan.integer' => 'Tahun pembuatan armada harus berupa angka tahun.',
+            'tahun_pembuatan.min' => 'Tahun pembuatan armada minimal tahun 1990.',
+            'tahun_pembuatan.max' => 'Tahun pembuatan armada maksimal tahun 2099.',
             'status_kendaraan.required' => 'Status operasional armada wajib dipilih.',
+            'status_kendaraan.in' => 'Status operasional armada yang dipilih tidak valid.',
             'nama_pemilik.required' => 'Nama pemilik armada wajib diisi.',
+            'nama_pemilik.max' => 'Nama pemilik armada maksimal 100 karakter.',
+            'harga_aset.numeric' => 'Nilai perolehan unit harus berupa angka nominal.',
+            'harga_aset.min' => 'Nilai perolehan unit tidak boleh bernilai negatif.',
+            'harga_aset.max' => 'Nilai perolehan unit maksimal Rp 9.999.999.999.999 (9,9 Triliun).',
+            'jumlah_unit.integer' => 'Jumlah unit harus berupa angka bulat.',
+            'jumlah_unit.min' => 'Jumlah unit minimal 1 unit.',
+            'jumlah_unit.max' => 'Jumlah unit maksimal 50 unit sekaligus.',
+            'tanggal_kir.date' => 'Format tanggal uji KIR Dishub tidak valid.',
+            'tanggal_pajak.date' => 'Format tanggal jatuh tempo pajak STNK tidak valid.',
         ];
 
         $validated = $request->validate([
-            'kode_kendaraan' => 'nullable|string|max:30',
+            'kode_kendaraan' => 'nullable|string|max:30|unique:data_kendaraan,kode_kendaraan',
             'no_polisi' => 'required|string|max:20',
-            'kode_aset' => 'nullable|string|max:30|exists:data_aset,kode_aset',
+            'kode_aset' => 'nullable|string|max:30',
             'nama_aset' => 'nullable|string|max:100',
             'merek_kendaraan' => 'required|string|max:50',
             'jenis_kendaraan' => 'nullable|string|max:50',
@@ -159,14 +201,16 @@ class KendaraanController extends Controller
             'tanggal_pajak' => 'nullable|date',
             'status_kendaraan' => 'required|in:aktif,rusak,dalam_perbaikan,non-aktif',
             'nama_pemilik' => 'required|string|max:100',
-            'harga_aset' => 'nullable|numeric|min:0',
+            'harga_aset' => 'nullable|numeric|min:0|max:9999999999999',
             'jumlah_unit' => 'nullable|integer|min:1|max:50',
         ], $pesanKustom);
 
         DB::beginTransaction();
         try {
             $hargaBeli = (float) ($validated['harga_aset'] ?? 0);
-            $namaModelDasar = $validated['nama_aset'] ?: ($validated['merek_kendaraan'] . ' ' . ($validated['jenis_kendaraan'] ?? 'Truk'));
+            $namaModelDasar = !empty($validated['nama_aset']) 
+                ? $validated['nama_aset'] 
+                : ($validated['merek_kendaraan'] . ' ' . (!empty($validated['jenis_kendaraan']) ? $validated['jenis_kendaraan'] : 'Truk'));
 
             $daftarKodeKendaraan = ($jumlahUnit === 1 && $request->filled('kode_kendaraan'))
                 ? [strtoupper(trim($request->kode_kendaraan))]
@@ -184,57 +228,70 @@ class KendaraanController extends Controller
                 $plat = !empty($rincian['no_polisi']) 
                     ? strtoupper(trim($rincian['no_polisi'])) 
                     : ($i === 0 ? strtoupper(trim($validated['no_polisi'])) : ('B ' . (9100 + $i) . ' PBJ'));
-                $mesin = !empty($rincian['no_mesin']) ? strtoupper(trim($rincian['no_mesin'])) : ($validated['no_mesin'] ? strtoupper(trim($validated['no_mesin'])) : '-');
-                $rangka = !empty($rincian['no_rangka']) ? strtoupper(trim($rincian['no_rangka'])) : ($validated['no_rangka'] ? strtoupper(trim($validated['no_rangka'])) : '-');
+                $mesin = !empty($rincian['no_mesin']) ? strtoupper(trim($rincian['no_mesin'])) : (!empty($validated['no_mesin']) ? strtoupper(trim($validated['no_mesin'])) : '-');
+                $rangka = !empty($rincian['no_rangka']) ? strtoupper(trim($rincian['no_rangka'])) : (!empty($validated['no_rangka']) ? strtoupper(trim($validated['no_rangka'])) : '-');
 
                 $namaModel = $jumlahUnit > 1 ? ($namaModelDasar . ' #' . str_pad($nomorUrut, 2, '0', STR_PAD_LEFT)) : $namaModelDasar;
 
-                // 1. Catat entitas aset finansial di data_aset
-                DB::table('data_aset')->insert([
-                    'kode_aset'            => $kodeAset,
-                    'kode_jenis_aset'      => 'AST-TRK',
-                    'nama_aset'            => $namaModel,
-                    'tanggal_pembelian'    => now()->format('Y-m-d'),
-                    'harga_aset'           => $hargaBeli,
-                    'harga_perolehan'      => $hargaBeli,
-                    'nilai_residu'         => 0.00,
-                    'umur_manfaat'         => 8,
-                    'metode_penyusutan'    => 'Garis Lurus',
-                    'tarif_penyusutan'     => 12.50,
-                    'kode_akun_aset'       => '1201',
-                    'kode_akun_akumulasi'  => '1202',
-                    'kode_akun_beban'      => '6105',
-                    'akumulasi_penyusutan' => 0.00,
-                    'nilai_buku'           => $hargaBeli,
-                    'status_aset'          => $validated['status_kendaraan'],
-                    'nama_pemilik'         => $validated['nama_pemilik'],
-                    'no_polisi'            => $plat,
-                    'no_mesin'             => $mesin,
-                    'no_rangka'            => $rangka,
-                    'merek_aset'           => trim($validated['merek_kendaraan']),
-                    'muatan'               => trim($validated['muatan']),
-                    'jenis_kendaraan'      => trim($validated['jenis_kendaraan'] ?? 'Colt Diesel Double'),
-                    'tahun_pembuatan'      => $validated['tahun_pembuatan'],
-                    'tanggal_kir'          => $validated['tanggal_kir'] ?? null,
-                    'tanggal_pajak'        => $validated['tanggal_pajak'] ?? null,
-                    'dibuat_pada'          => now(),
-                    'diperbarui_pada'      => now(),
-                ]);
+                $tglBeli = $request->filled('tanggal_pembelian') 
+                    ? Carbon::parse($request->input('tanggal_pembelian'))->format('Y-m-d') 
+                    : now()->format('Y-m-d');
+                $tglKir = !empty($validated['tanggal_kir']) 
+                    ? Carbon::parse($validated['tanggal_kir'])->format('Y-m-d') 
+                    : null;
+                $tglPajak = !empty($validated['tanggal_pajak']) 
+                    ? Carbon::parse($validated['tanggal_pajak'])->format('Y-m-d') 
+                    : null;
+
+                // 1. Catat entitas aset finansial di data_aset jika belum ada
+                $adaAset = DB::table('data_aset')->where('kode_aset', $kodeAset)->exists();
+                if (!$adaAset) {
+                    DB::table('data_aset')->insert([
+                        'kode_aset'            => $kodeAset,
+                        'kode_jenis_aset'      => $request->input('kode_jenis_aset', 'AST-TRK'),
+                        'nama_aset'            => $namaModel,
+                        'tanggal_pembelian'    => $tglBeli,
+                        'harga_aset'           => $hargaBeli,
+                        'harga_perolehan'      => $hargaBeli,
+                        'nilai_residu'         => 0.00,
+                        'umur_manfaat'         => 8,
+                        'metode_penyusutan'    => 'Garis Lurus',
+                        'tarif_penyusutan'     => 12.50,
+                        'kode_akun_aset'       => '1201',
+                        'kode_akun_akumulasi'  => '1202',
+                        'kode_akun_beban'      => '6105',
+                        'akumulasi_penyusutan' => 0.00,
+                        'nilai_buku'           => $hargaBeli,
+                        'status_aset'          => $validated['status_kendaraan'],
+                        'nama_pemilik'         => $validated['nama_pemilik'],
+                        'no_polisi'            => $plat,
+                        'no_mesin'             => $mesin,
+                        'no_rangka'            => $rangka,
+                        'merek_aset'           => trim($validated['merek_kendaraan']),
+                        'muatan'               => trim($validated['muatan']),
+                        'jenis_kendaraan'      => !empty($validated['jenis_kendaraan']) ? trim($validated['jenis_kendaraan']) : 'Colt Diesel Double',
+                        'tahun_pembuatan'      => $validated['tahun_pembuatan'],
+                        'tanggal_kir'          => $tglKir,
+                        'tanggal_pajak'        => $tglPajak,
+                        'dibuat_pada'          => now(),
+                        'diperbarui_pada'      => now(),
+                    ]);
+                }
 
                 // 2. Simpan ke data_kendaraan
-                DataKendaraan::create([
+                Kendaraan::create([
                     'kode_kendaraan'   => $kodeKendaraan,
                     'kode_aset'        => $kodeAset,
                     'no_polisi'        => $plat,
                     'no_mesin'         => $mesin !== '-' ? $mesin : null,
                     'no_rangka'        => $rangka !== '-' ? $rangka : null,
                     'merek_kendaraan'  => trim($validated['merek_kendaraan']),
-                    'jenis_kendaraan'  => trim($validated['jenis_kendaraan'] ?? 'Colt Diesel Double'),
-                    'tipe_armada'      => trim($validated['tipe_armada'] ?? ($validated['jenis_kendaraan'] ?? 'Colt Diesel Double')),
+                    'jenis_kendaraan'  => !empty($validated['jenis_kendaraan']) ? trim($validated['jenis_kendaraan']) : 'Colt Diesel Double',
+                    'tipe_armada'      => !empty($validated['tipe_armada']) ? trim($validated['tipe_armada']) : (!empty($validated['jenis_kendaraan']) ? trim($validated['jenis_kendaraan']) : 'Colt Diesel Double'),
                     'muatan'           => trim($validated['muatan']),
                     'tahun_pembuatan'  => $validated['tahun_pembuatan'],
-                    'tanggal_kir'      => $validated['tanggal_kir'] ?? null,
-                    'tanggal_pajak'    => $validated['tanggal_pajak'] ?? null,
+                    'tanggal_kir'      => $tglKir,
+                    'tanggal_pajak'    => $tglPajak,
                     'status_kendaraan' => $validated['status_kendaraan'],
                     'nama_pemilik'     => trim($validated['nama_pemilik']),
                 ]);
@@ -266,13 +323,32 @@ class KendaraanController extends Controller
         if (!$kendaraan) {
             return response()->json([
                 'status' => 'gagal',
-                'pesan' => 'Data kendaraan tidak ditemukan.'
+                'pesan' => 'Data kendaraan tidak ditemukan di sistem.'
             ], 404);
         }
 
+        $dataKendaraan = $kendaraan->toArray();
+        $dataKendaraan['kode_kendaraan'] = $kendaraan->kode_kendaraan;
+        $dataKendaraan['kode_aset'] = $kendaraan->kode_aset ?? $kendaraan->kode_kendaraan;
+        $dataKendaraan['merek_kendaraan'] = $kendaraan->merek_kendaraan;
+        $dataKendaraan['merek_aset'] = $kendaraan->merek_kendaraan ?: ($kendaraan->asetPerusahaan->merek_aset ?? '');
+        $dataKendaraan['status_kendaraan'] = $kendaraan->status_kendaraan;
+        $dataKendaraan['status_aset'] = $kendaraan->status_kendaraan ?: ($kendaraan->asetPerusahaan->status_aset ?? 'aktif');
+        $dataKendaraan['kode_jenis_aset'] = $kendaraan->asetPerusahaan->kode_jenis_aset ?? 'AST-TRK';
+        $dataKendaraan['harga_aset'] = (int) round((float) ($kendaraan->asetPerusahaan->harga_perolehan ?? ($kendaraan->asetPerusahaan->harga_aset ?? 0)));
+        $dataKendaraan['tanggal_pembelian'] = !empty($kendaraan->asetPerusahaan?->tanggal_pembelian)
+            ? Carbon::parse($kendaraan->asetPerusahaan->tanggal_pembelian)->format('Y-m-d')
+            : '';
+        $dataKendaraan['tanggal_kir'] = !empty($kendaraan->tanggal_kir)
+            ? Carbon::parse($kendaraan->tanggal_kir)->format('Y-m-d')
+            : '';
+        $dataKendaraan['tanggal_pajak'] = !empty($kendaraan->tanggal_pajak)
+            ? Carbon::parse($kendaraan->tanggal_pajak)->format('Y-m-d')
+            : '';
+
         return response()->json([
             'status' => 'sukses',
-            'data' => $kendaraan
+            'data' => $dataKendaraan
         ]);
     }
 
@@ -283,15 +359,49 @@ class KendaraanController extends Controller
     {
         $kendaraan = Kendaraan::where('kode_kendaraan', $id)
             ->orWhere('kode_aset', $id)
-            ->firstOrFail();
+            ->first();
+
+        if (!$kendaraan) {
+            return redirect()->route('operasional.armada.kendaraan', ['tab' => 'kendaraan'])
+                ->with('error', 'Data armada kendaraan tidak ditemukan.');
+        }
+
+        // Normalisasi input form jika mengirim format nama field alternatif
+        if (!$request->filled('merek_kendaraan') && $request->filled('merek_aset')) {
+            $request->merge(['merek_kendaraan' => $request->merek_aset]);
+        }
+
+        if (!$request->filled('status_kendaraan') && $request->filled('status_aset')) {
+            $request->merge(['status_kendaraan' => $request->status_aset]);
+        }
+
+        if ($request->input('status_kendaraan') === 'dijual') {
+            $request->merge(['status_kendaraan' => 'non-aktif']);
+        }
+
+        if (!$request->filled('nama_pemilik')) {
+            $request->merge(['nama_pemilik' => $kendaraan->nama_pemilik ?? 'PT Putra Balkom Jaya']);
+        }
 
         $pesanKustom = [
             'no_polisi.required' => 'Nomor plat polisi wajib diisi.',
+            'no_polisi.max' => 'Nomor plat polisi maksimal 20 karakter.',
             'merek_kendaraan.required' => 'Merek armada truk wajib diisi.',
+            'merek_kendaraan.max' => 'Merek armada maksimal 50 karakter.',
             'muatan.required' => 'Kapasitas muatan wajib diisi.',
-            'tahun_pembuatan.required' => 'Tahun pembuatan wajib diisi.',
+            'muatan.max' => 'Kapasitas muatan maksimal 50 karakter.',
+            'tahun_pembuatan.required' => 'Tahun pembuatan armada wajib diisi.',
+            'tahun_pembuatan.integer' => 'Tahun pembuatan armada harus berupa angka tahun.',
+            'tahun_pembuatan.min' => 'Tahun pembuatan armada minimal tahun 1990.',
+            'tahun_pembuatan.max' => 'Tahun pembuatan armada maksimal tahun 2099.',
             'status_kendaraan.required' => 'Status operasional armada wajib dipilih.',
+            'status_kendaraan.in' => 'Status operasional armada yang dipilih tidak valid.',
             'nama_pemilik.required' => 'Nama pemilik armada wajib diisi.',
+            'nama_pemilik.max' => 'Nama pemilik armada maksimal 100 karakter.',
+            'tanggal_kir.date' => 'Format tanggal uji KIR Dishub tidak valid.',
+            'tanggal_pajak.date' => 'Format tanggal jatuh tempo pajak STNK tidak valid.',
+            'harga_aset.numeric' => 'Harga perolehan armada harus berupa angka.',
+            'harga_aset.max' => 'Nominal harga perolehan armada maksimal Rp 9.999.999.999.999.',
         ];
 
         $validated = $request->validate([
@@ -308,21 +418,29 @@ class KendaraanController extends Controller
             'tanggal_pajak' => 'nullable|date',
             'status_kendaraan' => 'required|in:aktif,rusak,dalam_perbaikan,non-aktif',
             'nama_pemilik' => 'required|string|max:100',
+            'harga_aset' => 'nullable|numeric|min:0|max:9999999999999',
         ], $pesanKustom);
+
+        $tglKir = !empty($validated['tanggal_kir'])
+            ? Carbon::parse($validated['tanggal_kir'])->format('Y-m-d')
+            : null;
+        $tglPajak = !empty($validated['tanggal_pajak'])
+            ? Carbon::parse($validated['tanggal_pajak'])->format('Y-m-d')
+            : null;
 
         DB::beginTransaction();
         try {
             $kendaraan->update([
                 'no_polisi'        => strtoupper(trim($validated['no_polisi'])),
-                'no_mesin'         => $validated['no_mesin'] ? strtoupper(trim($validated['no_mesin'])) : $kendaraan->no_mesin,
-                'no_rangka'        => $validated['no_rangka'] ? strtoupper(trim($validated['no_rangka'])) : $kendaraan->no_rangka,
+                'no_mesin'         => !empty($validated['no_mesin']) ? strtoupper(trim($validated['no_mesin'])) : $kendaraan->no_mesin,
+                'no_rangka'        => !empty($validated['no_rangka']) ? strtoupper(trim($validated['no_rangka'])) : $kendaraan->no_rangka,
                 'merek_kendaraan'  => trim($validated['merek_kendaraan']),
-                'jenis_kendaraan'  => trim($validated['jenis_kendaraan'] ?? $kendaraan->jenis_kendaraan),
-                'tipe_armada'      => trim($validated['tipe_armada'] ?? $kendaraan->tipe_armada),
+                'jenis_kendaraan'  => !empty($validated['jenis_kendaraan']) ? trim($validated['jenis_kendaraan']) : $kendaraan->jenis_kendaraan,
+                'tipe_armada'      => !empty($validated['tipe_armada']) ? trim($validated['tipe_armada']) : $kendaraan->tipe_armada,
                 'muatan'           => trim($validated['muatan']),
                 'tahun_pembuatan'  => $validated['tahun_pembuatan'],
-                'tanggal_kir'      => $validated['tanggal_kir'] ?? null,
-                'tanggal_pajak'    => $validated['tanggal_pajak'] ?? null,
+                'tanggal_kir'      => $tglKir,
+                'tanggal_pajak'    => $tglPajak,
                 'status_kendaraan' => $validated['status_kendaraan'],
                 'nama_pemilik'     => trim($validated['nama_pemilik']),
                 'diperbarui_pada'  => now(),
@@ -330,20 +448,36 @@ class KendaraanController extends Controller
 
             // Sinkronkan ke data_aset jika berelasi
             if ($kendaraan->kode_aset) {
-                DB::table('data_aset')->where('kode_aset', $kendaraan->kode_aset)->update([
+                $asetUpdate = [
                     'no_polisi'       => strtoupper(trim($validated['no_polisi'])),
-                    'nama_aset'       => trim($validated['nama_aset'] ?? $kendaraan->nama_aset),
                     'status_aset'     => $validated['status_kendaraan'],
-                    'tanggal_kir'     => $validated['tanggal_kir'] ?? null,
-                    'tanggal_pajak'   => $validated['tanggal_pajak'] ?? null,
+                    'merek_aset'      => trim($validated['merek_kendaraan']),
+                    'muatan'          => trim($validated['muatan']),
+                    'tahun_pembuatan' => $validated['tahun_pembuatan'],
+                    'tanggal_kir'     => $tglKir,
+                    'tanggal_pajak'   => $tglPajak,
                     'diperbarui_pada' => now(),
-                ]);
+                ];
+                if (!empty($validated['nama_aset'])) {
+                    $asetUpdate['nama_aset'] = trim($validated['nama_aset']);
+                }
+                if ($request->filled('harga_aset')) {
+                    $asetUpdate['harga_aset'] = (float) $request->harga_aset;
+                    $asetUpdate['harga_perolehan'] = (float) $request->harga_aset;
+                }
+                if ($request->filled('tanggal_pembelian')) {
+                    $asetUpdate['tanggal_pembelian'] = Carbon::parse($request->tanggal_pembelian)->format('Y-m-d');
+                }
+                if ($request->filled('kode_jenis_aset')) {
+                    $asetUpdate['kode_jenis_aset'] = $request->kode_jenis_aset;
+                }
+                DB::table('data_aset')->where('kode_aset', $kendaraan->kode_aset)->update($asetUpdate);
             }
 
             DB::commit();
 
             return redirect()->route('operasional.armada.kendaraan', ['tab' => 'kendaraan'])
-                ->with('sukses', "Data kendaraan {$kendaraan->no_polisi} berhasil diperbarui!");
+                ->with('sukses', "Data armada [{$kendaraan->kode_kendaraan}] ({$kendaraan->no_polisi}) berhasil diperbarui!");
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->withInput()->with('error', 'Gagal memperbarui armada: ' . $e->getMessage());
@@ -353,22 +487,48 @@ class KendaraanController extends Controller
     /**
      * Hapus data kendaraan dari database.
      */
-    public function hapus($id)
+    public function hapus(Request $request, $id = null)
     {
-        $kendaraan = Kendaraan::where('kode_kendaraan', $id)
-            ->orWhere('kode_aset', $id)
-            ->firstOrFail();
+        $targetId = $id ?: $request->input('kode_kendaraan', $request->input('kode_aset'));
+
+        if (!$targetId) {
+            return redirect()->route('operasional.armada.kendaraan', ['tab' => 'kendaraan'])
+                ->with('error', 'Kode armada kendaraan tidak ditemukan atau belum dipilih.');
+        }
+
+        $kendaraan = Kendaraan::where('kode_kendaraan', $targetId)
+            ->orWhere('kode_aset', $targetId)
+            ->first();
+
+        if (!$kendaraan) {
+            return redirect()->route('operasional.armada.kendaraan', ['tab' => 'kendaraan'])
+                ->with('error', "Data armada [{$targetId}] tidak ditemukan atau sudah dihapus sebelumnya.");
+        }
+
         $noPolisi = $kendaraan->no_polisi;
         $kodeKnd = $kendaraan->kode_kendaraan;
+        $kodeAset = $kendaraan->kode_aset;
 
+        DB::beginTransaction();
         try {
             $kendaraan->delete();
+
+            if (!empty($kodeAset)) {
+                DB::table('data_aset')->where('kode_aset', $kodeAset)->delete();
+            }
+
+            DB::commit();
 
             return redirect()->route('operasional.armada.kendaraan', ['tab' => 'kendaraan'])
                 ->with('sukses', "Data armada [{$kodeKnd}] ({$noPolisi}) berhasil dihapus dari database!");
         } catch (\Illuminate\Database\QueryException $e) {
+            DB::rollBack();
             return redirect()->route('operasional.armada.kendaraan', ['tab' => 'kendaraan'])
-                ->with('error', "Gagal menghapus kendaraan [{$kodeKnd}]! Data armada ini masih terikat dengan dokumen Surat Jalan atau SPK Servis Bengkel.");
+                ->with('error', "Gagal menghapus armada [{$kodeKnd}]! Data kendaraan ini masih terikat dengan dokumen Surat Jalan atau SPK Servis Bengkel.");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('operasional.armada.kendaraan', ['tab' => 'kendaraan'])
+                ->with('error', "Gagal menghapus armada: " . $e->getMessage());
         }
     }
 
@@ -634,11 +794,13 @@ class KendaraanController extends Controller
             'harga_aset'        => 'required|numeric|min:0',
         ], $pesanKustom);
 
+        $tglBeliAset = Carbon::parse($validated['tanggal_pembelian'])->format('Y-m-d');
+
         DB::table('data_aset')->insert([
             'kode_aset'         => strtoupper(trim($validated['kode_aset'])),
             'kode_jenis_aset'   => $validated['kode_jenis_aset'],
             'nama_aset'         => trim($validated['nama_aset']),
-            'tanggal_pembelian' => $validated['tanggal_pembelian'],
+            'tanggal_pembelian' => $tglBeliAset,
             'harga_aset'        => $validated['harga_aset'],
             'no_polisi'         => !empty($validated['no_polisi']) ? strtoupper(trim($validated['no_polisi'])) : '-',
             'merek_aset'        => $request->merek_aset ?? '-',
@@ -672,9 +834,26 @@ class KendaraanController extends Controller
             ], 404);
         }
 
+        $dataAset = (array) $aset;
+        if (!empty($dataAset['tanggal_pembelian'])) {
+            $dataAset['tanggal_pembelian'] = Carbon::parse($dataAset['tanggal_pembelian'])->format('Y-m-d');
+        }
+        if (!empty($dataAset['tanggal_kir'])) {
+            $dataAset['tanggal_kir'] = Carbon::parse($dataAset['tanggal_kir'])->format('Y-m-d');
+        }
+        if (!empty($dataAset['tanggal_pajak'])) {
+            $dataAset['tanggal_pajak'] = Carbon::parse($dataAset['tanggal_pajak'])->format('Y-m-d');
+        }
+        if (isset($dataAset['harga_aset'])) {
+            $dataAset['harga_aset'] = (int) round((float) $dataAset['harga_aset']);
+        }
+        if (isset($dataAset['harga_perolehan'])) {
+            $dataAset['harga_perolehan'] = (int) round((float) $dataAset['harga_perolehan']);
+        }
+
         return response()->json([
             'status' => 'sukses',
-            'data' => $aset
+            'data' => $dataAset
         ]);
     }
 
@@ -688,6 +867,8 @@ class KendaraanController extends Controller
             'nama_aset.required' => 'Nama aset wajib diisi.',
             'tanggal_pembelian.required' => 'Tanggal pembelian wajib diisi.',
             'harga_aset.required' => 'Harga perolehan aset wajib diisi.',
+            'harga_aset.numeric' => 'Harga perolehan aset harus berupa angka.',
+            'harga_aset.max' => 'Nominal harga perolehan aset maksimal Rp 9.999.999.999.999.',
         ];
 
         $validated = $request->validate([
@@ -695,14 +876,16 @@ class KendaraanController extends Controller
             'nama_aset'         => 'required|string|max:100',
             'no_polisi'         => 'nullable|string|max:20',
             'tanggal_pembelian' => 'required|date',
-            'harga_aset'        => 'required|numeric|min:0',
+            'harga_aset'        => 'required|numeric|min:0|max:9999999999999',
             'status_aset'       => 'nullable|string|in:aktif,non-aktif,dalam_perbaikan,rusak,dijual',
         ], $pesanKustom);
+
+        $tglBeliAset = Carbon::parse($validated['tanggal_pembelian'])->format('Y-m-d');
 
         DB::table('data_aset')->where('kode_aset', $kode_aset)->update([
             'kode_jenis_aset'   => $validated['kode_jenis_aset'],
             'nama_aset'         => trim($validated['nama_aset']),
-            'tanggal_pembelian' => $validated['tanggal_pembelian'],
+            'tanggal_pembelian' => $tglBeliAset,
             'harga_aset'        => $validated['harga_aset'],
             'no_polisi'         => !empty($validated['no_polisi']) ? strtoupper(trim($validated['no_polisi'])) : '-',
             'status_aset'       => $validated['status_aset'] ?? 'aktif',

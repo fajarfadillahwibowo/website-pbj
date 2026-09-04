@@ -33,16 +33,21 @@
                         SPV Operasional (Read-Only)
                     </span>
                 </template>
-                <template x-if="jabatanAktif !== 'SPV_OPERASIONAL'">
+                <template x-if="jabatanAktif === 'PENGAWAS_DRIVER'">
+                    <span class="px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase rounded-md bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 font-mono">
+                        Pengawas Driver (Akses Penuh)
+                    </span>
+                </template>
+                <template x-if="jabatanAktif !== 'SPV_OPERASIONAL' && jabatanAktif !== 'PENGAWAS_DRIVER'">
                     <span class="px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase rounded-md bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 font-mono">
                         Dispatcher & Pengawas Driver
                     </span>
                 </template>
                 <span class="text-xs text-slate-400 font-mono">Modul Operasional</span>
             </div>
-            <h1 class="text-xl font-bold text-slate-900 dark:text-slate-100">Data Karyawan (Driver)</h1>
+            <h1 class="text-xl font-bold text-slate-900 dark:text-slate-100" x-text="jabatanAktif === 'PENGAWAS_DRIVER' ? 'Data Driver' : 'Data Karyawan (Driver)'">Data Karyawan (Driver)</h1>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Kelola data pengemudi armada truk semen terintegrasi database dengan manajemen berkas KTP dan dokumen kontrak.
+                Kelola data seluruh pengemudi armada logistik semen, verifikasi foto KTP/identitas, dan arsip dokumen perjanjian kerja (SPK).
             </p>
         </div>
 
@@ -236,7 +241,7 @@
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">No. KTP / NIK (16 Digit)</th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">No. HP / WA</th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Alamat</th>
-                        <th class="px-4 py-3 text-center font-semibold uppercase tracking-wider">Berkas</th>
+                        <th class="px-4 py-3 text-center font-semibold uppercase tracking-wider">Berkas Lampiran</th>
                         <th class="px-4 py-3 text-center font-semibold uppercase tracking-wider">Status</th>
                         <th class="px-4 py-3 text-center font-semibold uppercase tracking-wider">Aksi</th>
                     </tr>
@@ -298,14 +303,14 @@
                                     <!-- Foto KTP -->
                                     @if($driver->foto_ktp_url)
                                         <a href="{{ $driver->foto_ktp_url }}" target="_blank"
-                                           class="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 transition-colors"
-                                           title="Lihat Foto KTP">
+                                           class="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors"
+                                           title="Lihat Foto KTP Driver">
                                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                             </svg>
                                         </a>
                                     @else
-                                        <span class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600" title="Foto KTP Belum Diunggah">
+                                        <span class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600 cursor-not-allowed" title="Foto KTP Belum Dilampirkan (Opsional)">
                                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                             </svg>
@@ -315,14 +320,14 @@
                                     <!-- File Kontrak -->
                                     @if($driver->file_kontrak_url)
                                         <a href="{{ $driver->file_kontrak_url }}" target="_blank"
-                                           class="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 transition-colors"
-                                           title="Unduh / Lihat Dokumen Kontrak">
+                                           class="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
+                                           title="Lihat / Unduh Dokumen Kontrak Kerja (SPK)">
                                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                             </svg>
                                         </a>
                                     @else
-                                        <span class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600" title="Dokumen Kontrak Belum Diunggah">
+                                        <span class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600 cursor-not-allowed" title="Dokumen Kontrak Belum Dilampirkan (Opsional)">
                                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                             </svg>
@@ -509,47 +514,90 @@
                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30"></textarea>
                 </div>
 
-                <!-- Upload Berkas Lampiran: Foto KTP & File Kontrak (Maks 2 MB) -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837]">
-                    <!-- Unggah Foto KTP -->
-                    <div>
-                        <div class="flex items-center justify-between mb-1">
-                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Unggah Foto KTP</label>
-                            <span class="text-[9px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-1.5 py-0.2 rounded font-mono">Maks 2 MB</span>
+                <!-- Bagian Berkas Lampiran: Foto KTP & Surat Kontrak Kerja -->
+                <div class="pt-3 border-t border-slate-200 dark:border-[#252837]">
+                    <div class="flex items-center justify-between mb-2.5">
+                        <div class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                            </svg>
+                            <span class="font-bold text-xs text-slate-800 dark:text-slate-200 uppercase tracking-wider">Dokumen & Berkas Lampiran</span>
                         </div>
-                        <input type="file" name="foto_ktp" accept="image/jpeg,image/png,image/jpg,image/webp" 
-                               @change="pratinjauFotoTambah($event)"
-                               class="w-full text-xs text-slate-500 file:mr-2.5 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 dark:file:bg-blue-950/50 dark:file:text-blue-300 hover:file:bg-blue-100 cursor-pointer">
-                        <p class="text-[10px] text-slate-400 mt-1">Format: JPG, PNG, WEBP (Maksimal 2 MB).</p>
-                        
-                        <!-- Pratinjau Foto KTP -->
-                        <template x-if="pratinjauFotoUrl">
-                            <div class="mt-2 relative inline-block">
-                                <img :src="pratinjauFotoUrl" class="h-20 w-auto object-cover rounded-lg border border-blue-300 shadow-xs">
-                                <button type="button" @click="pratinjauFotoUrl = null; $el.closest('div').previousElementSibling.previousElementSibling.value = ''"
-                                        class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center text-[10px] hover:bg-rose-700 shadow-xs"
-                                        title="Batal pilih foto">&times;</button>
-                            </div>
-                        </template>
+                        <span class="text-[10px] text-slate-400 font-mono">Maks. 2 MB / berkas</span>
                     </div>
 
-                    <!-- Unggah File Kontrak -->
-                    <div>
-                        <div class="flex items-center justify-between mb-1">
-                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Unggah File Kontrak</label>
-                            <span class="text-[9px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-1.5 py-0.2 rounded font-mono">Maks 2 MB</span>
-                        </div>
-                        <input type="file" name="file_kontrak" accept=".pdf,.doc,.docx,image/jpeg,image/png"
-                               @change="validasiFileKontrak($event, 'tambah')"
-                               class="w-full text-xs text-slate-500 file:mr-2.5 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 dark:file:bg-indigo-950/50 dark:file:text-indigo-300 hover:file:bg-indigo-100 cursor-pointer">
-                        <p class="text-[10px] text-slate-400 mt-1">Format: PDF, DOC, DOCX, JPG (Maksimal 2 MB).</p>
-
-                        <template x-if="namaFileKontrakTambah">
-                            <div class="mt-2 flex items-center gap-1.5 text-[11px] font-mono text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-1 rounded-md border border-indigo-200 dark:border-indigo-900/50">
-                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                <span class="truncate max-w-[180px]" x-text="namaFileKontrakTambah"></span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        <!-- Kartu Unggah Foto KTP -->
+                        <div class="p-3 rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300">
+                                        Foto KTP / Identitas <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span>
+                                    </label>
+                                    <span class="text-[9px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-1.5 py-0.5 rounded font-mono">JPG, PNG, WEBP</span>
+                                </div>
+                                <input type="file" name="foto_ktp" x-ref="inputFotoTambah" accept="image/jpeg,image/png,image/jpg,image/webp" 
+                                       @change="pratinjauFotoTambah($event)"
+                                       class="w-full text-xs text-slate-500 file:mr-2.5 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 dark:file:bg-blue-950/50 dark:file:text-blue-300 hover:file:bg-blue-100 cursor-pointer">
+                                <p class="text-[10px] text-slate-400 mt-1">Gunakan foto KTP/SIM asli yang jelas, tidak buram, dan terbaca.</p>
                             </div>
-                        </template>
+
+                            <!-- Pratinjau Foto KTP Terpilih -->
+                            <template x-if="pratinjauFotoUrl">
+                                <div class="mt-2.5 p-2 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 flex items-center justify-between gap-2.5">
+                                    <div class="flex items-center gap-2.5 min-w-0">
+                                        <img :src="pratinjauFotoUrl" class="h-11 w-11 object-cover rounded-lg border border-blue-300 dark:border-blue-700 shadow-xs shrink-0">
+                                        <div class="truncate">
+                                            <span class="text-[11px] font-bold text-blue-700 dark:text-blue-300 block">Foto KTP Terpilih</span>
+                                            <span class="text-[9px] text-slate-500 dark:text-slate-400">Siap disimpan bersama data pengemudi</span>
+                                        </div>
+                                    </div>
+                                    <button type="button" @click="pratinjauFotoUrl = null; $refs.inputFotoTambah.value = ''"
+                                            class="px-2 py-1 text-[10px] font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-100/70 dark:hover:bg-rose-950/50 rounded-lg transition-colors shrink-0"
+                                            title="Batalkan pilihan foto KTP">
+                                        Batal
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Kartu Unggah File Kontrak -->
+                        <div class="p-3 rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300">
+                                        Surat Kontrak Kerja (SPK) <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span>
+                                    </label>
+                                    <span class="text-[9px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-1.5 py-0.5 rounded font-mono">PDF, DOC, DOCX, JPG</span>
+                                </div>
+                                <input type="file" name="file_kontrak" x-ref="inputKontrakTambah" accept=".pdf,.doc,.docx,image/jpeg,image/png"
+                                       @change="validasiFileKontrak($event, 'tambah')"
+                                       class="w-full text-xs text-slate-500 file:mr-2.5 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 dark:file:bg-indigo-950/50 dark:file:text-indigo-300 hover:file:bg-indigo-100 cursor-pointer">
+                                <p class="text-[10px] text-slate-400 mt-1">Salinan digital dokumen kontrak perjanjian kerja logistik.</p>
+                            </div>
+
+                            <!-- Pratinjau File Kontrak Terpilih -->
+                            <template x-if="namaFileKontrakTambah">
+                                <div class="mt-2.5 p-2 rounded-xl bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900/60 flex items-center justify-between gap-2.5">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center shrink-0">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            </svg>
+                                        </div>
+                                        <div class="truncate">
+                                            <span class="text-[11px] font-bold text-indigo-700 dark:text-indigo-300 block truncate" x-text="namaFileKontrakTambah"></span>
+                                            <span class="text-[9px] text-slate-500 dark:text-slate-400">Dokumen kontrak siap diunggah</span>
+                                        </div>
+                                    </div>
+                                    <button type="button" @click="namaFileKontrakTambah = ''; $refs.inputKontrakTambah.value = ''"
+                                            class="px-2 py-1 text-[10px] font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-100/70 dark:hover:bg-rose-950/50 rounded-lg transition-colors shrink-0"
+                                            title="Batalkan pilihan dokumen kontrak">
+                                        Batal
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
                     </div>
                 </div>
 
@@ -622,15 +670,27 @@
                         <input type="text" name="no_hp" x-model="formEdit.no_hp" required maxlength="25"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30 font-mono">
                     </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Mulai Kerja <span class="text-rose-500">*</span></label>
-                        <x-input-tanggal 
-                            nama="tanggal_mulai_kerja" 
-                            modelBind="formEdit.tanggal_mulai_kerja" 
-                            placeholder="Pilih Tanggal Mulai"
-                            :wajib="true"
-                            warnaFokus="amber"
-                        />
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tgl Mulai <span class="text-rose-500">*</span></label>
+                            <x-input-tanggal 
+                                nama="tanggal_mulai_kerja" 
+                                modelBind="formEdit.tanggal_mulai_kerja" 
+                                placeholder="Pilih Mulai"
+                                :wajib="true"
+                                warnaFokus="amber"
+                            />
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tgl Akhir <span class="text-slate-400 font-normal text-[9px]">(Opsional)</span></label>
+                            <x-input-tanggal 
+                                nama="tanggal_berhenti" 
+                                modelBind="formEdit.tanggal_berhenti" 
+                                placeholder="Pilih Akhir"
+                                :wajib="false"
+                                warnaFokus="amber"
+                            />
+                        </div>
                     </div>
                 </div>
                 <div>
@@ -639,89 +699,136 @@
                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30"></textarea>
                 </div>
 
-                <!-- Berkas Lampiran: Foto KTP & File Kontrak (Maks 2 MB) -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837]">
-                    <!-- Kelola Foto KTP -->
-                    <div>
-                        <div class="flex items-center justify-between mb-1">
-                            <label class="block font-semibold text-slate-700 dark:text-slate-300">Foto KTP / Identitas</label>
-                            <span class="text-[9px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-1.5 py-0.2 rounded font-mono">Maks 2 MB</span>
+                <!-- Bagian Kelola Berkas Lampiran: Foto KTP & Surat Kontrak Kerja -->
+                <div class="pt-3 border-t border-slate-200 dark:border-[#252837]">
+                    <div class="flex items-center justify-between mb-2.5">
+                        <div class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                            </svg>
+                            <span class="font-bold text-xs text-slate-800 dark:text-slate-200 uppercase tracking-wider">Kelola Berkas Dokumen & Kontrak</span>
                         </div>
-                        
-                        <!-- Pratinjau berkas yang saat ini tersimpan -->
-                        <template x-if="formEdit.foto_ktp_url">
-                            <div class="mb-2 p-2 rounded-lg bg-white dark:bg-[#14161F] border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                                <div class="flex items-center gap-2 min-w-0">
-                                    <img :src="formEdit.foto_ktp_url" class="h-10 w-10 object-cover rounded-md border shrink-0">
-                                    <div class="truncate">
-                                        <div class="text-[11px] font-bold text-slate-700 dark:text-slate-300">Foto KTP Tersimpan</div>
-                                        <a :href="formEdit.foto_ktp_url" target="_blank" class="text-[10px] text-blue-600 hover:underline">Buka Gambar</a>
-                                    </div>
-                                </div>
-                                <button type="button" @click="hapusBerkasDriver(formEdit.kode_karyawan, 'foto_ktp')"
-                                        class="px-2 py-1 text-[10px] font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded transition-colors shrink-0"
-                                        title="Hapus foto KTP tersimpan">
-                                    Hapus
-                                </button>
-                            </div>
-                        </template>
-
-                        <input type="file" name="foto_ktp" accept="image/jpeg,image/png,image/jpg,image/webp"
-                               @change="pratinjauFotoEdit($event)"
-                               class="w-full text-xs text-slate-500 file:mr-2.5 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 dark:file:bg-amber-950/50 dark:file:text-amber-300 hover:file:bg-amber-100 cursor-pointer">
-                        <p class="text-[10px] text-slate-400 mt-1">Format: JPG, PNG, WEBP (Maksimal 2 MB).</p>
-
-                        <!-- Pratinjau Foto Baru yang Dipilih -->
-                        <template x-if="pratinjauFotoEditUrl">
-                            <div class="mt-2 relative inline-block">
-                                <span class="text-[9px] text-amber-600 dark:text-amber-400 block font-semibold mb-0.5">Foto Baru Terpilih:</span>
-                                <img :src="pratinjauFotoEditUrl" class="h-20 w-auto object-cover rounded-lg border border-amber-400 shadow-xs">
-                                <button type="button" @click="pratinjauFotoEditUrl = null; $el.closest('div').previousElementSibling.previousElementSibling.value = ''"
-                                        class="absolute top-3.5 -right-1.5 w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center text-[10px] hover:bg-rose-700 shadow-xs"
-                                        title="Batal ganti foto">&times;</button>
-                            </div>
-                        </template>
+                        <span class="text-[10px] text-slate-400 font-mono">Maks. 2 MB / berkas</span>
                     </div>
 
-                    <!-- Kelola File Kontrak -->
-                    <div>
-                        <div class="flex items-center justify-between mb-1">
-                            <label class="block font-semibold text-slate-700 dark:text-slate-300">File Kontrak Kerja</label>
-                            <span class="text-[9px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-1.5 py-0.2 rounded font-mono">Maks 2 MB</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        <!-- Kelola Foto KTP -->
+                        <div class="p-3 rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300">
+                                        Foto KTP / Identitas <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span>
+                                    </label>
+                                    <span class="text-[9px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-1.5 py-0.5 rounded font-mono">JPG, PNG, WEBP</span>
+                                </div>
+                                
+                                <!-- Pratinjau berkas yang saat ini tersimpan -->
+                                <template x-if="formEdit.foto_ktp_url">
+                                    <div class="mb-2.5 p-2 rounded-xl bg-white dark:bg-[#14161F] border border-slate-200 dark:border-slate-700 flex items-center justify-between shadow-xs">
+                                        <div class="flex items-center gap-2.5 min-w-0">
+                                            <img :src="formEdit.foto_ktp_url" class="h-10 w-10 object-cover rounded-lg border border-slate-300 dark:border-slate-600 shrink-0">
+                                            <div class="truncate">
+                                                <div class="text-[11px] font-bold text-slate-800 dark:text-slate-200">Foto KTP Tersimpan</div>
+                                                <a :href="formEdit.foto_ktp_url" target="_blank" class="text-[10px] text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-0.5">
+                                                    <span>Buka Gambar Asli</span>
+                                                    <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <button type="button" @click="hapusBerkasDriver(formEdit.kode_karyawan, 'foto_ktp')"
+                                                class="px-2.5 py-1 text-[10px] font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors shrink-0"
+                                                title="Hapus foto KTP tersimpan">
+                                            Hapus
+                                        </button>
+                                    </div>
+                                </template>
+
+                                <label class="block text-[10px] font-medium text-slate-500 dark:text-slate-400 mb-1" x-text="formEdit.foto_ktp_url ? 'Ganti Foto KTP (Pilih berkas baru):' : 'Unggah Foto KTP:'"></label>
+                                <input type="file" name="foto_ktp" x-ref="inputFotoEdit" accept="image/jpeg,image/png,image/jpg,image/webp"
+                                       @change="pratinjauFotoEdit($event)"
+                                       class="w-full text-xs text-slate-500 file:mr-2.5 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 dark:file:bg-amber-950/50 dark:file:text-amber-300 hover:file:bg-amber-100 cursor-pointer">
+                                <p class="text-[10px] text-slate-400 mt-1">Kosongkan jika tidak ingin mengubah salinan foto KTP.</p>
+                            </div>
+
+                            <!-- Pratinjau Foto Baru yang Dipilih -->
+                            <template x-if="pratinjauFotoEditUrl">
+                                <div class="mt-2.5 p-2 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 flex items-center justify-between gap-2.5">
+                                    <div class="flex items-center gap-2.5 min-w-0">
+                                        <img :src="pratinjauFotoEditUrl" class="h-10 w-10 object-cover rounded-lg border border-amber-400 shadow-xs shrink-0">
+                                        <div class="truncate">
+                                            <span class="text-[11px] font-bold text-amber-700 dark:text-amber-300 block">Foto Baru Terpilih</span>
+                                            <span class="text-[9px] text-slate-500 dark:text-slate-400">Akan menggantikan berkas lama saat disimpan</span>
+                                        </div>
+                                    </div>
+                                    <button type="button" @click="pratinjauFotoEditUrl = null; $refs.inputFotoEdit.value = ''"
+                                            class="px-2 py-1 text-[10px] font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-100/70 dark:hover:bg-rose-950/50 rounded-lg transition-colors shrink-0"
+                                            title="Batalkan foto baru">
+                                        Batal
+                                    </button>
+                                </div>
+                            </template>
                         </div>
 
-                        <!-- Berkas kontrak yang saat ini tersimpan -->
-                        <template x-if="formEdit.file_kontrak_url">
-                            <div class="mb-2 p-2 rounded-lg bg-white dark:bg-[#14161F] border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                                <div class="flex items-center gap-2 min-w-0">
-                                    <div class="w-8 h-8 rounded bg-blue-50 dark:bg-blue-950/50 text-blue-600 flex items-center justify-center shrink-0">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                    </div>
-                                    <div class="truncate">
-                                        <div class="text-[11px] font-bold text-slate-700 dark:text-slate-300">Kontrak Tersimpan</div>
-                                        <a :href="formEdit.file_kontrak_url" target="_blank" class="text-[10px] text-blue-600 hover:underline">Unduh Berkas</a>
-                                    </div>
+                        <!-- Kelola File Kontrak -->
+                        <div class="p-3 rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label class="block font-semibold text-slate-700 dark:text-slate-300">
+                                        Surat Kontrak Kerja (SPK) <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span>
+                                    </label>
+                                    <span class="text-[9px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-1.5 py-0.5 rounded font-mono">PDF, DOC, DOCX, JPG</span>
                                 </div>
-                                <button type="button" @click="hapusBerkasDriver(formEdit.kode_karyawan, 'file_kontrak')"
-                                        class="px-2 py-1 text-[10px] font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded transition-colors shrink-0"
-                                        title="Hapus berkas kontrak tersimpan">
-                                    Hapus
-                                </button>
-                            </div>
-                        </template>
 
-                        <input type="file" name="file_kontrak" accept=".pdf,.doc,.docx,image/jpeg,image/png"
-                               @change="validasiFileKontrak($event, 'edit')"
-                               class="w-full text-xs text-slate-500 file:mr-2.5 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 dark:file:bg-amber-950/50 dark:file:text-amber-300 hover:file:bg-amber-100 cursor-pointer">
-                        <p class="text-[10px] text-slate-400 mt-1">Format: PDF, DOC, DOCX, JPG (Maksimal 2 MB).</p>
+                                <!-- Berkas kontrak yang saat ini tersimpan -->
+                                <template x-if="formEdit.file_kontrak_url">
+                                    <div class="mb-2.5 p-2 rounded-xl bg-white dark:bg-[#14161F] border border-slate-200 dark:border-slate-700 flex items-center justify-between shadow-xs">
+                                        <div class="flex items-center gap-2 min-w-0">
+                                            <div class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                            </div>
+                                            <div class="truncate">
+                                                <div class="text-[11px] font-bold text-slate-800 dark:text-slate-200">Kontrak Tersimpan</div>
+                                                <a :href="formEdit.file_kontrak_url" target="_blank" class="text-[10px] text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-0.5">
+                                                    <span>Unduh / Buka Dokumen</span>
+                                                    <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <button type="button" @click="hapusBerkasDriver(formEdit.kode_karyawan, 'file_kontrak')"
+                                                class="px-2.5 py-1 text-[10px] font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors shrink-0"
+                                                title="Hapus berkas kontrak tersimpan">
+                                            Hapus
+                                        </button>
+                                    </div>
+                                </template>
 
-                        <!-- Nama Berkas Baru yang Dipilih -->
-                        <template x-if="namaFileKontrakEdit">
-                            <div class="mt-2 flex items-center gap-1.5 text-[11px] font-mono text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-2 py-1 rounded-md border border-amber-200 dark:border-amber-900/50">
-                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                <span class="truncate max-w-[180px]" x-text="namaFileKontrakEdit"></span>
+                                <label class="block text-[10px] font-medium text-slate-500 dark:text-slate-400 mb-1" x-text="formEdit.file_kontrak_url ? 'Ganti Dokumen Kontrak (Pilih berkas baru):' : 'Unggah Surat Kontrak:'"></label>
+                                <input type="file" name="file_kontrak" x-ref="inputKontrakEdit" accept=".pdf,.doc,.docx,image/jpeg,image/png"
+                                       @change="validasiFileKontrak($event, 'edit')"
+                                       class="w-full text-xs text-slate-500 file:mr-2.5 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-700 dark:file:bg-amber-950/50 dark:file:text-amber-300 hover:file:bg-amber-100 cursor-pointer">
+                                <p class="text-[10px] text-slate-400 mt-1">Kosongkan jika tidak ingin mengubah dokumen kontrak.</p>
                             </div>
-                        </template>
+
+                            <!-- Nama Berkas Baru yang Dipilih -->
+                            <template x-if="namaFileKontrakEdit">
+                                <div class="mt-2.5 p-2 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 flex items-center justify-between gap-2.5">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <div class="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                        </div>
+                                        <div class="truncate">
+                                            <span class="text-[11px] font-bold text-amber-700 dark:text-amber-300 block truncate" x-text="namaFileKontrakEdit"></span>
+                                            <span class="text-[9px] text-slate-500 dark:text-slate-400">Akan menggantikan berkas lama saat disimpan</span>
+                                        </div>
+                                    </div>
+                                    <button type="button" @click="namaFileKontrakEdit = ''; $refs.inputKontrakEdit.value = ''"
+                                            class="px-2 py-1 text-[10px] font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-100/70 dark:hover:bg-rose-950/50 rounded-lg transition-colors shrink-0"
+                                            title="Batalkan dokumen baru">
+                                        Batal
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
                     </div>
                 </div>
 
@@ -799,55 +906,98 @@
                          x-text="detailDriver.alamat || '-'"></div>
                 </div>
 
-                <!-- Lampiran Berkas KTP & Kontrak -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- Preview Foto KTP -->
-                    <div class="p-3.5 rounded-xl border border-[#E2E8F0] dark:border-[#252837]">
-                        <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Foto KTP / SIM</div>
-                        <template x-if="detailDriver.foto_ktp_url">
-                            <div>
-                                <img :src="detailDriver.foto_ktp_url" class="w-full h-28 object-cover rounded-lg border border-[#E2E8F0] dark:border-[#252837] mb-2 cursor-pointer hover:opacity-90"
-                                     @click="window.open(detailDriver.foto_ktp_url, '_blank')">
-                                <a :href="detailDriver.foto_ktp_url" target="_blank"
-                                   class="text-[11px] font-semibold text-blue-600 hover:underline flex items-center gap-1">
-                                    <span>Buka Gambar Penuh</span>
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                                </a>
-                            </div>
-                        </template>
-                        <template x-if="!detailDriver.foto_ktp_url">
-                            <div class="h-28 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center text-slate-400 text-[11px]">
-                                <span>Foto KTP belum diunggah</span>
-                            </div>
-                        </template>
+                <!-- Lampiran Dokumen Identitas & Kontrak Kerja -->
+                <div>
+                    <div class="flex items-center justify-between mb-2.5">
+                        <div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                            <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                            </svg>
+                            <span>Arsip Dokumen Legalitas & Identitas</span>
+                        </div>
+                        <span class="text-[10px] text-slate-400">Verifikasi berkas digital driver</span>
                     </div>
 
-                    <!-- Dokumen Kontrak -->
-                    <div class="p-3.5 rounded-xl border border-[#E2E8F0] dark:border-[#252837] flex flex-col justify-between">
-                        <div>
-                            <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Dokumen Kontrak</div>
-                            <template x-if="detailDriver.file_kontrak_url">
-                                <div class="p-3 rounded-lg bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 text-blue-800 dark:text-blue-300">
-                                    <div class="flex items-center gap-2 font-semibold text-xs mb-1">
-                                        <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                        <span>Berkas Kontrak Terlampir</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Preview Foto KTP -->
+                        <div class="p-3.5 rounded-xl border border-[#E2E8F0] dark:border-[#252837] bg-white dark:bg-[#14161F] flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">Foto KTP / Kartu Identitas</span>
+                                    <template x-if="detailDriver.foto_ktp_url">
+                                        <span class="px-2 py-0.5 text-[9px] font-bold uppercase rounded-md bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 font-mono">Tersedia</span>
+                                    </template>
+                                    <template x-if="!detailDriver.foto_ktp_url">
+                                        <span class="px-2 py-0.5 text-[9px] font-medium rounded-md bg-slate-100 dark:bg-slate-800 text-slate-400">Belum Ada</span>
+                                    </template>
+                                </div>
+                                <template x-if="detailDriver.foto_ktp_url">
+                                    <div>
+                                        <img :src="detailDriver.foto_ktp_url" class="w-full h-32 object-cover rounded-lg border border-[#E2E8F0] dark:border-[#252837] mb-2 cursor-pointer hover:opacity-95 shadow-xs"
+                                             @click="window.open(detailDriver.foto_ktp_url, '_blank')" title="Klik untuk memperbesar gambar">
+                                        <p class="text-[10px] text-slate-500 dark:text-slate-400">Salinan digital identitas resmi driver armada tersimpan aman.</p>
                                     </div>
-                                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Dokumen kerja legal driver tersimpan di server.</p>
-                                </div>
-                            </template>
-                            <template x-if="!detailDriver.file_kontrak_url">
-                                <div class="h-20 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center text-slate-400 text-[11px]">
-                                    <span>Belum ada dokumen kontrak</span>
-                                </div>
+                                </template>
+                                <template x-if="!detailDriver.foto_ktp_url">
+                                    <div class="h-32 rounded-lg bg-slate-50 dark:bg-[#1C1E2A] border border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center text-slate-400 text-center p-3">
+                                        <svg class="w-6 h-6 mb-1 opacity-40 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">Foto KTP Belum Diunggah</span>
+                                        <span class="text-[9px] text-slate-400 mt-0.5">Berkas bersifat opsional</span>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <template x-if="detailDriver.foto_ktp_url">
+                                <a :href="detailDriver.foto_ktp_url" target="_blank"
+                                   class="mt-3 inline-flex items-center justify-center gap-1.5 w-full py-2 text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-xl transition-colors">
+                                    <span>Buka Foto Ukuran Penuh</span>
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                </a>
                             </template>
                         </div>
-                        
-                        <template x-if="detailDriver.file_kontrak_url">
-                            <a :href="detailDriver.file_kontrak_url" target="_blank"
-                               class="mt-3 w-full py-2 text-center text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors shadow-sm">
-                                Unduh / Buka Dokumen
-                            </a>
-                        </template>
+
+                        <!-- Dokumen Kontrak -->
+                        <div class="p-3.5 rounded-xl border border-[#E2E8F0] dark:border-[#252837] bg-white dark:bg-[#14161F] flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">Surat Kontrak Kerja (SPK)</span>
+                                    <template x-if="detailDriver.file_kontrak_url">
+                                        <span class="px-2 py-0.5 text-[9px] font-bold uppercase rounded-md bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 font-mono">Tersedia</span>
+                                    </template>
+                                    <template x-if="!detailDriver.file_kontrak_url">
+                                        <span class="px-2 py-0.5 text-[9px] font-medium rounded-md bg-slate-100 dark:bg-slate-800 text-slate-400">Belum Ada</span>
+                                    </template>
+                                </div>
+                                <template x-if="detailDriver.file_kontrak_url">
+                                    <div class="p-3 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-900/50 text-indigo-900 dark:text-indigo-200">
+                                        <div class="flex items-center gap-2.5 mb-1.5">
+                                            <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center shrink-0">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                            </div>
+                                            <div>
+                                                <div class="font-bold text-xs">Surat Kontrak Terlampir</div>
+                                                <div class="text-[10px] text-slate-500 dark:text-slate-400">Perjanjian kerja aktif tersimpan di server.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <template x-if="!detailDriver.file_kontrak_url">
+                                    <div class="h-32 rounded-lg bg-slate-50 dark:bg-[#1C1E2A] border border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center text-slate-400 text-center p-3">
+                                        <svg class="w-6 h-6 mb-1 opacity-40 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                        <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">Kontrak Belum Diunggah</span>
+                                        <span class="text-[9px] text-slate-400 mt-0.5">Berkas bersifat opsional</span>
+                                    </div>
+                                </template>
+                            </div>
+                            
+                            <template x-if="detailDriver.file_kontrak_url">
+                                <a :href="detailDriver.file_kontrak_url" target="_blank"
+                                   class="mt-3 inline-flex items-center justify-center gap-1.5 w-full py-2 text-center text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors shadow-sm">
+                                    <span>Unduh / Buka Dokumen Kontrak</span>
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                </a>
+                            </template>
+                        </div>
                     </div>
                 </div>
 
@@ -998,7 +1148,7 @@
                 const file = event.target.files[0];
                 if (file) {
                     if (file.size > 2 * 1024 * 1024) {
-                        alert('Ukuran file foto KTP melebihi batas maksimal 2 MB!');
+                        alert('Ukuran berkas Foto KTP melebihi batas maksimal 2 MB. Silakan pilih foto dengan ukuran lebih kecil.');
                         event.target.value = '';
                         this.pratinjauFotoUrl = null;
                         return;
@@ -1011,7 +1161,7 @@
                 const file = event.target.files[0];
                 if (file) {
                     if (file.size > 2 * 1024 * 1024) {
-                        alert('Ukuran file kontrak melebihi batas maksimal 2 MB!');
+                        alert('Ukuran berkas Surat Kontrak Kerja melebihi batas maksimal 2 MB. Silakan pilih berkas dokumen dengan ukuran lebih kecil.');
                         event.target.value = '';
                         if (formKey === 'tambah') this.namaFileKontrakTambah = '';
                         if (formKey === 'edit') this.namaFileKontrakEdit = '';
@@ -1026,7 +1176,7 @@
                 const file = event.target.files[0];
                 if (file) {
                     if (file.size > 2 * 1024 * 1024) {
-                        alert('Ukuran file foto KTP melebihi batas maksimal 2 MB!');
+                        alert('Ukuran berkas Foto KTP melebihi batas maksimal 2 MB. Silakan pilih foto dengan ukuran lebih kecil.');
                         event.target.value = '';
                         this.pratinjauFotoEditUrl = null;
                         return;
@@ -1071,8 +1221,8 @@
                             no_ktp: nikFormat,
                             no_hp: d.no_hp,
                             alamat: d.alamat,
-                            tanggal_mulai_kerja: d.tanggal_mulai_kerja || '',
-                            tanggal_berhenti: d.tanggal_berhenti || '',
+                            tanggal_mulai_kerja: d.tanggal_mulai_kerja ? String(d.tanggal_mulai_kerja).split('T')[0] : '',
+                            tanggal_berhenti: d.tanggal_berhenti ? String(d.tanggal_berhenti).split('T')[0] : '',
                             foto_ktp_url: d.foto_ktp_url,
                             file_kontrak_url: d.file_kontrak_url
                         };
@@ -1084,8 +1234,8 @@
             },
 
             async hapusBerkasDriver(kode, jenisBerkas) {
-                const label = jenisBerkas === 'foto_ktp' ? 'Foto KTP' : 'File Kontrak';
-                if (!confirm(`Apakah Anda yakin ingin menghapus berkas ${label} ini?`)) {
+                const label = jenisBerkas === 'foto_ktp' ? 'Foto KTP / Identitas' : 'Surat Kontrak Kerja (SPK)';
+                if (!confirm(`Apakah Anda yakin ingin menghapus berkas ${label} pengemudi ini dari server? Tindakan ini tidak dapat dibatalkan.`)) {
                     return;
                 }
                 try {

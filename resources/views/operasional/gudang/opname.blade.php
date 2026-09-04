@@ -278,6 +278,16 @@
                                     @endif
 
                                     <div class="inline-flex items-center gap-1">
+                                        <!-- Lihat / Detail -->
+                                        <button @click="bukaModalDetail('{{ $opn->id_opname }}')"
+                                                class="p-1 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
+                                                title="Lihat Detail Catatan Opname">
+                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                        </button>
+
                                         <!-- Edit -->
                                         <button @click="bukaModalEdit('{{ $opn->id_opname }}')"
                                                 class="p-1 rounded text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
@@ -522,6 +532,171 @@
         </div>
     </div>
 
+    <!-- Modal Detail Stock Opname (Lihat Data) -->
+    <div x-show="modalDetailTerbuka" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="modalDetailTerbuka = false"
+             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
+            
+            <!-- Header Modal Detail -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837] bg-slate-50/50 dark:bg-[#1C1E2A]/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-teal-50 dark:bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center font-bold shrink-0">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Detail Stock Opname Fisik</h3>
+                            <span class="font-mono text-xs font-bold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-500/10 px-2 py-0.5 rounded-md border border-teal-200 dark:border-teal-500/20" x-text="detailOpname.nomor_opname"></span>
+                        </div>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5" x-text="'Tanggal Audit: ' + (detailOpname.tanggal_format || detailOpname.tanggal_opname || '-')"></p>
+                    </div>
+                </div>
+                <button @click="modalDetailTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none">&times;</button>
+            </div>
+
+            <!-- Konten Modal Detail -->
+            <div class="p-6 space-y-5 text-xs">
+                <!-- Status Konfirmasi Banner -->
+                <div class="p-3 rounded-xl flex items-center justify-between border"
+                     :class="detailOpname.status_konfirmasi === 'dikonfirmasi_spv' ? 'bg-emerald-50/70 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300' : 'bg-amber-50/70 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-800 dark:text-amber-300'">
+                    <div class="flex items-center gap-2 font-medium">
+                        <template x-if="detailOpname.status_konfirmasi === 'dikonfirmasi_spv'">
+                            <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </template>
+                        <template x-if="detailOpname.status_konfirmasi !== 'dikonfirmasi_spv'">
+                            <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                        </template>
+                        <span x-text="detailOpname.status_konfirmasi === 'dikonfirmasi_spv' ? 'Status: Telah Disetujui & Stok Riil Tersinkronisasi' : 'Status: Menunggu Persetujuan / Verifikasi SPV Gudang'"></span>
+                    </div>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase"
+                          :class="detailOpname.status_konfirmasi === 'dikonfirmasi_spv' ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' : 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400'"
+                          x-text="detailOpname.status_konfirmasi === 'dikonfirmasi_spv' ? 'DIKONFIRMASI SPV' : 'DRAFT'"></span>
+                </div>
+
+                <!-- Grid 3 Kartu Perbandingan Kuantitas Stok -->
+                <div class="grid grid-cols-3 gap-3">
+                    <!-- Stok Sistem -->
+                    <div class="p-3.5 rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-center">
+                        <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Stok Sistem (Buku)</div>
+                        <div class="text-base font-bold font-mono text-slate-900 dark:text-slate-100 mt-1">
+                            <span x-text="new Intl.NumberFormat('id-ID').format(detailOpname.stok_sistem || 0)"></span>
+                            <span class="text-xs font-normal text-slate-400">Zak</span>
+                        </div>
+                        <div class="text-[9px] text-slate-400 mt-1">Pencatatan Awal</div>
+                    </div>
+
+                    <!-- Stok Fisik -->
+                    <div class="p-3.5 rounded-xl bg-sky-50/70 dark:bg-sky-500/10 border border-sky-200/80 dark:border-sky-500/20 text-center">
+                        <div class="text-[10px] font-semibold text-sky-700 dark:text-sky-400 uppercase tracking-wider">Stok Fisik Riil</div>
+                        <div class="text-base font-bold font-mono text-sky-800 dark:text-sky-300 mt-1">
+                            <span x-text="new Intl.NumberFormat('id-ID').format(detailOpname.stok_fisik || 0)"></span>
+                            <span class="text-xs font-normal text-sky-500">Zak</span>
+                        </div>
+                        <div class="text-[9px] text-sky-600/80 dark:text-sky-400 mt-1">Hasil Hitung Lapangan</div>
+                    </div>
+
+                    <!-- Selisih -->
+                    <div class="p-3.5 rounded-xl border text-center"
+                         :class="(detailOpname.selisih < 0) ? 'bg-rose-50/70 dark:bg-rose-500/10 border-rose-200 text-rose-800 dark:text-rose-300' : ((detailOpname.selisih > 0) ? 'bg-emerald-50/70 dark:bg-emerald-500/10 border-emerald-200 text-emerald-800 dark:text-emerald-300' : 'bg-slate-100/70 dark:bg-slate-800/50 border-slate-200 text-slate-700 dark:text-slate-300')">
+                        <div class="text-[10px] font-semibold uppercase tracking-wider"
+                             :class="(detailOpname.selisih < 0) ? 'text-rose-700 dark:text-rose-400' : ((detailOpname.selisih > 0) ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500')">
+                            Selisih (Varian)
+                        </div>
+                        <div class="text-base font-bold font-mono mt-1">
+                            <span x-text="(detailOpname.selisih > 0 ? '+' : '') + new Intl.NumberFormat('id-ID').format(detailOpname.selisih || 0)"></span>
+                            <span class="text-xs font-normal opacity-75">Zak</span>
+                        </div>
+                        <div class="text-[9px] mt-1 font-semibold"
+                             x-text="(detailOpname.selisih < 0) ? 'Kurang / Minus' : ((detailOpname.selisih > 0) ? 'Surplus / Lebih' : 'Cocok Sesuai')"></div>
+                    </div>
+                </div>
+
+                <!-- Informasi Fasilitas Gudang -->
+                <div class="p-4 rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] space-y-3">
+                    <div class="text-[11px] font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider pb-2 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                        <span>Informasi Fasilitas Gudang & Audit</span>
+                        <span class="font-mono font-semibold text-teal-600 dark:text-teal-400" x-text="detailOpname.gudang ? detailOpname.gudang.nama_gudang : detailOpname.kode_gudang"></span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-2.5 pt-1">
+                        <div>
+                            <span class="text-slate-400 block text-[10px]">Kode Fasilitas Gudang:</span>
+                            <strong class="font-mono text-slate-900 dark:text-slate-100" x-text="detailOpname.kode_gudang || '-'"></strong>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block text-[10px]">Tipe / Jenis Gudang:</span>
+                            <strong class="text-slate-900 dark:text-slate-100" x-text="detailOpname.gudang ? detailOpname.gudang.jenis_gudang : '-'"></strong>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block text-[10px]">Komoditas Semen:</span>
+                            <strong class="text-slate-900 dark:text-slate-100" x-text="(detailOpname.gudang && detailOpname.gudang.barang) ? (detailOpname.gudang.barang.nama_barang + ' (' + (detailOpname.gudang.barang.jenis_barang || '-') + ')') : (detailOpname.gudang ? detailOpname.gudang.kode_barang : '-')"></strong>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block text-[10px]">Petugas Auditor Lapangan:</span>
+                            <strong class="text-slate-900 dark:text-slate-100" x-text="detailOpname.petugas_opname || '-'"></strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Catatan Keterangan Selisih -->
+                <div>
+                    <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Catatan & Keterangan Selisih Fisik</div>
+                    <div class="p-3 rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300 leading-relaxed font-mono"
+                         x-text="detailOpname.keterangan_selisih || 'Tidak ada catatan selisih fisik khusus.'"></div>
+                </div>
+
+                <!-- Riwayat Terakhir Diperbarui / Dibuat -->
+                <div class="p-3 rounded-xl bg-teal-50/50 dark:bg-teal-500/5 border border-teal-200/60 dark:border-teal-500/20 flex items-center justify-between font-mono text-[11px]">
+                    <div class="flex items-center gap-2 text-teal-900 dark:text-teal-300">
+                        <svg class="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>Dicatat: <strong x-text="detailOpname.terakhir_diedit_relatif || '-'"></strong></span>
+                    </div>
+                    <span class="text-slate-500 dark:text-slate-400" x-text="detailOpname.terakhir_diedit_waktu || '-'"></span>
+                </div>
+            </div>
+
+            <!-- Footer Modal Detail -->
+            <div class="flex items-center justify-between px-6 py-3.5 border-t border-[#E2E8F0] dark:border-[#252837] bg-slate-50 dark:bg-[#1C1E2A]">
+                <div class="flex items-center gap-2">
+                    <template x-if="detailOpname.status_konfirmasi === 'draft'">
+                        <form :action="'{{ url('operasional/gudang/opname') }}/' + detailOpname.id_opname + '/konfirmasi'" method="POST"
+                              onsubmit="return confirm('Konfirmasi opname ini dan sinkronkan kuantitas stok riil ke gudang?')">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 bg-amber-100/80 dark:bg-amber-500/20 hover:bg-amber-200 rounded-xl transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                <span>Konfirmasi SPV</span>
+                            </button>
+                        </form>
+                    </template>
+                    <button @click="modalDetailTerbuka = false; bukaModalEdit(detailOpname.id_opname)"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-slate-200/80 dark:bg-slate-700 hover:bg-slate-300 rounded-xl transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        <span>Ubah Data</span>
+                    </button>
+                </div>
+                <button @click="modalDetailTerbuka = false"
+                        class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] hover:bg-slate-100 rounded-xl transition-colors">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- 7. MODAL KONFIRMASI HAPUS OPNAME -->
     <div x-show="modalHapusTerbuka" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
@@ -563,9 +738,12 @@
         return {
             modalTambahTerbuka: false,
             modalEditTerbuka: false,
+            modalDetailTerbuka: false,
             modalHapusTerbuka: false,
 
             keteranganKodeOpn: 'Mode: Daur Ulang Slot Kosong',
+
+            petaStokGudang: @json(($daftarGudang ?? collect())->pluck('stok_tersedia', 'kode_gudang')),
 
             formTambah: {
                 nomor_opname: '',
@@ -590,22 +768,34 @@
                 keterangan_selisih: ''
             },
 
+            detailOpname: {},
             hapusData: { id: '', nomor_opname: '' },
 
             get selisihHitungTambah() {
                 return (parseInt(this.formTambah.stok_fisik) || 0) - (parseInt(this.formTambah.stok_sistem) || 0);
             },
 
-            initOpname() {},
-
-            ubahGudangPilihan(kodeGudang) {
-                const selectEl = document.querySelector('select[name="kode_gudang"]');
-                const selectedOpt = selectEl.options[selectEl.selectedIndex];
-                const stok = selectedOpt.getAttribute('data-stok');
-                if (stok !== null) {
-                    this.formTambah.stok_sistem = parseInt(stok) || 0;
-                    this.formTambah.stok_fisik = parseInt(stok) || 0;
+            async bukaModalDetail(id) {
+                try {
+                    const res = await fetch(`{{ url('operasional/gudang/opname') }}/${id}`);
+                    const data = await res.json();
+                    if (data.status === 'sukses') {
+                        this.detailOpname = data.data;
+                        this.modalDetailTerbuka = true;
+                    }
+                } catch (e) {
+                    alert('Gagal mengambil detail data opname.');
                 }
+            },
+
+            initOpname() {
+                this.$watch('formTambah.kode_gudang', (kode) => {
+                    if (kode && typeof this.petaStokGudang[kode] !== 'undefined') {
+                        const stok = parseInt(this.petaStokGudang[kode]) || 0;
+                        this.formTambah.stok_sistem = stok;
+                        this.formTambah.stok_fisik = stok;
+                    }
+                });
             },
 
             bukaModalTambah() {
@@ -636,7 +826,7 @@
                             id_opname: d.id_opname,
                             nomor_opname: d.nomor_opname,
                             kode_gudang: d.kode_gudang,
-                            tanggal_opname: d.tanggal_opname ? d.tanggal_opname.slice(0, 10) : '',
+                            tanggal_opname: d.tanggal_opname ? String(d.tanggal_opname).split('T')[0] : '',
                             stok_sistem: d.stok_sistem,
                             stok_fisik: d.stok_fisik,
                             status_konfirmasi: d.status_konfirmasi,

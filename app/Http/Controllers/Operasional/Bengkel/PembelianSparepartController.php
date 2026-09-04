@@ -70,15 +70,23 @@ class PembelianSparepartController extends Controller
      */
     public function simpan(Request $request)
     {
+        if ($request->filled('harga_beli')) {
+            $bersihHarga = preg_replace('/[^0-9]/', '', (string) $request->input('harga_beli'));
+            $request->merge(['harga_beli' => $bersihHarga]);
+        }
+
         $pesanKustom = [
             'nomor_faktur_beli.required' => 'Nomor faktur pembelian wajib diisi.',
             'nomor_faktur_beli.unique' => 'Nomor faktur pembelian sudah terdaftar.',
             'kode_sparepart.required' => 'Sparepart wajib dipilih.',
             'kode_sparepart.exists' => 'Sparepart tidak valid.',
             'tanggal_beli.required' => 'Tanggal pembelian wajib diisi.',
+            'tanggal_beli.date' => 'Format tanggal pembelian tidak valid.',
             'nama_supplier.required' => 'Nama toko / supplier wajib diisi.',
             'jumlah_beli.required' => 'Jumlah kuantitas beli wajib diisi.',
+            'jumlah_beli.min' => 'Jumlah beli minimal 1 unit.',
             'harga_beli.required' => 'Harga beli satuan wajib diisi.',
+            'harga_beli.numeric' => 'Harga beli satuan harus berupa angka nominal valid.',
             'dibuat_oleh.required' => 'Nama pengawas/pencatat wajib diisi.',
         ];
 
@@ -92,28 +100,39 @@ class PembelianSparepartController extends Controller
             'dibuat_oleh' => 'required|string|max:50',
         ], $pesanKustom);
 
+        $tanggalBeliPresisi = Carbon::parse($validated['tanggal_beli'])->format('Y-m-d');
         $totalBayar = (int) $validated['jumlah_beli'] * (float) $validated['harga_beli'];
 
-        $pembelian = PembelianSparepart::create([
-            'nomor_faktur_beli' => strtoupper(trim($validated['nomor_faktur_beli'])),
-            'kode_sparepart' => $validated['kode_sparepart'],
-            'tanggal_beli' => $validated['tanggal_beli'],
-            'nama_supplier' => trim($validated['nama_supplier']),
-            'jumlah_beli' => $validated['jumlah_beli'],
-            'harga_beli' => $validated['harga_beli'],
-            'total_bayar' => $totalBayar,
-            'dibuat_oleh' => trim($validated['dibuat_oleh']),
-        ]);
+        DB::beginTransaction();
+        try {
+            $pembelian = PembelianSparepart::create([
+                'nomor_faktur_beli' => strtoupper(trim($validated['nomor_faktur_beli'])),
+                'kode_sparepart' => $validated['kode_sparepart'],
+                'tanggal_beli' => $tanggalBeliPresisi,
+                'nama_supplier' => trim($validated['nama_supplier']),
+                'jumlah_beli' => $validated['jumlah_beli'],
+                'harga_beli' => $validated['harga_beli'],
+                'total_bayar' => $totalBayar,
+                'dibuat_oleh' => trim($validated['dibuat_oleh']),
+            ]);
 
-        // Otomatis tambah stok fisik di master sparepart
-        $part = Sparepart::find($validated['kode_sparepart']);
-        if ($part) {
-            $part->increment('stok_part', $validated['jumlah_beli']);
-            $part->update(['harga_satuan' => $validated['harga_beli']]); // Perbarui harga standar ke harga beli terbaru
+            // Otomatis tambah stok fisik di master sparepart
+            $part = Sparepart::find($validated['kode_sparepart']);
+            if ($part) {
+                $part->increment('stok_part', $validated['jumlah_beli']);
+                $part->update(['harga_satuan' => $validated['harga_beli']]); // Perbarui harga standar ke harga beli terbaru
+            }
+
+            DB::commit();
+
+            return redirect()->route('operasional.bengkel.pembelian_sparepart')
+                ->with('sukses', "Faktur Pembelian [{$pembelian->nomor_faktur_beli}] berhasil disimpan! Stok sparepart otomatis bertambah +{$pembelian->jumlah_beli}.");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal menyimpan faktur pembelian sparepart: ' . $e->getMessage());
         }
-
-        return redirect()->route('operasional.bengkel.pembelian_sparepart')
-            ->with('sukses', "Faktur Pembelian [{$pembelian->nomor_faktur_beli}] berhasil disimpan! Stok sparepart otomatis bertambah +{$pembelian->jumlah_beli}.");
     }
 
     /**
@@ -143,13 +162,21 @@ class PembelianSparepartController extends Controller
     {
         $pembelian = PembelianSparepart::findOrFail($id_pembelian_part);
 
+        if ($request->filled('harga_beli')) {
+            $bersihHarga = preg_replace('/[^0-9]/', '', (string) $request->input('harga_beli'));
+            $request->merge(['harga_beli' => $bersihHarga]);
+        }
+
         $pesanKustom = [
             'kode_sparepart.required' => 'Sparepart wajib dipilih.',
             'kode_sparepart.exists' => 'Sparepart tidak valid.',
             'tanggal_beli.required' => 'Tanggal pembelian wajib diisi.',
+            'tanggal_beli.date' => 'Format tanggal pembelian tidak valid.',
             'nama_supplier.required' => 'Nama toko / supplier wajib diisi.',
             'jumlah_beli.required' => 'Jumlah kuantitas beli wajib diisi.',
+            'jumlah_beli.min' => 'Jumlah beli minimal 1 unit.',
             'harga_beli.required' => 'Harga beli satuan wajib diisi.',
+            'harga_beli.numeric' => 'Harga beli satuan harus berupa angka nominal valid.',
             'dibuat_oleh.required' => 'Nama pengawas wajib diisi.',
         ];
 
@@ -162,32 +189,43 @@ class PembelianSparepartController extends Controller
             'dibuat_oleh' => 'required|string|max:50',
         ], $pesanKustom);
 
+        $tanggalBeliPresisi = Carbon::parse($validated['tanggal_beli'])->format('Y-m-d');
         $selisihJumlah = (int) $validated['jumlah_beli'] - (int) $pembelian->jumlah_beli;
         $totalBayar = (int) $validated['jumlah_beli'] * (float) $validated['harga_beli'];
 
-        // Jika sparepart sama, sesuaikan stok selisih
-        if ($pembelian->kode_sparepart === $validated['kode_sparepart']) {
-            if ($selisihJumlah != 0) {
-                Sparepart::where('kode_sparepart', $pembelian->kode_sparepart)->increment('stok_part', $selisihJumlah);
+        DB::beginTransaction();
+        try {
+            // Jika sparepart sama, sesuaikan stok selisih
+            if ($pembelian->kode_sparepart === $validated['kode_sparepart']) {
+                if ($selisihJumlah != 0) {
+                    Sparepart::where('kode_sparepart', $pembelian->kode_sparepart)->increment('stok_part', $selisihJumlah);
+                }
+            } else {
+                // Jika sparepart diubah, kembalikan stok lama & tambahkan stok baru
+                Sparepart::where('kode_sparepart', $pembelian->kode_sparepart)->decrement('stok_part', $pembelian->jumlah_beli);
+                Sparepart::where('kode_sparepart', $validated['kode_sparepart'])->increment('stok_part', $validated['jumlah_beli']);
             }
-        } else {
-            // Jika sparepart diubah, kembalikan stok lama & tambahkan stok baru
-            Sparepart::where('kode_sparepart', $pembelian->kode_sparepart)->decrement('stok_part', $pembelian->jumlah_beli);
-            Sparepart::where('kode_sparepart', $validated['kode_sparepart'])->increment('stok_part', $validated['jumlah_beli']);
+
+            $pembelian->update([
+                'kode_sparepart' => $validated['kode_sparepart'],
+                'tanggal_beli' => $tanggalBeliPresisi,
+                'nama_supplier' => trim($validated['nama_supplier']),
+                'jumlah_beli' => $validated['jumlah_beli'],
+                'harga_beli' => $validated['harga_beli'],
+                'total_bayar' => $totalBayar,
+                'dibuat_oleh' => trim($validated['dibuat_oleh']),
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('operasional.bengkel.pembelian_sparepart')
+                ->with('sukses', "Faktur Pembelian [{$pembelian->nomor_faktur_beli}] berhasil diperbarui!");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal memperbarui faktur pembelian sparepart: ' . $e->getMessage());
         }
-
-        $pembelian->update([
-            'kode_sparepart' => $validated['kode_sparepart'],
-            'tanggal_beli' => $validated['tanggal_beli'],
-            'nama_supplier' => trim($validated['nama_supplier']),
-            'jumlah_beli' => $validated['jumlah_beli'],
-            'harga_beli' => $validated['harga_beli'],
-            'total_bayar' => $totalBayar,
-            'dibuat_oleh' => trim($validated['dibuat_oleh']),
-        ]);
-
-        return redirect()->route('operasional.bengkel.pembelian_sparepart')
-            ->with('sukses', "Faktur Pembelian [{$pembelian->nomor_faktur_beli}] berhasil diperbarui!");
     }
 
     /**
@@ -198,13 +236,22 @@ class PembelianSparepartController extends Controller
         $pembelian = PembelianSparepart::findOrFail($id_pembelian_part);
         $nomor = $pembelian->nomor_faktur_beli;
 
-        // Kurangi stok di master sparepart
-        Sparepart::where('kode_sparepart', $pembelian->kode_sparepart)->decrement('stok_part', $pembelian->jumlah_beli);
+        DB::beginTransaction();
+        try {
+            // Kurangi stok di master sparepart
+            Sparepart::where('kode_sparepart', $pembelian->kode_sparepart)->decrement('stok_part', $pembelian->jumlah_beli);
 
-        $pembelian->delete();
+            $pembelian->delete();
 
-        return redirect()->route('operasional.bengkel.pembelian_sparepart')
-            ->with('sukses', "Faktur Pembelian [{$nomor}] berhasil dihapus! Stok sparepart telah disesuaikan.");
+            DB::commit();
+
+            return redirect()->route('operasional.bengkel.pembelian_sparepart')
+                ->with('sukses', "Faktur Pembelian [{$nomor}] berhasil dihapus! Stok sparepart telah disesuaikan.");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('operasional.bengkel.pembelian_sparepart')
+                ->with('error', 'Gagal menghapus faktur pembelian: ' . $e->getMessage());
+        }
     }
 
     /**

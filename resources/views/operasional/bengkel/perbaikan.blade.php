@@ -785,14 +785,14 @@
                             id_perbaikan: d.id_perbaikan,
                             nomor_spk_perbaikan: d.nomor_spk_perbaikan,
                             kode_aset: d.kode_kendaraan || d.kode_aset,
-                            tanggal_masuk: d.tanggal_masuk ? d.tanggal_masuk.slice(0, 10) : '',
-                            tanggal_selesai: d.tanggal_selesai ? d.tanggal_selesai.slice(0, 10) : '',
+                            tanggal_masuk: d.tanggal_masuk ? d.tanggal_masuk.split('T')[0] : '',
+                            tanggal_selesai: d.tanggal_selesai ? d.tanggal_selesai.split('T')[0] : '',
                             bengkel_pelaksana: d.bengkel_pelaksana,
                             status_perbaikan: d.status_perbaikan,
                             keluhan_kerusakan: d.keluhan_kerusakan,
                             tindakan_perbaikan: d.tindakan_perbaikan,
-                            biaya_jasa: d.biaya_jasa,
-                            biaya_sparepart: d.biaya_sparepart,
+                            biaya_jasa: Math.round(parseFloat(d.biaya_jasa) || 0),
+                            biaya_sparepart: Math.round(parseFloat(d.biaya_sparepart) || 0),
                             pengawas_kendaraan: d.pengawas_kendaraan
                         };
                         this.modalEditTerbuka = true;

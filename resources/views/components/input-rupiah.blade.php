@@ -11,23 +11,32 @@
     'disabled' => false,
 ])
 
-<div class="space-y-1 w-full" x-data="{
+<div class="space-y-1 w-full" 
+     @set-nilai-{{ $nama }}.window="nilaiMurni = $event.detail; formatKeTampilan(nilaiMurni);"
+     x-data="{
     nilaiMurni: '{{ old($nama, $nilaiAwal) }}',
     nilaiTampil: '',
     init() {
         this.formatKeTampilan(this.nilaiMurni);
         
         @if($modelBind)
-            this.$watch('{{ $modelBind }}', (val) => {
-                if (String(val) !== String(this.nilaiMurni)) {
-                    this.nilaiMurni = val || '0';
+            try {
+                let getter = new Function('try { return (typeof this.{{ $modelBind }} !== "undefined" ? this.{{ $modelBind }} : (typeof {{ $modelBind }} !== "undefined" ? {{ $modelBind }} : null)); } catch(e){ return null; }');
+                let valAwal = getter.call(this);
+                if (valAwal !== null && valAwal !== undefined && valAwal !== '') {
+                    this.nilaiMurni = valAwal;
                     this.formatKeTampilan(this.nilaiMurni);
                 }
-            });
-            if (typeof {{ $modelBind }} !== 'undefined' && {{ $modelBind }} !== null && {{ $modelBind }} !== '') {
-                this.nilaiMurni = {{ $modelBind }};
-                this.formatKeTampilan(this.nilaiMurni);
-            }
+            } catch(e) {}
+
+            try {
+                this.$watch('{{ $modelBind }}', (val) => {
+                    if (String(val) !== String(this.nilaiMurni)) {
+                        this.nilaiMurni = val || '0';
+                        this.formatKeTampilan(this.nilaiMurni);
+                    }
+                });
+            } catch(e) {}
         @endif
     },
     formatKeTampilan(angka) {
@@ -36,8 +45,23 @@
             this.nilaiMurni = '';
             return;
         }
+
+        let strAngka = String(angka).trim();
+
+        // Tangani angka desimal dari MySQL/API (misal: "1200000.00" atau 1200000.00)
+        // agar bagian desimal (".00") tidak terkonversi menjadi tambahan digit 00 (x100)
+        if (typeof angka === 'number') {
+            strAngka = Math.round(angka).toString();
+        } else if (strAngka.includes('.')) {
+            let bagianTitik = strAngka.split('.');
+            // Format desimal database hanya memiliki 1 titik dan 1-2 digit di belakang titik
+            if (bagianTitik.length === 2 && bagianTitik[1].length <= 2) {
+                strAngka = Math.round(parseFloat(strAngka) || 0).toString();
+            }
+        }
+
         // Bersihkan dari selain angka
-        let bersih = String(angka).replace(/[^0-9]/g, '');
+        let bersih = strAngka.replace(/[^0-9]/g, '');
         if (!bersih) {
             this.nilaiTampil = '';
             this.nilaiMurni = '';
@@ -54,7 +78,10 @@
             this.nilaiMurni = '';
             this.nilaiTampil = '';
             @if($modelBind)
-                {{ $modelBind }} = 0;
+                try {
+                    let setter = new Function('val', 'try { this.{{ $modelBind }} = val; } catch(e){ try { {{ $modelBind }} = val; } catch(e2){} }');
+                    setter.call(this, 0);
+                } catch(e) {}
             @endif
             $dispatch('input', 0);
             $dispatch('change', 0);
@@ -65,7 +92,10 @@
         this.nilaiTampil = num.toLocaleString('id-ID');
         
         @if($modelBind)
-            {{ $modelBind }} = num;
+            try {
+                let setter = new Function('val', 'try { this.{{ $modelBind }} = val; } catch(e){ try { {{ $modelBind }} = val; } catch(e2){} }');
+                setter.call(this, num);
+            } catch(e) {}
         @endif
         
         $dispatch('input', num);
@@ -82,7 +112,7 @@
     @endif
 
     <!-- Hidden Raw Value untuk Submit Form Backend -->
-    <input type="hidden" name="{{ $nama }}" :value="nilaiMurni" {{ $wajib ? 'required' : '' }}>
+    <input type="hidden" name="{{ $nama }}" :value="nilaiMurni">
 
     <!-- Input Display Teks Terformat Titik Otomatis -->
     <div class="relative flex items-center rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/30 transition-all overflow-hidden {{ $classTambahan }}">

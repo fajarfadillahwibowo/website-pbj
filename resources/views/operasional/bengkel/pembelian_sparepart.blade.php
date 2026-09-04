@@ -652,10 +652,10 @@
                             id_pembelian_part: d.id_pembelian_part,
                             nomor_faktur_beli: d.nomor_faktur_beli,
                             kode_sparepart: d.kode_sparepart,
-                            tanggal_beli: d.tanggal_beli ? d.tanggal_beli.slice(0, 10) : '',
+                            tanggal_beli: d.tanggal_beli ? d.tanggal_beli.split('T')[0] : '',
                             nama_supplier: d.nama_supplier,
                             jumlah_beli: d.jumlah_beli,
-                            harga_beli: d.harga_beli,
+                            harga_beli: Math.round(parseFloat(d.harga_beli) || 0),
                             dibuat_oleh: d.dibuat_oleh
                         };
                         this.modalEditTerbuka = true;

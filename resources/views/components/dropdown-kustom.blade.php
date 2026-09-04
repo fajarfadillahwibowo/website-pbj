@@ -29,7 +29,10 @@
     }
 @endphp
 
-<div class="relative w-full" x-data="{
+<div class="relative w-full" 
+     @set-nilai-{{ $nama }}.window="terpilih = $event.detail; sinkronkanLabel()"
+     @update-dropdown-{{ $nama }}.window="terpilih = $event.detail; sinkronkanLabel()"
+     x-data="{
     buka: false,
     terpilih: '{{ old($nama, $nilaiAwal) }}',
     labelTerpilih: '',
@@ -37,11 +40,20 @@
     submitOtomatis: {{ $submitOnChange ? 'true' : 'false' }},
     init() {
         @if($modelBind)
-            this.$watch('{{ $modelBind }}', (val) => {
-                this.terpilih = val;
-                this.sinkronkanLabel();
-            });
-            this.terpilih = {{ $modelBind }} || this.terpilih;
+            try {
+                let getter = new Function('try { return (typeof this.{{ $modelBind }} !== "undefined" ? this.{{ $modelBind }} : (typeof {{ $modelBind }} !== "undefined" ? {{ $modelBind }} : null)); } catch(e){ return null; }');
+                let valAwal = getter.call(this);
+                if (valAwal !== null && valAwal !== undefined && valAwal !== '') {
+                    this.terpilih = valAwal;
+                }
+            } catch(e) {}
+            
+            try {
+                this.$watch('{{ $modelBind }}', (val) => {
+                    this.terpilih = val;
+                    this.sinkronkanLabel();
+                });
+            } catch(e) {}
         @endif
         this.sinkronkanLabel();
     },
@@ -57,7 +69,10 @@
         this.terpilih = nilai;
         this.labelTerpilih = label;
         @if($modelBind)
-            {{ $modelBind }} = nilai;
+            try {
+                let setter = new Function('val', 'try { this.{{ $modelBind }} = val; } catch(e){ try { {{ $modelBind }} = val; } catch(e2){} }');
+                setter.call(this, nilai);
+            } catch(e) {}
         @endif
         this.buka = false;
         $dispatch('input', nilai);
@@ -71,7 +86,7 @@
 }" @click.away="buka = false">
 
     <!-- Input hidden untuk submit form -->
-    <input type="hidden" name="{{ $nama }}" :value="terpilih" {{ $wajib ? 'required' : '' }}>
+    <input type="hidden" name="{{ $nama }}" :value="terpilih">
 
     <!-- Tombol Trigger Dropdown Modern & Compact -->
     <button type="button" 

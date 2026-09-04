@@ -77,6 +77,39 @@ class StokGudangController extends Controller
      */
     public function simpan(Request $request)
     {
+        // 1. Auto-generate kode_gudang jika belum terisi dari client
+        if (!$request->filled('kode_gudang')) {
+            $request->merge(['kode_gudang' => $this->generateKodeGudang('gap')]);
+        } else {
+            $request->merge(['kode_gudang' => strtoupper(trim((string) $request->input('kode_gudang')))]);
+        }
+
+        // 2. Sanitasi harga_barang (buang simbol Rp, titik, dsb.)
+        if ($request->has('harga_barang')) {
+            $raw = (string) $request->input('harga_barang');
+            $request->merge(['harga_barang' => preg_replace('/[^0-9]/', '', $raw)]);
+        }
+
+        // 3. Fallback nilai default cerdas untuk mencegah kegagalan validasi
+        if (!$request->filled('harga_barang')) {
+            $request->merge(['harga_barang' => 0]);
+        }
+
+        if (!$request->filled('stok_tersedia')) {
+            $request->merge(['stok_tersedia' => 0]);
+        }
+
+        if (!$request->filled('jenis_gudang')) {
+            $request->merge(['jenis_gudang' => 'Utama']);
+        }
+
+        if (!$request->filled('kode_barang')) {
+            $defaultSemen = DB::table('data_semen')->value('kode_barang');
+            if ($defaultSemen) {
+                $request->merge(['kode_barang' => $defaultSemen]);
+            }
+        }
+
         $pesanKustom = [
             'kode_gudang.required' => 'Kode gudang wajib diisi.',
             'kode_gudang.unique' => 'Kode gudang sudah terdaftar.',
@@ -103,20 +136,29 @@ class StokGudangController extends Controller
             'sub_distrik' => 'required|string|max:50',
         ], $pesanKustom);
 
-        $gudang = Gudang::create([
-            'kode_gudang' => strtoupper(trim($validated['kode_gudang'])),
-            'nama_gudang' => trim($validated['nama_gudang']),
-            'jenis_gudang' => trim($validated['jenis_gudang']),
-            'kode_barang' => $validated['kode_barang'],
-            'plant' => trim($validated['plant']),
-            'harga_barang' => $validated['harga_barang'],
-            'stok_tersedia' => $validated['stok_tersedia'],
-            'distrik' => trim($validated['distrik']),
-            'sub_distrik' => trim($validated['sub_distrik']),
-        ]);
+        DB::beginTransaction();
+        try {
+            $gudang = Gudang::create([
+                'kode_gudang' => strtoupper(trim($validated['kode_gudang'])),
+                'nama_gudang' => trim($validated['nama_gudang']),
+                'jenis_gudang' => trim($validated['jenis_gudang']),
+                'kode_barang' => $validated['kode_barang'],
+                'plant' => trim($validated['plant']),
+                'harga_barang' => $validated['harga_barang'],
+                'stok_tersedia' => $validated['stok_tersedia'],
+                'distrik' => trim($validated['distrik']),
+                'sub_distrik' => trim($validated['sub_distrik']),
+            ]);
 
-        return redirect()->route('operasional.gudang.stok')
-            ->with('sukses', "Gudang {$gudang->nama_gudang} ({$gudang->kode_gudang}) berhasil didaftarkan!");
+            DB::commit();
+
+            return redirect()->route('operasional.gudang.stok')
+                ->with('sukses', "Gudang {$gudang->nama_gudang} ({$gudang->kode_gudang}) berhasil didaftarkan!");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()
+                ->with('error', 'Gagal mendaftarkan fasilitas gudang: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -146,6 +188,27 @@ class StokGudangController extends Controller
     {
         $gudang = Gudang::findOrFail($kode_gudang);
 
+        if ($request->has('harga_barang')) {
+            $raw = (string) $request->input('harga_barang');
+            $request->merge(['harga_barang' => preg_replace('/[^0-9]/', '', $raw)]);
+        }
+
+        if (!$request->filled('harga_barang')) {
+            $request->merge(['harga_barang' => $gudang->harga_barang ?? 0]);
+        }
+
+        if (!$request->filled('stok_tersedia')) {
+            $request->merge(['stok_tersedia' => $gudang->stok_tersedia ?? 0]);
+        }
+
+        if (!$request->filled('jenis_gudang')) {
+            $request->merge(['jenis_gudang' => $gudang->jenis_gudang ?? 'Utama']);
+        }
+
+        if (!$request->filled('kode_barang')) {
+            $request->merge(['kode_barang' => $gudang->kode_barang]);
+        }
+
         $pesanKustom = [
             'nama_gudang.required' => 'Nama gudang wajib diisi.',
             'jenis_gudang.required' => 'Jenis fasilitas gudang wajib dipilih.',
@@ -169,20 +232,29 @@ class StokGudangController extends Controller
             'sub_distrik' => 'required|string|max:50',
         ], $pesanKustom);
 
-        $gudang->update([
-            'nama_gudang' => trim($validated['nama_gudang']),
-            'jenis_gudang' => trim($validated['jenis_gudang']),
-            'kode_barang' => $validated['kode_barang'],
-            'plant' => trim($validated['plant']),
-            'harga_barang' => $validated['harga_barang'],
-            'stok_tersedia' => $validated['stok_tersedia'],
-            'distrik' => trim($validated['distrik']),
-            'sub_distrik' => trim($validated['sub_distrik']),
-            'diperbarui_pada' => now(),
-        ]);
+        DB::beginTransaction();
+        try {
+            $gudang->update([
+                'nama_gudang' => trim($validated['nama_gudang']),
+                'jenis_gudang' => trim($validated['jenis_gudang']),
+                'kode_barang' => $validated['kode_barang'],
+                'plant' => trim($validated['plant']),
+                'harga_barang' => $validated['harga_barang'],
+                'stok_tersedia' => $validated['stok_tersedia'],
+                'distrik' => trim($validated['distrik']),
+                'sub_distrik' => trim($validated['sub_distrik']),
+                'diperbarui_pada' => now(),
+            ]);
 
-        return redirect()->route('operasional.gudang.stok')
-            ->with('sukses', "Data Gudang {$gudang->nama_gudang} berhasil diperbarui!");
+            DB::commit();
+
+            return redirect()->route('operasional.gudang.stok')
+                ->with('sukses', "Data Gudang {$gudang->nama_gudang} berhasil diperbarui!");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()
+                ->with('error', 'Gagal memperbarui fasilitas gudang: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -194,12 +266,21 @@ class StokGudangController extends Controller
 
         $validated = $request->validate([
             'tipe_mutasi' => 'required|in:masuk,keluar,atur',
-            'jumlah_zak' => 'required|integer|min:1',
+            'jumlah_zak' => 'required|integer|min:0',
             'keterangan' => 'nullable|string',
+        ], [
+            'tipe_mutasi.required' => 'Tipe aksi mutasi wajib dipilih.',
+            'jumlah_zak.required' => 'Jumlah kuantitas zak wajib diisi.',
+            'jumlah_zak.integer' => 'Jumlah kuantitas zak harus berupa bilangan bulat.',
+            'jumlah_zak.min' => 'Jumlah kuantitas zak tidak boleh negatif.',
         ]);
 
         $stokLama = $gudang->stok_tersedia;
-        $jumlah = $validated['jumlah_zak'];
+        $jumlah = (int) $validated['jumlah_zak'];
+
+        if (in_array($validated['tipe_mutasi'], ['masuk', 'keluar']) && $jumlah < 1) {
+            return redirect()->back()->with('error', 'Jumlah kuantitas zak untuk mutasi masuk atau keluar minimal 1 zak.');
+        }
 
         if ($validated['tipe_mutasi'] === 'masuk') {
             $stokBaru = $stokLama + $jumlah;
@@ -215,12 +296,20 @@ class StokGudangController extends Controller
             $pesan = "Stok fisik Gudang {$gudang->nama_gudang} berhasil disesuaikan menjadi {$stokBaru} Zak.";
         }
 
-        $gudang->update([
-            'stok_tersedia' => $stokBaru,
-            'diperbarui_pada' => now(),
-        ]);
+        DB::beginTransaction();
+        try {
+            $gudang->update([
+                'stok_tersedia' => $stokBaru,
+                'diperbarui_pada' => now(),
+            ]);
 
-        return redirect()->route('operasional.gudang.stok')->with('sukses', $pesan);
+            DB::commit();
+
+            return redirect()->route('operasional.gudang.stok')->with('sukses', $pesan);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal memproses mutasi stok: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -238,19 +327,32 @@ class StokGudangController extends Controller
                 ->with('error', "Gagal menghapus! Gudang {$namaGudang} masih terhubung dengan transaksi Sales Order.");
         }
 
-        $gudang->delete();
+        // Proteksi jika masih memiliki riwayat di Stock Opname
+        $digunakanOpname = DB::table('opname_gudang')->where('kode_gudang', $kode_gudang)->exists();
+        if ($digunakanOpname) {
+            return redirect()->route('operasional.gudang.stok')
+                ->with('error', "Gagal menghapus! Gudang {$namaGudang} masih memiliki riwayat catatan Stock Opname fisik.");
+        }
 
-        return redirect()->route('operasional.gudang.stok')
-            ->with('sukses', "Gudang {$namaGudang} ({$kode_gudang}) berhasil dihapus dari sistem!");
+        DB::beginTransaction();
+        try {
+            $gudang->delete();
+            DB::commit();
+
+            return redirect()->route('operasional.gudang.stok')
+                ->with('sukses', "Gudang {$namaGudang} ({$kode_gudang}) berhasil dihapus dari sistem!");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->route('operasional.gudang.stok')
+                ->with('error', 'Gagal menghapus fasilitas gudang: ' . $e->getMessage());
+        }
     }
 
     /**
-     * Generator kode otomatis untuk Kode Gudang.
+     * Logika internal pembuatan kode otomatis untuk Kode Gudang.
      */
-    public function buatKodeOtomatis(Request $request)
+    public function generateKodeGudang(string $mode = 'gap'): string
     {
-        $mode = $request->input('mode', 'gap');
-
         if ($mode === 'acak') {
             $karakter = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
             $panjang = strlen($karakter);
@@ -270,12 +372,7 @@ class StokGudangController extends Controller
                 $percobaan++;
             } while (!$kodeUnik && $percobaan < 50);
 
-            return response()->json([
-                'status' => 'sukses',
-                'mode' => 'acak',
-                'kode_otomatis' => $kodeUnik ?? ('GDG-' . strtoupper(bin2hex(random_bytes(2)))),
-                'keterangan' => 'Format Acak Anti-Tebak'
-            ]);
+            return $kodeUnik ?? ('GDG-' . strtoupper(bin2hex(random_bytes(2))));
         }
 
         // Mode GAP FILLING: Cari slot nomor terkecil yang kosong / terhapus
@@ -298,13 +395,22 @@ class StokGudangController extends Controller
             $slotTersedia++;
         }
 
-        $kodeBaru = 'GDG-' . str_pad($slotTersedia, 3, '0', STR_PAD_LEFT);
+        return 'GDG-' . str_pad($slotTersedia, 3, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Generator kode otomatis untuk Kode Gudang (JSON endpoint).
+     */
+    public function buatKodeOtomatis(Request $request)
+    {
+        $mode = $request->input('mode', 'gap');
+        $kodeBaru = $this->generateKodeGudang($mode);
 
         return response()->json([
             'status' => 'sukses',
-            'mode' => 'gap',
+            'mode' => $mode,
             'kode_otomatis' => $kodeBaru,
-            'keterangan' => 'Slot Nomor Terkecil Tersedia (Daur Ulang Otomatis)'
+            'keterangan' => $mode === 'acak' ? 'Format Acak Anti-Tebak' : 'Slot Nomor Terkecil Tersedia (Daur Ulang Otomatis)'
         ]);
     }
 

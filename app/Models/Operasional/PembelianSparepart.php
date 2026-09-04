@@ -28,7 +28,7 @@ class PembelianSparepart extends Model
     ];
 
     protected $casts = [
-        'tanggal_beli' => 'date',
+        'tanggal_beli' => 'date:Y-m-d',
         'jumlah_beli' => 'integer',
         'harga_beli' => 'decimal:2',
         'total_bayar' => 'decimal:2',

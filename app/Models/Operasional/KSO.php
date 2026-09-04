@@ -32,8 +32,8 @@ class KSO extends Model
     ];
 
     protected $casts = [
-        'tanggal_mulai' => 'date',
-        'tanggal_selesai' => 'date',
+        'tanggal_mulai' => 'date:Y-m-d',
+        'tanggal_selesai' => 'date:Y-m-d',
         'nilai_kontrak' => 'decimal:2',
         'dibuat_pada' => 'datetime',
         'diperbarui_pada' => 'datetime',

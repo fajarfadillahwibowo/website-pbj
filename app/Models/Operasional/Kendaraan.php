@@ -38,8 +38,8 @@ class Kendaraan extends Model
     ];
 
     protected $casts = [
-        'tanggal_kir' => 'date',
-        'tanggal_pajak' => 'date',
+        'tanggal_kir' => 'date:Y-m-d',
+        'tanggal_pajak' => 'date:Y-m-d',
         'dibuat_pada' => 'datetime',
         'diperbarui_pada' => 'datetime',
         'tahun_pembuatan' => 'integer',
@@ -48,6 +48,8 @@ class Kendaraan extends Model
     protected $appends = [
         'nama_aset',
         'kode_aset_display',
+        'merek_aset',
+        'status_aset',
         'harga_aset_rupiah',
         'terakhir_diedit_relatif',
         'terakhir_diedit_waktu',
@@ -84,6 +86,22 @@ class Kendaraan extends Model
     public function getNamaAsetAttribute()
     {
         return $this->asetPerusahaan->nama_aset ?? ($this->merek_kendaraan . ' ' . $this->jenis_kendaraan);
+    }
+
+    /**
+     * Accessor alias merek_aset dari merek_kendaraan untuk kompatibilitas view.
+     */
+    public function getMerekAsetAttribute()
+    {
+        return $this->merek_kendaraan ?? ($this->asetPerusahaan->merek_aset ?? null);
+    }
+
+    /**
+     * Accessor alias status_aset dari status_kendaraan untuk kompatibilitas view.
+     */
+    public function getStatusAsetAttribute()
+    {
+        return $this->status_kendaraan ?? ($this->asetPerusahaan->status_aset ?? 'aktif');
     }
 
     /**

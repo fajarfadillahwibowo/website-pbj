@@ -64,6 +64,11 @@ class SparepartController extends Controller
      */
     public function simpan(Request $request)
     {
+        if ($request->filled('harga_satuan')) {
+            $bersihHarga = preg_replace('/[^0-9]/', '', (string) $request->input('harga_satuan'));
+            $request->merge(['harga_satuan' => $bersihHarga]);
+        }
+
         $pesanKustom = [
             'kode_sparepart.required' => 'Kode sparepart wajib diisi.',
             'kode_sparepart.unique' => 'Kode sparepart sudah terdaftar.',
@@ -72,6 +77,7 @@ class SparepartController extends Controller
             'stok_part.required' => 'Kuantitas stok awal wajib diisi.',
             'satuan.required' => 'Satuan barang wajib diisi.',
             'harga_satuan.required' => 'Harga beli satuan wajib diisi.',
+            'harga_satuan.numeric' => 'Harga beli satuan harus berupa angka nominal valid.',
         ];
 
         $validated = $request->validate([
@@ -83,17 +89,27 @@ class SparepartController extends Controller
             'harga_satuan' => 'required|numeric|min:0',
         ], $pesanKustom);
 
-        $part = Sparepart::create([
-            'kode_sparepart' => strtoupper(trim($validated['kode_sparepart'])),
-            'nama_sparepart' => trim($validated['nama_sparepart']),
-            'kategori_part' => trim($validated['kategori_part']),
-            'stok_part' => $validated['stok_part'],
-            'satuan' => trim($validated['satuan']),
-            'harga_satuan' => $validated['harga_satuan'],
-        ]);
+        DB::beginTransaction();
+        try {
+            $part = Sparepart::create([
+                'kode_sparepart' => strtoupper(trim($validated['kode_sparepart'])),
+                'nama_sparepart' => trim($validated['nama_sparepart']),
+                'kategori_part' => trim($validated['kategori_part']),
+                'stok_part' => $validated['stok_part'],
+                'satuan' => trim($validated['satuan']),
+                'harga_satuan' => $validated['harga_satuan'],
+            ]);
 
-        return redirect()->route('operasional.bengkel.sparepart')
-            ->with('sukses', "Sparepart [{$part->kode_sparepart}] {$part->nama_sparepart} berhasil ditambahkan!");
+            DB::commit();
+
+            return redirect()->route('operasional.bengkel.sparepart')
+                ->with('sukses', "Sparepart [{$part->kode_sparepart}] {$part->nama_sparepart} berhasil ditambahkan!");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal menambahkan data sparepart: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -123,12 +139,18 @@ class SparepartController extends Controller
     {
         $part = Sparepart::findOrFail($kode_sparepart);
 
+        if ($request->filled('harga_satuan')) {
+            $bersihHarga = preg_replace('/[^0-9]/', '', (string) $request->input('harga_satuan'));
+            $request->merge(['harga_satuan' => $bersihHarga]);
+        }
+
         $pesanKustom = [
             'nama_sparepart.required' => 'Nama sparepart wajib diisi.',
             'kategori_part.required' => 'Kategori sparepart wajib dipilih.',
             'stok_part.required' => 'Kuantitas stok wajib diisi.',
             'satuan.required' => 'Satuan barang wajib diisi.',
             'harga_satuan.required' => 'Harga beli satuan wajib diisi.',
+            'harga_satuan.numeric' => 'Harga beli satuan harus berupa angka nominal valid.',
         ];
 
         $validated = $request->validate([
@@ -139,16 +161,26 @@ class SparepartController extends Controller
             'harga_satuan' => 'required|numeric|min:0',
         ], $pesanKustom);
 
-        $part->update([
-            'nama_sparepart' => trim($validated['nama_sparepart']),
-            'kategori_part' => trim($validated['kategori_part']),
-            'stok_part' => $validated['stok_part'],
-            'satuan' => trim($validated['satuan']),
-            'harga_satuan' => $validated['harga_satuan'],
-        ]);
+        DB::beginTransaction();
+        try {
+            $part->update([
+                'nama_sparepart' => trim($validated['nama_sparepart']),
+                'kategori_part' => trim($validated['kategori_part']),
+                'stok_part' => $validated['stok_part'],
+                'satuan' => trim($validated['satuan']),
+                'harga_satuan' => $validated['harga_satuan'],
+            ]);
 
-        return redirect()->route('operasional.bengkel.sparepart')
-            ->with('sukses', "Data sparepart [{$part->kode_sparepart}] berhasil diperbarui!");
+            DB::commit();
+
+            return redirect()->route('operasional.bengkel.sparepart')
+                ->with('sukses', "Data sparepart [{$part->kode_sparepart}] berhasil diperbarui!");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal memperbarui data sparepart: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -158,11 +190,21 @@ class SparepartController extends Controller
     {
         $part = Sparepart::findOrFail($kode_sparepart);
 
+        $minJumlah = ($request->input('tipe_mutasi') === 'atur') ? 0 : 1;
+
+        $pesanKustom = [
+            'tipe_mutasi.required' => 'Tipe penyesuaian stok wajib dipilih.',
+            'tipe_mutasi.in' => 'Tipe penyesuaian stok tidak valid.',
+            'jumlah.required' => 'Jumlah kuantitas stok wajib diisi.',
+            'jumlah.integer' => 'Jumlah kuantitas stok harus berupa angka bulat.',
+            'jumlah.min' => $minJumlah === 0 ? 'Jumlah stok minimal 0.' : 'Jumlah perubahan stok minimal 1 unit.',
+        ];
+
         $validated = $request->validate([
             'tipe_mutasi' => 'required|in:masuk,keluar,atur',
-            'jumlah' => 'required|integer|min:1',
+            'jumlah' => "required|integer|min:{$minJumlah}",
             'keterangan' => 'nullable|string',
-        ]);
+        ], $pesanKustom);
 
         $jumlah = (int) $validated['jumlah'];
         $stokLama = $part->stok_part;
@@ -182,12 +224,21 @@ class SparepartController extends Controller
             $pesan = "Kuantitas fisik sparepart diatur menjadi {$jumlah} {$part->satuan}.";
         }
 
-        $part->update([
-            'stok_part' => $stokBaru,
-        ]);
+        DB::beginTransaction();
+        try {
+            $part->update([
+                'stok_part' => $stokBaru,
+            ]);
 
-        return redirect()->route('operasional.bengkel.sparepart')
-            ->with('sukses', "{$pesan} (Stok sekarang: {$stokBaru} {$part->satuan})");
+            DB::commit();
+
+            return redirect()->route('operasional.bengkel.sparepart')
+                ->with('sukses', "{$pesan} (Stok sekarang: {$stokBaru} {$part->satuan})");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('operasional.bengkel.sparepart')
+                ->with('error', 'Gagal memproses mutasi stok sparepart: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -198,10 +249,26 @@ class SparepartController extends Controller
         $part = Sparepart::findOrFail($kode_sparepart);
         $nama = $part->nama_sparepart;
 
-        $part->delete();
+        // Proteksi integritas relasional: cek apakah ada riwayat pembelian sparepart
+        $terpakaiBeli = DB::table('pembelian_sparepart')->where('kode_sparepart', $kode_sparepart)->exists();
+        if ($terpakaiBeli) {
+            return redirect()->route('operasional.bengkel.sparepart')
+                ->with('error', "Gagal menghapus sparepart [{$kode_sparepart}] {$nama}. Suku cadang ini masih tercatat dalam riwayat faktur pembelian.");
+        }
 
-        return redirect()->route('operasional.bengkel.sparepart')
-            ->with('sukses', "Sparepart [{$kode_sparepart}] {$nama} berhasil dihapus!");
+        DB::beginTransaction();
+        try {
+            $part->delete();
+
+            DB::commit();
+
+            return redirect()->route('operasional.bengkel.sparepart')
+                ->with('sukses', "Sparepart [{$kode_sparepart}] {$nama} berhasil dihapus!");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('operasional.bengkel.sparepart')
+                ->with('error', 'Gagal menghapus data sparepart: ' . $e->getMessage());
+        }
     }
 
     /**

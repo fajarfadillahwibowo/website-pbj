@@ -29,7 +29,7 @@ class StockOpname extends Model
     ];
 
     protected $casts = [
-        'tanggal_opname' => 'date',
+        'tanggal_opname' => 'date:Y-m-d',
         'stok_sistem' => 'integer',
         'stok_fisik' => 'integer',
         'selisih' => 'integer',
