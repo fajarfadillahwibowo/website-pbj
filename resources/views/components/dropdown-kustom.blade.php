@@ -29,46 +29,17 @@
     }
 @endphp
 
-<div class="relative w-full" x-data="{
-    buka: false,
-    terpilih: '{{ old($nama, $nilaiAwal) }}',
-    labelTerpilih: '',
-    daftar: {{ json_encode($daftarPilihan) }},
-    submitOtomatis: {{ $submitOnChange ? 'true' : 'false' }},
-    init() {
-        @if($modelBind)
-            this.$watch('{{ $modelBind }}', (val) => {
-                this.terpilih = val;
-                this.sinkronkanLabel();
-            });
-            this.terpilih = {{ $modelBind }} || this.terpilih;
-        @endif
-        this.sinkronkanLabel();
-    },
-    sinkronkanLabel() {
-        if (this.terpilih !== null && this.terpilih !== '') {
-            let item = this.daftar.find(d => String(d.nilai) === String(this.terpilih));
-            this.labelTerpilih = item ? item.label : this.terpilih;
-        } else {
-            this.labelTerpilih = '';
-        }
-    },
-    pilihItem(nilai, label) {
-        this.terpilih = nilai;
-        this.labelTerpilih = label;
-        @if($modelBind)
-            {{ $modelBind }} = nilai;
-        @endif
-        this.buka = false;
-        $dispatch('input', nilai);
-        $dispatch('change', nilai);
-        if (this.submitOtomatis) {
-            $nextTick(() => {
-                if ($el.closest('form')) $el.closest('form').submit();
-            });
-        }
-    }
-}" @click.away="buka = false">
+<div class="relative w-full" 
+     @set-nilai-{{ $nama }}.window="terpilih = $event.detail; sinkronkanLabel()"
+     @update-dropdown-{{ $nama }}.window="terpilih = $event.detail; sinkronkanLabel()"
+     x-data="komponenDropdownKustom({
+         nama: '{{ $nama }}',
+         nilaiAwal: @js(old($nama, $nilaiAwal)),
+         daftar: @js($daftarPilihan),
+         submitOnChange: @js($submitOnChange),
+         modelBind: @js($modelBind)
+     })"
+     @click.away="buka = false">
 
     <!-- Input hidden untuk submit form -->
     <input type="hidden" name="{{ $nama }}" :value="terpilih" {{ $wajib ? 'required' : '' }}>

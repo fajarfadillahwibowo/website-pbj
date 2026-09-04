@@ -92,6 +92,23 @@ class OngkosAngkutController extends Controller
             ]);
         }
 
+        // Sanitasi kode_gudang jika bernilai 'semua', empty string, atau 'null' agar menjadi null valid
+        if ($request->has('kode_gudang')) {
+            $valGudang = trim((string) $request->input('kode_gudang'));
+            if ($valGudang === '' || strtolower($valGudang) === 'semua' || strtolower($valGudang) === 'null') {
+                $request->merge(['kode_gudang' => null]);
+            }
+        }
+
+        // Default muatan dan wilayah jika tidak terisi
+        if (!$request->filled('muatan_oa')) {
+            $request->merge(['muatan_oa' => 'Semen Zak 50kg']);
+        }
+        if (!$request->filled('wilayah_oa')) {
+            $wilayahDefault = Wilayah::value('nama_wilayah') ?? 'Wilayah Distribusi';
+            $request->merge(['wilayah_oa' => $wilayahDefault]);
+        }
+
         $pesanKustom = [
             'kode_oa.required' => 'Kode Ongkos Angkut wajib diisi.',
             'kode_oa.unique' => 'Kode Ongkos Angkut sudah terdaftar dalam sistem.',
@@ -117,23 +134,30 @@ class OngkosAngkutController extends Controller
             'keterangan'       => 'nullable|string|max:255',
         ], $pesanKustom);
 
-        OngkosAngkut::create([
-            'kode_oa'          => trim($validated['kode_oa']),
-            'nama_oa'          => trim($validated['nama_oa']),
-            'kode_gudang'      => $validated['kode_gudang'] ?: null,
-            'kontrak_oa'       => $validated['kontrak_oa'] ? trim($validated['kontrak_oa']) : null,
-            'muatan_oa'        => trim($validated['muatan_oa']),
-            'harga_oa'         => $validated['harga_oa'],
-            'harga_kso'        => $validated['harga_kso'],
-            'harga_kso_khusus' => $validated['harga_kso_khusus'],
-            'wilayah_oa'       => trim($validated['wilayah_oa']),
-            'keterangan'       => $validated['keterangan'] ? trim($validated['keterangan']) : null,
-            'dibuat_pada'      => now(),
-            'diperbarui_pada'  => now(),
-        ]);
+        DB::beginTransaction();
+        try {
+            $oa = OngkosAngkut::create([
+                'kode_oa'          => trim($validated['kode_oa']),
+                'nama_oa'          => trim($validated['nama_oa']),
+                'kode_gudang'      => ($validated['kode_gudang'] ?? null) ?: null,
+                'kontrak_oa'       => !empty($validated['kontrak_oa']) ? trim($validated['kontrak_oa']) : null,
+                'muatan_oa'        => trim($validated['muatan_oa']),
+                'harga_oa'         => $validated['harga_oa'] ?? 0,
+                'harga_kso'        => $validated['harga_kso'] ?? 0,
+                'harga_kso_khusus' => $validated['harga_kso_khusus'] ?? 0,
+                'wilayah_oa'       => trim($validated['wilayah_oa']),
+                'keterangan'       => !empty($validated['keterangan']) ? trim($validated['keterangan']) : null,
+            ]);
 
-        return redirect()->route('operasional.pengiriman.ongkos_angkut')
-            ->with('sukses', "Data Ongkos Angkut {$validated['nama_oa']} ({$validated['kode_oa']}) berhasil ditambahkan ke sistem!");
+            DB::commit();
+
+            return redirect()->route('operasional.pengiriman.ongkos_angkut')
+                ->with('sukses', "Data Ongkos Angkut {$validated['nama_oa']} ({$validated['kode_oa']}) berhasil ditambahkan ke sistem!");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()
+                ->with('error', 'Gagal menambahkan data ongkos angkut: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -166,6 +190,22 @@ class OngkosAngkutController extends Controller
         // Bersihkan format rupiah jika terdapat titik/karakter pemisah
         $this->bersihkanInputNominal($request);
 
+        // Sanitasi kode_gudang jika bernilai 'semua', empty string, atau 'null' agar menjadi null valid
+        if ($request->has('kode_gudang')) {
+            $valGudang = trim((string) $request->input('kode_gudang'));
+            if ($valGudang === '' || strtolower($valGudang) === 'semua' || strtolower($valGudang) === 'null') {
+                $request->merge(['kode_gudang' => null]);
+            }
+        }
+
+        // Default muatan dan wilayah jika tidak terisi
+        if (!$request->filled('muatan_oa')) {
+            $request->merge(['muatan_oa' => $oa->muatan_oa ?: 'Semen Zak 50kg']);
+        }
+        if (!$request->filled('wilayah_oa')) {
+            $request->merge(['wilayah_oa' => $oa->wilayah_oa ?: (Wilayah::value('nama_wilayah') ?? 'Wilayah Distribusi')]);
+        }
+
         $pesanKustom = [
             'nama_oa.required' => 'Nama Rute / Trayek OA wajib diisi.',
             'kode_gudang.exists' => 'Fasilitas gudang yang dipilih tidak valid atau belum terdaftar pada Master Gudang (SPV Gudang).',
@@ -188,21 +228,30 @@ class OngkosAngkutController extends Controller
             'keterangan'       => 'nullable|string|max:255',
         ], $pesanKustom);
 
-        $oa->update([
-            'nama_oa'          => trim($validated['nama_oa']),
-            'kode_gudang'      => $validated['kode_gudang'] ?: null,
-            'kontrak_oa'       => $validated['kontrak_oa'] ? trim($validated['kontrak_oa']) : null,
-            'muatan_oa'        => trim($validated['muatan_oa']),
-            'harga_oa'         => $validated['harga_oa'],
-            'harga_kso'        => $validated['harga_kso'],
-            'harga_kso_khusus' => $validated['harga_kso_khusus'],
-            'wilayah_oa'       => trim($validated['wilayah_oa']),
-            'keterangan'       => $validated['keterangan'] ? trim($validated['keterangan']) : null,
-            'diperbarui_pada'  => now(),
-        ]);
+        DB::beginTransaction();
+        try {
+            $oa->update([
+                'nama_oa'          => trim($validated['nama_oa']),
+                'kode_gudang'      => ($validated['kode_gudang'] ?? null) ?: null,
+                'kontrak_oa'       => !empty($validated['kontrak_oa']) ? trim($validated['kontrak_oa']) : null,
+                'muatan_oa'        => trim($validated['muatan_oa']),
+                'harga_oa'         => $validated['harga_oa'] ?? 0,
+                'harga_kso'        => $validated['harga_kso'] ?? 0,
+                'harga_kso_khusus' => $validated['harga_kso_khusus'] ?? 0,
+                'wilayah_oa'       => trim($validated['wilayah_oa']),
+                'keterangan'       => !empty($validated['keterangan']) ? trim($validated['keterangan']) : null,
+                'diperbarui_pada'  => now(),
+            ]);
 
-        return redirect()->route('operasional.pengiriman.ongkos_angkut')
-            ->with('sukses', "Data Ongkos Angkut {$oa->nama_oa} ({$oa->kode_oa}) berhasil diperbarui!");
+            DB::commit();
+
+            return redirect()->route('operasional.pengiriman.ongkos_angkut')
+                ->with('sukses', "Data Ongkos Angkut {$oa->nama_oa} ({$oa->kode_oa}) berhasil diperbarui!");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()
+                ->with('error', 'Gagal memperbarui data ongkos angkut: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -213,14 +262,17 @@ class OngkosAngkutController extends Controller
         $oa = OngkosAngkut::where('kode_oa', $kode_oa)->firstOrFail();
         $namaOa = $oa->nama_oa;
 
+        DB::beginTransaction();
         try {
             $oa->delete();
+            DB::commit();
 
             return redirect()->route('operasional.pengiriman.ongkos_angkut')
                 ->with('sukses', "Data Ongkos Angkut {$namaOa} ({$kode_oa}) berhasil dihapus dari sistem! Nomor slot kode ini siap digunakan kembali.");
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (\Throwable $e) {
+            DB::rollBack();
             return redirect()->route('operasional.pengiriman.ongkos_angkut')
-                ->with('error', "Gagal menghapus data ongkos angkut {$namaOa}! Data rute ini masih terikat dengan transaksi surat jalan / operasional lain.");
+                ->with('error', "Gagal menghapus data ongkos angkut {$namaOa}: " . $e->getMessage());
         }
     }
 
@@ -315,7 +367,13 @@ class OngkosAngkutController extends Controller
                 if (is_string($nilaiMentah)) {
                     $bersih = preg_replace('/[^0-9]/', '', $nilaiMentah);
                     $request->merge([$field => $bersih !== '' ? (float) $bersih : 0]);
+                } elseif (is_numeric($nilaiMentah)) {
+                    $request->merge([$field => (float) $nilaiMentah]);
+                } else {
+                    $request->merge([$field => 0]);
                 }
+            } else {
+                $request->merge([$field => 0]);
             }
         }
     }

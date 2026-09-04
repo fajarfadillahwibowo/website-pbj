@@ -886,6 +886,148 @@
             };
         }
 
+        // =========================================================================
+        // HELPER GLOBAL: KOMPONEN DROPDOWN & INPUT RUPIAH KUSTOM (ALPINE.JS)
+        // =========================================================================
+        function dapatkanNilaiScope(konteks, path) {
+            if (!path) return undefined;
+            try {
+                return new Function('with(this) { return ' + path + '; }').call(konteks);
+            } catch(e) {
+                return undefined;
+            }
+        }
+
+        function tetapkanNilaiScope(konteks, path, nilai) {
+            if (!path) return;
+            try {
+                new Function('val', 'with(this) { ' + path + ' = val; }').call(konteks, nilai);
+            } catch(e) {}
+        }
+
+        function komponenDropdownKustom(config = {}) {
+            return {
+                buka: false,
+                terpilih: (config.nilaiAwal !== undefined && config.nilaiAwal !== null) ? String(config.nilaiAwal) : '',
+                labelTerpilih: '',
+                daftar: Array.isArray(config.daftar) ? config.daftar : [],
+                submitOtomatis: Boolean(config.submitOnChange),
+                init() {
+                    if (config.modelBind) {
+                        const valAwal = dapatkanNilaiScope(this, config.modelBind);
+                        if (valAwal !== undefined && valAwal !== null && valAwal !== '') {
+                            this.terpilih = String(valAwal);
+                        }
+                        try {
+                            this.$watch(config.modelBind, (val) => {
+                                this.terpilih = (val !== undefined && val !== null) ? String(val) : '';
+                                this.sinkronkanLabel();
+                            });
+                        } catch(e) {}
+                    }
+                    this.sinkronkanLabel();
+                },
+                sinkronkanLabel() {
+                    if (this.terpilih !== null && this.terpilih !== '' && this.terpilih !== undefined) {
+                        const item = this.daftar.find(d => String(d.nilai) === String(this.terpilih));
+                        this.labelTerpilih = item ? item.label : this.terpilih;
+                    } else {
+                        this.labelTerpilih = '';
+                    }
+                },
+                pilihItem(nilai, label) {
+                    this.terpilih = (nilai !== undefined && nilai !== null) ? String(nilai) : '';
+                    this.labelTerpilih = label || this.terpilih;
+                    if (config.modelBind) {
+                        tetapkanNilaiScope(this, config.modelBind, nilai);
+                    }
+                    this.buka = false;
+                    this.$dispatch('input', nilai);
+                    this.$dispatch('change', nilai);
+                    if (this.submitOtomatis) {
+                        this.$nextTick(() => {
+                            if (this.$el && this.$el.closest('form')) {
+                                this.$el.closest('form').submit();
+                            }
+                        });
+                    }
+                }
+            };
+        }
+
+        function komponenInputRupiah(config = {}) {
+            return {
+                nilaiMurni: (config.nilaiAwal !== undefined && config.nilaiAwal !== null) ? config.nilaiAwal : '',
+                nilaiTampil: '',
+                init() {
+                    this.formatKeTampilan(this.nilaiMurni);
+                    if (config.modelBind) {
+                        const valAwal = dapatkanNilaiScope(this, config.modelBind);
+                        if (valAwal !== undefined && valAwal !== null && valAwal !== '') {
+                            this.nilaiMurni = valAwal;
+                            this.formatKeTampilan(this.nilaiMurni);
+                        }
+                        try {
+                            this.$watch(config.modelBind, (val) => {
+                                if (String(val) !== String(this.nilaiMurni)) {
+                                    this.nilaiMurni = (val !== null && val !== undefined) ? val : '';
+                                    this.formatKeTampilan(this.nilaiMurni);
+                                }
+                            });
+                        } catch(e) {}
+                    }
+                },
+                formatKeTampilan(angka) {
+                    if (angka === '' || angka === null || angka === undefined) {
+                        this.nilaiTampil = '';
+                        this.nilaiMurni = '';
+                        return;
+                    }
+                    let strAngka = String(angka).trim();
+                    if (typeof angka === 'number') {
+                        strAngka = Math.round(angka).toString();
+                    } else if (strAngka.includes('.')) {
+                        const bagianTitik = strAngka.split('.');
+                        if (bagianTitik.length === 2 && bagianTitik[1].length <= 2) {
+                            strAngka = Math.round(parseFloat(strAngka) || 0).toString();
+                        }
+                    }
+                    const bersih = strAngka.replace(/[^0-9]/g, '');
+                    if (!bersih) {
+                        this.nilaiTampil = '';
+                        this.nilaiMurni = '';
+                        return;
+                    }
+                    const num = parseInt(bersih, 10);
+                    this.nilaiMurni = num;
+                    this.nilaiTampil = num.toLocaleString('id-ID');
+                },
+                ketikInput(e) {
+                    if (config.readonly || config.disabled) return;
+                    const inputVal = e.target.value;
+                    const bersih = inputVal.replace(/[^0-9]/g, '');
+                    if (!bersih) {
+                        this.nilaiMurni = '';
+                        this.nilaiTampil = '';
+                        if (config.modelBind) {
+                            tetapkanNilaiScope(this, config.modelBind, 0);
+                        }
+                        this.$dispatch('input', 0);
+                        this.$dispatch('change', 0);
+                        return;
+                    }
+                    const num = parseInt(bersih, 10);
+                    this.nilaiMurni = num;
+                    this.nilaiTampil = num.toLocaleString('id-ID');
+                    if (config.modelBind) {
+                        tetapkanNilaiScope(this, config.modelBind, num);
+                    }
+                    this.$dispatch('input', num);
+                    this.$dispatch('change', num);
+                }
+            };
+        }
+
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', pulihkanPosisiSidebar);
         } else {

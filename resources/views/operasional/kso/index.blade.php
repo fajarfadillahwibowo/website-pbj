@@ -1094,9 +1094,9 @@
                             kode_kso: d.kode_kso,
                             nama_kso: d.nama_kso,
                             pihak_mitra: d.pihak_mitra,
-                            tanggal_mulai: d.tanggal_mulai ? d.tanggal_mulai.slice(0, 10) : '',
-                            tanggal_selesai: d.tanggal_selesai ? d.tanggal_selesai.slice(0, 10) : '',
-                            nilai_kontrak: d.nilai_kontrak,
+                            tanggal_mulai: d.tanggal_mulai ? String(d.tanggal_mulai).split('T')[0] : '',
+                            tanggal_selesai: d.tanggal_selesai ? String(d.tanggal_selesai).split('T')[0] : '',
+                            nilai_kontrak: Math.round(parseFloat(d.nilai_kontrak) || 0),
                             status_kso: d.status_kso,
                             keterangan: d.keterangan || ''
                         };
@@ -1155,7 +1155,7 @@
                             kode_kso: d.kode_kso,
                             nama_oa: d.nama_oa,
                             muatan: d.muatan,
-                            ongkos_angkut: d.ongkos_angkut
+                            ongkos_angkut: Math.round(parseFloat(d.ongkos_angkut) || 0)
                         };
                         this.modalEditOaTerbuka = true;
                     }

@@ -50,9 +50,9 @@ class AsetPerusahaan extends Model
     ];
 
     protected $casts = [
-        'tanggal_pembelian' => 'date',
-        'tanggal_kir' => 'date',
-        'tanggal_pajak' => 'date',
+        'tanggal_pembelian' => 'date:Y-m-d',
+        'tanggal_kir' => 'date:Y-m-d',
+        'tanggal_pajak' => 'date:Y-m-d',
         'harga_aset' => 'decimal:2',
         'harga_perolehan' => 'decimal:2',
         'nilai_residu' => 'decimal:2',

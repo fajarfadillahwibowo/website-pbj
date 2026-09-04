@@ -197,7 +197,7 @@ Route::prefix('operasional')->name('operasional.')->group(function () {
         Route::get('/kendaraan/api/buat-kode', [KendaraanController::class, 'buatKodeOtomatis'])->name('kendaraan.buat_kode');
         Route::get('/kendaraan/{kode_aset}', [KendaraanController::class, 'ambilDetail'])->name('kendaraan.detail');
         Route::put('/kendaraan/{kode_aset}', [KendaraanController::class, 'perbarui'])->name('kendaraan.perbarui');
-        Route::delete('/kendaraan/{kode_aset}', [KendaraanController::class, 'hapus'])->name('kendaraan.hapus');
+        Route::delete('/kendaraan/{kode_aset?}', [KendaraanController::class, 'hapus'])->name('kendaraan.hapus');
 
         // Sub-Fitur Aset Perusahaan di dalam Data Kendaraan (Tab Jenis Aset / Aset Perusahaan)
         Route::post('/kendaraan-aset', [KendaraanController::class, 'simpanAset'])->name('kendaraan.aset.simpan');

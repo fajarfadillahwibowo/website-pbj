@@ -32,8 +32,8 @@ class PerbaikanKendaraan extends Model
     ];
 
     protected $casts = [
-        'tanggal_masuk' => 'date',
-        'tanggal_selesai' => 'date',
+        'tanggal_masuk' => 'date:Y-m-d',
+        'tanggal_selesai' => 'date:Y-m-d',
         'biaya_jasa' => 'decimal:2',
         'biaya_sparepart' => 'decimal:2',
         'total_biaya' => 'decimal:2',

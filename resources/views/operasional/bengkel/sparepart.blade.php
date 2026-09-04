@@ -607,7 +607,7 @@
                             kategori_part: d.kategori_part,
                             stok_part: d.stok_part,
                             satuan: d.satuan,
-                            harga_satuan: d.harga_satuan
+                            harga_satuan: Math.round(parseFloat(d.harga_satuan) || 0)
                         };
                         this.modalEditTerbuka = true;
                     }

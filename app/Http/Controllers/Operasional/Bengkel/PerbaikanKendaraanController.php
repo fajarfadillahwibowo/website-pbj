@@ -74,16 +74,29 @@ class PerbaikanKendaraanController extends Controller
         $kodeKndInput = $request->input('kode_kendaraan') ?? $request->input('kode_aset');
         $request->merge(['kode_kendaraan' => $kodeKndInput]);
 
+        if ($request->filled('biaya_jasa')) {
+            $request->merge(['biaya_jasa' => preg_replace('/[^0-9]/', '', (string) $request->input('biaya_jasa'))]);
+        }
+        if ($request->filled('biaya_sparepart')) {
+            $request->merge(['biaya_sparepart' => preg_replace('/[^0-9]/', '', (string) $request->input('biaya_sparepart'))]);
+        }
+
         $pesanKustom = [
             'nomor_spk_perbaikan.required' => 'Nomor SPK perbaikan wajib diisi.',
             'nomor_spk_perbaikan.unique' => 'Nomor SPK sudah terdaftar.',
             'kode_kendaraan.required' => 'Armada kendaraan wajib dipilih.',
             'kode_kendaraan.exists' => 'Armada kendaraan tidak valid.',
             'tanggal_masuk.required' => 'Tanggal masuk servis wajib diisi.',
+            'tanggal_masuk.date' => 'Format tanggal masuk servis tidak valid.',
+            'tanggal_selesai.date' => 'Format tanggal selesai tidak valid.',
+            'tanggal_selesai.after_or_equal' => 'Tanggal selesai harus sama atau setelah tanggal masuk.',
             'keluhan_kerusakan.required' => 'Keluhan / indikasi kerusakan wajib diisi.',
             'bengkel_pelaksana.required' => 'Bengkel pelaksana wajib dipilih.',
             'status_perbaikan.required' => 'Status perbaikan wajib dipilih.',
+            'status_perbaikan.in' => 'Status perbaikan tidak valid.',
             'pengawas_kendaraan.required' => 'Nama pengawas kendaraan wajib diisi.',
+            'biaya_jasa.numeric' => 'Biaya jasa harus berupa angka nominal valid.',
+            'biaya_sparepart.numeric' => 'Biaya sparepart harus berupa angka nominal valid.',
         ];
 
         $validated = $request->validate([
@@ -100,27 +113,40 @@ class PerbaikanKendaraanController extends Controller
             'pengawas_kendaraan' => 'required|string|max:50',
         ], $pesanKustom);
 
+        $tanggalMasukPresisi = Carbon::parse($validated['tanggal_masuk'])->format('Y-m-d');
+        $tanggalSelesaiPresisi = !empty($validated['tanggal_selesai']) ? Carbon::parse($validated['tanggal_selesai'])->format('Y-m-d') : null;
+
         $biayaJasa = (float) ($validated['biaya_jasa'] ?? 0);
         $biayaSparepart = (float) ($validated['biaya_sparepart'] ?? 0);
         $totalBiaya = $biayaJasa + $biayaSparepart;
 
-        $perbaikan = PerbaikanKendaraan::create([
-            'nomor_spk_perbaikan' => strtoupper(trim($validated['nomor_spk_perbaikan'])),
-            'kode_kendaraan' => $validated['kode_kendaraan'],
-            'tanggal_masuk' => $validated['tanggal_masuk'],
-            'tanggal_selesai' => $validated['tanggal_selesai'] ?? null,
-            'keluhan_kerusakan' => trim($validated['keluhan_kerusakan']),
-            'tindakan_perbaikan' => $validated['tindakan_perbaikan'] ? trim($validated['tindakan_perbaikan']) : null,
-            'biaya_jasa' => $biayaJasa,
-            'biaya_sparepart' => $biayaSparepart,
-            'total_biaya' => $totalBiaya,
-            'bengkel_pelaksana' => trim($validated['bengkel_pelaksana']),
-            'status_perbaikan' => $validated['status_perbaikan'],
-            'pengawas_kendaraan' => trim($validated['pengawas_kendaraan']),
-        ]);
+        DB::beginTransaction();
+        try {
+            $perbaikan = PerbaikanKendaraan::create([
+                'nomor_spk_perbaikan' => strtoupper(trim($validated['nomor_spk_perbaikan'])),
+                'kode_kendaraan' => $validated['kode_kendaraan'],
+                'tanggal_masuk' => $tanggalMasukPresisi,
+                'tanggal_selesai' => $tanggalSelesaiPresisi,
+                'keluhan_kerusakan' => trim($validated['keluhan_kerusakan']),
+                'tindakan_perbaikan' => $validated['tindakan_perbaikan'] ? trim($validated['tindakan_perbaikan']) : null,
+                'biaya_jasa' => $biayaJasa,
+                'biaya_sparepart' => $biayaSparepart,
+                'total_biaya' => $totalBiaya,
+                'bengkel_pelaksana' => trim($validated['bengkel_pelaksana']),
+                'status_perbaikan' => $validated['status_perbaikan'],
+                'pengawas_kendaraan' => trim($validated['pengawas_kendaraan']),
+            ]);
 
-        return redirect()->route('operasional.bengkel.perbaikan')
-            ->with('sukses', "SPK Perbaikan [{$perbaikan->nomor_spk_perbaikan}] untuk truk {$perbaikan->kode_kendaraan} berhasil diterbitkan!");
+            DB::commit();
+
+            return redirect()->route('operasional.bengkel.perbaikan')
+                ->with('sukses', "SPK Perbaikan [{$perbaikan->nomor_spk_perbaikan}] untuk truk {$perbaikan->kode_kendaraan} berhasil diterbitkan!");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal menerbitkan SPK perbaikan: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -153,14 +179,27 @@ class PerbaikanKendaraanController extends Controller
         $kodeKndInput = $request->input('kode_kendaraan') ?? $request->input('kode_aset');
         $request->merge(['kode_kendaraan' => $kodeKndInput]);
 
+        if ($request->filled('biaya_jasa')) {
+            $request->merge(['biaya_jasa' => preg_replace('/[^0-9]/', '', (string) $request->input('biaya_jasa'))]);
+        }
+        if ($request->filled('biaya_sparepart')) {
+            $request->merge(['biaya_sparepart' => preg_replace('/[^0-9]/', '', (string) $request->input('biaya_sparepart'))]);
+        }
+
         $pesanKustom = [
             'kode_kendaraan.required' => 'Armada kendaraan wajib dipilih.',
             'kode_kendaraan.exists' => 'Armada kendaraan tidak valid.',
             'tanggal_masuk.required' => 'Tanggal masuk servis wajib diisi.',
+            'tanggal_masuk.date' => 'Format tanggal masuk servis tidak valid.',
+            'tanggal_selesai.date' => 'Format tanggal selesai tidak valid.',
+            'tanggal_selesai.after_or_equal' => 'Tanggal selesai harus sama atau setelah tanggal masuk.',
             'keluhan_kerusakan.required' => 'Keluhan / kerusakan wajib diisi.',
             'bengkel_pelaksana.required' => 'Bengkel pelaksana wajib dipilih.',
             'status_perbaikan.required' => 'Status perbaikan wajib dipilih.',
+            'status_perbaikan.in' => 'Status perbaikan tidak valid.',
             'pengawas_kendaraan.required' => 'Nama pengawas kendaraan wajib diisi.',
+            'biaya_jasa.numeric' => 'Biaya jasa harus berupa angka nominal valid.',
+            'biaya_sparepart.numeric' => 'Biaya sparepart harus berupa angka nominal valid.',
         ];
 
         $validated = $request->validate([
@@ -176,32 +215,44 @@ class PerbaikanKendaraanController extends Controller
             'pengawas_kendaraan' => 'required|string|max:50',
         ], $pesanKustom);
 
+        $tanggalMasukPresisi = Carbon::parse($validated['tanggal_masuk'])->format('Y-m-d');
+        $tanggalSelesai = !empty($validated['tanggal_selesai']) ? Carbon::parse($validated['tanggal_selesai'])->format('Y-m-d') : null;
+
         $biayaJasa = (float) ($validated['biaya_jasa'] ?? 0);
         $biayaSparepart = (float) ($validated['biaya_sparepart'] ?? 0);
         $totalBiaya = $biayaJasa + $biayaSparepart;
 
         // Jika status diubah jadi selesai dan tanggal_selesai kosong, isi hari ini
-        $tanggalSelesai = $validated['tanggal_selesai'];
         if ($validated['status_perbaikan'] === 'Selesai' && empty($tanggalSelesai)) {
             $tanggalSelesai = Carbon::now()->format('Y-m-d');
         }
 
-        $perbaikan->update([
-            'kode_kendaraan' => $validated['kode_kendaraan'],
-            'tanggal_masuk' => $validated['tanggal_masuk'],
-            'tanggal_selesai' => $tanggalSelesai,
-            'keluhan_kerusakan' => trim($validated['keluhan_kerusakan']),
-            'tindakan_perbaikan' => $validated['tindakan_perbaikan'] ? trim($validated['tindakan_perbaikan']) : null,
-            'biaya_jasa' => $biayaJasa,
-            'biaya_sparepart' => $biayaSparepart,
-            'total_biaya' => $totalBiaya,
-            'bengkel_pelaksana' => trim($validated['bengkel_pelaksana']),
-            'status_perbaikan' => $validated['status_perbaikan'],
-            'pengawas_kendaraan' => trim($validated['pengawas_kendaraan']),
-        ]);
+        DB::beginTransaction();
+        try {
+            $perbaikan->update([
+                'kode_kendaraan' => $validated['kode_kendaraan'],
+                'tanggal_masuk' => $tanggalMasukPresisi,
+                'tanggal_selesai' => $tanggalSelesai,
+                'keluhan_kerusakan' => trim($validated['keluhan_kerusakan']),
+                'tindakan_perbaikan' => $validated['tindakan_perbaikan'] ? trim($validated['tindakan_perbaikan']) : null,
+                'biaya_jasa' => $biayaJasa,
+                'biaya_sparepart' => $biayaSparepart,
+                'total_biaya' => $totalBiaya,
+                'bengkel_pelaksana' => trim($validated['bengkel_pelaksana']),
+                'status_perbaikan' => $validated['status_perbaikan'],
+                'pengawas_kendaraan' => trim($validated['pengawas_kendaraan']),
+            ]);
 
-        return redirect()->route('operasional.bengkel.perbaikan')
-            ->with('sukses', "Data SPK Perbaikan [{$perbaikan->nomor_spk_perbaikan}] berhasil diperbarui!");
+            DB::commit();
+
+            return redirect()->route('operasional.bengkel.perbaikan')
+                ->with('sukses', "Data SPK Perbaikan [{$perbaikan->nomor_spk_perbaikan}] berhasil diperbarui!");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal memperbarui SPK perbaikan: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -211,19 +262,33 @@ class PerbaikanKendaraanController extends Controller
     {
         $perbaikan = PerbaikanKendaraan::findOrFail($id_perbaikan);
 
+        $pesanKustom = [
+            'status_perbaikan.required' => 'Status perbaikan wajib dipilih.',
+            'status_perbaikan.in' => 'Status perbaikan tidak valid.',
+        ];
+
         $validated = $request->validate([
             'status_perbaikan' => 'required|in:Dalam Proses,Selesai,Menunggu Sparepart,Dibatalkan',
-        ]);
+        ], $pesanKustom);
 
         $updateData = ['status_perbaikan' => $validated['status_perbaikan']];
         if ($validated['status_perbaikan'] === 'Selesai' && empty($perbaikan->tanggal_selesai)) {
             $updateData['tanggal_selesai'] = Carbon::now()->format('Y-m-d');
         }
 
-        $perbaikan->update($updateData);
+        DB::beginTransaction();
+        try {
+            $perbaikan->update($updateData);
 
-        return redirect()->route('operasional.bengkel.perbaikan')
-            ->with('sukses', "Status SPK [{$perbaikan->nomor_spk_perbaikan}] diubah menjadi '{$validated['status_perbaikan']}'!");
+            DB::commit();
+
+            return redirect()->route('operasional.bengkel.perbaikan')
+                ->with('sukses', "Status SPK [{$perbaikan->nomor_spk_perbaikan}] diubah menjadi '{$validated['status_perbaikan']}'!");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('operasional.bengkel.perbaikan')
+                ->with('error', 'Gagal memperbarui status SPK: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -234,10 +299,19 @@ class PerbaikanKendaraanController extends Controller
         $perbaikan = PerbaikanKendaraan::findOrFail($id_perbaikan);
         $nomor = $perbaikan->nomor_spk_perbaikan;
 
-        $perbaikan->delete();
+        DB::beginTransaction();
+        try {
+            $perbaikan->delete();
 
-        return redirect()->route('operasional.bengkel.perbaikan')
-            ->with('sukses', "SPK Perbaikan [{$nomor}] berhasil dihapus!");
+            DB::commit();
+
+            return redirect()->route('operasional.bengkel.perbaikan')
+                ->with('sukses', "SPK Perbaikan [{$nomor}] berhasil dihapus!");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('operasional.bengkel.perbaikan')
+                ->with('error', 'Gagal menghapus SPK perbaikan: ' . $e->getMessage());
+        }
     }
 
     /**

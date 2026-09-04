@@ -37,8 +37,8 @@ class Driver extends Model
     protected $casts = [
         'dibuat_pada' => 'datetime',
         'diperbarui_pada' => 'datetime',
-        'tanggal_mulai_kerja' => 'date',
-        'tanggal_berhenti' => 'date',
+        'tanggal_mulai_kerja' => 'date:Y-m-d',
+        'tanggal_berhenti' => 'date:Y-m-d',
     ];
 
     protected $appends = [

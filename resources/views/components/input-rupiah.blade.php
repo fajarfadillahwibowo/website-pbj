@@ -30,72 +30,15 @@
     $kelasFokus = ($readonly || $disabled) ? '' : ($petaWarnaFokus[$warnaFokus] ?? $petaWarnaFokus['blue']);
 @endphp
 
-<div class="space-y-1 w-full" x-data="{
-    nilaiMurni: '{{ old($nama, $nilaiAwal) }}',
-    nilaiTampil: '',
-    init() {
-        this.formatKeTampilan(this.nilaiMurni);
-        
-        @if($modelBind)
-            this.$watch('{{ $modelBind }}', (val) => {
-                if (String(val) !== String(this.nilaiMurni)) {
-                    this.nilaiMurni = (val !== null && val !== undefined) ? val : '';
-                    this.formatKeTampilan(this.nilaiMurni);
-                }
-            });
-            try {
-                let nilaiAwalModel = {{ $modelBind }};
-                if (typeof nilaiAwalModel !== 'undefined' && nilaiAwalModel !== null && nilaiAwalModel !== '') {
-                    this.nilaiMurni = nilaiAwalModel;
-                    this.formatKeTampilan(this.nilaiMurni);
-                }
-            } catch (err) {}
-        @endif
-    },
-    formatKeTampilan(angka) {
-        if (angka === '' || angka === null || angka === undefined) {
-            this.nilaiTampil = '';
-            this.nilaiMurni = '';
-            return;
-        }
-        let bersih = String(angka).replace(/[^0-9]/g, '');
-        if (!bersih) {
-            this.nilaiTampil = '';
-            this.nilaiMurni = '';
-            return;
-        }
-        let num = parseInt(bersih, 10);
-        this.nilaiMurni = num;
-        this.nilaiTampil = num.toLocaleString('id-ID');
-    },
-    ketikInput(e) {
-        @if($readonly || $disabled)
-            return;
-        @endif
-        let inputVal = e.target.value;
-        let bersih = inputVal.replace(/[^0-9]/g, '');
-        if (!bersih) {
-            this.nilaiMurni = '';
-            this.nilaiTampil = '';
-            @if($modelBind)
-                try { {{ $modelBind }} = 0; } catch (err) {}
-            @endif
-            this.$dispatch('input', 0);
-            this.$dispatch('change', 0);
-            return;
-        }
-        let num = parseInt(bersih, 10);
-        this.nilaiMurni = num;
-        this.nilaiTampil = num.toLocaleString('id-ID');
-        
-        @if($modelBind)
-            try { {{ $modelBind }} = num; } catch (err) {}
-        @endif
-        
-        this.$dispatch('input', num);
-        this.$dispatch('change', num);
-    }
-}">
+<div class="space-y-1 w-full" 
+     @set-nilai-{{ $nama }}.window="nilaiMurni = $event.detail; formatKeTampilan(nilaiMurni);"
+     x-data="komponenInputRupiah({
+         nama: '{{ $nama }}',
+         nilaiAwal: @js(old($nama, $nilaiAwal)),
+         modelBind: @js($modelBind),
+         readonly: @js($readonly),
+         disabled: @js($disabled)
+     })">
     @if($label)
         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300">
             {{ $label }}

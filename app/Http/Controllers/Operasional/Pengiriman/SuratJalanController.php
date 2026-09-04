@@ -102,6 +102,12 @@ class SuratJalanController extends Controller
     public function simpan(Request $request)
     {
         $kodeKndInput = $request->input('kode_kendaraan') ?? $request->input('kode_aset');
+        if ($kodeKndInput) {
+            $knd = Kendaraan::where('kode_kendaraan', $kodeKndInput)->orWhere('kode_aset', $kodeKndInput)->first();
+            if ($knd) {
+                $kodeKndInput = $knd->kode_kendaraan;
+            }
+        }
         $request->merge(['kode_kendaraan' => $kodeKndInput]);
 
         $pesanKustom = [
@@ -127,24 +133,34 @@ class SuratJalanController extends Controller
             'keterangan' => 'nullable|string',
         ], $pesanKustom);
 
-        $suratJalan = SuratJalan::create([
-            'nomor_surat_jalan' => strtoupper(trim($validated['nomor_surat_jalan'])),
-            'id_so' => $validated['id_so'],
-            'kode_driver' => $validated['kode_driver'],
-            'kode_kendaraan' => $validated['kode_kendaraan'],
-            'tanggal_kirim' => $validated['tanggal_kirim'],
-            'status_pengiriman' => $validated['status_pengiriman'],
-            'keterangan' => $validated['keterangan'] ? trim($validated['keterangan']) : null,
-        ]);
+        DB::beginTransaction();
+        try {
+            $tglKirim = Carbon::parse($validated['tanggal_kirim'])->format('Y-m-d H:i:s');
 
-        // Perbarui status Sales Order menjadi 'dikirim' jika masih draft/disetujui
-        $so = PembelianSO::find($validated['id_so']);
-        if ($so && in_array($so->status_so, ['draft', 'disetujui'])) {
-            $so->update(['status_so' => 'dikirim', 'diperbarui_pada' => now()]);
+            $suratJalan = SuratJalan::create([
+                'nomor_surat_jalan' => strtoupper(trim($validated['nomor_surat_jalan'])),
+                'id_so' => $validated['id_so'],
+                'kode_driver' => $validated['kode_driver'],
+                'kode_kendaraan' => $validated['kode_kendaraan'],
+                'tanggal_kirim' => $tglKirim,
+                'status_pengiriman' => $validated['status_pengiriman'],
+                'keterangan' => $validated['keterangan'] ? trim($validated['keterangan']) : null,
+            ]);
+
+            // Perbarui status Sales Order menjadi 'dikirim' jika masih draft/disetujui
+            $so = PembelianSO::find($validated['id_so']);
+            if ($so && in_array($so->status_so, ['draft', 'disetujui'])) {
+                $so->update(['status_so' => 'dikirim', 'diperbarui_pada' => now()]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('operasional.pengiriman.surat_jalan')
+                ->with('sukses', "Surat Jalan {$suratJalan->nomor_surat_jalan} berhasil diterbitkan!");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', 'Gagal menerbitkan Surat Jalan: ' . $e->getMessage());
         }
-
-        return redirect()->route('operasional.pengiriman.surat_jalan')
-            ->with('sukses', "Surat Jalan {$suratJalan->nomor_surat_jalan} berhasil diterbitkan!");
     }
 
     /**
@@ -166,9 +182,16 @@ class SuratJalanController extends Controller
             ], 404);
         }
 
+        $dataSJ = $pengiriman->toArray();
+        $dataSJ['tanggal_kirim'] = !empty($pengiriman->tanggal_kirim) 
+            ? Carbon::parse($pengiriman->tanggal_kirim)->format('Y-m-d') 
+            : '';
+        $dataSJ['kode_kendaraan'] = $pengiriman->kode_kendaraan;
+        $dataSJ['kode_aset'] = $pengiriman->kode_kendaraan;
+
         return response()->json([
             'status' => 'sukses',
-            'data' => $pengiriman
+            'data' => $dataSJ
         ]);
     }
 
@@ -180,6 +203,12 @@ class SuratJalanController extends Controller
         $suratJalan = SuratJalan::findOrFail($id_pengiriman);
 
         $kodeKndInput = $request->input('kode_kendaraan') ?? $request->input('kode_aset');
+        if ($kodeKndInput) {
+            $knd = Kendaraan::where('kode_kendaraan', $kodeKndInput)->orWhere('kode_aset', $kodeKndInput)->first();
+            if ($knd) {
+                $kodeKndInput = $knd->kode_kendaraan;
+            }
+        }
         $request->merge(['kode_kendaraan' => $kodeKndInput]);
 
         $pesanKustom = [
@@ -202,18 +231,28 @@ class SuratJalanController extends Controller
             'keterangan' => 'nullable|string',
         ], $pesanKustom);
 
-        $suratJalan->update([
-            'id_so' => $validated['id_so'],
-            'kode_driver' => $validated['kode_driver'],
-            'kode_kendaraan' => $validated['kode_kendaraan'],
-            'tanggal_kirim' => $validated['tanggal_kirim'],
-            'status_pengiriman' => $validated['status_pengiriman'],
-            'keterangan' => $validated['keterangan'] ? trim($validated['keterangan']) : null,
-            'diperbarui_pada' => now(),
-        ]);
+        DB::beginTransaction();
+        try {
+            $tglKirim = Carbon::parse($validated['tanggal_kirim'])->format('Y-m-d H:i:s');
 
-        return redirect()->route('operasional.pengiriman.surat_jalan')
-            ->with('sukses', "Data Surat Jalan {$suratJalan->nomor_surat_jalan} berhasil diperbarui!");
+            $suratJalan->update([
+                'id_so' => $validated['id_so'],
+                'kode_driver' => $validated['kode_driver'],
+                'kode_kendaraan' => $validated['kode_kendaraan'],
+                'tanggal_kirim' => $tglKirim,
+                'status_pengiriman' => $validated['status_pengiriman'],
+                'keterangan' => $validated['keterangan'] ? trim($validated['keterangan']) : null,
+                'diperbarui_pada' => now(),
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('operasional.pengiriman.surat_jalan')
+                ->with('sukses', "Data Surat Jalan {$suratJalan->nomor_surat_jalan} berhasil diperbarui!");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', 'Gagal memperbarui Surat Jalan: ' . $e->getMessage());
+        }
     }
 
     /**

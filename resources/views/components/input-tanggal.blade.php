@@ -29,6 +29,7 @@
 
     init() {
         if (this.nilai) {
+            this.nilai = String(this.nilai).split('T')[0];
             this.sinkronkanTanggalDariNilai(this.nilai);
         } else {
             let sekarang = new Date();
@@ -39,8 +40,9 @@
 
         @if($modelBind)
             this.$watch('{{ $modelBind }}', (val) => {
-                if (val !== this.nilai) {
-                    this.nilai = val || '';
+                let bersih = val ? String(val).split('T')[0] : '';
+                if (bersih !== this.nilai) {
+                    this.nilai = bersih;
                     if (this.nilai) {
                         this.sinkronkanTanggalDariNilai(this.nilai);
                     }
@@ -48,7 +50,7 @@
                 }
             });
             if (typeof {{ $modelBind }} !== 'undefined' && {{ $modelBind }} !== null && {{ $modelBind }} !== '') {
-                this.nilai = {{ $modelBind }};
+                this.nilai = String({{ $modelBind }}).split('T')[0];
                 this.sinkronkanTanggalDariNilai(this.nilai);
                 this.buatKalender();
             }
@@ -57,7 +59,9 @@
 
     sinkronkanTanggalDariNilai(tglStr) {
         if (!tglStr) return;
-        let bagian = tglStr.split('-');
+        let bersih = String(tglStr).split('T')[0];
+        this.nilai = bersih;
+        let bagian = bersih.split('-');
         if (bagian.length === 3) {
             let y = parseInt(bagian[0], 10);
             let m = parseInt(bagian[1], 10) - 1;
@@ -70,7 +74,8 @@
 
     formatTampilan() {
         if (!this.nilai) return '';
-        let bagian = this.nilai.split('-');
+        let bersih = String(this.nilai).split('T')[0];
+        let bagian = bersih.split('-');
         if (bagian.length === 3) {
             let y = bagian[0];
             let m = parseInt(bagian[1], 10) - 1;
@@ -79,7 +84,7 @@
                 return `${d} ${this.namaBulanSingkat[m]} ${y}`;
             }
         }
-        return this.nilai;
+        return bersih;
     },
 
     buatKalender() {

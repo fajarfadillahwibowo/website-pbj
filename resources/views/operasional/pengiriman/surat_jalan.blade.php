@@ -30,9 +30,9 @@
             'sub'   => 'HP: ' . ($drv->no_hp ?? '-')
         ])->toArray();
         $opsiKendaraan = ($daftarKendaraan ?? collect())->map(fn($knd) => [
-            'nilai' => $knd->kode_aset,
-            'label' => ($knd->no_polisi ?? '-') . ' — ' . ($knd->nama_aset ?? 'Truk Armada'),
-            'sub'   => 'Kapasitas: ' . ($knd->muatan ?? 'Standar')
+            'nilai' => $knd->kode_kendaraan ?: $knd->kode_aset,
+            'label' => ($knd->no_polisi ?? '-') . ' — ' . ($knd->nama_aset ?? $knd->merek_kendaraan ?? 'Truk Armada'),
+            'sub'   => 'Kapasitas: ' . ($knd->muatan ?? 'Standar') . ' | Kode: ' . ($knd->kode_kendaraan ?? $knd->kode_aset)
         ])->toArray();
     @endphp
 
@@ -748,8 +748,8 @@
                 nomor_surat_jalan: '',
                 id_so: '{{ $daftarSO->first()->id_so ?? "" }}',
                 kode_driver: '{{ $daftarDriver->first()->kode_karyawan ?? "" }}',
-                kode_aset: '{{ $daftarKendaraan->first()->kode_aset ?? "" }}',
-                tanggal_kirim: new Date().toISOString().slice(0, 16),
+                kode_aset: '{{ $daftarKendaraan->first()->kode_kendaraan ?? $daftarKendaraan->first()->kode_aset ?? "" }}',
+                tanggal_kirim: new Date().toISOString().slice(0, 10),
                 status_pengiriman: 'dalam_perjalanan',
                 keterangan: ''
             },
@@ -816,7 +816,7 @@
                             id_so: d.id_so,
                             kode_driver: d.kode_driver,
                             kode_aset: d.kode_kendaraan || d.kode_aset,
-                            tanggal_kirim: d.tanggal_kirim ? d.tanggal_kirim.slice(0, 16) : '',
+                            tanggal_kirim: d.tanggal_kirim ? String(d.tanggal_kirim).split('T')[0] : '',
                             status_pengiriman: d.status_pengiriman,
                             keterangan: d.keterangan || ''
                         };

@@ -24,6 +24,10 @@
             'sub'   => 'Plant: ' . ($g->plant ?? 'Utama') . ' · ' . ($g->distrik ?? 'Pusat') . ' · Stok: ' . number_format($g->stok_tersedia ?? 0, 0, ',', '.') . ' Zak (' . ($g->jenis_gudang ?? 'Gudang') . ')'
         ])->toArray();
 
+        $opsiGudangForm = array_merge([
+            ['nilai' => '', 'label' => '-- Tanpa Fasilitas Gudang Tertentu (Umum) --', 'sub' => 'Tarif rute umum / lintas fasilitas distribusi']
+        ], $opsiGudang);
+
         $opsiFilterGudang = array_merge([
             ['nilai' => 'semua', 'label' => 'Semua Fasilitas Gudang (SPV Gudang)', 'sub' => null]
         ], $opsiGudang);
@@ -294,28 +298,50 @@
                                 </span>
                             </td>
 
-                            <!-- 10. Aksi Popover Modern -->
+                            <!-- 10. Aksi Langsung (Detail, Edit, Hapus) -->
                             <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                <x-menu-aksi-tabel 
-                                    :kodeSalin="$oa->kode_oa" 
-                                    labelSalin="Salin Kode"
-                                    modulIzin="ops_ongkos_angkut"
-                                    :aksiDetail="'bukaModalDetail(\'' . $oa->kode_oa . '\')'"
-                                    labelDetail="Detail"
-                                    :aksiEdit="'bukaModalEdit(\'' . $oa->kode_oa . '\')'"
-                                    labelEdit="Edit"
-                                >
+                                <div class="inline-flex items-center gap-1.5">
+                                    <!-- Detail / Lihat -->
+                                    <button @click="bukaModalDetail('{{ $oa->kode_oa }}')"
+                                            class="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
+                                            title="Lihat Detail Tarif Ongkos Angkut">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                    </button>
+
+                                    <!-- Edit / Ubah -->
                                     <template x-if="!apakahReadOnly('ops_ongkos_angkut')">
-                                        <button @click="bukaModalHapus('{{ $oa->kode_oa }}', '{{ addslashes($oa->nama_oa) }}'); terbuka = false" 
-                                                type="button" 
-                                                class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors text-left border-t border-slate-100 dark:border-[#252837]">
-                                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        <button @click="bukaModalEdit('{{ $oa->kode_oa }}')"
+                                                class="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
+                                                title="Ubah Data Tarif OA">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                             </svg>
-                                            <span>Hapus</span>
                                         </button>
                                     </template>
-                                </x-menu-aksi-tabel>
+
+                                    <!-- Hapus -->
+                                    <template x-if="!apakahReadOnly('ops_ongkos_angkut')">
+                                        <button @click="bukaModalHapus('{{ $oa->kode_oa }}', '{{ addslashes($oa->nama_oa) }}')"
+                                                class="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
+                                                title="Hapus Data Ongkos Angkut">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </button>
+                                    </template>
+                                </div>
+
+                                <!-- Riwayat Terakhir Diedit Real-Time di Kolom Bawah Aksi -->
+                                <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 flex items-center justify-center gap-1 font-mono cursor-help"
+                                     title="Terakhir diperbarui: {{ $oa->terakhir_diedit_waktu }}">
+                                    <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <span>{{ $oa->terakhir_diedit_relatif }}</span>
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -382,7 +408,8 @@
                         <x-dropdown-kustom 
                             nama="kode_gudang"
                             placeholder="-- Pilih Gudang Asal --"
-                            :opsi="$opsiGudang"
+                            :opsi="$opsiGudangForm"
+                            :nilaiAwal="$daftarGudang->first()->kode_gudang ?? ''"
                             :wajib="false"
                             warnaFokus="blue"
                             modelBind="formTambah.kode_gudang"
@@ -418,6 +445,7 @@
                             nama="muatan_oa"
                             placeholder="-- Pilih Jenis Muatan --"
                             :opsi="$opsiMuatan"
+                            :nilaiAwal="'Semen Zak 50kg'"
                             :wajib="true"
                             warnaFokus="blue"
                             modelBind="formTambah.muatan_oa"
@@ -517,7 +545,7 @@
                         <x-dropdown-kustom 
                             nama="kode_gudang"
                             placeholder="-- Pilih Gudang Asal --"
-                            :opsi="$opsiGudang"
+                            :opsi="$opsiGudangForm"
                             :wajib="false"
                             warnaFokus="amber"
                             modelBind="formEdit.kode_gudang"
@@ -841,8 +869,18 @@
                 this.formTambah.harga_kso = 0;
                 this.formTambah.harga_kso_khusus = 0;
                 this.formTambah.keterangan = '';
+                this.formTambah.kode_gudang = '{{ $daftarGudang->first()->kode_gudang ?? "" }}';
+                this.formTambah.muatan_oa = 'Semen Zak 50kg';
                 this.buatKodeOtomatis();
                 this.modalTambahTerbuka = true;
+
+                this.$nextTick(() => {
+                    window.dispatchEvent(new CustomEvent('set-nilai-kode_gudang', { detail: this.formTambah.kode_gudang }));
+                    window.dispatchEvent(new CustomEvent('set-nilai-muatan_oa', { detail: this.formTambah.muatan_oa }));
+                    window.dispatchEvent(new CustomEvent('set-nilai-harga_oa', { detail: 0 }));
+                    window.dispatchEvent(new CustomEvent('set-nilai-harga_kso', { detail: 0 }));
+                    window.dispatchEvent(new CustomEvent('set-nilai-harga_kso_khusus', { detail: 0 }));
+                });
             },
 
             async buatKodeOtomatis() {
@@ -882,13 +920,21 @@
                             kode_gudang: d.kode_gudang || '',
                             kontrak_oa: d.kontrak_oa || '',
                             muatan_oa: d.muatan_oa || 'Semen Zak 50kg',
-                            harga_oa: Number(d.harga_oa) || 0,
-                            harga_kso: Number(d.harga_kso) || 0,
-                            harga_kso_khusus: Number(d.harga_kso_khusus) || 0,
+                            harga_oa: Math.round(Number(d.harga_oa) || 0),
+                            harga_kso: Math.round(Number(d.harga_kso) || 0),
+                            harga_kso_khusus: Math.round(Number(d.harga_kso_khusus) || 0),
                             wilayah_oa: d.wilayah_oa || '',
                             keterangan: d.keterangan || ''
                         };
                         this.modalEditTerbuka = true;
+
+                        this.$nextTick(() => {
+                            window.dispatchEvent(new CustomEvent('set-nilai-kode_gudang', { detail: this.formEdit.kode_gudang }));
+                            window.dispatchEvent(new CustomEvent('set-nilai-muatan_oa', { detail: this.formEdit.muatan_oa }));
+                            window.dispatchEvent(new CustomEvent('set-nilai-harga_oa', { detail: this.formEdit.harga_oa }));
+                            window.dispatchEvent(new CustomEvent('set-nilai-harga_kso', { detail: this.formEdit.harga_kso }));
+                            window.dispatchEvent(new CustomEvent('set-nilai-harga_kso_khusus', { detail: this.formEdit.harga_kso_khusus }));
+                        });
                     }
                 } catch (e) {
                     alert('Gagal mengambil data ongkos angkut untuk diedit.');

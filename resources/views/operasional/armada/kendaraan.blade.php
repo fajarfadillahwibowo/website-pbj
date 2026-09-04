@@ -10,7 +10,6 @@
             ['nilai' => 'aktif', 'label' => 'Aktif (Siap Jalan)'],
             ['nilai' => 'dalam_perbaikan', 'label' => 'Dalam Perbaikan (Bengkel)'],
             ['nilai' => 'rusak', 'label' => 'Rusak'],
-            ['nilai' => 'dijual', 'label' => 'Dijual'],
             ['nilai' => 'non-aktif', 'label' => 'Non-Aktif'],
         ];
         $opsiStatusFilterKendaraan = array_merge([
@@ -287,7 +286,7 @@
                                         {{ $k->no_polisi ?: '-' }}
                                     </div>
                                     <div class="text-[11px] font-mono text-orange-600 dark:text-orange-400 font-semibold mt-1">
-                                        {{ $k->kode_aset }}
+                                        {{ $k->kode_kendaraan ?: $k->kode_aset }}
                                     </div>
                                 </td>
 
@@ -305,7 +304,7 @@
                                 </td>
 
                                 <td class="px-4 py-3.5 whitespace-nowrap">
-                                    <div class="font-semibold text-slate-800 dark:text-slate-200">{{ $k->merek_aset }}</div>
+                                    <div class="font-semibold text-slate-800 dark:text-slate-200">{{ $k->merek_kendaraan ?: $k->merek_aset }}</div>
                                     <div class="font-mono text-slate-500 dark:text-slate-400 text-[11px] mt-0.5">{{ $k->muatan }}</div>
                                 </td>
 
@@ -318,14 +317,14 @@
                                     <div class="space-y-1">
                                         <div class="flex items-center justify-center gap-1 text-[11px] font-mono">
                                             <span class="text-slate-400 text-[10px]">KIR:</span>
-                                            @php $kir = $k->status_kir_info; @endphp
+                                             @php $kir = $k->status_kir_info; @endphp
                                             <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold {{ $kir['warna'] === 'emerald' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400' : ($kir['warna'] === 'amber' ? 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 font-bold animate-pulse' : 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400 font-bold') }}">
                                                 {{ $kir['label'] }}
                                             </span>
                                         </div>
                                         <div class="flex items-center justify-center gap-1 text-[11px] font-mono">
                                             <span class="text-slate-400 text-[10px]">Pjk:</span>
-                                            @php $pjk = $k->status_pajak_info; @endphp
+                                             @php $pjk = $k->status_pajak_info; @endphp
                                             <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold {{ $pjk['warna'] === 'emerald' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400' : ($pjk['warna'] === 'amber' ? 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 font-bold animate-pulse' : 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400 font-bold') }}">
                                                 {{ $pjk['label'] }}
                                             </span>
@@ -335,17 +334,17 @@
 
                                 <td class="px-4 py-3.5 text-center whitespace-nowrap">
                                     @php
-                                        $warnaStatus = match($k->status_aset) {
+                                        $statusK = $k->status_kendaraan ?: $k->status_aset;
+                                        $warnaStatus = match($statusK) {
                                             'aktif' => 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20',
                                             'dalam_perbaikan' => 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20',
                                             'rusak' => 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/20',
                                             default => 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700',
                                         };
-                                        $labelStatus = match($k->status_aset) {
+                                        $labelStatus = match($statusK) {
                                             'aktif' => 'Aktif (Siap Jalan)',
                                             'dalam_perbaikan' => 'Servis Bengkel',
                                             'rusak' => 'Rusak',
-                                            'dijual' => 'Dijual',
                                             default => 'Non-Aktif',
                                         };
                                     @endphp
@@ -356,7 +355,7 @@
 
                                 <td class="px-4 py-3.5 text-center whitespace-nowrap">
                                     <div class="inline-flex items-center gap-1.5">
-                                        <button @click="bukaModalDetailKendaraan('{{ $k->kode_aset }}')"
+                                        <button @click="bukaModalDetailKendaraan('{{ $k->kode_kendaraan ?: $k->kode_aset }}')"
                                                 class="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
                                                 title="Lihat Spesifikasi & Detail Truk">
                                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -365,7 +364,7 @@
                                             </svg>
                                         </button>
 
-                                        <button @click="bukaModalEditKendaraan('{{ $k->kode_aset }}')"
+                                        <button @click="bukaModalEditKendaraan('{{ $k->kode_kendaraan ?: $k->kode_aset }}')"
                                                 class="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
                                                 title="Ubah Data Kendaraan">
                                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -373,7 +372,7 @@
                                             </svg>
                                         </button>
 
-                                        <button @click="bukaModalHapusKendaraan('{{ $k->kode_aset }}', '{{ addslashes($k->nama_aset) }}', '{{ $k->no_polisi }}')"
+                                        <button @click="bukaModalHapusKendaraan('{{ $k->kode_kendaraan ?: $k->kode_aset }}', '{{ addslashes($k->nama_aset) }}', '{{ $k->no_polisi }}')"
                                                 class="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
                                                 title="Hapus Data Kendaraan">
                                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -767,7 +766,7 @@
                             <label class="block font-semibold text-slate-700 dark:text-slate-300">Kode Kendaraan</label>
                             <span class="text-[10px] text-orange-600 dark:text-orange-400 font-semibold px-1.5 py-0.5 bg-orange-50 dark:bg-orange-950/50 rounded-md">Otomatis</span>
                         </div>
-                        <input type="text" name="kode_aset" x-model="formTambahKendaraan.kode_aset" required placeholder="TRK-001"
+                        <input type="text" name="kode_kendaraan" x-model="formTambahKendaraan.kode_kendaraan" required placeholder="KND-001"
                                class="w-full px-3 py-2 rounded-xl bg-orange-50/50 dark:bg-[#1C1E2A] border border-orange-200 dark:border-orange-900/50 text-orange-900 dark:text-orange-300 font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500/30">
                     </div>
 
@@ -802,7 +801,7 @@
 
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Merek Truk</label>
-                        <input type="text" name="merek_aset" x-model="formTambahKendaraan.merek_aset" required placeholder="Hino / Mitsubishi / Isuzu"
+                        <input type="text" name="merek_kendaraan" x-model="formTambahKendaraan.merek_kendaraan" required placeholder="Hino / Mitsubishi / Isuzu"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/30">
                     </div>
                 </div>
@@ -868,12 +867,12 @@
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Operasional <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
-                            nama="status_aset"
+                            nama="status_kendaraan"
                             placeholder="-- Pilih Status --"
                             :opsi="$opsiStatusKendaraan"
                             :wajib="true"
                             warnaFokus="orange"
-                            modelBind="formTambahKendaraan.status_aset"
+                            modelBind="formTambahKendaraan.status_kendaraan"
                         />
                     </div>
                 </div>
@@ -890,11 +889,11 @@
     <div x-show="modalEditKendaraanTerbuka" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
         <div @click.away="modalEditKendaraanTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-visible shadow-xl my-8">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Ubah Data Kendaraan: <span class="font-mono text-amber-600" x-text="formEditKendaraan.kode_aset"></span></h3>
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Ubah Data Kendaraan: <span class="font-mono text-amber-600" x-text="formEditKendaraan.kode_kendaraan || formEditKendaraan.kode_aset"></span></h3>
                 <button @click="modalEditKendaraanTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none">&times;</button>
             </div>
 
-            <form :action="'{{ url('operasional/armada/kendaraan') }}/' + formEditKendaraan.kode_aset" method="POST" class="p-5 space-y-3.5 text-xs">
+            <form :action="'{{ url('operasional/armada/kendaraan') }}/' + (formEditKendaraan.kode_kendaraan || formEditKendaraan.kode_aset)" method="POST" class="p-5 space-y-3.5 text-xs">
                 @csrf
                 @method('PUT')
                 <div class="col-span-2">
@@ -929,7 +928,7 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Merek Truk <span class="text-rose-500">*</span></label>
-                        <input type="text" name="merek_aset" x-model="formEditKendaraan.merek_aset" required
+                        <input type="text" name="merek_kendaraan" x-model="formEditKendaraan.merek_kendaraan" required
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
 
@@ -972,12 +971,12 @@
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Operasional <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
-                            nama="status_aset"
+                            nama="status_kendaraan"
                             placeholder="-- Pilih Status --"
                             :opsi="$opsiStatusKendaraan"
                             :wajib="true"
                             warnaFokus="amber"
-                            modelBind="formEditKendaraan.status_aset"
+                            modelBind="formEditKendaraan.status_kendaraan"
                         />
                     </div>
                 </div>
@@ -996,6 +995,12 @@
                     </div>
                 </div>
 
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Pemilik Legal <span class="text-rose-500">*</span></label>
+                    <input type="text" name="nama_pemilik" x-model="formEditKendaraan.nama_pemilik" required placeholder="PT Putra Balkom Jaya"
+                           class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                </div>
+
                 <div class="flex items-center justify-end gap-2 pt-2">
                     <button type="button" @click="modalEditKendaraanTerbuka = false" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
                     <button type="submit" class="px-4 py-2 font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl transition-all shadow-sm">Simpan Perubahan</button>
@@ -1012,7 +1017,7 @@
             <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837] bg-slate-50 dark:bg-[#1C1E2A]">
                 <div class="flex items-center gap-2.5">
                     <div class="w-10 h-10 rounded-xl bg-orange-600 text-white flex items-center justify-center font-bold font-mono text-sm">
-                        <span x-text="detailKendaraan.kode_aset ? detailKendaraan.kode_aset.substring(0,3) : 'TRK'"></span>
+                        <span x-text="(detailKendaraan.kode_kendaraan || detailKendaraan.kode_aset) ? (detailKendaraan.kode_kendaraan || detailKendaraan.kode_aset).substring(0,3) : 'KND'"></span>
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
@@ -1020,7 +1025,7 @@
                             <span class="px-2 py-0.5 rounded font-mono font-bold text-xs bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-100"
                                   x-text="detailKendaraan.no_polisi"></span>
                         </div>
-                        <p class="text-[11px] text-slate-400 font-mono" x-text="detailKendaraan.kode_aset"></p>
+                        <p class="text-[11px] text-slate-400 font-mono" x-text="detailKendaraan.kode_kendaraan || detailKendaraan.kode_aset"></p>
                     </div>
                 </div>
                 <button @click="modalDetailKendaraanTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
@@ -1032,11 +1037,11 @@
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-3.5 p-4 rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837]">
                     <div>
                         <div class="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Jenis Aset</div>
-                        <div class="font-bold text-slate-800 dark:text-slate-200 mt-0.5" x-text="detailKendaraan.jenis_aset ? detailKendaraan.jenis_aset.jenis_aset : detailKendaraan.kode_jenis_aset"></div>
+                        <div class="font-bold text-slate-800 dark:text-slate-200 mt-0.5" x-text="detailKendaraan.jenis_aset ? detailKendaraan.jenis_aset.jenis_aset : (detailKendaraan.kode_jenis_aset || '-')"></div>
                     </div>
                     <div>
                         <div class="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Merek & Tahun</div>
-                        <div class="font-bold text-slate-800 dark:text-slate-200 mt-0.5" x-text="detailKendaraan.merek_aset + ' (' + (detailKendaraan.tahun_pembuatan || '-') + ')'"></div>
+                        <div class="font-bold text-slate-800 dark:text-slate-200 mt-0.5" x-text="(detailKendaraan.merek_kendaraan || detailKendaraan.merek_aset || '-') + ' (' + (detailKendaraan.tahun_pembuatan || '-') + ')'"></div>
                     </div>
                     <div>
                         <div class="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Kapasitas Muatan</div>
@@ -1054,7 +1059,7 @@
                         <div class="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Status Operasi</div>
                         <div class="mt-0.5">
                             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase font-mono bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20"
-                                  x-text="detailKendaraan.status_aset"></span>
+                                  x-text="detailKendaraan.status_kendaraan || detailKendaraan.status_aset"></span>
                         </div>
                     </div>
                 </div>
@@ -1110,6 +1115,7 @@
             <form :action="'{{ url('operasional/armada/kendaraan') }}/' + hapusKendaraanData.kode" method="POST" class="mt-6 flex items-center justify-center gap-2.5">
                 @csrf
                 @method('DELETE')
+                <input type="hidden" name="kode_kendaraan" :value="hapusKendaraanData.kode">
                 <button type="button" @click="modalHapusKendaraanTerbuka = false"
                         class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-colors">
                     Batal
@@ -1657,10 +1663,12 @@
             keteranganKodeAset: 'Mode: Daur Ulang Slot Kosong',
 
             formTambahKendaraan: {
+                kode_kendaraan: '',
                 kode_aset: '',
                 kode_jenis_aset: '{{ $daftarSemuaJenis->first()->kode_jenis_aset ?? "" }}',
                 nama_aset: '',
                 no_polisi: '',
+                merek_kendaraan: 'Hino',
                 merek_aset: 'Hino',
                 muatan: '25 Ton (500 Zak)',
                 harga_aset: 1200000000,
@@ -1671,14 +1679,17 @@
                 nama_pemilik: 'PT Putra Balkom Jaya',
                 tanggal_kir: '',
                 tanggal_pajak: '',
+                status_kendaraan: 'aktif',
                 status_aset: 'aktif'
             },
 
             formEditKendaraan: {
+                kode_kendaraan: '',
                 kode_aset: '',
                 kode_jenis_aset: '',
                 nama_aset: '',
                 no_polisi: '',
+                merek_kendaraan: '',
                 merek_aset: '',
                 muatan: '',
                 harga_aset: 0,
@@ -1686,9 +1697,10 @@
                 tahun_pembuatan: '',
                 no_mesin: '',
                 no_rangka: '',
-                nama_pemilik: '',
+                nama_pemilik: 'PT Putra Balkom Jaya',
                 tanggal_kir: '',
                 tanggal_pajak: '',
+                status_kendaraan: 'aktif',
                 status_aset: 'aktif'
             },
 
@@ -1760,6 +1772,7 @@
                     const res = await fetch(`{{ route("operasional.armada.kendaraan.buat_kode") }}?mode=${mode}`);
                     const data = await res.json();
                     if (data.status === 'sukses') {
+                        this.formTambahKendaraan.kode_kendaraan = data.kode_otomatis;
                         this.formTambahKendaraan.kode_aset = data.kode_otomatis;
                         this.keteranganKodeKendaraan = data.keterangan || (mode === 'acak' ? 'Mode: Kode Acak Anti-Tebak' : 'Mode: Daur Ulang Slot Kosong');
                     }
@@ -1788,21 +1801,24 @@
                     if (data.status === 'sukses') {
                         const d = data.data;
                         this.formEditKendaraan = {
-                            kode_aset: d.kode_aset,
-                            kode_jenis_aset: d.kode_jenis_aset,
-                            nama_aset: d.nama_aset,
-                            no_polisi: d.no_polisi,
-                            merek_aset: d.merek_aset,
-                            muatan: d.muatan,
-                            harga_aset: d.harga_aset,
-                            tanggal_pembelian: d.tanggal_pembelian || '',
+                            kode_kendaraan: d.kode_kendaraan || d.kode_aset || kode,
+                            kode_aset: d.kode_aset || d.kode_kendaraan || kode,
+                            kode_jenis_aset: d.kode_jenis_aset || (d.aset_perusahaan ? d.aset_perusahaan.kode_jenis_aset : 'AST-TRK'),
+                            nama_aset: d.nama_aset || (d.aset_perusahaan ? d.aset_perusahaan.nama_aset : ''),
+                            no_polisi: d.no_polisi || '',
+                            merek_kendaraan: d.merek_kendaraan || d.merek_aset || '',
+                            merek_aset: d.merek_kendaraan || d.merek_aset || '',
+                            muatan: d.muatan || '',
+                            harga_aset: d.harga_aset || (d.aset_perusahaan ? (d.aset_perusahaan.harga_perolehan || d.aset_perusahaan.harga_aset) : 0),
+                            tanggal_pembelian: d.tanggal_pembelian ? String(d.tanggal_pembelian).split('T')[0] : (d.aset_perusahaan && d.aset_perusahaan.tanggal_pembelian ? String(d.aset_perusahaan.tanggal_pembelian).split('T')[0] : ''),
                             tahun_pembuatan: d.tahun_pembuatan || '',
-                            no_mesin: d.no_mesin,
-                            no_rangka: d.no_rangka,
-                            nama_pemilik: d.nama_pemilik,
-                            tanggal_kir: d.tanggal_kir || '',
-                            tanggal_pajak: d.tanggal_pajak || '',
-                            status_aset: d.status_aset
+                            no_mesin: d.no_mesin || '',
+                            no_rangka: d.no_rangka || '',
+                            nama_pemilik: d.nama_pemilik || 'PT Putra Balkom Jaya',
+                            tanggal_kir: d.tanggal_kir ? String(d.tanggal_kir).split('T')[0] : '',
+                            tanggal_pajak: d.tanggal_pajak ? String(d.tanggal_pajak).split('T')[0] : '',
+                            status_kendaraan: d.status_kendaraan || d.status_aset || 'aktif',
+                            status_aset: d.status_kendaraan || d.status_aset || 'aktif'
                         };
                         this.modalEditKendaraanTerbuka = true;
                     }
@@ -1864,7 +1880,7 @@
                             kode_jenis_aset: d.kode_jenis_aset,
                             nama_aset: d.nama_aset,
                             no_polisi: d.no_polisi === '-' ? '' : d.no_polisi,
-                            tanggal_pembelian: d.tanggal_pembelian,
+                            tanggal_pembelian: d.tanggal_pembelian ? String(d.tanggal_pembelian).split('T')[0] : '',
                             harga_aset: d.harga_aset,
                             status_aset: d.status_aset || 'aktif'
                         };
