@@ -199,7 +199,7 @@
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Toko / Supplier</th>
                         <th class="px-4 py-3 text-center font-semibold uppercase tracking-wider">Kuantitas & Harga</th>
                         <th class="px-4 py-3 text-right font-semibold uppercase tracking-wider">Total Pembelian</th>
-                        <th class="px-4 py-3 text-center font-semibold uppercase tracking-wider">Aksi</th>
+                        <th class="px-4 py-3 text-center font-semibold uppercase tracking-wider">Aksi & Cetak</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
@@ -252,40 +252,52 @@
                                 {{ $beli->total_bayar_rupiah }}
                             </td>
 
-                            <!-- Aksi & Riwayat Real-Time -->
+                            <!-- Aksi Langsung & Cetak -->
                             <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                <div class="inline-flex items-center gap-1.5">
+                                <div class="flex items-center justify-center gap-1">
                                     <!-- Detail -->
                                     <button @click="bukaModalDetail('{{ $beli->id_pembelian_part }}')"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
-                                            title="Lihat Detail Faktur Pembelian">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                        </svg>
+                                            type="button"
+                                            class="inline-flex items-center gap-1 px-2 py-1.5 text-[10px] font-semibold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/10 hover:bg-sky-100 dark:hover:bg-sky-500/20 border border-sky-200 dark:border-sky-500/20 rounded-lg transition-all"
+                                            title="Detail Faktur">
+                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        <span>Detail</span>
+                                    </button>
+
+                                    <!-- Cetak -->
+                                    <button @click="cetakFaktur('{{ $beli->id_pembelian_part }}')"
+                                            type="button"
+                                            class="inline-flex items-center gap-1 px-2 py-1.5 text-[10px] font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 border border-rose-200 dark:border-rose-500/20 rounded-lg transition-all"
+                                            title="Cetak Faktur">
+                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                        <span>Cetak</span>
                                     </button>
 
                                     <!-- Edit -->
-                                    <button @click="bukaModalEdit('{{ $beli->id_pembelian_part }}')"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
-                                            title="Ubah Data Faktur">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </button>
+                                    <template x-if="!apakahReadOnly('bengkel_pembelian_sparepart')">
+                                        <button @click="bukaModalEdit('{{ $beli->id_pembelian_part }}')"
+                                                type="button"
+                                                class="inline-flex items-center gap-1 px-2 py-1.5 text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 border border-amber-200 dark:border-amber-500/20 rounded-lg transition-all"
+                                                title="Edit Faktur">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                            <span>Edit</span>
+                                        </button>
+                                    </template>
 
                                     <!-- Hapus -->
-                                    <button @click="bukaModalHapus('{{ $beli->id_pembelian_part }}', '{{ $beli->nomor_faktur_beli }}')"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
-                                            title="Hapus Faktur Pembelian">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
+                                    <template x-if="!apakahReadOnly('bengkel_pembelian_sparepart')">
+                                        <button @click="bukaModalHapus('{{ $beli->id_pembelian_part }}', '{{ $beli->nomor_faktur_beli }}')"
+                                                type="button"
+                                                class="inline-flex items-center gap-1 px-2 py-1.5 text-[10px] font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 border border-rose-200 dark:border-rose-500/20 rounded-lg transition-all"
+                                                title="Hapus Faktur">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            <span>Hapus</span>
+                                        </button>
+                                    </template>
                                 </div>
 
                                 <!-- Riwayat Diedit Real-Time -->
-                                <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 flex items-center justify-center gap-1 font-mono cursor-help"
+                                <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 flex items-center justify-center gap-1 font-mono cursor-help"
                                      title="Dicatat pada: {{ $beli->terakhir_diedit_waktu }}">
                                     <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -478,55 +490,93 @@
         </div>
     </div>
 
-    <!-- Modal Detail Pembelian Sparepart -->
+    <!-- Modal Detail & Cetak Faktur Pembelian Sparepart -->
     <div x-show="modalDetailTerbuka" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
         <div @click.away="modalDetailTerbuka = false"
-             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-8">
+             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
             
             <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837]">
-                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Rincian Faktur Pembelian Sparepart</h3>
-                <button @click="modalDetailTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-rose-600"></span>
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">Faktur Pembelian Suku Cadang Armada</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button @click="cetakDokumenFaktur()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Cetak Faktur">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                        <span>Cetak Faktur</span>
+                    </button>
+                    <button @click="modalDetailTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
             </div>
 
-            <div class="p-6 space-y-4 text-xs">
-                <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 flex justify-between items-center">
-                    <div>
-                        <span class="text-[10px] text-rose-600 dark:text-rose-400 font-mono block">No. Faktur Pembelian</span>
-                        <strong class="text-base font-mono font-bold text-rose-700 dark:text-rose-300" x-text="detailBeli.nomor_faktur_beli"></strong>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-[10px] text-slate-400 font-mono block">Tanggal Beli</span>
-                        <strong class="font-mono text-slate-900 dark:text-slate-100" x-text="detailBeli.tanggal_beli_format"></strong>
+            <!-- Area Lembar Faktur Cetak -->
+            <div id="areaCetakFaktur" class="p-6 space-y-4 text-xs">
+                <!-- Header Kop Perusahaan -->
+                <div class="flex items-center justify-center gap-3 pb-3 border-b border-[#E2E8F0] dark:border-[#252837]">
+                    <img src="{{ asset('images/logo-pbj.png') }}" alt="Logo PT Putra Balkom Jaya" class="w-12 h-12 object-contain shrink-0">
+                    <div class="text-center">
+                        <div class="font-bold text-base text-slate-900 dark:text-slate-100">PT PUTRA BALKOM JAYA</div>
+                        <div class="text-[11px] text-slate-500">Divisi Operasional Bengkel & Pengadaan Suku Cadang Armada</div>
+                        <div class="text-sm font-mono font-bold text-rose-600 dark:text-rose-400 mt-1 uppercase tracking-wider" x-text="'FAKTUR PEMBELIAN SPAREPART: ' + (detailBeli.nomor_faktur_beli || '')"></div>
                     </div>
                 </div>
 
-                <div class="space-y-2">
-                    <div class="flex justify-between py-1.5 border-b border-[#E2E8F0] dark:border-[#252837]">
-                        <span class="text-slate-500">Suku Cadang:</span>
-                        <strong class="text-slate-900 dark:text-slate-100" x-text="detailBeli.sparepart ? detailBeli.sparepart.nama_sparepart : detailBeli.kode_sparepart"></strong>
+                <!-- Info Faktur & Supplier Grid -->
+                <div class="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-slate-50 dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837]">
+                    <div>
+                        <span class="text-[10px] text-slate-400 uppercase font-mono block">Supplier / Toko Penyedia</span>
+                        <strong class="text-sm font-bold text-slate-900 dark:text-slate-100" x-text="detailBeli.nama_supplier"></strong>
+                        <div class="text-[11px] text-slate-500 font-mono mt-0.5" x-text="'No. Faktur: ' + (detailBeli.nomor_faktur_beli || '-')"></div>
                     </div>
-                    <div class="flex justify-between py-1.5 border-b border-[#E2E8F0] dark:border-[#252837]">
-                        <span class="text-slate-500">Supplier / Toko:</span>
-                        <strong class="text-slate-900 dark:text-slate-100" x-text="detailBeli.nama_supplier"></strong>
+                    <div class="text-right">
+                        <span class="text-[10px] text-slate-400 uppercase font-mono block">Tanggal Transaksi</span>
+                        <strong class="text-xs font-mono font-bold text-slate-900 dark:text-slate-100" x-text="detailBeli.tanggal_beli_format || '-'"></strong>
+                        <div class="text-[11px] text-slate-500 mt-0.5" x-text="'Dicatat oleh: ' + (detailBeli.dibuat_oleh || '-')"></div>
                     </div>
-                    <div class="flex justify-between py-1.5 border-b border-[#E2E8F0] dark:border-[#252837]">
-                        <span class="text-slate-500">Kuantitas Dibeli:</span>
-                        <strong class="font-mono text-slate-900 dark:text-slate-100" x-text="detailBeli.jumlah_beli + ' Unit'"></strong>
+                </div>
+
+                <!-- Rincian Item Pembelian -->
+                <div class="p-3.5 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] space-y-2">
+                    <div class="flex justify-between items-start pb-2 border-b border-[#E2E8F0] dark:border-[#252837]">
+                        <div>
+                            <span class="text-[10px] text-slate-400 uppercase font-mono block">Item Sparepart / Suku Cadang</span>
+                            <div class="font-bold text-sm text-slate-900 dark:text-slate-100" x-text="detailBeli.sparepart ? detailBeli.sparepart.nama_sparepart : detailBeli.kode_sparepart"></div>
+                            <div class="text-[11px] text-slate-500 font-mono mt-0.5" x-text="'Kode: ' + (detailBeli.kode_sparepart || '-') + ' · Kategori: ' + ((detailBeli.sparepart && detailBeli.sparepart.kategori_part) ? detailBeli.sparepart.kategori_part : 'Suku Cadang')"></div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-slate-400 uppercase font-mono block">Jumlah Pembelian</span>
+                            <div class="font-mono font-bold text-sm text-slate-900 dark:text-slate-100" x-text="(detailBeli.jumlah_beli || 0) + ' ' + ((detailBeli.sparepart && detailBeli.sparepart.satuan) ? detailBeli.sparepart.satuan : 'Unit')"></div>
+                        </div>
                     </div>
-                    <div class="flex justify-between py-1.5 border-b border-[#E2E8F0] dark:border-[#252837]">
-                        <span class="text-slate-500">Harga Beli Satuan:</span>
-                        <strong class="font-mono text-slate-900 dark:text-slate-100" x-text="detailBeli.harga_beli_rupiah"></strong>
+
+                    <div class="space-y-1.5 pt-1 font-mono">
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Harga Satuan:</span>
+                            <span class="text-slate-900 dark:text-slate-100 font-bold" x-text="detailBeli.harga_beli_rupiah || 'Rp 0'"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Kuantitas:</span>
+                            <span class="text-slate-900 dark:text-slate-100" x-text="(detailBeli.jumlah_beli || 0) + ' Unit'"></span>
+                        </div>
+                        <div class="flex justify-between pt-2 border-t border-[#E2E8F0] dark:border-[#252837] text-sm">
+                            <strong class="text-slate-800 dark:text-slate-200">Total Pembayaran:</strong>
+                            <strong class="text-emerald-600 dark:text-emerald-400 font-bold" x-text="detailBeli.total_bayar_rupiah || 'Rp 0'"></strong>
+                        </div>
                     </div>
-                    <div class="flex justify-between py-2 border-b border-[#E2E8F0] dark:border-[#252837] text-sm">
-                        <span class="text-slate-700 dark:text-slate-300 font-bold">Total Pembayaran:</span>
-                        <strong class="font-mono font-bold text-emerald-600 dark:text-emerald-400" x-text="detailBeli.total_bayar_rupiah"></strong>
+                </div>
+
+                <!-- Tanda Tangan Dokumen -->
+                <div class="grid grid-cols-2 gap-4 pt-4 text-center">
+                    <div class="p-2 border border-[#E2E8F0] dark:border-[#252837] rounded-xl">
+                        <div class="text-[10px] text-slate-400 mb-10">Pencatat / Pengawas Kendaraan:</div>
+                        <div class="font-bold text-slate-900 dark:text-slate-100 border-t border-slate-300 dark:border-slate-700 pt-1" x-text="detailBeli.dibuat_oleh || 'Pengawas Kendaraan'"></div>
                     </div>
-                    <div class="flex justify-between py-1.5">
-                        <span class="text-slate-500">Pencatat / Pengawas:</span>
-                        <span class="text-slate-800 dark:text-slate-200" x-text="detailBeli.dibuat_oleh"></span>
+                    <div class="p-2 border border-[#E2E8F0] dark:border-[#252837] rounded-xl">
+                        <div class="text-[10px] text-slate-400 mb-10">Toko / Supplier Penyedia:</div>
+                        <div class="font-bold text-slate-900 dark:text-slate-100 border-t border-slate-300 dark:border-slate-700 pt-1" x-text="detailBeli.nama_supplier || '( ........................................ )'"></div>
                     </div>
                 </div>
             </div>
@@ -679,6 +729,26 @@
                 } catch (e) {
                     alert('Gagal mengambil detail pembelian.');
                 }
+            },
+
+            async cetakFaktur(id) {
+                await this.bukaModalDetail(id);
+                setTimeout(() => {
+                    this.cetakDokumenFaktur();
+                }, 400);
+            },
+
+            cetakDokumenFaktur() {
+                const printContents = document.getElementById('areaCetakFaktur').innerHTML;
+                const win = window.open('', '', 'height=700,width=900');
+                win.document.write('<html><head><title>Cetak Faktur ' + (this.detailBeli.nomor_faktur_beli || '') + '</title>');
+                win.document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">');
+                win.document.write('</head><body class="p-8">');
+                win.document.write(printContents);
+                win.document.write('</body></html>');
+                win.document.close();
+                win.focus();
+                setTimeout(() => { win.print(); win.close(); }, 500);
             },
 
             bukaModalHapus(id, nomor) {

@@ -251,37 +251,42 @@
                                 {{ $part->total_valuasi_rupiah }}
                             </td>
 
-                            <!-- Aksi Popover Modern -->
+                            <!-- Aksi Langsung -->
                             <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                <x-menu-aksi-tabel 
-                                    :kodeSalin="$part->kode_sparepart" 
-                                    labelSalin="Salin Kode"
-                                    modulIzin="ops_bengkel"
-                                    :aksiEdit="'bukaModalEdit(\'' . $part->kode_sparepart . '\')'"
-                                    labelEdit="Edit"
-                                >
+                                <div class="flex items-center justify-center gap-1">
+                                    <!-- Edit -->
                                     <template x-if="!apakahReadOnly('ops_bengkel')">
-                                        <button @click="bukaModalMutasi('{{ $part->kode_sparepart }}', '{{ $part->nama_sparepart }}', {{ $part->stok_part }}, '{{ $part->satuan }}'); terbuka = false" 
-                                                type="button" 
-                                                class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors text-left border-b border-slate-100 dark:border-[#252837]">
-                                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
-                                            </svg>
-                                            <span>Mutasi Stok</span>
+                                        <button @click="bukaModalEdit('{{ $part->kode_sparepart }}')"
+                                                type="button"
+                                                class="inline-flex items-center gap-1 px-2 py-1.5 text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 border border-amber-200 dark:border-amber-500/20 rounded-lg transition-all"
+                                                title="Edit Sparepart">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                            <span>Edit</span>
                                         </button>
                                     </template>
 
+                                    <!-- Mutasi Stok -->
                                     <template x-if="!apakahReadOnly('ops_bengkel')">
-                                        <button @click="bukaModalHapus('{{ $part->kode_sparepart }}', '{{ $part->nama_sparepart }}'); terbuka = false" 
-                                                type="button" 
-                                                class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors text-left border-t border-slate-100 dark:border-[#252837]">
-                                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
+                                        <button @click="bukaModalMutasi('{{ $part->kode_sparepart }}', '{{ $part->nama_sparepart }}', {{ $part->stok_part }}, '{{ $part->satuan }}')"
+                                                type="button"
+                                                class="inline-flex items-center gap-1 px-2 py-1.5 text-[10px] font-semibold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/10 hover:bg-sky-100 dark:hover:bg-sky-500/20 border border-sky-200 dark:border-sky-500/20 rounded-lg transition-all"
+                                                title="Mutasi Stok">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                                            <span>Mutasi</span>
+                                        </button>
+                                    </template>
+
+                                    <!-- Hapus -->
+                                    <template x-if="!apakahReadOnly('ops_bengkel')">
+                                        <button @click="bukaModalHapus('{{ $part->kode_sparepart }}', '{{ $part->nama_sparepart }}')"
+                                                type="button"
+                                                class="inline-flex items-center gap-1 px-2 py-1.5 text-[10px] font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 border border-rose-200 dark:border-rose-500/20 rounded-lg transition-all"
+                                                title="Hapus Sparepart">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                             <span>Hapus</span>
                                         </button>
                                     </template>
-                                </x-menu-aksi-tabel>
+                                </div>
                             </td>
                         </tr>
                     @empty
