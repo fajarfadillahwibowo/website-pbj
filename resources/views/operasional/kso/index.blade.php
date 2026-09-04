@@ -316,35 +316,26 @@
 
                                 <!-- Aksi & Riwayat Diedit Real-Time -->
                                 <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                    <div class="inline-flex items-center gap-1.5">
-                                        <!-- Detail -->
-                                        <button @click="bukaModalDetailKso('{{ $kso->kode_kso }}')"
-                                                class="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
-                                                title="Lihat Detail KSO & Rute Ongkos">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                            </svg>
-                                        </button>
-
-                                        <!-- Edit -->
-                                        <button @click="bukaModalEditKso('{{ $kso->kode_kso }}')"
-                                                class="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
-                                                title="Ubah Data Mitra KSO">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                            </svg>
-                                        </button>
-
-                                        <!-- Hapus -->
-                                        <button @click="bukaModalHapusKso('{{ $kso->kode_kso }}', '{{ $kso->nama_kso }}')"
-                                                class="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
-                                                title="Hapus Data Mitra KSO">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <x-menu-aksi-tabel 
+                                    kodeSalin="{{ $kso->kode_kso }}"
+                                    labelSalin="Salin Kode KSO"
+                                    aksiDetail="bukaModalDetailKso('{{ $kso->kode_kso }}')"
+                                    labelDetail="Detail KSO"
+                                    aksiEdit="bukaModalEditKso('{{ $kso->kode_kso }}')"
+                                    labelEdit="Ubah Mitra KSO"
+                                    modulIzin="ops_kso"
+                                >
+                                    <div x-show="!apakahReadOnly('ops_kso')" class="border-t border-slate-100 dark:border-[#252837] pt-1 mt-1">
+                                        <button @click.stop="menuTerbuka = false; bukaModalHapusKso('{{ $kso->kode_kso }}', '{{ $kso->nama_kso }}')"
+                                                type="button"
+                                                class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors text-left font-medium">
+                                            <svg class="w-3.5 h-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                             </svg>
+                                            <span>Hapus Mitra KSO</span>
                                         </button>
                                     </div>
+                                </x-menu-aksi-tabel>
 
                                     <!-- Riwayat Diedit Real-Time -->
                                     <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 flex items-center justify-center gap-1 font-mono cursor-help"
@@ -478,25 +469,24 @@
 
                                 <!-- Aksi & Riwayat Diedit Real-Time -->
                                 <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                    <div class="inline-flex items-center gap-1.5">
-                                        <!-- Edit -->
-                                        <button @click="bukaModalEditOa('{{ $oa->kode_oa }}')"
-                                                class="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
-                                                title="Ubah Tarif Ongkos KSO">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                            </svg>
-                                        </button>
-
-                                        <!-- Hapus -->
-                                        <button @click="bukaModalHapusOa('{{ $oa->kode_oa }}', '{{ $oa->nama_oa }}')"
-                                                class="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
-                                                title="Hapus Tarif Ongkos KSO">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                        </button>
-                                    </div>
+                                    <x-menu-aksi-tabel 
+                                        kodeSalin="{{ $oa->kode_oa }}"
+                                        labelSalin="Salin Kode OA"
+                                        aksiEdit="bukaModalEditOa('{{ $oa->kode_oa }}')"
+                                        labelEdit="Ubah Tarif KSO"
+                                        modulIzin="ops_kso"
+                                    >
+                                        <div x-show="!apakahReadOnly('ops_kso')" class="border-t border-slate-100 dark:border-[#252837] pt-1 mt-1">
+                                            <button @click.stop="menuTerbuka = false; bukaModalHapusOa('{{ $oa->kode_oa }}', '{{ $oa->nama_oa }}')"
+                                                    type="button"
+                                                    class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors text-left font-medium">
+                                                <svg class="w-3.5 h-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                                <span>Hapus Tarif</span>
+                                            </button>
+                                        </div>
+                                    </x-menu-aksi-tabel>
 
                                     <!-- Riwayat Diedit Real-Time -->
                                     <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 flex items-center justify-center gap-1 font-mono cursor-help"

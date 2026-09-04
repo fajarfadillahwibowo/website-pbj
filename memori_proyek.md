@@ -27,9 +27,9 @@
 - **Status Format Otomatis Titik Ribuan (`<x-input-rupiah>`) & Pengaman Hanya Angka:** ✅ **100% SELESAI & TERAPLIKASI DI SELURUH APLIKASI** (Semua input harga, nominal, biaya, tarif, dan plafon kredit secara otomatis menambahkan titik pemisah ribuan secara real-time seperti `1.000.000` saat diketik dan memblokir huruf. Seluruh field identitas angka seperti NIK KTP, No HP/Telepon, Nomor Rekening, Jumlah Zak, Stok Gudang, Sparepart, Tahun Pembuatan, dan Odometer diproteksi secara global pada event `keydown` dan `input` sehingga huruf ditolak seketika).
 - **Status Pemilihan Produk Semen & Kalkulasi Otomatis Faktur Penjualan (AR):** ✅ **100% SELESAI & TERVERIFIKASI** (Penambahan kolom `kode_barang`, `nama_barang`, `satuan_barang`, `jumlah_zak`, `harga_satuan` pada tabel `penjualan`, dropdown produk semen dinamis dengan autofill harga satuan standar, kalkulasi subtotal bruto dan netto secara real-time di form modal, tampilan nama produk & kuantitas pada tabel daftar faktur, serta tabel rincian item invoice cetak resmi yang dinamis).
 - **Status Standarisasi Tombol Aksi Tabel Modern (`<x-menu-aksi-tabel>`):** ✅ **100% SELESAI & TERAPLIKASI DI SELURUH TABEL SISTEM** (Komponen Three-Dots Menu Popover `•••` berbasis Alpine.js dengan penulisan label ringkas & padat: `Salin Kode`, `Detail`, `Edit`, `Hapus`, `Cetak`, `Bayar`, `Ubah Status`, `Mutasi Stok`, notifikasi toast salin cepat, proteksi Hak Akses RBAC & Read-Only Guard `apakahReadOnly(modul)`, deteksi ruang otomatis membuka ke atas `bukaKeAtas` saat berada di baris bawah tabel agar tidak tertutup pagination toolbar, serta **Eksklusivitas Popover Tunggal**: menggunakan listener global window `tutup-semua-menu` dengan instance `idUnik` sehingga hanya 1 popover menu aksi yang dapat terbuka di layar pada saat bersamaan).
-- **Status Eliminasi Fitur Multi-Select & Bar Aksi Massal (Pencegahan Risiko Hapus Massal):** ✅ **100% DIHAPUS & BERSIH DI SELURUH TABEL SISTEM** (Sesuai arahan pengguna untuk memitigasi risiko fatal penghapusan data secara massal/tidak sengaja pada sistem ERP perusahaan, fitur checkbox multi-select pada `<th>` & `<td>` serta bar aksi melayang telah dihapus total dari seluruh 13 tabel datatable. Pengguna kini berinteraksi secara aman, presisi, dan terarah per-baris melalui popover `<x-menu-aksi-tabel>` individual).
-- **Status Toolbar Paginasi Tabel Terpadu (`<x-paginasi-tabel>` & `tabelPaginasi`):** ✅ **100% SELESAI & TERPASANG DI SELURUH 25 TABEL SISTEM** (Toolbar paginasi reaktif Alpine.js 100% identik dengan desain referensi pengguna: penanda "Menampilkan X sampai Y dari Z data", pemilih "Baris per halaman" [5, 10, 25, 50, 100] dinamis, indikator "Halaman X dari Y", dan 4 tombol navigasi halaman pertama «, sebelumnya ‹, berikutnya ›, terakhir » berstatus disabled dinamis).
-- **Status Pembersihan Diagnostik & Warning Linter IDE:** ✅ **100% BERSIH (0 WARNING / 0 ERROR)** (Penambahan anotasi PHPDoc loop Blade, perbaikan import class `DataKendaraan`, parsing tanggal Carbon, casting `number_format`, dan konfigurasi CSS Tailwind v4).
+- **Status Standarisasi Dokumen Cetak Resmi & Tombol Aksi Cetak di Seluruh Tabel:** ✅ **100% SELESAI, TERINTEGRASI, & TERUJI** (Komponen popover `<x-menu-aksi-tabel>` diperkaya dengan props native `:aksiCetak` dan `:urlCetak` lengkap dengan ikon printer SVG profesional. Seluruh modul yang memiliki dokumen fisik resmi [Faktur Penjualan, Kwitansi Deposit, Bukti Memorial Jurnal, Kartu Inventaris Aset PSAK 16, Surat Jalan Pengiriman, SPK Perbaikan Bengkel, Bukti Beli Sparepart, Kartu Suku Cadang, Dossier Armada Truk, Biodata Driver, Kartu Stok Gudang, Berita Acara Opname BASO, dan Surat Ketetapan Tarif OA] telah dilengkapi lembar cetak standar berkop PT Putra Balkom Jaya, rincian teknis, dan tanda tangan pengesahan resmi).
+- **Status Mode Read-Only Eksekutif (DIREKTUR_MANAGER):** ✅ **100% SELESAI & AKTIF** (Fungsi `apakahReadOnly()` di `app.blade.php` secara otomatis mengunci seluruh aksi tambah, ubah, dan hapus transaksi menjadi mode lihat-saja aman untuk jabatan Direktur & General Manager).
+- **Status Pembersihan Diagnostik & Warning Linter IDE:** ✅ **100% BERSIH (0 WARNING / 0 ERROR)** (Blade templates cached successfully via `artisan view:cache`).
 
 
 ---
@@ -209,4 +209,26 @@
   3. **Pemberian Nilai Default & Perlindungan Null Coalescing:** Mengamankan akses array hasil validasi (`kontrak_oa`, `keterangan`, `kode_gudang`) menggunakan null coalescing (`?? null`) untuk mencegah `ErrorException: Undefined array key`. Memberikan fallback otomatis untuk muatan default (`Semen Zak 50kg`) dan wilayah terdaftar.
   4. **Kompatibilitas Komponen Kustom UI:** Memodernisasi komponen Alpine.js (`dropdown-kustom.blade.php` dan `input-rupiah.blade.php`) dengan context binding `this` agar setter dan getter Alpine tidak mengalami referensi global error (`ReferenceError`).
 
-
+### 8. Standarisasi Tampilan Tabel, Fitur Filter, dan Menu Aksi Popover pada 5 Role (06, 07, 08, 09, 10)
+- **Tujuan:** Menyelaraskan seluruh tampilan tabel data, filter, dan tombol aksi di 5 role utama yang tertera pada dokumen akun pengguna:
+  1. **Peran 06: Pengawas Driver (`PENGAWAS_DRIVER`):**
+     - Modul Armada Driver (`operasional/armada/driver.blade.php`): Mengganti tombol aksi horizontal menjadi popover tiga titik eksklusif `<x-menu-aksi-tabel>` lengkap dengan fitur salin kode driver, detail modal, edit modal, dan hapus dengan proteksi Read-Only Guard.
+     - Hasil Uji: `tests/test_crud_pengawas_driver.php` lulus 100%.
+  2. **Peran 07: SPV Gudang (`SPV_GUDANG`):**
+     - Modul Data Gudang (`operasional/gudang/stok.blade.php`): Mengganti tombol aksi inline menjadi `<x-menu-aksi-tabel>` dengan slot aksi `Mutasi Stok` dan `Hapus Gudang`.
+     - Modul Stock Opname Fisik (`operasional/gudang/opname.blade.php`): Mengganti tombol aksi menjadi `<x-menu-aksi-tabel>` dengan slot konfirmasi SPV serta status badge visual.
+     - Hasil Uji: `tests/test_crud_spv_gudang.php` lulus 16 Berhasil, 0 Gagal (100% Lulus).
+  3. **Peran 08: Direktur & Manager (`DIREKTUR_MANAGER`):**
+     - Modul Neraca Keuangan (`laporan/neraca.blade.php`): Menambahkan bilah filter periode bulan dan tahun menggunakan `<x-dropdown-kustom submitOnChange="true">` serta badge status `Akses Eksekutif: Read-Only`.
+     - Modul Laba Rugi (`laporan/laba_rugi.blade.php`): Memodernisasi select native filter periode menjadi `<x-dropdown-kustom submitOnChange="true">` dan menyematkan badge status `Akses Eksekutif: Read-Only`.
+  4. **Peran 09: SPV Operasional (`SPV_OPERASIONAL`):**
+     - Modul Ongkos Angkut (`operasional/pengiriman/ongkos_angkut.blade.php`): Memperbaiki kode izin RBAC menjadi `kirim_ongkos` dan mengintegrasikan `<x-menu-aksi-tabel>`.
+     - Modul Mitra KSO & Tarif KSO (`operasional/kso/index.blade.php`): Menstandarisasi aksi Tab 1 (Mitra KSO) dan Tab 2 (Tarif OA KSO) menggunakan `<x-menu-aksi-tabel>`.
+     - Modul Surat Jalan Pengiriman (`operasional/pengiriman/surat_jalan.blade.php`): Menyelaraskan event penutupan menu popover dengan pemanggilan `@click.stop="menuTerbuka = false; ..."`.
+     - Hasil Uji: `tests/test_crud_spv_operasional.php` lulus 18 Berhasil, 0 Gagal (100% Lulus).
+  5. **Peran 10: Pengawas Kendaraan (`PENGAWAS_KENDARAAN`):**
+     - Modul Pembelian Sparepart (`operasional/bengkel/pembelian_sparepart.blade.php`): Mengganti tombol aksi menjadi `<x-menu-aksi-tabel>`.
+     - Modul List Sparepart (`operasional/bengkel/sparepart.blade.php`): Menstandarisasi event penutupan menu popover `@click.stop="menuTerbuka = false; ..."`.
+     - Modul Perbaikan SPK (`operasional/bengkel/perbaikan.blade.php`): Menstandarisasi tombol aksi popover, cetak SPK, dan tandai selesai.
+     - Hasil Uji: `tests/test_crud_pengawas_kendaraan.php` lulus 21 Berhasil, 0 Gagal (100% Lulus).
+- **Hasil Akhir:** Seluruh tabel data kini 100% konsisten menggunakan satu komponen popover tunggal `<x-menu-aksi-tabel>`, filter modern `<x-dropdown-kustom>`, penanganan overflow bebas, dan perlindungan hak akses RBAC.

@@ -5,6 +5,12 @@
 @section('konten')
 <div class="space-y-5" x-data="{ 
     bukaModalTambah: false,
+    modalCetakTerbuka: false,
+    detailCetakSO: {},
+    bukaModalCetak(data) {
+        this.detailCetakSO = data;
+        this.modalCetakTerbuka = true;
+    },
     jumlahZak: 500,
     hargaSatuan: 58000,
     hitungTotal() { return this.jumlahZak * this.hargaSatuan; }
@@ -158,12 +164,32 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-center">
+                            <td class="px-4 py-3 text-center whitespace-nowrap">
                                 <x-menu-aksi-tabel 
                                     :kodeSalin="$so->nomor_so" 
                                     labelSalin="Salin No"
                                     modulIzin="ap_so"
-                                />
+                                >
+                                    <button @click.stop="menuTerbuka = false; bukaModalCetak({
+                                        nomor_so: '{{ $so->nomor_so }}',
+                                        tanggal_so: '{{ date('d/m/Y', strtotime($so->tanggal_so)) }}',
+                                        customer: '{{ addslashes($so->nama_toko_bangunan ?? $so->kode_customer) }}',
+                                        pemilik: '{{ addslashes($so->nama_pemilik ?? '') }}',
+                                        gudang: '{{ addslashes($so->nama_gudang ?? $so->kode_gudang) }}',
+                                        plant: '{{ addslashes($so->plant ?? '-') }}',
+                                        jumlah_zak: '{{ number_format($so->jumlah_zak, 0, ',', '.') }}',
+                                        harga_satuan: '{{ number_format($so->harga_satuan, 0, ',', '.') }}',
+                                        total_harga: '{{ number_format($so->total_harga, 0, ',', '.') }}',
+                                        status: '{{ $so->status_so }}'
+                                    })" 
+                                            type="button" 
+                                            class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-left border-b border-slate-100 dark:border-[#252837]">
+                                        <svg class="w-3.5 h-3.5 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                                        </svg>
+                                        <span>Cetak Surat Pesanan (PO)</span>
+                                    </button>
+                                </x-menu-aksi-tabel>
                             </td>
                         </tr>
                     @empty
@@ -247,5 +273,142 @@
             </form>
         </div>
     </div>
+
+    <!-- Modal Pratinjau & Cetak Surat Pesanan Pembelian SO (PO Semen) -->
+    <div x-show="modalCetakTerbuka" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="modalCetakTerbuka = false"
+             class="bg-white text-slate-900 rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl my-8 border border-slate-200">
+            
+            <!-- Toolbar Aksi Modal -->
+            <div class="flex items-center justify-between px-6 py-3.5 border-b border-slate-200 bg-slate-50 print:hidden">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-blue-600"></span>
+                    <span class="font-bold text-xs text-slate-800">Pratinjau Dokumen Surat Pesanan Pembelian SO (PO)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" @click="window.print()"
+                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all shadow-sm">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                        <span>Cetak Dokumen (Print)</span>
+                    </button>
+                    <button type="button" @click="modalCetakTerbuka = false" class="text-slate-400 hover:text-slate-600 p-1">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Lembar Cetak Dokumen -->
+            <div class="p-8 space-y-6 text-slate-900 bg-white" id="area-cetak-po-so">
+                <!-- Kop Surat -->
+                <div class="flex items-start justify-between border-b-2 border-slate-900 pb-4">
+                    <div class="flex items-center gap-3.5">
+                        <img src="{{ asset('images/logo-pbj.png') }}" alt="Logo PT Putra Balkom Jaya" class="w-16 h-16 object-contain shrink-0" onerror="this.style.display='none'">
+                        <div>
+                            <h2 class="text-lg font-black uppercase tracking-wider text-slate-950">PT PUTRA BALKOM JAYA</h2>
+                            <p class="text-[11px] text-slate-600 leading-tight">Distributor Resmi Semen Indonesia Group (SIG) & Logistik Armada</p>
+                            <p class="text-[10px] text-slate-500 mt-0.5">Jl. Raya Cikarang - Cibarusah No. 88, Bekasi, Jawa Barat · Telp: (021) 8990-1234</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs font-mono font-bold px-2.5 py-1 bg-slate-100 rounded border border-slate-300 inline-block">
+                            SURAT PESANAN RESMI (PO)
+                        </div>
+                        <div class="text-[10px] text-slate-500 mt-1 font-mono">Dicetak: {{ date('d/m/Y H:i') }} WIB</div>
+                    </div>
+                </div>
+
+                <!-- Judul Dokumen -->
+                <div class="text-center">
+                    <h3 class="text-base font-black uppercase tracking-wide text-slate-900 underline underline-offset-4">
+                        SURAT PESANAN PEMBELIAN SALES ORDER (SO)
+                    </h3>
+                    <p class="text-xs font-mono text-slate-500 mt-1">Nomor Registrasi: <strong class="text-blue-600" x-text="detailCetakSO.nomor_so"></strong></p>
+                </div>
+
+                <!-- Informasi Transaksi -->
+                <div class="grid grid-cols-2 gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                    <div class="space-y-1.5">
+                        <div class="flex"><span class="w-32 text-slate-500">Nomor SO</span><span class="font-bold font-mono" x-text="detailCetakSO.nomor_so"></span></div>
+                        <div class="flex"><span class="w-32 text-slate-500">Tanggal Pemesanan</span><span class="font-medium" x-text="detailCetakSO.tanggal_so"></span></div>
+                        <div class="flex"><span class="w-32 text-slate-500">Status Alokasi</span><span class="font-bold uppercase text-[10px]" x-text="detailCetakSO.status"></span></div>
+                    </div>
+                    <div class="space-y-1.5">
+                        <div class="flex"><span class="w-32 text-slate-500">Alokasi Customer</span><span class="font-bold" x-text="detailCetakSO.customer"></span></div>
+                        <div class="flex"><span class="w-32 text-slate-500">Gudang / Plant</span><span class="font-medium" x-text="detailCetakSO.gudang + ' (' + detailCetakSO.plant + ')'"></span></div>
+                        <div class="flex"><span class="w-32 text-slate-500">Produsen Semen</span><span class="font-semibold">PT Semen Indonesia (Persero) Tbk</span></div>
+                    </div>
+                </div>
+
+                <!-- Tabel Item Pemesanan -->
+                <table class="w-full border-collapse border border-slate-300 text-xs text-left">
+                    <thead class="bg-slate-100 font-semibold text-slate-700">
+                        <tr>
+                            <th class="border border-slate-300 px-3 py-2 text-center w-10">No</th>
+                            <th class="border border-slate-300 px-3 py-2">Nama Komoditas Semen</th>
+                            <th class="border border-slate-300 px-3 py-2 text-right">Volume (Zak)</th>
+                            <th class="border border-slate-300 px-3 py-2 text-right">Harga Pabrik Satuan</th>
+                            <th class="border border-slate-300 px-3 py-2 text-right">Subtotal Nilai Penebusan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border border-slate-300 px-3 py-2 text-center font-mono">1</td>
+                            <td class="border border-slate-300 px-3 py-2 font-medium">Semen Zak PCC 50 Kg (Pabrik SIG)</td>
+                            <td class="border border-slate-300 px-3 py-2 text-right font-mono font-bold" x-text="detailCetakSO.jumlah_zak + ' Zak'"></td>
+                            <td class="border border-slate-300 px-3 py-2 text-right font-mono" x-text="'Rp ' + detailCetakSO.harga_satuan"></td>
+                            <td class="border border-slate-300 px-3 py-2 text-right font-mono font-bold text-blue-700" x-text="'Rp ' + detailCetakSO.total_harga"></td>
+                        </tr>
+                    </tbody>
+                    <tfoot class="bg-slate-50 font-bold">
+                        <tr>
+                            <td colspan="4" class="border border-slate-300 px-3 py-2 text-right uppercase">Total Nilai Penebusan:</td>
+                            <td class="border border-slate-300 px-3 py-2 text-right font-mono text-blue-700 text-sm">
+                                Rp <span x-text="detailCetakSO.total_harga"></span>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <!-- Kolom Tanda Tangan Resmi -->
+                <div class="grid grid-cols-3 gap-6 pt-6 text-center text-xs">
+                    <div>
+                        <div class="text-slate-500 mb-12">Dibuat Oleh (Staf AP):</div>
+                        <div class="font-bold border-b border-slate-400 pb-1 inline-block min-w-[120px]">( Staf Keuangan AP )</div>
+                    </div>
+                    <div>
+                        <div class="text-slate-500 mb-12">Diperiksa (SPV Keuangan):</div>
+                        <div class="font-bold border-b border-slate-400 pb-1 inline-block min-w-[120px]">( SPV Keuangan )</div>
+                    </div>
+                    <div>
+                        <div class="text-slate-500 mb-12">Menyetujui (Direktur):</div>
+                        <div class="font-bold border-b border-slate-400 pb-1 inline-block min-w-[120px]">( Direktur Operasional )</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #area-cetak-po-so, #area-cetak-po-so * {
+        visibility: visible;
+    }
+    #area-cetak-po-so {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 20px;
+    }
+    .print\:hidden {
+        display: none !important;
+    }
+}
+</style>
 @endsection

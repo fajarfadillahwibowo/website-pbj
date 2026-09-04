@@ -107,25 +107,41 @@
         </div>
 
         <!-- Filter Form & Action Buttons -->
+        @php
+            $opsiBulanLabaRugi = [];
+            foreach($daftarBulan as $noBulan => $labelBulan) {
+                $opsiBulanLabaRugi[] = ['nilai' => (string)$noBulan, 'label' => $labelBulan];
+            }
+            $opsiTahunLabaRugi = [
+                ['nilai' => '2024', 'label' => 'Tahun 2024'],
+                ['nilai' => '2025', 'label' => 'Tahun 2025'],
+                ['nilai' => '2026', 'label' => 'Tahun 2026'],
+                ['nilai' => '2027', 'label' => 'Tahun 2027'],
+            ];
+        @endphp
         <div class="flex flex-wrap items-center gap-2">
-            <!-- Form Filter Periode -->
-            <form method="GET" action="{{ route('laporan.laba_rugi') }}" class="flex items-center gap-1.5 bg-[#F8FAFC] dark:bg-[#1A1D2A] p-1 rounded-xl border border-[#E2E8F0] dark:border-[#252837]">
-                <select name="bulan" class="text-xs font-semibold bg-transparent text-slate-800 dark:text-slate-200 py-1.5 px-2 focus:outline-none cursor-pointer">
-                    @foreach($daftarBulan as $noBulan => $labelBulan)
-                        <option value="{{ $noBulan }}" {{ $bulan == $noBulan ? 'selected' : '' }} class="dark:bg-[#1A1D2A]">{{ $labelBulan }}</option>
-                    @endforeach
-                </select>
-                <span class="text-slate-300 dark:text-slate-700">/</span>
-                <select name="tahun" class="text-xs font-semibold bg-transparent text-slate-800 dark:text-slate-200 py-1.5 px-2 focus:outline-none cursor-pointer">
-                    @for($thn = 2024; $thn <= 2027; $thn++)
-                        <option value="{{ $thn }}" {{ $tahun == $thn ? 'selected' : '' }} class="dark:bg-[#1A1D2A]">{{ $thn }}</option>
-                    @endfor
-                </select>
-                <button type="submit" class="p-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-xs" title="Terapkan Filter">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                </button>
+            <!-- Form Filter Periode Dropdown Kustom -->
+            <form method="GET" action="{{ route('laporan.laba_rugi') }}" class="flex items-center gap-2">
+                <div class="w-36">
+                    <x-dropdown-kustom 
+                        nama="bulan"
+                        placeholder="-- Bulan --"
+                        :opsi="$opsiBulanLabaRugi"
+                        :nilaiAwal="(string)$bulan"
+                        :submitOnChange="true"
+                        warnaFokus="blue"
+                    />
+                </div>
+                <div class="w-32">
+                    <x-dropdown-kustom 
+                        nama="tahun"
+                        placeholder="-- Tahun --"
+                        :opsi="$opsiTahunLabaRugi"
+                        :nilaiAwal="(string)$tahun"
+                        :submitOnChange="true"
+                        warnaFokus="blue"
+                    />
+                </div>
             </form>
 
             <!-- Ekspor Excel / CSV -->

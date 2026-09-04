@@ -252,60 +252,55 @@
                                 <div class="font-semibold text-slate-900 dark:text-slate-100 text-xs">
                                     {{ $opn->petugas_opname }}
                                 </div>
-                                <div class="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-xs mt-0.5">
-                                    {{ $opn->keterangan_selisih ?: 'Perhitungan fisik gudang' }}
-                                </div>
                             </td>
 
                             <!-- Status & Aksi -->
                             <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                <div class="flex flex-col items-center gap-1.5">
+                                <div class="flex items-center justify-center gap-2">
                                     @php $badge = $opn->status_badge; @endphp
-                                    @if($opn->status_konfirmasi === 'draft')
-                                        <form action="{{ route('operasional.gudang.opname.konfirmasi', $opn->id_opname) }}" method="POST">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" onclick="return confirm('Konfirmasi opname dan sinkronkan stok fisik gudang sekarang?')"
-                                                    class="px-2 py-0.5 rounded text-[10px] font-bold uppercase font-mono bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 hover:bg-emerald-600 hover:text-white transition-colors"
-                                                    title="Klik untuk setujui & sinkronkan stok fisik">
-                                                Konfirmasi SPV ✔
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase font-mono border {{ $badge['bg'] }}">
+                                        {{ $badge['label'] }}
+                                    </span>
+
+                                    <x-menu-aksi-tabel 
+                                        kodeSalin="{{ $opn->nomor_opname }}"
+                                        labelSalin="Salin No. Opname"
+                                        aksiDetail="bukaModalDetail('{{ $opn->id_opname }}')"
+                                        labelDetail="Detail Opname"
+                                        :aksiCetak="'cetakLangsungOpname(\'' . $opn->id_opname . '\')'"
+                                        labelCetak="Cetak BASO"
+                                        aksiEdit="{{ $opn->status_konfirmasi === 'draft' ? \"bukaModalEdit('{$opn->id_opname}')\" : null }}"
+                                        labelEdit="Ubah Hitung Fisik"
+                                        modulIzin="gudang_opname"
+                                    >
+                                        @if($opn->status_konfirmasi === 'draft')
+                                            <!-- Opsi Konfirmasi SPV -->
+                                            <form action="{{ route('operasional.gudang.opname.konfirmasi', $opn->id_opname) }}" method="POST" class="block w-full">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" onclick="return confirm('Konfirmasi opname dan sinkronkan stok fisik gudang sekarang?')"
+                                                        @click="menuTerbuka = false"
+                                                        class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors text-left font-medium">
+                                                    <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                                    </svg>
+                                                    <span>Konfirmasi SPV</span>
+                                                </button>
+                                            </form>
+                                        @endif
+
+                                        <!-- Opsi Hapus -->
+                                        <div x-show="!apakahReadOnly('gudang_opname')" class="border-t border-slate-100 dark:border-[#252837] pt-1 mt-1">
+                                            <button @click.stop="menuTerbuka = false; bukaModalHapus('{{ $opn->id_opname }}', '{{ $opn->nomor_opname }}')"
+                                                    type="button"
+                                                    class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors text-left font-medium">
+                                                <svg class="w-3.5 h-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                                <span>Hapus Opname</span>
                                             </button>
-                                        </form>
-                                    @else
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase font-mono border {{ $badge['bg'] }}">
-                                            {{ $badge['label'] }}
-                                        </span>
-                                    @endif
-
-                                    <div class="inline-flex items-center gap-1">
-                                        <!-- Lihat / Detail -->
-                                        <button @click="bukaModalDetail('{{ $opn->id_opname }}')"
-                                                class="p-1 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
-                                                title="Lihat Detail Catatan Opname">
-                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                            </svg>
-                                        </button>
-
-                                        <!-- Edit -->
-                                        <button @click="bukaModalEdit('{{ $opn->id_opname }}')"
-                                                class="p-1 rounded text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
-                                                title="Ubah Data Opname">
-                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                            </svg>
-                                        </button>
-
-                                        <!-- Hapus -->
-                                        <button @click="bukaModalHapus('{{ $opn->id_opname }}', '{{ $opn->nomor_opname }}')"
-                                                class="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
-                                                title="Hapus Data Opname">
-                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                        </button>
-                                    </div>
+                                        </div>
+                                    </x-menu-aksi-tabel>
                                 </div>
 
                                 <!-- Riwayat Diedit Real-Time -->
@@ -689,6 +684,13 @@
                         </svg>
                         <span>Ubah Data</span>
                     </button>
+                    <button type="button" @click="cetakBeritaAcaraOpname()"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl transition-colors shadow-xs">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                        </svg>
+                        <span>Cetak BASO</span>
+                    </button>
                 </div>
                 <button @click="modalDetailTerbuka = false"
                         class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] hover:bg-slate-100 rounded-xl transition-colors">
@@ -844,6 +846,117 @@
             bukaModalHapus(id, nomorOpname) {
                 this.hapusData = { id: id, nomor_opname: nomorOpname };
                 this.modalHapusTerbuka = true;
+            },
+
+            async cetakLangsungOpname(id) {
+                await this.bukaModalDetail(id);
+                setTimeout(() => {
+                    this.cetakBeritaAcaraOpname();
+                }, 400);
+            },
+
+            cetakBeritaAcaraOpname() {
+                const nomor = this.detailOpname.nomor_opname || '';
+                const tanggal = this.detailOpname.tanggal_format || this.detailOpname.tanggal_opname || '';
+                const gudang = (this.detailOpname.gudang ? this.detailOpname.gudang.nama_gudang : this.detailOpname.kode_gudang) || '-';
+                const komoditas = (this.detailOpname.gudang && this.detailOpname.gudang.barang) ? (this.detailOpname.gudang.barang.nama_barang + ' (' + (this.detailOpname.gudang.barang.jenis_barang || '-') + ')') : 'Semen Zak PCC';
+                const plant = (this.detailOpname.gudang ? this.detailOpname.gudang.plant : '-') || '-';
+                const stokSistem = new Intl.NumberFormat('id-ID').format(this.detailOpname.stok_sistem || 0);
+                const stokFisik = new Intl.NumberFormat('id-ID').format(this.detailOpname.stok_fisik || 0);
+                const selisih = (parseInt(this.detailOpname.selisih) || 0);
+                const selisihFmt = (selisih > 0 ? '+' : '') + new Intl.NumberFormat('id-ID').format(selisih);
+                const status = this.detailOpname.status_konfirmasi === 'dikonfirmasi_spv' ? 'DIKONFIRMASI SPV & TERSINKRON' : 'DRAFT / AUDIT FISIK';
+                const petugas = this.detailOpname.petugas_opname || '-';
+                const catatan = this.detailOpname.keterangan_selisih || 'Tidak ada catatan selisih fisik khusus.';
+
+                const html = `
+                <div class="p-8 space-y-6 text-slate-900 bg-white font-sans text-xs">
+                    <div class="flex items-start justify-between border-b-2 border-slate-900 pb-4">
+                        <div>
+                            <h2 class="text-base font-black uppercase tracking-wider text-slate-950">PT PUTRA BALKOM JAYA</h2>
+                            <p class="text-[10px] text-slate-600 leading-tight">Distributor Resmi Semen Indonesia Group (SIG) & Logistik Armada</p>
+                            <p class="text-[9px] text-slate-500 mt-0.5">Bekasi, Jawa Barat · Telp: (021) 8990-1234</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs font-mono font-bold px-2.5 py-1 bg-slate-100 rounded border border-slate-300 inline-block">
+                                BERITA ACARA STOCK OPNAME
+                            </div>
+                            <div class="text-[10px] text-slate-500 mt-1 font-mono">No: ${nomor}</div>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <h3 class="text-sm font-black uppercase tracking-wide text-slate-900 underline underline-offset-4">
+                            BERITA ACARA AUDIT FISIK STOCK OPNAME GUDANG (BASO)
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">Hasil Rekonsiliasi Kuantitas Fisik Riil vs Pencatatan Sistem</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+                        <div class="space-y-1.5">
+                            <div><span class="text-slate-500 w-32 inline-block">No. Dokumen:</span><strong>${nomor}</strong></div>
+                            <div><span class="text-slate-500 w-32 inline-block">Tanggal Audit:</span><span>${tanggal}</span></div>
+                            <div><span class="text-slate-500 w-32 inline-block">Status Audit:</span><strong class="uppercase">${status}</strong></div>
+                        </div>
+                        <div class="space-y-1.5">
+                            <div><span class="text-slate-500 w-32 inline-block">Fasilitas Gudang:</span><strong>${gudang}</strong></div>
+                            <div><span class="text-slate-500 w-32 inline-block">Plant Produksi:</span><span>${plant}</span></div>
+                            <div><span class="text-slate-500 w-32 inline-block">Auditor Lapangan:</span><span>${petugas}</span></div>
+                        </div>
+                    </div>
+
+                    <table class="w-full border-collapse border border-slate-300 text-left">
+                        <thead class="bg-slate-100 font-semibold">
+                            <tr>
+                                <th class="border border-slate-300 px-3 py-2">Komoditas Semen</th>
+                                <th class="border border-slate-300 px-3 py-2 text-right">Stok Sistem (Zak)</th>
+                                <th class="border border-slate-300 px-3 py-2 text-right">Stok Fisik (Zak)</th>
+                                <th class="border border-slate-300 px-3 py-2 text-right">Selisih Fisik (Zak)</th>
+                                <th class="border border-slate-300 px-3 py-2 text-center">Kondisi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="border border-slate-300 px-3 py-2 font-medium">${komoditas}</td>
+                                <td class="border border-slate-300 px-3 py-2 text-right font-mono">${stokSistem}</td>
+                                <td class="border border-slate-300 px-3 py-2 text-right font-mono font-bold">${stokFisik}</td>
+                                <td class="border border-slate-300 px-3 py-2 text-right font-mono font-bold">${selisihFmt}</td>
+                                <td class="border border-slate-300 px-3 py-2 text-center font-bold">${selisih === 0 ? 'SESUAI' : (selisih < 0 ? 'SELISIH KURANG' : 'SELISIH LEBIH')}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                        <div class="font-bold text-slate-800 mb-1">Catatan & Keterangan Lapangan:</div>
+                        <div class="italic text-slate-700">${catatan}</div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-6 pt-6 text-center text-xs">
+                        <div>
+                            <div class="text-slate-500 mb-10">Petugas Auditor:</div>
+                            <div class="font-bold border-b border-slate-400 pb-1 inline-block min-w-[110px]">( ${petugas} )</div>
+                        </div>
+                        <div>
+                            <div class="text-slate-500 mb-10">Kepala Gudang:</div>
+                            <div class="font-bold border-b border-slate-400 pb-1 inline-block min-w-[110px]">( Staf Gudang )</div>
+                        </div>
+                        <div>
+                            <div class="text-slate-500 mb-10">SPV Gudang:</div>
+                            <div class="font-bold border-b border-slate-400 pb-1 inline-block min-w-[110px]">( SPV Gudang )</div>
+                        </div>
+                    </div>
+                </div>
+                `;
+
+                const win = window.open('', '', 'height=750,width=900');
+                win.document.write('<html><head><title>Cetak BASO ' + nomor + '</title>');
+                win.document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">');
+                win.document.write('</head><body class="p-4">');
+                win.document.write(html);
+                win.document.write('</body></html>');
+                win.document.close();
+                win.focus();
+                setTimeout(() => { win.print(); win.close(); }, 500);
             }
         };
     }

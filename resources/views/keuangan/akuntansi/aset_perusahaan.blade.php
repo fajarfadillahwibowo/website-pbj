@@ -221,6 +221,8 @@
                                     modulIzin="akun_aset"
                                     aksiDetail="bukaDetail('{{ $aset->kode_aset }}')"
                                     labelDetail="Detail"
+                                    :aksiCetak="'cetakKartuAset(\'' . $aset->kode_aset . '\')'"
+                                    labelCetak="Cetak Kartu Aset"
                                     aksiEdit="bukaEdit('{{ $aset->kode_aset }}')"
                                     labelEdit="Edit"
                                     aksiHapus="{{ route('keuangan.akuntansi.aset.destroy', $aset->kode_aset) }}"
@@ -711,11 +713,31 @@
                         <p class="text-xs text-indigo-600 dark:text-indigo-400 font-mono font-semibold" x-text="detailAset.kode_aset"></p>
                     </div>
                 </div>
-                <button @click="modalDetailTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-lg font-bold">
-                    &times;
-                </button>
+                <div class="flex items-center gap-2">
+                    <button @click="cetakDokumenAset()" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white hover:bg-slate-100 dark:bg-[#14161F] dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors">
+                        <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                        <span>Cetak Kartu Aset</span>
+                    </button>
+                    <button @click="modalDetailTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-lg font-bold p-1">
+                        &times;
+                    </button>
+                </div>
             </div>
-            <div class="p-6 space-y-4 text-xs">
+            <!-- Area Cetak Kartu Aset Tetap -->
+            <div id="areaCetakAset" class="p-6 space-y-4 text-xs">
+                <!-- Kop Resmi Khusus Cetak -->
+                <div class="border-b-2 border-slate-900 pb-3 mb-4 flex items-center justify-between">
+                    <div>
+                        <div class="text-base font-black tracking-wide text-slate-900 uppercase">PT PUTRA BALKOM JAYA</div>
+                        <div class="text-[10px] text-slate-600">Departemen Akuntansi Keuangan & Aktiva Tetap</div>
+                        <div class="text-[9px] text-slate-500">Kartu Inventaris Aset Tetap & Parameter Depresiasi PSAK 16</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="inline-block px-2.5 py-1 rounded bg-slate-100 text-[11px] font-mono font-bold text-slate-900 border border-slate-300">
+                            KARTU AKTIVA TETAP
+                        </span>
+                    </div>
+                </div>
                 <!-- Grid Informasi Utama Finansial -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div class="p-3 bg-slate-50 dark:bg-[#1C1E2A] rounded-xl border border-[#E2E8F0] dark:border-[#252837]">
@@ -805,6 +827,20 @@
                      x-show="detailAset.keterangan">
                     <div class="text-[10px] text-slate-400 font-semibold uppercase mb-1">Keterangan Aset / Fasilitas Bangunan di Atas Tanah</div>
                     <div class="text-xs text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed" x-text="detailAset.keterangan"></div>
+                </div>
+
+                <!-- Tanda Tangan Khusus Cetak -->
+                <div class="pt-6 grid grid-cols-2 gap-8 text-center text-[10px]">
+                    <div>
+                        <div class="text-slate-500 mb-12">Diverifikasi Oleh (Inventaris / Logistik):</div>
+                        <div class="font-bold underline text-slate-900">( ........................................ )</div>
+                        <div class="text-slate-400">Pengawas / Penanggung Jawab Fisik</div>
+                    </div>
+                    <div>
+                        <div class="text-slate-500 mb-12">Disetujui Oleh (Keuangan & Akuntansi):</div>
+                        <div class="font-bold underline text-slate-900">( ........................................ )</div>
+                        <div class="text-slate-400">Kepala Akuntansi / Keuangan</div>
+                    </div>
                 </div>
 
                 <div class="flex justify-end pt-2">
@@ -1146,6 +1182,24 @@
             bukaHapus(kode, nama) {
                 this.hapusData = { kode: kode, nama: nama };
                 this.modalHapusTerbuka = true;
+            },
+
+            async cetakKartuAset(kode) {
+                await this.bukaDetail(kode);
+                this.$nextTick(() => {
+                    this.cetakDokumenAset();
+                });
+            },
+
+            cetakDokumenAset() {
+                const isiCetak = document.getElementById('areaCetakAset').innerHTML;
+                const jendelaCetak = window.open('', '_blank', 'height=700,width=900');
+                jendelaCetak.document.write('<html><head><title>Kartu Inventaris Aset - ' + (this.detailAset.kode_aset || '') + '</title>');
+                jendelaCetak.document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">');
+                jendelaCetak.document.write('</head><body class="p-8 bg-white text-slate-900 font-sans" onload="window.print(); window.close();">');
+                jendelaCetak.document.write(isiCetak);
+                jendelaCetak.document.write('</body></html>');
+                jendelaCetak.document.close();
             }
         };
     }

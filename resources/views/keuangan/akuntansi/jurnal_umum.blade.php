@@ -3,7 +3,15 @@
 @section('judul', 'Jurnal Umum Transaksi (Akuntansi)')
 
 @section('konten')
-<div class="space-y-5" x-data="{ bukaModalTambah: false }">
+<div class="space-y-5" x-data="{ 
+    bukaModalTambah: false,
+    modalCetakTerbuka: false,
+    detailCetak: {},
+    cetakVoucherJurnal(data) {
+        this.detailCetak = data;
+        this.modalCetakTerbuka = true;
+    }
+}">
     <!-- Flash Notification -->
     @if(session('sukses'))
         <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-center justify-between">
@@ -125,6 +133,15 @@
                                     :kodeSalin="$jurnal->nomor_jurnal" 
                                     labelSalin="Salin"
                                     modulIzin="akun_jurnal"
+                                    :aksiCetak="'cetakVoucherJurnal(' . json_encode([
+                                        'nomor' => $jurnal->nomor_jurnal,
+                                        'tanggal' => date('d/m/Y', strtotime($jurnal->tanggal_transaksi)),
+                                        'akun' => ($jurnal->kode_akun . ' - ' . ($jurnal->nama_akun ?? '')),
+                                        'keterangan' => $jurnal->keterangan,
+                                        'posisi' => $jurnal->posisi ?? 'Debit',
+                                        'nominal' => number_format($jurnal->nominal, 0, ',', '.')
+                                    ]) . ')'"
+                                    labelCetak="Cetak Memorial"
                                 />
                             </td>
                         </tr>
@@ -200,6 +217,101 @@
                     <button type="submit" class="px-4 py-2 font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl transition-all shadow-sm">Simpan Jurnal</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Pratinjau & Cetak Bukti Memorial Jurnal Umum -->
+    <div x-show="modalCetakTerbuka" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="modalCetakTerbuka = false"
+             class="bg-white text-slate-900 rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl my-8 border border-slate-200">
+            
+            <!-- Toolbar Aksi Modal (Disembunyikan saat cetak) -->
+            <div class="flex items-center justify-between px-6 py-3.5 border-b border-slate-200 bg-slate-50 print:hidden">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-teal-600"></span>
+                    <span class="font-bold text-xs text-slate-800">Pratinjau Bukti Memorial Jurnal Umum</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" @click="window.print()"
+                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-xl transition-all shadow-sm">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                        </svg>
+                        <span>Cetak Bukti Memorial</span>
+                    </button>
+                    <button type="button" @click="modalCetakTerbuka = false" class="text-slate-400 hover:text-slate-600 p-1">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Lembar Cetak Bukti Memorial -->
+            <div class="p-8 space-y-6 text-xs text-slate-800 font-sans">
+                <!-- Kop Resmi -->
+                <div class="border-b-2 border-slate-900 pb-3 flex items-center justify-between">
+                    <div>
+                        <div class="text-base font-black tracking-wide text-slate-900 uppercase">PT PUTRA BALKOM JAYA</div>
+                        <div class="text-[10px] text-slate-600">Sistem Akuntansi Keuangan & Pembukuan Double-Entry</div>
+                        <div class="text-[9px] text-slate-400">Jl. Raya Surabaya - Rembang Km. 45, Jawa Timur</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="inline-block px-3 py-1 rounded bg-teal-50 text-[11px] font-mono font-bold text-teal-800 border border-teal-200">
+                            BUKTI MEMORIAL AKUNTANSI
+                        </span>
+                        <div class="text-[10px] font-mono text-slate-500 mt-1" x-text="detailCetak.nomor"></div>
+                    </div>
+                </div>
+
+                <!-- Detail Entri Jurnal -->
+                <div class="grid grid-cols-2 gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                    <div>
+                        <span class="text-slate-500 block text-[10px]">Nomor Jurnal:</span>
+                        <strong class="text-slate-900 font-bold font-mono text-sm text-teal-700" x-text="detailCetak.nomor"></strong>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-slate-500 block text-[10px]">Tanggal Transaksi:</span>
+                        <strong class="font-mono text-slate-900" x-text="detailCetak.tanggal"></strong>
+                    </div>
+                </div>
+
+                <div class="space-y-2 border border-slate-200 rounded-xl p-4">
+                    <div class="flex justify-between py-1.5 border-b border-slate-200">
+                        <span class="text-slate-500">Akun Perkiraan (COA):</span>
+                        <strong class="font-bold text-slate-900" x-text="detailCetak.akun"></strong>
+                    </div>
+                    <div class="flex justify-between py-1.5 border-b border-slate-200">
+                        <span class="text-slate-500">Posisi Akun:</span>
+                        <span class="px-2.5 py-0.5 rounded font-mono font-bold text-xs uppercase"
+                              :class="detailCetak.posisi === 'Debit' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'"
+                              x-text="detailCetak.posisi"></span>
+                    </div>
+                    <div class="flex justify-between py-1.5 border-b border-slate-200">
+                        <span class="text-slate-500">Nominal Transaksi:</span>
+                        <strong class="font-mono font-bold text-sm text-slate-900" x-text="'Rp ' + (detailCetak.nominal || 0)"></strong>
+                    </div>
+                    <div class="flex justify-between py-1.5">
+                        <span class="text-slate-500">Uraian / Keterangan Transaksi:</span>
+                        <span class="text-slate-700 font-medium" x-text="detailCetak.keterangan || '-'"></span>
+                    </div>
+                </div>
+
+                <!-- Tanda Tangan Pengesahan -->
+                <div class="pt-6 grid grid-cols-2 gap-8 text-center text-[10px]">
+                    <div>
+                        <div class="text-slate-500 mb-14">Dibuat Oleh (Staf Pembukuan):</div>
+                        <div class="font-bold underline text-slate-900">( ........................................ )</div>
+                        <div class="text-slate-400">Akuntansi & Pajak</div>
+                    </div>
+                    <div>
+                        <div class="text-slate-500 mb-14">Diperiksa & Disetujui:</div>
+                        <div class="font-bold underline text-slate-900">( ........................................ )</div>
+                        <div class="text-slate-400">SPV Keuangan & Akuntansi</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

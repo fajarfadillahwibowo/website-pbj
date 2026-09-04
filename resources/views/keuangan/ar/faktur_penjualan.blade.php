@@ -227,8 +227,8 @@
                                     :kodeSalin="$faktur->nomor_faktur"
                                     labelSalin="Salin No"
                                     modulIzin="ar_faktur"
-                                    :urlDetail="route('keuangan.ar.faktur.cetak', $faktur->nomor_faktur)"
-                                    labelDetail="Cetak"
+                                    :urlCetak="route('keuangan.ar.faktur.cetak', $faktur->nomor_faktur)"
+                                    labelCetak="Cetak Faktur"
                                 />
                             </td>
                         </tr>

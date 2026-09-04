@@ -275,46 +275,39 @@
                             </td>
 
                             <!-- Aksi Popover Modern -->
-                            <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                <div class="inline-flex items-center gap-1.5">
-                                    <!-- Tombol Mutasi Stok -->
-                                    <button @click="bukaModalMutasi('{{ $gdg->kode_gudang }}', '{{ addslashes($gdg->nama_gudang) }}', {{ $gdg->stok_tersedia }})"
-                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors"
-                                            title="Penyesuaian Stok Fisik / Mutasi Cepat">
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <x-menu-aksi-tabel 
+                                    kodeSalin="{{ $gdg->kode_gudang }}"
+                                    labelSalin="Salin Kode Gudang"
+                                    aksiDetail="bukaModalDetail('{{ $gdg->kode_gudang }}')"
+                                    labelDetail="Detail Gudang"
+                                    :aksiCetak="'cetakKartuGudang(\'' . $gdg->kode_gudang . '\')'"
+                                    labelCetak="Cetak Kartu Stok"
+                                    aksiEdit="bukaModalEdit('{{ $gdg->kode_gudang }}')"
+                                    labelEdit="Ubah Data Gudang"
+                                    modulIzin="gudang_stok"
+                                >
+                                    <!-- Tombol Mutasi Stok Fisik -->
+                                    <button @click.stop="menuTerbuka = false; bukaModalMutasi('{{ $gdg->kode_gudang }}', '{{ addslashes($gdg->nama_gudang) }}', {{ $gdg->stok_tersedia }})"
+                                            type="button"
+                                            class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors text-left font-medium">
+                                        <svg class="w-3.5 h-3.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
                                         </svg>
                                         <span>Mutasi Stok</span>
                                     </button>
 
-                                    <!-- Tombol Opsi Lihat / Detail -->
-                                    <button @click="bukaModalDetail('{{ $gdg->kode_gudang }}')"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
-                                            title="Lihat Detail Fasilitas Gudang">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                        </svg>
-                                    </button>
-
-                                    <!-- Tombol Ubah / Edit -->
-                                    <button @click="bukaModalEdit('{{ $gdg->kode_gudang }}')"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
-                                            title="Ubah Data Gudang">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </button>
-
-                                    <!-- Tombol Hapus -->
-                                    <button @click="bukaModalHapus('{{ $gdg->kode_gudang }}', '{{ addslashes($gdg->nama_gudang) }}')"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
-                                            title="Hapus Gudang">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </div>
+                                    <!-- Tombol Hapus Gudang -->
+                                    <div x-show="!apakahReadOnly('gudang_stok')" class="border-t border-slate-100 dark:border-[#252837] pt-1 mt-1">
+                                        <button @click.stop="menuTerbuka = false; bukaModalHapus('{{ $gdg->kode_gudang }}', '{{ addslashes($gdg->nama_gudang) }}')"
+                                                type="button"
+                                                class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors text-left font-medium">
+                                            <svg class="w-3.5 h-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                            <span>Hapus Gudang</span>
+                                        </button>
+                                    </div>
+                                </x-menu-aksi-tabel>
 
                                 <!-- Riwayat Terakhir Diedit Real-Time di Kolom Bawah Aksi -->
                                 <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 flex items-center justify-center gap-1 font-mono cursor-help"
@@ -568,11 +561,30 @@
                         <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5" x-text="detailGudang.nama_gudang"></p>
                     </div>
                 </div>
-                <button @click="modalDetailTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none">&times;</button>
+                <div class="flex items-center gap-2">
+                    <button @click="cetakDokumenGudang()" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white hover:bg-slate-100 dark:bg-[#14161F] dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors">
+                        <svg class="w-3.5 h-3.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                        <span>Cetak Kartu Stok</span>
+                    </button>
+                    <button @click="modalDetailTerbuka = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none p-1">&times;</button>
+                </div>
             </div>
 
-            <!-- Konten Modal Detail -->
-            <div class="p-6 space-y-5 text-xs">
+            <!-- Konten Modal Detail (Area Cetak Kartu Stok) -->
+            <div id="areaCetakGudang" class="p-6 space-y-5 text-xs">
+                <!-- Kop Resmi Khusus Cetak -->
+                <div class="border-b-2 border-slate-900 pb-3 mb-4 flex items-center justify-between">
+                    <div>
+                        <div class="text-base font-black tracking-wide text-slate-900 uppercase">PT PUTRA BALKOM JAYA</div>
+                        <div class="text-[10px] text-slate-600">Manajemen Logistik & Distribusi Semen Nasional</div>
+                        <div class="text-[9px] text-slate-500">Lembar Posisi Persediaan & Kartu Kontrol Fasilitas Gudang</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="inline-block px-2.5 py-1 rounded bg-slate-100 text-[11px] font-mono font-bold text-slate-900 border border-slate-300">
+                            KARTU STOK GUDANG
+                        </span>
+                    </div>
+                </div>
                 <!-- Ringkasan 3 Metrik Utama -->
                 <div class="grid grid-cols-3 gap-3">
                     <div class="p-3.5 rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-center">
@@ -641,7 +653,18 @@
                         </svg>
                         <span>Terakhir Diedit: <strong x-text="detailGudang.terakhir_diedit_relatif || '-'"></strong></span>
                     </div>
-                    <span class="text-slate-500 dark:text-slate-400" x-text="detailGudang.terakhir_diedit_waktu || '-'"></span>
+                <!-- Tanda Tangan Khusus Cetak -->
+                <div class="pt-6 border-t border-slate-200 dark:border-slate-800 grid grid-cols-2 gap-8 text-center text-[10px]">
+                    <div>
+                        <div class="text-slate-500 mb-14">Petugas / PIC Gudang:</div>
+                        <div class="font-bold underline text-slate-900 dark:text-slate-100" x-text="detailGudang.pic_gudang || '( ........................................ )'"></div>
+                        <div class="text-slate-400">Pengelola Fasilitas</div>
+                    </div>
+                    <div>
+                        <div class="text-slate-500 mb-14">Mengetahui (Supervisi):</div>
+                        <div class="font-bold underline text-slate-900 dark:text-slate-100">( ........................................ )</div>
+                        <div class="text-slate-400">SPV Gudang & Logistik</div>
+                    </div>
                 </div>
             </div>
 
@@ -831,6 +854,24 @@
                 } catch (e) {
                     alert('Gagal mengambil detail data gudang.');
                 }
+            },
+
+            async cetakKartuGudang(kode) {
+                await this.bukaModalDetail(kode);
+                this.$nextTick(() => {
+                    this.cetakDokumenGudang();
+                });
+            },
+
+            cetakDokumenGudang() {
+                const printContents = document.getElementById('areaCetakGudang').innerHTML;
+                const win = window.open('', '_blank', 'height=750,width=900');
+                win.document.write('<html><head><title>Kartu Stok Gudang ' + (this.detailGudang.nama_gudang || '') + ' (' + (this.detailGudang.kode_gudang || '') + ')</title>');
+                win.document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">');
+                win.document.write('</head><body class="p-8 bg-white text-slate-900 font-sans" onload="window.print(); window.close();">');
+                win.document.write(printContents);
+                win.document.write('</body></html>');
+                win.document.close();
             },
 
             initGudang() {

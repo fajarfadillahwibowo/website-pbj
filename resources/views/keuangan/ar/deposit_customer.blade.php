@@ -3,7 +3,15 @@
 @section('judul', 'Deposit Customer (AR)')
 
 @section('konten')
-<div class="space-y-5" x-data="{ bukaModalTopUp: false }">
+<div class="space-y-5" x-data="{ 
+    bukaModalTopUp: false,
+    modalCetakTerbuka: false,
+    detailCetak: {},
+    cetakKwitansi(data) {
+        this.detailCetak = data;
+        this.modalCetakTerbuka = true;
+    }
+}">
     <!-- Flash Notification -->
     @if(session('sukses'))
         <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-center justify-between">
@@ -149,6 +157,17 @@
                                     :kodeSalin="$dep->nomor_bukti_deposit" 
                                     labelSalin="Salin No"
                                     modulIzin="ar_deposit"
+                                    :aksiCetak="'cetakKwitansi(' . json_encode([
+                                        'nomor' => $dep->nomor_bukti_deposit,
+                                        'tanggal' => date('d/m/Y', strtotime($dep->tanggal_deposit)),
+                                        'customer' => $dep->customer->nama_toko_bangunan ?? $dep->kode_customer,
+                                        'pemilik' => $dep->customer->nama_pemilik ?? '-',
+                                        'tipe' => $dep->tipe_mutasi,
+                                        'nominal' => number_format($dep->jumlah_nominal, 0, ',', '.'),
+                                        'saldo_akhir' => number_format($dep->saldo_akhir_deposit, 0, ',', '.'),
+                                        'keterangan' => $dep->keterangan ?? '-'
+                                    ]) . ')'"
+                                    labelCetak="Cetak Kwitansi"
                                 />
                             </td>
                         </tr>
@@ -222,6 +241,103 @@
                     <button type="submit" class="px-4 py-2 font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-all shadow-sm">Simpan Top Up</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Pratinjau & Cetak Kwitansi Resmi Deposit Customer -->
+    <div x-show="modalCetakTerbuka" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs overflow-y-auto">
+        <div @click.away="modalCetakTerbuka = false"
+             class="bg-white text-slate-900 rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl my-8 border border-slate-200">
+            
+            <!-- Toolbar Aksi Modal (Disembunyikan saat cetak) -->
+            <div class="flex items-center justify-between px-6 py-3.5 border-b border-slate-200 bg-slate-50 print:hidden">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-sky-600"></span>
+                    <span class="font-bold text-xs text-slate-800">Pratinjau Kwitansi / Bukti Mutasi Deposit</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" @click="window.print()"
+                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-all shadow-sm">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                        </svg>
+                        <span>Cetak Kwitansi</span>
+                    </button>
+                    <button type="button" @click="modalCetakTerbuka = false" class="text-slate-400 hover:text-slate-600 p-1">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Lembar Cetak Kwitansi -->
+            <div class="p-8 space-y-6 text-xs text-slate-800 font-sans">
+                <!-- Kop Resmi -->
+                <div class="border-b-2 border-slate-900 pb-3 flex items-center justify-between">
+                    <div>
+                        <div class="text-base font-black tracking-wide text-slate-900 uppercase">PT PUTRA BALKOM JAYA</div>
+                        <div class="text-[10px] text-slate-600">Distribusi Semen & Layanan Jasa Logistik Armada Nasional</div>
+                        <div class="text-[9px] text-slate-400">Jl. Raya Surabaya - Rembang Km. 45, Jawa Timur</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="inline-block px-3 py-1 rounded bg-sky-50 text-[11px] font-mono font-bold text-sky-800 border border-sky-200">
+                            BUKTI MUTASI DEPOSIT
+                        </span>
+                        <div class="text-[10px] font-mono text-slate-500 mt-1" x-text="detailCetak.nomor"></div>
+                    </div>
+                </div>
+
+                <!-- Detail Transaksi -->
+                <div class="grid grid-cols-2 gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                    <div>
+                        <span class="text-slate-500 block text-[10px]">Toko Bangunan / Proyek:</span>
+                        <strong class="text-slate-900 font-bold text-sm" x-text="detailCetak.customer"></strong>
+                        <div class="text-[10px] text-slate-500 mt-0.5">Pemilik: <span x-text="detailCetak.pemilik"></span></div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-slate-500 block text-[10px]">Tanggal Transaksi:</span>
+                        <strong class="font-mono text-slate-900" x-text="detailCetak.tanggal"></strong>
+                        <div class="mt-1">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase"
+                                  :class="detailCetak.tipe === 'Masuk' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
+                                  x-text="detailCetak.tipe === 'Masuk' ? 'Setoran Deposit Masuk' : 'Pemotongan Faktur'"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2 border border-slate-200 rounded-xl p-4">
+                    <div class="flex justify-between py-1.5 border-b border-slate-200">
+                        <span class="text-slate-500">Nominal Transaksi:</span>
+                        <strong class="font-mono font-bold text-sm"
+                                :class="detailCetak.tipe === 'Masuk' ? 'text-emerald-700' : 'text-rose-700'"
+                                x-text="(detailCetak.tipe === 'Masuk' ? '+ Rp ' : '- Rp ') + (detailCetak.nominal || 0)"></strong>
+                    </div>
+                    <div class="flex justify-between py-1.5 border-b border-slate-200">
+                        <span class="text-slate-500">Saldo Akhir Deposit:</span>
+                        <strong class="font-mono font-bold text-slate-900" x-text="'Rp ' + (detailCetak.saldo_akhir || 0)"></strong>
+                    </div>
+                    <div class="flex justify-between py-1.5">
+                        <span class="text-slate-500">Keterangan / Berita:</span>
+                        <span class="text-slate-700 font-medium" x-text="detailCetak.keterangan || '-'"></span>
+                    </div>
+                </div>
+
+                <!-- Tanda Tangan Pengesahan -->
+                <div class="pt-6 grid grid-cols-2 gap-8 text-center text-[10px]">
+                    <div>
+                        <div class="text-slate-500 mb-14">Penyetor / Customer:</div>
+                        <div class="font-bold underline text-slate-900" x-text="detailCetak.pemilik || detailCetak.customer"></div>
+                        <div class="text-slate-400">Pihak Toko</div>
+                    </div>
+                    <div>
+                        <div class="text-slate-500 mb-14">Diterima & Disahkan:</div>
+                        <div class="font-bold underline text-slate-900">( ........................................ )</div>
+                        <div class="text-slate-400">Kasir / Bagian AR Keuangan</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

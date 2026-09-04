@@ -7,6 +7,9 @@
     'aksiDetail'  => null,
     'urlDetail'   => null,
     'labelDetail' => 'Detail',
+    'aksiCetak'   => null,
+    'urlCetak'    => null,
+    'labelCetak'  => 'Cetak',
     'aksiEdit'    => null,
     'urlEdit'     => null,
     'labelEdit'   => 'Edit',
@@ -117,6 +120,28 @@ class="relative inline-block text-left">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                 </svg>
                 <span>{{ $labelDetail }}</span>
+            </a>
+        @endif
+
+        <!-- 3. Opsi Cetak Dokumen Resmi -->
+        @if($aksiCetak)
+            <button @click.stop="menuTerbuka = false; {{ $aksiCetak }}" 
+                    type="button" 
+                    class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-[#F8FAFC] dark:hover:bg-[#1C1E2A] transition-colors text-left group">
+                <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                </svg>
+                <span>{{ $labelCetak }}</span>
+            </button>
+        @elseif($urlCetak)
+            <a href="{{ $urlCetak }}" 
+               @click="menuTerbuka = false"
+               target="_blank"
+               class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-[#F8FAFC] dark:hover:bg-[#1C1E2A] transition-colors text-left group">
+                <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                </svg>
+                <span>{{ $labelCetak }}</span>
             </a>
         @endif
 

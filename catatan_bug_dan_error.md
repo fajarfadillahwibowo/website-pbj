@@ -88,15 +88,18 @@
     5. Mengintegrasikan kolom checkbox `<th>`/`<td>` yang terlindungi izin read-only (`x-show="!apakahReadOnly(modulIzin)"`), highlight baris terpilih `:class="{ 'bg-primary-50/50 dark:bg-primary-950/20': apakahTerpilih(...) }"`, dan `<x-bar-aksi-massal>` pada seluruh tabel utama aplikasi.
     6. Menyederhanakan penulisan copywriting seluruh label aksi menjadi ringkas & padat (`Salin Kode`, `Detail`, `Edit`, `Hapus`, `Cetak`, `Bayar`, `Ubah Status`, `Mutasi Stok`).
 
-- **[TERSELESAIKAN] Integrasi Pengaman Hak Akses RBAC pada Fitur Multi-Select & Hapus Massal Aman (Bulk Delete Safety)**:
-  - *Kebutuhan & Risiko:*
-    1. Pengguna berstatus *Lihat Saja (Read-Only)* tidak boleh memiliki kolom checkbox seleksi ataupun tombol aksi berbahaya di layar.
-    2. Penghapusan massal pada tabel Master & Operasional harus memiliki validasi integritas relasi foreign key dan saldo aktif (misalnya: customer dengan piutang aktif > 0 atau wilayah dengan toko binaan aktif tidak boleh terhapus sembarangan).
+- **[TERSELESAIKAN] Inkonsistensi Aksi Baris Tabel, Format Filter, dan Penutupan Menu Popover pada 5 Role (06, 07, 08, 09, 10)**:
+  - *Penyebab:*
+    1. Beberapa view (seperti `operasional/armada/driver.blade.php`, `operasional/gudang/stok.blade.php`, `operasional/gudang/opname.blade.php`, `operasional/pengiriman/ongkos_angkut.blade.php`, `operasional/kso/index.blade.php`, `operasional/bengkel/pembelian_sparepart.blade.php`) masih menggunakan tombol aksi horizontal terpisah atau tombol aksi langsung tanpa komponen popover standar.
+    2. Pada slot tombol kustom `<x-menu-aksi-tabel>` di `surat_jalan.blade.php`, `sparepart.blade.php`, dan `perbaikan.blade.php`, kode penutupan menu memanggil variabel yang tidak ada (`terbuka = false`), sehingga menu popover tidak otomatis tertutup saat tombol diklik.
+    3. Pada `ongkos_angkut.blade.php`, pemeriksaan izin RBAC menggunakan kode `ops_ongkos_angkut` yang tidak sesuai dengan matriks hak akses `layouts/app.blade.php` (`kirim_ongkos`).
+    4. Halaman Neraca dan Laba Rugi untuk Direktur & Manager belum memiliki filter periode bulanan dan tahunan yang seragam dengan komponen `<x-dropdown-kustom>`.
   - *Solusi:*
-    1. Menambahkan pengkondisian `x-show="!apakahReadOnly('modulIzin')"` pada seluruh `<th>` dan `<td>` checkbox di 11 view tabel sehingga kolom checkbox tersembunyi total saat role hanya memiliki izin lihat.
-    2. Menambahkan 9 endpoint rute `POST /.../hapus-massal` dan implementasi method `hapusMassal(Request $request)` di seluruh Controller Master & Operasional terkait dengan transaksi `DB::beginTransaction()`, pengecekan foreign key, dan logging status error.
-    3. Menyesuaikan modul Keuangan AR/AP/Akuntansi agar hanya menyediakan aksi massal **"Salin Terpilih"** demi menjaga audit trail transaksi finansial.
-    4. Pengujian `php artisan route:clear` dan `php artisan view:cache` lulus 100% tanpa error.
+    1. Mengganti seluruh tombol aksi baris di seluruh tabel 5 role terkait dengan komponen `<x-menu-aksi-tabel>` yang rapi, padat, dan eksklusif 1 popover aktif.
+    2. Menstandarisasi event klik slot tombol menjadi `@click.stop="menuTerbuka = false; fungsiAksi(...)"` untuk menutup popover seketika sebelum modal ditampilkan.
+    3. Memperbaiki kode izin modul pada `ongkos_angkut.blade.php` menjadi `kirim_ongkos`.
+    4. Menambahkan bilah filter periode bulan dan tahun pada `neraca.blade.php` dan memodernisasi form filter `laba_rugi.blade.php` menggunakan `<x-dropdown-kustom submitOnChange="true">` beserta badge penanda `Akses Eksekutif: Read-Only`.
+    5. Seluruh suite pengujian otomatis (`test_crud_pengawas_driver.php`, `test_crud_spv_gudang.php`, `test_crud_spv_operasional.php`, `test_crud_pengawas_kendaraan.php`) lulus 100% tanpa error.
 
 - **[TERSELESAIKAN] Standardisasi dan Penyelarasan Konsistensi Input Plat Nomor Kendaraan (Single Unit, Multi Unit, & Modal Edit)**:
   - *Penyebab Masalah:* Input plat nomor pada pendaftaran aset single unit menggunakan format 3 kolom (`Wilayah`, `Nomor Seri`, `Seri Huruf`) dan badge plat visual live, sedangkan pada pendaftaran multi-unit kartu daftar truk hanya menggunakan 1 kolom text biasa sehingga bentuk penginputannya tidak konsisten.
@@ -105,6 +108,15 @@
     2. Menghubungkan otomatis pembentukan string lengkap plat nomor ke input hidden untuk dikirim ke backend.
     3. Memperbarui modal edit aset (`aset_perusahaan.blade.php`) serta modal tambah/edit aset di manajemen armada (`kendaraan.blade.php`) menggunakan `<x-input-plat-nomor>`.
     4. Pengujian live browser menunjukkan format input 100% konsisten dan reaktif memperbarui visual badge secara real-time.
+
+- **[TERSELESAIKAN] Standardisasi dan Penyelarasan Tombol Aksi Cetak Dokumen Resmi pada Seluruh Tabel ERP**:
+  - *Kebutuhan:* Seluruh tabel operasional dan keuangan yang memiliki dokumen transaksi fisik memerlukan tombol aksi cetak langsung pada menu aksi tabel (`<x-menu-aksi-tabel>`) dan tombol cetak di modal detail, lengkap dengan template berkop surat resmi PT Putra Balkom Jaya dan pengesahan tanda tangan.
+  - *Solusi Eksekusi:*
+    1. Memperkaya komponen `<x-menu-aksi-tabel>` dengan props native `:aksiCetak`, `:urlCetak`, dan `:labelCetak` lengkap dengan ikon printer SVG profesional.
+    2. Menghubungkan tombol cetak pada 13 modul fisik: Faktur Penjualan AR (`cetak_faktur`), List Piutang (faktur invoice), Kwitansi Deposit Customer, Bukti Memorial Jurnal Umum, Kartu Inventaris Aset PSAK 16, Surat Jalan Pengiriman, SPK Perbaikan Bengkel, Bukti Beli Sparepart, Kartu Suku Cadang, Dossier Armada Truk, Biodata Driver, Kartu Stok Gudang, Berita Acara Opname BASO, dan Surat Ketetapan Tarif OA.
+    3. Menerapkan mekanisme cetak terisolasi yang ringan via `window.open` dengan Tailwind CSS dan auto-close pasca-cetak.
+    4. Menyelaraskan kode modul RBAC (`kirim_sj`, `bengkel_perbaikan`, `bengkel_sparepart`) serta memastikan hak akses Read-Only untuk peran `DIREKTUR_MANAGER`.
+    5. Verifikasi kompilasi template Blade `artisan view:cache` lulus 100% (0 error).
 
 ---
 

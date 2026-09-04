@@ -139,6 +139,8 @@
                                     :kodeSalin="$piutang->penjualan->nomor_faktur ?? 'PIU-' . $piutang->id_piutang"
                                     labelSalin="Salin No"
                                     modulIzin="ar_piutang"
+                                    :urlCetak="($piutang->penjualan && $piutang->penjualan->nomor_faktur) ? route('keuangan.ar.faktur.cetak', $piutang->penjualan->nomor_faktur) : null"
+                                    labelCetak="Cetak Faktur"
                                 >
                                     @if($piutang->sisa_piutang > 0)
                                         <button @click.stop="menuTerbuka = false; piutangTerpilih = {{ json_encode([

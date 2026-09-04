@@ -19,6 +19,70 @@
         </div>
     </div>
 
+    <!-- Filter Periode Laporan & Badge Eksekutif Read-Only -->
+    @php
+        $opsiBulan = [
+            ['nilai' => '01', 'label' => 'Januari'],
+            ['nilai' => '02', 'label' => 'Februari'],
+            ['nilai' => '03', 'label' => 'Maret'],
+            ['nilai' => '04', 'label' => 'April'],
+            ['nilai' => '05', 'label' => 'Mei'],
+            ['nilai' => '06', 'label' => 'Juni'],
+            ['nilai' => '07', 'label' => 'Juli'],
+            ['nilai' => '08', 'label' => 'Agustus'],
+            ['nilai' => '09', 'label' => 'September'],
+            ['nilai' => '10', 'label' => 'Oktober'],
+            ['nilai' => '11', 'label' => 'November'],
+            ['nilai' => '12', 'label' => 'Desember'],
+        ];
+        $opsiTahun = [
+            ['nilai' => '2024', 'label' => 'Tahun 2024'],
+            ['nilai' => '2025', 'label' => 'Tahun 2025'],
+            ['nilai' => '2026', 'label' => 'Tahun 2026'],
+            ['nilai' => '2027', 'label' => 'Tahun 2027'],
+        ];
+        $bulanTerpilih = str_pad((string)$bulan, 2, '0', STR_PAD_LEFT);
+        $tahunTerpilih = (string)$tahun;
+    @endphp
+
+    <div class="animasi-masuk flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white dark:bg-[#14161F] p-4 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
+        <form method="GET" action="{{ route('laporan.neraca') }}" class="flex flex-wrap items-center gap-2.5 flex-1">
+            <div class="w-44">
+                <x-dropdown-kustom 
+                    nama="bulan"
+                    placeholder="-- Pilih Bulan --"
+                    :opsi="$opsiBulan"
+                    :nilaiAwal="$bulanTerpilih"
+                    :submitOnChange="true"
+                    warnaFokus="emerald"
+                />
+            </div>
+            <div class="w-36">
+                <x-dropdown-kustom 
+                    nama="tahun"
+                    placeholder="-- Pilih Tahun --"
+                    :opsi="$opsiTahun"
+                    :nilaiAwal="$tahunTerpilih"
+                    :submitOnChange="true"
+                    warnaFokus="emerald"
+                />
+            </div>
+            @if($bulanTerpilih != date('m') || $tahunTerpilih != date('Y'))
+                <a href="{{ route('laporan.neraca') }}" class="px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    Periode Berjalan
+                </a>
+            @endif
+        </form>
+
+        <div class="flex items-center gap-2 shrink-0">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-medium font-mono">
+                <svg class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                <span>Akses Eksekutif: Read-Only</span>
+            </span>
+        </div>
+    </div>
+
     <!-- Dua Kolom: Aktiva vs Passiva -->
     <div class="wadah-bertingkat grid grid-cols-1 lg:grid-cols-2 gap-5">
         

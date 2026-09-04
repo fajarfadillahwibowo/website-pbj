@@ -290,13 +290,15 @@
                                 <x-menu-aksi-tabel 
                                     :kodeSalin="$sj->nomor_surat_jalan" 
                                     labelSalin="Salin No"
-                                    modulIzin="ops_surat_jalan"
+                                    modulIzin="kirim_sj"
                                     :aksiDetail="'bukaModalCetak(\'' . $sj->id_pengiriman . '\')'"
-                                    labelDetail="Cetak"
+                                    labelDetail="Detail"
+                                    :aksiCetak="'bukaModalCetak(\'' . $sj->id_pengiriman . '\')'"
+                                    labelCetak="Cetak Surat Jalan"
                                     :aksiEdit="'bukaModalEdit(\'' . $sj->id_pengiriman . '\')'"
                                     labelEdit="Edit"
                                 >
-                                    <button @click="bukaModalStatus('{{ $sj->id_pengiriman }}', '{{ $sj->nomor_surat_jalan }}', '{{ $sj->status_pengiriman }}'); terbuka = false" 
+                                    <button @click.stop="menuTerbuka = false; bukaModalStatus('{{ $sj->id_pengiriman }}', '{{ $sj->nomor_surat_jalan }}', '{{ $sj->status_pengiriman }}')" 
                                             type="button" 
                                             class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-sky-50 dark:hover:bg-sky-500/10 hover:text-sky-600 dark:hover:text-sky-400 transition-colors text-left border-b border-slate-100 dark:border-[#252837]">
                                         <svg class="w-3.5 h-3.5 text-sky-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -305,8 +307,8 @@
                                         <span>Ubah Status</span>
                                     </button>
 
-                                    <template x-if="!apakahReadOnly('ops_surat_jalan')">
-                                        <button @click="bukaModalHapus('{{ $sj->id_pengiriman }}', '{{ $sj->nomor_surat_jalan }}'); terbuka = false" 
+                                    <template x-if="!apakahReadOnly('kirim_sj')">
+                                        <button @click.stop="menuTerbuka = false; bukaModalHapus('{{ $sj->id_pengiriman }}', '{{ $sj->nomor_surat_jalan }}')" 
                                                 type="button" 
                                                 class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors text-left border-t border-slate-100 dark:border-[#252837]">
                                             <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

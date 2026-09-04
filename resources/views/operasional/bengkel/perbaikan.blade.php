@@ -276,25 +276,17 @@
                                 <x-menu-aksi-tabel 
                                     :kodeSalin="$spk->nomor_spk_perbaikan" 
                                     labelSalin="Salin No"
-                                    modulIzin="ops_perbaikan"
+                                    modulIzin="bengkel_perbaikan"
                                     :aksiDetail="'bukaModalDetail(\'' . $spk->id_perbaikan . '\')'"
                                     labelDetail="Detail"
+                                    :aksiCetak="'cetakSPK(\'' . $spk->id_perbaikan . '\')'"
+                                    labelCetak="Cetak SPK"
                                     :aksiEdit="'bukaModalEdit(\'' . $spk->id_perbaikan . '\')'"
                                     labelEdit="Edit"
                                 >
-                                    <!-- Cetak SPK -->
-                                    <button @click="cetakSPK('{{ $spk->id_perbaikan }}'); terbuka = false" 
-                                            type="button" 
-                                            class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 transition-colors text-left border-b border-slate-100 dark:border-[#252837]">
-                                        <svg class="w-3.5 h-3.5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                                        </svg>
-                                        <span>Cetak</span>
-                                    </button>
-
                                     @if($spk->status_perbaikan === 'Dalam Proses')
-                                        <template x-if="!apakahReadOnly('ops_perbaikan')">
-                                            <button @click="ubahStatusCepat('{{ $spk->id_perbaikan }}', 'Selesai'); terbuka = false" 
+                                        <template x-if="!apakahReadOnly('bengkel_perbaikan')">
+                                            <button @click.stop="menuTerbuka = false; ubahStatusCepat('{{ $spk->id_perbaikan }}', 'Selesai')" 
                                                     type="button" 
                                                     class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors text-left border-b border-slate-100 dark:border-[#252837]">
                                                 <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -305,8 +297,8 @@
                                         </template>
                                     @endif
 
-                                    <template x-if="!apakahReadOnly('ops_perbaikan')">
-                                        <button @click="bukaModalHapus('{{ $spk->id_perbaikan }}', '{{ $spk->nomor_spk_perbaikan }}'); terbuka = false" 
+                                    <template x-if="!apakahReadOnly('bengkel_perbaikan')">
+                                        <button @click.stop="menuTerbuka = false; bukaModalHapus('{{ $spk->id_perbaikan }}', '{{ $spk->nomor_spk_perbaikan }}')" 
                                                 type="button" 
                                                 class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors text-left border-t border-slate-100 dark:border-[#252837]">
                                             <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

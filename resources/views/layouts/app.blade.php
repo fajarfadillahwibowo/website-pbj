@@ -110,6 +110,7 @@
         apakahReadOnly(kodeModul) {
           if (!this.kunciRbac) return false;
           if (this.jabatanAktif === 'SUPER_ADMIN' || this.jabatanAktif === 'SPV_KEUANGAN') return false;
+          if (this.jabatanAktif === 'DIREKTUR_MANAGER') return true;
           if (this.jabatanAktif === 'SPV_OPERASIONAL' && kodeModul === 'armada_driver') return true;
           if (this.jabatanAktif === 'STAFF_AR') {
             const hakTulis = ['dashboard', 'master_customer', 'master_barang', 'ar_faktur', 'ar_piutang', 'ar_deposit'];
