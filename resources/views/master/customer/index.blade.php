@@ -156,13 +156,6 @@
             <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
-                        <th x-show="!apakahReadOnly('master_customer')" class="px-3 py-3 text-center w-10">
-                            <input type="checkbox" 
-                                   @change="togglePilihSemua({{ json_encode(($daftarCustomer ?? collect())->pluck('kode_customer')->toArray()) }})"
-                                   :checked="apakahSemuaTerpilih({{ json_encode(($daftarCustomer ?? collect())->pluck('kode_customer')->toArray()) }})"
-                                   class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-blue-600 focus:ring-blue-500/30 dark:bg-[#1C1E2A] cursor-pointer"
-                                   title="Pilih Semua Customer">
-                        </th>
                         <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider">Kode</th>
                         <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider">Nama Pemilik & Badan Usaha</th>
                         <th class="px-4 py-3 text-center font-semibold uppercase tracking-wider">Cabang Toko / Proyek</th>
@@ -176,14 +169,7 @@
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarCustomer as $cust)
                         <tr x-show="apakahBarisTampil({{ $loop->index }})" 
-                            :class="{ 'bg-blue-50/50 dark:bg-blue-950/20': apakahTerpilih('{{ $cust->kode_customer }}') }"
                             class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
-                            <td x-show="!apakahReadOnly('master_customer')" class="px-3 py-3 text-center">
-                                <input type="checkbox" 
-                                       :checked="apakahTerpilih('{{ $cust->kode_customer }}')"
-                                       @change="togglePilih('{{ $cust->kode_customer }}')"
-                                       class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-blue-600 focus:ring-blue-500/30 dark:bg-[#1C1E2A] cursor-pointer">
-                            </td>
                             <td class="px-4 py-3 font-mono font-bold text-blue-600 dark:text-blue-400">
                                 {{ $cust->kode_customer }}
                             </td>
@@ -194,7 +180,7 @@
                             <td class="px-4 py-3 text-center">
                                 <button @click="bukaModalDetail('{{ $cust->kode_customer }}')" type="button"
                                         class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 hover:bg-emerald-100 transition-colors">
-                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                                     <span>{{ $cust->toko_bangunan_count ?? 0 }} Toko/Proyek</span>
                                 </button>
                             </td>
@@ -228,7 +214,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="px-4 py-8 text-center text-slate-400">
+                            <td colspan="8" class="px-4 py-8 text-center text-slate-400">
                                 Belum ada data customer yang terdaftar.
                             </td>
                         </tr>
@@ -239,16 +225,6 @@
 
         <!-- Toolbar Paginasi -->
         <x-paginasi-tabel :totalData="count($daftarCustomer ?? [])" />
-
-        <!-- Bar Aksi Massal (Multi-Select Floating Bar) -->
-        <x-bar-aksi-massal 
-            labelItem="customer" 
-            warna="blue" 
-            modulIzin="master_customer" 
-            ruteHapusMassal="{{ route('master.customer.hapus_massal') }}" 
-            namaInputId="daftar_kode_customer" 
-            pesanPeringatan="Customer dengan saldo piutang aktif tidak akan terhapus demi keamanan finansial." 
-        />
     </div>
 
     <!-- ========================================================================= -->

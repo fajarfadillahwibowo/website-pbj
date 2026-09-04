@@ -177,13 +177,6 @@
             <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
-                        <th x-show="!apakahReadOnly('master_customer')" class="px-3 py-3 text-center w-10">
-                            <input type="checkbox" 
-                                   @change="togglePilihSemua({{ json_encode(($daftarToko ?? collect())->pluck('kode_toko')->toArray()) }})"
-                                   :checked="apakahSemuaTerpilih({{ json_encode(($daftarToko ?? collect())->pluck('kode_toko')->toArray()) }})"
-                                   class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-emerald-600 focus:ring-emerald-500/30 dark:bg-[#1C1E2A] cursor-pointer"
-                                   title="Pilih Semua Toko / Proyek">
-                        </th>
                         <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider">Kode Toko</th>
                         <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider">Nama Toko / Proyek</th>
                         <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider">Customer Pemilik</th>
@@ -196,14 +189,7 @@
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarToko as $toko)
                         <tr x-show="apakahBarisTampil({{ $loop->index }})" 
-                            :class="{ 'bg-emerald-50/50 dark:bg-emerald-950/20': apakahTerpilih('{{ $toko->kode_toko }}') }"
                             class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
-                            <td x-show="!apakahReadOnly('master_customer')" class="px-3 py-3 text-center">
-                                <input type="checkbox" 
-                                       :checked="apakahTerpilih('{{ $toko->kode_toko }}')"
-                                       @change="togglePilih('{{ $toko->kode_toko }}')"
-                                       class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-emerald-600 focus:ring-emerald-500/30 dark:bg-[#1C1E2A] cursor-pointer">
-                            </td>
                             <td class="px-4 py-3 font-mono font-bold text-emerald-600 dark:text-emerald-400">
                                 {{ $toko->kode_toko }}
                             </td>
@@ -267,7 +253,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-4 py-8 text-center text-slate-400">
+                            <td colspan="7" class="px-4 py-8 text-center text-slate-400">
                                 Belum ada data toko bangunan atau proyek cabang yang terdaftar.
                             </td>
                         </tr>
@@ -278,16 +264,6 @@
 
         <!-- Toolbar Paginasi -->
         <x-paginasi-tabel :totalData="count($daftarToko ?? [])" />
-
-        <!-- Bar Aksi Massal (Multi-Select Floating Bar) -->
-        <x-bar-aksi-massal 
-            labelItem="toko/proyek" 
-            warna="emerald" 
-            modulIzin="master_customer" 
-            ruteHapusMassal="{{ route('master.toko_bangunan.hapus_massal') }}" 
-            namaInputId="daftar_kode_toko" 
-            pesanPeringatan="Data cabang toko/proyek yang dihapus tidak dapat dipulihkan." 
-        />
     </div>
 
     <!-- ========================================================================= -->

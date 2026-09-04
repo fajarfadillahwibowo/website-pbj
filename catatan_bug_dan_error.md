@@ -98,6 +98,16 @@
     3. Menyesuaikan modul Keuangan AR/AP/Akuntansi agar hanya menyediakan aksi massal **"Salin Terpilih"** demi menjaga audit trail transaksi finansial.
     4. Pengujian `php artisan route:clear` dan `php artisan view:cache` lulus 100% tanpa error.
 
+- **[TERSELESAIKAN] Eliminasi Total Fitur Multi-Select Checkbox & Floating Bar Aksi Massal Demi Mitigasi Risiko Penghapusan Massal**:
+  - *Latar Belakang & Instruksi Pengguna:* Pengguna meminta agar fitur pemilihan multi-baris (checkbox) ditiadakan secara menyeluruh karena aksi hapus massal membawa risiko fatal terjadinya penghapusan data secara tidak sengaja (*accidental data loss*) pada sistem ERP perusahaan.
+  - *Solusi Eksekusi:*
+    1. Menghapus elemen checkbox `<th>` (*select all*) dan `<td>` (individual checkbox) dari seluruh 13 tabel datatable sistem.
+    2. Menghapus highlight kelas baris terpilih `:class="{ 'bg-...': apakahTerpilih(...) }"`.
+    3. Menghapus pemanggilan komponen `<x-bar-aksi-massal ... />` dari seluruh tampilan.
+    4. Menyesuaikan `colspan` baris `@empty` pada seluruh tabel agar tetap presisi dan rapi.
+    5. Menjaga popover `<x-menu-aksi-tabel>` (titik tiga `•••`) dan toolbar `<x-paginasi-tabel>` tetap berfungsi 100% secara aman, fokus, dan individual.
+    6. Verifikasi `php artisan view:clear` & `php artisan view:cache` sukses tanpa kendala.
+
 ---
 
 ## ⏭️ Progres Terlewati/Tertunda

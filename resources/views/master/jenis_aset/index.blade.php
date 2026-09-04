@@ -167,12 +167,6 @@
             <table class="tabel-bertingkat w-full text-left text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500 dark:text-slate-400">
                     <tr>
-                        <th x-show="!apakahReadOnly('master_jenis_aset')" class="w-10 px-3 py-3 text-center">
-                            <input type="checkbox" 
-                                   @change="togglePilihSemua({{ json_encode(($daftarJenisAset ?? collect())->pluck('kode_jenis_aset')->toArray()) }})"
-                                   :checked="apakahSemuaTerpilih({{ json_encode(($daftarJenisAset ?? collect())->pluck('kode_jenis_aset')->toArray()) }})"
-                                   class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-violet-600 focus:ring-violet-500/30 cursor-pointer">
-                        </th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Kode Jenis Aset</th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Nama Kategori Jenis Aset</th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Deskripsi & Spesifikasi Muatan</th>
@@ -183,15 +177,7 @@
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarJenisAset as $j)
                         <tr x-show="apakahBarisTampil({{ $loop->index }})" 
-                            :class="{ 'bg-violet-50/50 dark:bg-violet-950/20': apakahTerpilih('{{ $j->kode_jenis_aset }}') }"
                             class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
-                            <td x-show="!apakahReadOnly('master_jenis_aset')" class="w-10 px-3 py-3.5 text-center">
-                                <input type="checkbox" 
-                                       :checked="apakahTerpilih('{{ $j->kode_jenis_aset }}')"
-                                       @change="togglePilih('{{ $j->kode_jenis_aset }}')"
-                                       class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-violet-600 focus:ring-violet-500/30 cursor-pointer">
-                            </td>
-                            
                             <!-- Kode Jenis Aset -->
                             <td class="px-4 py-3.5 whitespace-nowrap">
                                 <span class="px-2.5 py-1 rounded-lg font-mono font-bold text-xs bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 border border-violet-200 dark:border-violet-500/20">
@@ -243,7 +229,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-12 text-center text-slate-400">
+                            <td colspan="5" class="px-4 py-12 text-center text-slate-400">
                                 <div class="flex flex-col items-center justify-center">
                                     <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-2">
                                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -261,16 +247,6 @@
         </div>
 
         <x-paginasi-tabel :totalData="count($daftarJenisAset ?? [])" />
-
-        <!-- Bar Aksi Massal (Multi-Select Floating Bar) -->
-        <x-bar-aksi-massal 
-            labelItem="jenis aset" 
-            warna="violet" 
-            modulIzin="master_jenis_aset" 
-            ruteHapusMassal="{{ route('master.jenis_aset.hapus_massal') }}" 
-            namaInputId="daftar_kode_jenis_aset" 
-            pesanPeringatan="Jenis aset yang masih memiliki unit armada terdaftar tidak akan terhapus demi integritas data." 
-        />
     </div>
 
     <!-- ========================================================================= -->

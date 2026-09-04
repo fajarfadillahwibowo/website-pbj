@@ -68,12 +68,6 @@
             <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
-                        <th x-show="!apakahReadOnly('master_wilayah')" class="w-10 px-3 py-2.5 text-center">
-                            <input type="checkbox" 
-                                   @change="togglePilihSemua({{ json_encode(($daftarWilayah ?? collect())->pluck('kode_wilayah')->toArray()) }})"
-                                   :checked="apakahSemuaTerpilih({{ json_encode(($daftarWilayah ?? collect())->pluck('kode_wilayah')->toArray()) }})"
-                                   class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-emerald-600 focus:ring-emerald-500/30 cursor-pointer">
-                        </th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Kode Wilayah</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Nama Wilayah & Zonasi</th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Jumlah Mitra Toko</th>
@@ -84,14 +78,7 @@
                     @forelse($daftarWilayah ?? [] as $w)
                         @php /** @var \App\Models\Master\Wilayah $w */ @endphp
                         <tr x-show="apakahBarisTampil({{ $loop->index }})" 
-                            :class="{ 'bg-emerald-50/50 dark:bg-emerald-950/20': apakahTerpilih('{{ $w->kode_wilayah }}') }"
                             class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
-                            <td x-show="!apakahReadOnly('master_wilayah')" class="w-10 px-3 py-3 text-center">
-                                <input type="checkbox" 
-                                       :checked="apakahTerpilih('{{ $w->kode_wilayah }}')"
-                                       @change="togglePilih('{{ $w->kode_wilayah }}')"
-                                       class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-emerald-600 focus:ring-emerald-500/30 cursor-pointer">
-                            </td>
                             <td class="px-4 py-3 font-mono font-medium text-emerald-600 dark:text-emerald-400">
                                 {{ $w->kode_wilayah }}
                             </td>
@@ -116,7 +103,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-6 text-center text-slate-400">Belum ada data wilayah zonasi.</td>
+                            <td colspan="4" class="px-4 py-6 text-center text-slate-400">Belum ada data wilayah zonasi.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -125,16 +112,6 @@
 
         <!-- Toolbar Paginasi & Baris per Halaman -->
         <x-paginasi-tabel :totalData="count($daftarWilayah ?? [])" />
-
-        <!-- Bar Aksi Massal (Multi-Select Floating Bar) -->
-        <x-bar-aksi-massal 
-            labelItem="wilayah" 
-            warna="emerald" 
-            modulIzin="master_wilayah" 
-            ruteHapusMassal="{{ route('master.wilayah.hapus_massal') }}" 
-            namaInputId="daftar_kode_wilayah" 
-            pesanPeringatan="Wilayah yang masih terikat dengan data customer/toko tidak akan terhapus demi integritas data." 
-        />
     </div>
 
     <!-- Modal Tambah Wilayah -->

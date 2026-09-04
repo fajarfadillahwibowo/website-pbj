@@ -197,12 +197,6 @@
             <table class="tabel-bertingkat w-full text-left text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500 dark:text-slate-400">
                     <tr>
-                        <th x-show="!apakahReadOnly('ops_gudang')" class="w-10 px-3 py-3 text-center">
-                            <input type="checkbox" 
-                                   @change="togglePilihSemua({{ json_encode(($daftarGudang ?? collect())->pluck('kode_gudang')->toArray()) }})"
-                                   :checked="apakahSemuaTerpilih({{ json_encode(($daftarGudang ?? collect())->pluck('kode_gudang')->toArray()) }})"
-                                   class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-amber-600 focus:ring-amber-500/30 cursor-pointer">
-                        </th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Kode & Nama Gudang</th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Komoditas Semen & Plant</th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Kuantitas Stok & Status</th>
@@ -214,15 +208,7 @@
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarGudang as $gdg)
                         <tr x-show="apakahBarisTampil({{ $loop->index }})" 
-                            :class="{ 'bg-amber-50/50 dark:bg-amber-950/20': apakahTerpilih('{{ $gdg->kode_gudang }}') }"
                             class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
-                            <td x-show="!apakahReadOnly('ops_gudang')" class="w-10 px-3 py-3.5 text-center">
-                                <input type="checkbox" 
-                                       :checked="apakahTerpilih('{{ $gdg->kode_gudang }}')"
-                                       @change="togglePilih('{{ $gdg->kode_gudang }}')"
-                                       class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-amber-600 focus:ring-amber-500/30 cursor-pointer">
-                            </td>
-                            
                             <!-- Kode & Nama -->
                             <td class="px-4 py-3.5 whitespace-nowrap">
                                 <div class="font-mono font-bold text-amber-600 dark:text-amber-400 text-sm">
@@ -323,7 +309,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-12 text-center text-slate-400">
+                            <td colspan="6" class="px-4 py-12 text-center text-slate-400">
                                 <div class="flex flex-col items-center justify-center">
                                     <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-2">
                                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -340,16 +326,6 @@
             </table>
         </div>
         <x-paginasi-tabel :totalData="count($daftarGudang ?? [])" />
-
-        <!-- Bar Aksi Massal (Multi-Select Floating Bar) -->
-        <x-bar-aksi-massal 
-            labelItem="gudang" 
-            warna="amber" 
-            modulIzin="ops_gudang" 
-            ruteHapusMassal="{{ route('operasional.gudang.stok.hapus_massal') }}" 
-            namaInputId="daftar_kode_gudang" 
-            pesanPeringatan="Gudang yang memiliki stok semen aktif tidak akan terhapus demi keamanan inventaris." 
-        />
     </div>
 
     <!-- Modal Tambah Fasilitas Gudang -->

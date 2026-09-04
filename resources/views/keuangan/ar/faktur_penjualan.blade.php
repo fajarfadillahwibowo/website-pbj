@@ -163,12 +163,6 @@
             <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
-                        <th x-show="!apakahReadOnly('ar_faktur')" class="w-10 px-3 py-2.5 text-center">
-                            <input type="checkbox" 
-                                   @change="togglePilihSemua({{ json_encode(($daftarFaktur ?? collect())->pluck('nomor_faktur')->toArray()) }})"
-                                   :checked="apakahSemuaTerpilih({{ json_encode(($daftarFaktur ?? collect())->pluck('nomor_faktur')->toArray()) }})"
-                                   class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-blue-600 focus:ring-blue-500/30 cursor-pointer">
-                        </th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">No. Faktur</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Tanggal</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Customer / Toko</th>
@@ -185,14 +179,7 @@
                     @forelse($daftarFaktur ?? [] as $faktur)
                         @php /** @var \App\Models\Keuangan\FakturPenjualan $faktur */ @endphp
                         <tr x-show="apakahBarisTampil({{ $loop->index }})" 
-                            :class="{ 'bg-blue-50/50 dark:bg-blue-950/20': apakahTerpilih('{{ $faktur->nomor_faktur }}') }"
                             class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
-                            <td x-show="!apakahReadOnly('ar_faktur')" class="w-10 px-3 py-3 text-center">
-                                <input type="checkbox" 
-                                       :checked="apakahTerpilih('{{ $faktur->nomor_faktur }}')"
-                                       @change="togglePilih('{{ $faktur->nomor_faktur }}')"
-                                       class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-blue-600 focus:ring-blue-500/30 cursor-pointer">
-                            </td>
                             <td class="px-4 py-3 font-mono font-medium text-blue-600 dark:text-blue-400">
                                 {{ $faktur->nomor_faktur }}
                             </td>
@@ -247,7 +234,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="11" class="px-4 py-6 text-center text-slate-400">Belum ada faktur penjualan tercatat.</td>
+                            <td colspan="10" class="px-4 py-6 text-center text-slate-400">Belum ada faktur penjualan tercatat.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -255,9 +242,6 @@
         </div>
 
         <x-paginasi-tabel :totalData="count($daftarFaktur ?? [])" />
-
-        <!-- Bar Aksi Massal (Multi-Select Floating Bar) -->
-        <x-bar-aksi-massal labelItem="faktur" warna="blue" modulIzin="ar_faktur" />
     </div>
 
     <!-- Modal Tambah Faktur Penjualan -->

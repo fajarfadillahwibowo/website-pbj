@@ -209,12 +209,6 @@
             <table class="tabel-bertingkat w-full text-left text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500 dark:text-slate-400">
                     <tr>
-                        <th x-show="!apakahReadOnly('ops_ongkos_angkut')" class="w-10 px-3 py-3 text-center">
-                            <input type="checkbox" 
-                                   @change="togglePilihSemua({{ json_encode(($daftarOngkosAngkut ?? collect())->pluck('kode_oa')->toArray()) }})"
-                                   :checked="apakahSemuaTerpilih({{ json_encode(($daftarOngkosAngkut ?? collect())->pluck('kode_oa')->toArray()) }})"
-                                   class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-blue-600 focus:ring-blue-500/30 cursor-pointer">
-                        </th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Kode OA</th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Nama Rute / Trayek OA</th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Gudang Asal (SPV Gudang)</th>
@@ -230,15 +224,7 @@
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarOngkosAngkut as $oa)
                         <tr x-show="apakahBarisTampil({{ $loop->index }})" 
-                            :class="{ 'bg-blue-50/50 dark:bg-blue-950/20': apakahTerpilih('{{ $oa->kode_oa }}') }"
                             class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors group">
-                            <td x-show="!apakahReadOnly('ops_ongkos_angkut')" class="w-10 px-3 py-3.5 text-center">
-                                <input type="checkbox" 
-                                       :checked="apakahTerpilih('{{ $oa->kode_oa }}')"
-                                       @change="togglePilih('{{ $oa->kode_oa }}')"
-                                       class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-blue-600 focus:ring-blue-500/30 cursor-pointer">
-                            </td>
-
                             <!-- 1. Kode OA -->
                             <td class="px-4 py-3.5 font-mono font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap">
                                 <span class="px-2 py-1 rounded bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20">
@@ -334,7 +320,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="11" class="px-4 py-12 text-center text-slate-400">
+                            <td colspan="10" class="px-4 py-12 text-center text-slate-400">
                                 <div class="flex flex-col items-center justify-center">
                                     <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-2">
                                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -351,14 +337,6 @@
             </table>
         </div>
         <x-paginasi-tabel :totalData="count($daftarOngkosAngkut ?? [])" />
-        <x-bar-aksi-massal 
-            labelItem="ongkos angkut" 
-            warna="blue" 
-            modulIzin="ops_ongkos_angkut" 
-            ruteHapusMassal="{{ route('operasional.pengiriman.ongkos_angkut.hapus_massal') }}" 
-            namaInputId="daftar_kode_oa" 
-            pesanPeringatan="Tarif ongkos angkut yang dihapus tidak dapat dipulihkan." 
-        />
     </div>
 
     <!-- ========================================================================= -->

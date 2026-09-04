@@ -157,12 +157,6 @@
             <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
-                        <th x-show="!apakahReadOnly('akun_aset')" class="w-10 px-3 py-2.5 text-center">
-                            <input type="checkbox" 
-                                   @change="togglePilihSemua({{ json_encode(($daftarAset ?? collect())->pluck('kode_aset')->toArray()) }})"
-                                   :checked="apakahSemuaTerpilih({{ json_encode(($daftarAset ?? collect())->pluck('kode_aset')->toArray()) }})"
-                                   class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-indigo-600 focus:ring-indigo-500/30 cursor-pointer">
-                        </th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Kode Aset</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Nama Aset & Kategori</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Penyusutan</th>
@@ -177,14 +171,7 @@
                     @forelse($daftarAset as $aset)
                         @php /** @var \App\Models\Keuangan\AsetPerusahaan $aset */ @endphp
                         <tr x-show="apakahBarisTampil({{ $loop->index }})" 
-                            :class="{ 'bg-indigo-50/50 dark:bg-indigo-950/20': apakahTerpilih('{{ $aset->kode_aset }}') }"
                             class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
-                            <td x-show="!apakahReadOnly('akun_aset')" class="w-10 px-3 py-3 text-center">
-                                <input type="checkbox" 
-                                       :checked="apakahTerpilih('{{ $aset->kode_aset }}')"
-                                       @change="togglePilih('{{ $aset->kode_aset }}')"
-                                       class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-indigo-600 focus:ring-indigo-500/30 cursor-pointer">
-                            </td>
                             <td class="px-4 py-3 font-mono font-medium text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
                                 {{ $aset->kode_aset }}
                             </td>
@@ -250,7 +237,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="px-4 py-8 text-center text-slate-400">Belum ada aktiva tetap terdaftar.</td>
+                            <td colspan="8" class="px-4 py-8 text-center text-slate-400">Belum ada aktiva tetap terdaftar.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -258,9 +245,6 @@
         </div>
 
         <x-paginasi-tabel :totalData="count($daftarAset ?? [])" />
-
-        <!-- Bar Aksi Massal (Multi-Select Floating Bar) -->
-        <x-bar-aksi-massal labelItem="aset" warna="indigo" modulIzin="akun_aset" />
     </div>
 
     <!-- Modal 1: Tambah Aset Baru Komprehensif (Canvas Landscape) -->

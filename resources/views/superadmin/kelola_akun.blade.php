@@ -76,12 +76,6 @@
             <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
-                        <th x-show="!apakahReadOnly('superadmin_akun')" class="w-10 px-3 py-2.5 text-center">
-                            <input type="checkbox" 
-                                   @change="togglePilihSemua({{ json_encode(collect($semuaAkun ?? [])->map(fn($a) => is_object($a) ? $a->username : $a['username'])->toArray()) }})"
-                                   :checked="apakahSemuaTerpilih({{ json_encode(collect($semuaAkun ?? [])->map(fn($a) => is_object($a) ? $a->username : $a['username'])->toArray()) }})"
-                                   class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-purple-600 focus:ring-purple-500/30 cursor-pointer">
-                        </th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider w-12">No</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Username</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Nama Pegawai / Pemilik</th>
@@ -101,14 +95,7 @@
                             $aktif = is_object($row) ? ($row->status_aktif ?? true) : ($row['status_aktif'] ?? true);
                         @endphp
                         <tr x-show="apakahBarisTampil({{ $loop->index }})" 
-                            :class="{ 'bg-purple-50/50 dark:bg-purple-950/20': apakahTerpilih('{{ $usr }}') }"
                             class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
-                            <td x-show="!apakahReadOnly('superadmin_akun')" class="w-10 px-3 py-3 text-center">
-                                <input type="checkbox" 
-                                       :checked="apakahTerpilih('{{ $usr }}')"
-                                       @change="togglePilih('{{ $usr }}')"
-                                       class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-purple-600 focus:ring-purple-500/30 cursor-pointer">
-                            </td>
                             <td class="px-4 py-3 text-center font-mono text-slate-400">{{ $index + 1 }}</td>
                             <td class="px-4 py-3 font-mono font-medium {{ $isSuper ? 'text-purple-600 dark:text-purple-400 font-bold' : 'text-slate-800 dark:text-slate-200' }}">
                                 {{ $usr }}
@@ -173,7 +160,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-6 text-center text-slate-400">Tidak ada akun yang sesuai dengan kriteria pencarian.</td>
+                            <td colspan="6" class="px-4 py-6 text-center text-slate-400">Tidak ada akun yang sesuai dengan kriteria pencarian.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -182,9 +169,6 @@
         
         <!-- Paginasi Terpadu -->
         <x-paginasi-tabel :totalData="count($semuaAkun ?? [])" />
-
-        <!-- Bar Aksi Massal (Multi-Select Floating Bar) -->
-        <x-bar-aksi-massal labelItem="akun pengguna" warna="purple" modulIzin="superadmin_akun" />
     </div>
 
     <!-- Modal Tambah Akun Pengguna -->

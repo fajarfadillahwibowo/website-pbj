@@ -117,12 +117,6 @@
             <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
-                        <th x-show="!apakahReadOnly('master_karyawan')" class="w-10 px-3 py-2.5 text-center">
-                            <input type="checkbox" 
-                                   @change="togglePilihSemua({{ json_encode(($daftarKaryawan ?? collect())->pluck('kode_karyawan')->toArray()) }})"
-                                   :checked="apakahSemuaTerpilih({{ json_encode(($daftarKaryawan ?? collect())->pluck('kode_karyawan')->toArray()) }})"
-                                   class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-indigo-600 focus:ring-indigo-500/30 cursor-pointer">
-                        </th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Kode Karyawan</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Nama Lengkap & Kontak</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Jabatan Peran</th>
@@ -136,14 +130,7 @@
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarKaryawan as $karyawan)
                         <tr x-show="apakahBarisTampil({{ $loop->index }})" 
-                            :class="{ 'bg-indigo-50/50 dark:bg-indigo-950/20': apakahTerpilih('{{ $karyawan->kode_karyawan }}') }"
                             class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
-                            <td x-show="!apakahReadOnly('master_karyawan')" class="w-10 px-3 py-3 text-center">
-                                <input type="checkbox" 
-                                       :checked="apakahTerpilih('{{ $karyawan->kode_karyawan }}')"
-                                       @change="togglePilih('{{ $karyawan->kode_karyawan }}')"
-                                       class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-indigo-600 focus:ring-indigo-500/30 cursor-pointer">
-                            </td>
                             <td class="px-4 py-3 font-mono font-medium text-indigo-600 dark:text-indigo-400">
                                 {{ $karyawan->kode_karyawan }}
                             </td>
@@ -189,7 +176,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="px-4 py-8 text-center text-slate-400">
+                            <td colspan="8" class="px-4 py-8 text-center text-slate-400">
                                 Tidak ada data karyawan yang cocok dengan kriteria pencarian.
                             </td>
                         </tr>
@@ -199,16 +186,6 @@
         </div>
 
         <x-paginasi-tabel :totalData="count($daftarKaryawan ?? [])" />
-
-        <!-- Bar Aksi Massal (Multi-Select Floating Bar) -->
-        <x-bar-aksi-massal 
-            labelItem="karyawan" 
-            warna="indigo" 
-            modulIzin="master_karyawan" 
-            ruteHapusMassal="{{ route('master.karyawan.hapus_massal') }}" 
-            namaInputId="daftar_kode_karyawan" 
-            pesanPeringatan="Karyawan yang terhubung dengan akun pengguna atau armada aktif tidak akan terhapus." 
-        />
     </div>
     @php
         $opsiKategoriKaryawan = [

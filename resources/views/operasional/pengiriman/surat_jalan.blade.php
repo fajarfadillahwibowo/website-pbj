@@ -207,12 +207,6 @@
             <table class="tabel-bertingkat w-full text-left text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500 dark:text-slate-400">
                     <tr>
-                        <th x-show="!apakahReadOnly('ops_surat_jalan')" class="w-10 px-3 py-3 text-center">
-                            <input type="checkbox" 
-                                   @change="togglePilihSemua({{ json_encode(($daftarPengiriman ?? collect())->pluck('nomor_surat_jalan')->toArray()) }})"
-                                   :checked="apakahSemuaTerpilih({{ json_encode(($daftarPengiriman ?? collect())->pluck('nomor_surat_jalan')->toArray()) }})"
-                                   class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-sky-600 focus:ring-sky-500/30 cursor-pointer">
-                        </th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">No. Surat Jalan & Waktu</th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Sales Order & Destinasi Customer</th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Driver Pengemudi</th>
@@ -224,15 +218,7 @@
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarPengiriman as $sj)
                         <tr x-show="apakahBarisTampil({{ $loop->index }})" 
-                            :class="{ 'bg-sky-50/50 dark:bg-sky-950/20': apakahTerpilih('{{ $sj->nomor_surat_jalan }}') }"
                             class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
-                            <td x-show="!apakahReadOnly('ops_surat_jalan')" class="w-10 px-3 py-3.5 text-center">
-                                <input type="checkbox" 
-                                       :checked="apakahTerpilih('{{ $sj->nomor_surat_jalan }}')"
-                                       @change="togglePilih('{{ $sj->nomor_surat_jalan }}')"
-                                       class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-sky-600 focus:ring-sky-500/30 cursor-pointer">
-                            </td>
-                            
                             <!-- No SJ & Tanggal -->
                             <td class="px-4 py-3.5 whitespace-nowrap">
                                 <div class="font-mono font-bold text-sky-600 dark:text-sky-400 text-sm">
@@ -334,7 +320,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-12 text-center text-slate-400">
+                            <td colspan="6" class="px-4 py-12 text-center text-slate-400">
                                 <div class="flex flex-col items-center justify-center">
                                     <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-2">
                                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -352,9 +338,6 @@
             </table>
         </div>
         <x-paginasi-tabel :totalData="count($daftarPengiriman ?? [])" />
-
-        <!-- Bar Aksi Massal (Multi-Select Floating Bar) -->
-        <x-bar-aksi-massal labelItem="surat jalan" warna="sky" modulIzin="ops_surat_jalan" />
     </div>
 
     <!-- Modal Tambah Surat Jalan -->
