@@ -269,7 +269,7 @@
                                         labelDetail="Detail Opname"
                                         :aksiCetak="'cetakLangsungOpname(\'' . $opn->id_opname . '\')'"
                                         labelCetak="Cetak BASO"
-                                        aksiEdit="{{ $opn->status_konfirmasi === 'draft' ? \"bukaModalEdit('{$opn->id_opname}')\" : null }}"
+                                        :aksiEdit="$opn->status_konfirmasi === 'draft' ? 'bukaModalEdit(\'' . $opn->id_opname . '\')' : null"
                                         labelEdit="Ubah Hitung Fisik"
                                         modulIzin="gudang_opname"
                                     >
