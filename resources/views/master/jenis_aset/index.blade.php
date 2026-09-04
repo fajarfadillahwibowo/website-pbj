@@ -134,7 +134,7 @@
     </div>
 
     <!-- 4. Tabel Data & Bar Pencarian -->
-    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div x-data="tabelPaginasi({ totalData: {{ count($daftarJenisAset ?? []) }}, defaultBaris: 10 })" class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         
         <!-- Search Bar -->
         <div class="p-4 sm:px-5 sm:py-4 border-b border-[#E2E8F0] dark:border-[#252837] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -167,6 +167,12 @@
             <table class="tabel-bertingkat w-full text-left text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500 dark:text-slate-400">
                     <tr>
+                        <th x-show="!apakahReadOnly('master_jenis_aset')" class="w-10 px-3 py-3 text-center">
+                            <input type="checkbox" 
+                                   @change="togglePilihSemua({{ json_encode(($daftarJenisAset ?? collect())->pluck('kode_jenis_aset')->toArray()) }})"
+                                   :checked="apakahSemuaTerpilih({{ json_encode(($daftarJenisAset ?? collect())->pluck('kode_jenis_aset')->toArray()) }})"
+                                   class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-violet-600 focus:ring-violet-500/30 cursor-pointer">
+                        </th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Kode Jenis Aset</th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Nama Kategori Jenis Aset</th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Deskripsi & Spesifikasi Muatan</th>
@@ -176,7 +182,15 @@
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarJenisAset as $j)
-                        <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                        <tr x-show="apakahBarisTampil({{ $loop->index }})" 
+                            :class="{ 'bg-violet-50/50 dark:bg-violet-950/20': apakahTerpilih('{{ $j->kode_jenis_aset }}') }"
+                            class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                            <td x-show="!apakahReadOnly('master_jenis_aset')" class="w-10 px-3 py-3.5 text-center">
+                                <input type="checkbox" 
+                                       :checked="apakahTerpilih('{{ $j->kode_jenis_aset }}')"
+                                       @change="togglePilih('{{ $j->kode_jenis_aset }}')"
+                                       class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-violet-600 focus:ring-violet-500/30 cursor-pointer">
+                            </td>
                             
                             <!-- Kode Jenis Aset -->
                             <td class="px-4 py-3.5 whitespace-nowrap">
@@ -203,51 +217,33 @@
                                 </span>
                             </td>
 
-                            <!-- Tombol Aksi & Riwayat Terakhir Diedit Real-Time -->
+                            <!-- Tombol Aksi Popover -->
                             <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                <div class="inline-flex items-center gap-1.5">
-                                    <!-- Detail -->
-                                    <button @click="bukaModalDetail('{{ $j->kode_jenis_aset }}')"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
-                                            title="Lihat Detail & Daftar Armada">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                        </svg>
-                                    </button>
-
-                                    <!-- Edit -->
-                                    <button @click="bukaModalEdit('{{ $j->kode_jenis_aset }}')"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
-                                            title="Ubah Kategori Jenis Aset">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </button>
-
-                                    <!-- Hapus -->
-                                    <button @click="bukaModalHapus('{{ $j->kode_jenis_aset }}', '{{ addslashes($j->jenis_aset) }}', {{ $j->kendaraan_count }})"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
-                                            title="Hapus Kategori">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                <!-- Riwayat Terakhir Diedit Real-Time -->
-                                <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 flex items-center justify-center gap-1 font-mono cursor-help"
-                                     title="Terakhir diperbarui: {{ $j->diperbarui_pada ? \Carbon\Carbon::parse($j->diperbarui_pada)->format('d/m/Y H:i:s') : '-' }}">
-                                    <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                    <span>{{ $j->diperbarui_pada ? \Carbon\Carbon::parse($j->diperbarui_pada)->locale('id')->diffForHumans() : 'Baru' }}</span>
-                                </div>
+                                <x-menu-aksi-tabel 
+                                    :kodeSalin="$j->kode_jenis_aset" 
+                                    labelSalin="Salin Kode"
+                                    modulIzin="master_jenis_aset"
+                                    :aksiDetail="'bukaModalDetail(\'' . $j->kode_jenis_aset . '\')'"
+                                    labelDetail="Detail"
+                                    :aksiEdit="'bukaModalEdit(\'' . $j->kode_jenis_aset . '\')'"
+                                    labelEdit="Edit"
+                                >
+                                    <template x-if="!apakahReadOnly('master_jenis_aset')">
+                                        <button @click="bukaModalHapus('{{ $j->kode_jenis_aset }}', '{{ addslashes($j->jenis_aset) }}', {{ $j->kendaraan_count }}); terbuka = false" 
+                                                type="button" 
+                                                class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors text-left border-t border-slate-100 dark:border-[#252837]">
+                                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                            <span>Hapus</span>
+                                        </button>
+                                    </template>
+                                </x-menu-aksi-tabel>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-12 text-center text-slate-400">
+                            <td colspan="6" class="px-4 py-12 text-center text-slate-400">
                                 <div class="flex flex-col items-center justify-center">
                                     <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-2">
                                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -263,6 +259,18 @@
                 </tbody>
             </table>
         </div>
+
+        <x-paginasi-tabel :totalData="count($daftarJenisAset ?? [])" />
+
+        <!-- Bar Aksi Massal (Multi-Select Floating Bar) -->
+        <x-bar-aksi-massal 
+            labelItem="jenis aset" 
+            warna="violet" 
+            modulIzin="master_jenis_aset" 
+            ruteHapusMassal="{{ route('master.jenis_aset.hapus_massal') }}" 
+            namaInputId="daftar_kode_jenis_aset" 
+            pesanPeringatan="Jenis aset yang masih memiliki unit armada terdaftar tidak akan terhapus demi integritas data." 
+        />
     </div>
 
     <!-- ========================================================================= -->

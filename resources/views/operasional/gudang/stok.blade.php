@@ -150,7 +150,7 @@
     </div>
 
     <!-- 4. Tabel Fasilitas Gudang & Filter -->
-    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div x-data="tabelPaginasi({ totalData: {{ count($daftarGudang ?? []) }}, defaultBaris: 10 })" class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         
         <!-- Filter Bar -->
         <div class="p-4 sm:px-5 sm:py-4 border-b border-[#E2E8F0] dark:border-[#252837] flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -197,6 +197,12 @@
             <table class="tabel-bertingkat w-full text-left text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500 dark:text-slate-400">
                     <tr>
+                        <th x-show="!apakahReadOnly('ops_gudang')" class="w-10 px-3 py-3 text-center">
+                            <input type="checkbox" 
+                                   @change="togglePilihSemua({{ json_encode(($daftarGudang ?? collect())->pluck('kode_gudang')->toArray()) }})"
+                                   :checked="apakahSemuaTerpilih({{ json_encode(($daftarGudang ?? collect())->pluck('kode_gudang')->toArray()) }})"
+                                   class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-amber-600 focus:ring-amber-500/30 cursor-pointer">
+                        </th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Kode & Nama Gudang</th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Komoditas Semen & Plant</th>
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Kuantitas Stok & Status</th>
@@ -207,7 +213,15 @@
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarGudang as $gdg)
-                        <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                        <tr x-show="apakahBarisTampil({{ $loop->index }})" 
+                            :class="{ 'bg-amber-50/50 dark:bg-amber-950/20': apakahTerpilih('{{ $gdg->kode_gudang }}') }"
+                            class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                            <td x-show="!apakahReadOnly('ops_gudang')" class="w-10 px-3 py-3.5 text-center">
+                                <input type="checkbox" 
+                                       :checked="apakahTerpilih('{{ $gdg->kode_gudang }}')"
+                                       @change="togglePilih('{{ $gdg->kode_gudang }}')"
+                                       class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-amber-600 focus:ring-amber-500/30 cursor-pointer">
+                            </td>
                             
                             <!-- Kode & Nama -->
                             <td class="px-4 py-3.5 whitespace-nowrap">
@@ -274,39 +288,42 @@
                                 Rp {{ number_format($gdg->stok_tersedia * $gdg->harga_barang, 0, ',', '.') }}
                             </td>
 
-                            <!-- Aksi & Mutasi -->
+                            <!-- Aksi Popover Modern -->
                             <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                <div class="inline-flex items-center gap-1.5">
-                                    <button @click="bukaModalMutasi('{{ $gdg->kode_gudang }}', '{{ $gdg->nama_gudang }}', {{ $gdg->stok_tersedia }})"
-                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 transition-colors"
-                                            title="Penyesuaian Stok Fisik / Mutasi Cepat">
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
-                                        </svg>
-                                        <span>Mutasi Stok</span>
-                                    </button>
+                                <x-menu-aksi-tabel 
+                                    :kodeSalin="$gdg->kode_gudang" 
+                                    labelSalin="Salin Kode"
+                                    modulIzin="ops_gudang"
+                                    :aksiEdit="'bukaModalEdit(\'' . $gdg->kode_gudang . '\')'"
+                                    labelEdit="Edit"
+                                >
+                                    <template x-if="!apakahReadOnly('ops_gudang')">
+                                        <button @click="bukaModalMutasi('{{ $gdg->kode_gudang }}', '{{ $gdg->nama_gudang }}', {{ $gdg->stok_tersedia }}); terbuka = false" 
+                                                type="button" 
+                                                class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors text-left border-b border-slate-100 dark:border-[#252837]">
+                                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                            </svg>
+                                            <span>Mutasi Stok</span>
+                                        </button>
+                                    </template>
 
-                                    <button @click="bukaModalEdit('{{ $gdg->kode_gudang }}')"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
-                                            title="Ubah Data Gudang">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </button>
-
-                                    <button @click="bukaModalHapus('{{ $gdg->kode_gudang }}', '{{ $gdg->nama_gudang }}')"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
-                                            title="Hapus Gudang">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </div>
+                                    <template x-if="!apakahReadOnly('ops_gudang')">
+                                        <button @click="bukaModalHapus('{{ $gdg->kode_gudang }}', '{{ $gdg->nama_gudang }}'); terbuka = false" 
+                                                type="button" 
+                                                class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors text-left border-t border-slate-100 dark:border-[#252837]">
+                                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                            <span>Hapus</span>
+                                        </button>
+                                    </template>
+                                </x-menu-aksi-tabel>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-12 text-center text-slate-400">
+                            <td colspan="7" class="px-4 py-12 text-center text-slate-400">
                                 <div class="flex flex-col items-center justify-center">
                                     <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-2">
                                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -322,6 +339,17 @@
                 </tbody>
             </table>
         </div>
+        <x-paginasi-tabel :totalData="count($daftarGudang ?? [])" />
+
+        <!-- Bar Aksi Massal (Multi-Select Floating Bar) -->
+        <x-bar-aksi-massal 
+            labelItem="gudang" 
+            warna="amber" 
+            modulIzin="ops_gudang" 
+            ruteHapusMassal="{{ route('operasional.gudang.stok.hapus_massal') }}" 
+            namaInputId="daftar_kode_gudang" 
+            pesanPeringatan="Gudang yang memiliki stok semen aktif tidak akan terhapus demi keamanan inventaris." 
+        />
     </div>
 
     <!-- Modal Tambah Fasilitas Gudang -->

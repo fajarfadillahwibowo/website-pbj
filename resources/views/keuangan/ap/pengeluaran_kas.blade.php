@@ -51,7 +51,7 @@
     </div>
 
     <!-- Tabel Data Pengeluaran Kas -->
-    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div x-data="tabelPaginasi({ totalData: {{ count($daftarPengeluaran ?? []) }}, defaultBaris: 10 })" class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <form method="GET" action="{{ route('keuangan.ap.pengeluaran') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
             @php
                 $opsiFilterKategoriPengeluaran = [
@@ -109,11 +109,13 @@
                         <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Nominal Kas Keluar</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Sumber Rekening</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Keterangan</th>
+                        <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider w-16">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarPengeluaran ?? [] as $keluar)
-                        <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                        @php /** @var \App\Models\Keuangan\PengeluaranKas $keluar */ @endphp
+                        <tr x-show="apakahBarisTampil({{ $loop->index }})" class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
                             <td class="px-4 py-3 font-mono font-medium text-rose-600 dark:text-rose-400">
                                 {{ $keluar->nomor_pengeluaran }}
                             </td>
@@ -137,15 +139,24 @@
                             <td class="px-4 py-3 text-slate-500 dark:text-slate-400 truncate max-w-xs">
                                 {{ $keluar->keterangan ?? '-' }}
                             </td>
+                            <td class="px-4 py-3 text-center">
+                                <x-menu-aksi-tabel 
+                                    :kodeSalin="$keluar->nomor_pengeluaran" 
+                                    labelSalin="Salin No"
+                                    modulIzin="ap_pengeluaran"
+                                />
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-6 text-center text-slate-400">Belum ada pengeluaran kas tercatat.</td>
+                            <td colspan="8" class="px-4 py-6 text-center text-slate-400">Belum ada pengeluaran kas tercatat.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+
+        <x-paginasi-tabel :totalData="count($daftarPengeluaran ?? [])" />
     </div>
 
     <!-- Modal Tambah Pengeluaran -->
@@ -202,8 +213,12 @@
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Total Nominal Pengeluaran (Rp) <span class="text-rose-500">*</span></label>
-                    <input type="number" name="total_nominal" required min="0" step="any" placeholder="1500000"
-                           class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/30 font-mono font-semibold text-sm">
+                    <x-input-rupiah 
+                        nama="total_nominal"
+                        placeholder="1.500.000"
+                        :wajib="true"
+                        warnaFokus="rose"
+                    />
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan Keperluan <span class="text-rose-500">*</span></label>

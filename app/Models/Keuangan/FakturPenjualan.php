@@ -21,6 +21,11 @@ class FakturPenjualan extends Model
         'tanggal_penjualan',
         'kode_customer',
         'kode_toko',
+        'kode_barang',
+        'nama_barang',
+        'satuan_barang',
+        'jumlah_zak',
+        'harga_satuan',
         'metode_pembayaran',
         'total_bruto',
         'diskon',
@@ -42,6 +47,11 @@ class FakturPenjualan extends Model
     public function tokoBangunan()
     {
         return $this->belongsTo(\App\Models\Master\TokoBangunan::class, 'kode_toko', 'kode_toko');
+    }
+
+    public function barang()
+    {
+        return $this->belongsTo(\App\Models\Master\Barang::class, 'kode_barang', 'kode_barang');
     }
 
     public function piutang()

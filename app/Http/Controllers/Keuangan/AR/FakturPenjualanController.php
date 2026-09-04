@@ -25,19 +25,26 @@ class FakturPenjualanController extends Controller
         $filterStatus = $request->input('status');
         $filterMetode = $request->input('metode');
 
-        $query = FakturPenjualan::with(['customer', 'tokoBangunan']);
+        $query = FakturPenjualan::with(['customer', 'tokoBangunan', 'barang']);
 
         if ($filterStatus) {
             $query->where('status_pembayaran', $filterStatus);
         }
 
         if ($filterMetode) {
-            $query->where('metode_pembayaran', $filterMetode);
+            if ($filterMetode === 'Kredit' || $filterMetode === 'Kredit / Piutang') {
+                $query->whereIn('metode_pembayaran', ['Kredit', 'Kredit / Piutang']);
+            } elseif ($filterMetode === 'Deposit' || $filterMetode === 'Potong Deposit') {
+                $query->whereIn('metode_pembayaran', ['Deposit', 'Potong Deposit']);
+            } else {
+                $query->where('metode_pembayaran', $filterMetode);
+            }
         }
 
         if ($kataKunci) {
             $query->where(function ($q) use ($kataKunci) {
                 $q->where('nomor_faktur', 'like', "%{$kataKunci}%")
+                  ->orWhere('nama_barang', 'like', "%{$kataKunci}%")
                   ->orWhereHas('customer', function ($c) use ($kataKunci) {
                       $c->where('nama_pemilik', 'like', "%{$kataKunci}%")
                         ->orWhere('nama_toko_bangunan', 'like', "%{$kataKunci}%");
@@ -84,7 +91,7 @@ class FakturPenjualanController extends Controller
      */
     public function store(Request $request)
     {
-        // Jika kode_toko dipilih, otomatis ambil kode_customer dari toko tersebut
+        // Jika kode_toko diisi, sinkronkan kode_customer pemilik
         if ($request->filled('kode_toko')) {
             $toko = TokoBangunan::where('kode_toko', $request->kode_toko)->first();
             if ($toko) {
@@ -95,22 +102,40 @@ class FakturPenjualanController extends Controller
         $request->validate([
             'kode_customer'     => 'required|string|exists:data_customer,kode_customer',
             'kode_toko'         => 'nullable|string|exists:data_toko_bangunan,kode_toko',
+            'kode_barang'       => 'required|string|exists:data_semen,kode_barang',
+            'jumlah_zak'        => 'required|numeric|min:1',
+            'harga_satuan'      => 'required|numeric|min:1',
             'tanggal_penjualan' => 'required|date',
-            'metode_pembayaran' => 'required|string|in:Tunai,Transfer,Kredit / Piutang,Potong Deposit',
+            'metode_pembayaran' => 'required|string|in:Tunai,Transfer,Kredit,Kredit / Piutang,Deposit,Potong Deposit',
             'total_bruto'       => 'required|numeric|min:1',
             'diskon'            => 'nullable|numeric|min:0',
         ], [
             'kode_customer.exists' => 'Customer toko bangunan tidak ditemukan.',
+            'kode_barang.exists'   => 'Produk semen tidak ditemukan dalam master data.',
+            'jumlah_zak.min'       => 'Kuantitas semen minimal 1 zak / satuan.',
+            'harga_satuan.min'     => 'Harga satuan semen minimal Rp 1.',
             'total_bruto.min'      => 'Total nominal penjualan minimal Rp 1.',
         ]);
 
         $customer = Customer::findOrFail($request->kode_customer);
+        $barang = Barang::find($request->kode_barang);
+        $namaBarang = $barang ? $barang->nama_barang : 'Semen Portland (PCC)';
+        $satuanBarang = $barang ? ($barang->satuan_barang ?? 'Zak') : 'Zak';
+        $jumlahZak = (int) $request->jumlah_zak;
+        $hargaSatuan = (float) $request->harga_satuan;
+
         $totalBruto = (float) $request->total_bruto;
         $diskon = (float) ($request->diskon ?? 0);
         $totalNetto = max(0, $totalBruto - $diskon);
 
         $metode = $request->metode_pembayaran;
+        if ($metode === 'Kredit') {
+            $metode = 'Kredit / Piutang';
+        } elseif ($metode === 'Deposit') {
+            $metode = 'Potong Deposit';
+        }
         $nomorFaktur = GeneratorKodeOtomatis::buatKodeTransaksi('penjualan', 'nomor_faktur', 'INV-', $request->tanggal_penjualan);
+        $pembuat = auth()->user()->username ?? 'spv_keuangan';
 
         DB::beginTransaction();
         try {
@@ -155,7 +180,7 @@ class FakturPenjualanController extends Controller
                     'jumlah_nominal'      => $totalNetto,
                     'saldo_akhir_deposit' => $customer->fresh()->saldo_deposit,
                     'keterangan'          => "Potong deposit untuk Faktur {$nomorFaktur}",
-                    'dibuat_oleh'         => 'staff_ar',
+                    'dibuat_oleh'         => $pembuat,
                 ]);
             } else {
                 // Tunai atau Transfer Bank
@@ -170,6 +195,11 @@ class FakturPenjualanController extends Controller
                 'tanggal_penjualan'  => $request->tanggal_penjualan,
                 'kode_customer'      => $customer->kode_customer,
                 'kode_toko'          => $request->kode_toko ?? null,
+                'kode_barang'        => $request->kode_barang,
+                'nama_barang'        => $namaBarang,
+                'satuan_barang'      => $satuanBarang,
+                'jumlah_zak'         => $jumlahZak,
+                'harga_satuan'       => $hargaSatuan,
                 'metode_pembayaran'  => $metode,
                 'total_bruto'        => $totalBruto,
                 'diskon'             => $diskon,
@@ -180,7 +210,7 @@ class FakturPenjualanController extends Controller
                 'jatuh_tempo'        => $jatuhTempo,
                 'id_rekening'        => $metode === 'Transfer' ? 1 : null,
                 'status_persetujuan' => 'disetujui',
-                'dibuat_oleh'        => 'staff_ar',
+                'dibuat_oleh'        => $pembuat,
             ]);
 
             // Jika kredit, catat ke list_piutang
@@ -203,7 +233,7 @@ class FakturPenjualanController extends Controller
                 $metode,
                 $totalNetto,
                 $metode === 'Transfer' ? 1 : null,
-                auth()->user()->username ?? 'staff_ar',
+                $pembuat,
                 "Faktur Penjualan {$nomorFaktur} - {$customer->nama_pemilik}"
             );
 
@@ -221,7 +251,7 @@ class FakturPenjualanController extends Controller
      */
     public function cetak($nomor_faktur)
     {
-        $faktur = FakturPenjualan::with(['customer', 'tokoBangunan'])
+        $faktur = FakturPenjualan::with(['customer', 'tokoBangunan', 'barang'])
             ->where('nomor_faktur', $nomor_faktur)
             ->firstOrFail();
 

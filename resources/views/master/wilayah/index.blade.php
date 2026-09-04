@@ -52,20 +52,28 @@
     </div>
 
     <!-- Tabel Data Wilayah -->
-    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div x-data="tabelPaginasi({ totalData: {{ count($daftarWilayah ?? []) }}, defaultBaris: 10 })" class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <form method="GET" action="{{ route('master.wilayah.index') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
             <div class="relative w-full sm:w-72">
                 <input type="text" name="cari" value="{{ $kataKunci ?? '' }}" placeholder="Cari kode / nama wilayah..."
                        class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
                 <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
-            <span class="text-xs text-slate-400 font-mono">Tabel: data_wilayah</span>
+            <div class="text-[11px] text-slate-400 font-mono">
+                Total Wilayah: <span class="font-bold text-slate-700 dark:text-slate-300">{{ count($daftarWilayah ?? []) }}</span>
+            </div>
         </form>
 
         <div class="overflow-x-auto">
             <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
+                        <th x-show="!apakahReadOnly('master_wilayah')" class="w-10 px-3 py-2.5 text-center">
+                            <input type="checkbox" 
+                                   @change="togglePilihSemua({{ json_encode(($daftarWilayah ?? collect())->pluck('kode_wilayah')->toArray()) }})"
+                                   :checked="apakahSemuaTerpilih({{ json_encode(($daftarWilayah ?? collect())->pluck('kode_wilayah')->toArray()) }})"
+                                   class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-emerald-600 focus:ring-emerald-500/30 cursor-pointer">
+                        </th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Kode Wilayah</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Nama Wilayah & Zonasi</th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Jumlah Mitra Toko</th>
@@ -74,7 +82,16 @@
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarWilayah ?? [] as $w)
-                        <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                        @php /** @var \App\Models\Master\Wilayah $w */ @endphp
+                        <tr x-show="apakahBarisTampil({{ $loop->index }})" 
+                            :class="{ 'bg-emerald-50/50 dark:bg-emerald-950/20': apakahTerpilih('{{ $w->kode_wilayah }}') }"
+                            class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                            <td x-show="!apakahReadOnly('master_wilayah')" class="w-10 px-3 py-3 text-center">
+                                <input type="checkbox" 
+                                       :checked="apakahTerpilih('{{ $w->kode_wilayah }}')"
+                                       @change="togglePilih('{{ $w->kode_wilayah }}')"
+                                       class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-emerald-600 focus:ring-emerald-500/30 cursor-pointer">
+                            </td>
                             <td class="px-4 py-3 font-mono font-medium text-emerald-600 dark:text-emerald-400">
                                 {{ $w->kode_wilayah }}
                             </td>
@@ -87,25 +104,37 @@
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-center">
-                                <div class="inline-flex items-center gap-2">
-                                    <button @click="editData = {{ json_encode($w) }}; bukaModalEdit = true" type="button" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">Edit</button>
-                                    <span class="text-slate-300 dark:text-slate-700">|</span>
-                                    <form method="POST" action="{{ route('master.wilayah.destroy', $w->kode_wilayah) }}" onsubmit="return confirm('Hapus wilayah {{ $w->nama_wilayah }}?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 dark:text-red-400 hover:underline font-medium">Hapus</button>
-                                    </form>
-                                </div>
+                                <x-menu-aksi-tabel 
+                                    :kodeSalin="$w->kode_wilayah" 
+                                    labelSalin="Salin Kode"
+                                    modulIzin="master_wilayah"
+                                    :aksiEdit="'editData = ' . json_encode($w) . '; bukaModalEdit = true'"
+                                    :aksiHapus="route('master.wilayah.destroy', $w->kode_wilayah)"
+                                    :pesanHapus="'Hapus data wilayah ' . $w->nama_wilayah . '?'"
+                                />
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-4 py-6 text-center text-slate-400">Belum ada data wilayah zonasi.</td>
+                            <td colspan="5" class="px-4 py-6 text-center text-slate-400">Belum ada data wilayah zonasi.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+
+        <!-- Toolbar Paginasi & Baris per Halaman -->
+        <x-paginasi-tabel :totalData="count($daftarWilayah ?? [])" />
+
+        <!-- Bar Aksi Massal (Multi-Select Floating Bar) -->
+        <x-bar-aksi-massal 
+            labelItem="wilayah" 
+            warna="emerald" 
+            modulIzin="master_wilayah" 
+            ruteHapusMassal="{{ route('master.wilayah.hapus_massal') }}" 
+            namaInputId="daftar_kode_wilayah" 
+            pesanPeringatan="Wilayah yang masih terikat dengan data customer/toko tidak akan terhapus demi integritas data." 
+        />
     </div>
 
     <!-- Modal Tambah Wilayah -->

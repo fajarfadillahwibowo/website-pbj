@@ -81,6 +81,8 @@ class PengeluaranKasController extends Controller
         $nominal = (float) $request->total_nominal;
         $nomorPengeluaran = GeneratorKodeOtomatis::buatKodeTransaksi('pengeluaran', 'nomor_pengeluaran', 'KAS-OUT-', $request->tanggal_pengeluaran);
 
+        $pembuat = auth()->user()->username ?? 'spv_keuangan';
+
         DB::beginTransaction();
         try {
             // Potong saldo rekening sumber jika dipilih
@@ -100,7 +102,7 @@ class PengeluaranKasController extends Controller
                 'keterangan'          => $request->keterangan,
                 'status_persetujuan'  => 'disetujui_spv',
                 'disetujui_oleh'      => 'spv_keuangan',
-                'dibuat_oleh'         => 'staff_ap',
+                'dibuat_oleh'         => $pembuat,
                 'dibuat_pada'         => now(),
             ]);
 
@@ -111,7 +113,7 @@ class PengeluaranKasController extends Controller
                 $request->kode_akun,
                 $nominal,
                 $request->id_rekening_sumber,
-                auth()->user()->username ?? 'staff_ap',
+                $pembuat,
                 $request->keterangan
             );
 

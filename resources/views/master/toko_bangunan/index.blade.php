@@ -123,7 +123,7 @@
     </div>
 
     <!-- 4. Filter & Tabel Data -->
-    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div x-data="tabelPaginasi({ totalData: {{ $daftarToko->count() }}, defaultBaris: 10 })" class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         
         <!-- Search & Filter Bar -->
         <div class="p-4 sm:px-5 sm:py-4 border-b border-[#E2E8F0] dark:border-[#252837] flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -168,7 +168,7 @@
             </form>
 
             <div class="text-[11px] text-slate-400 font-mono shrink-0">
-                Menampilkan <span class="font-bold text-slate-700 dark:text-slate-300">{{ $daftarToko->count() }}</span> data
+                Total Data: <span class="font-bold text-slate-700 dark:text-slate-300">{{ $daftarToko->count() }}</span>
             </div>
         </div>
 
@@ -177,6 +177,13 @@
             <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
+                        <th x-show="!apakahReadOnly('master_customer')" class="px-3 py-3 text-center w-10">
+                            <input type="checkbox" 
+                                   @change="togglePilihSemua({{ json_encode(($daftarToko ?? collect())->pluck('kode_toko')->toArray()) }})"
+                                   :checked="apakahSemuaTerpilih({{ json_encode(($daftarToko ?? collect())->pluck('kode_toko')->toArray()) }})"
+                                   class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-emerald-600 focus:ring-emerald-500/30 dark:bg-[#1C1E2A] cursor-pointer"
+                                   title="Pilih Semua Toko / Proyek">
+                        </th>
                         <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider">Kode Toko</th>
                         <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider">Nama Toko / Proyek</th>
                         <th class="px-4 py-3 text-left font-semibold uppercase tracking-wider">Customer Pemilik</th>
@@ -188,7 +195,15 @@
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarToko as $toko)
-                        <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                        <tr x-show="apakahBarisTampil({{ $loop->index }})" 
+                            :class="{ 'bg-emerald-50/50 dark:bg-emerald-950/20': apakahTerpilih('{{ $toko->kode_toko }}') }"
+                            class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                            <td x-show="!apakahReadOnly('master_customer')" class="px-3 py-3 text-center">
+                                <input type="checkbox" 
+                                       :checked="apakahTerpilih('{{ $toko->kode_toko }}')"
+                                       @change="togglePilih('{{ $toko->kode_toko }}')"
+                                       class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-emerald-600 focus:ring-emerald-500/30 dark:bg-[#1C1E2A] cursor-pointer">
+                            </td>
                             <td class="px-4 py-3 font-mono font-bold text-emerald-600 dark:text-emerald-400">
                                 {{ $toko->kode_toko }}
                             </td>
@@ -236,47 +251,43 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3 text-center">
-                                <div class="flex items-center justify-center gap-2">
-                                    <button @click="bukaModalDetail('{{ $toko->kode_toko }}')" type="button"
-                                            class="p-1.5 text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 rounded-lg transition-colors"
-                                            title="Lihat Detail Kinerja 360">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                        </svg>
-                                    </button>
-                                    <button @click="bukaModalEdit({{ json_encode($toko) }})" type="button"
-                                            class="p-1.5 text-amber-600 hover:text-amber-800 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 rounded-lg transition-colors"
-                                            title="Ubah Data">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </button>
-                                    <form action="{{ route('master.toko_bangunan.hapus', $toko->kode_toko) }}" method="POST" class="inline"
-                                          onsubmit="return confirm('Apakah Anda yakin ingin menghapus toko/proyek {{ $toko->nama_toko_bangunan }}?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                                class="p-1.5 text-rose-600 hover:text-rose-800 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors"
-                                                title="Hapus Toko">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                        </button>
-                                    </form>
-                                </div>
+                                <x-menu-aksi-tabel 
+                                    :kodeSalin="$toko->kode_toko"
+                                    labelSalin="Salin Kode"
+                                    modulIzin="master_customer"
+                                    aksiDetail="bukaModalDetail('{{ $toko->kode_toko }}')"
+                                    labelDetail="Detail"
+                                    aksiEdit="bukaModalEdit({{ json_encode($toko) }})"
+                                    labelEdit="Edit"
+                                    aksiHapus="{{ route('master.toko_bangunan.hapus', $toko->kode_toko) }}"
+                                    labelHapus="Hapus"
+                                    pesanHapus="Apakah Anda yakin ingin menghapus toko/proyek {{ $toko->nama_toko_bangunan }} ({{ $toko->kode_toko }})?"
+                                />
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-8 text-center text-slate-400">
-                                Belum ada data toko bangunan atau proyek yang terdaftar.
+                            <td colspan="8" class="px-4 py-8 text-center text-slate-400">
+                                Belum ada data toko bangunan atau proyek cabang yang terdaftar.
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+
+        <!-- Toolbar Paginasi -->
+        <x-paginasi-tabel :totalData="count($daftarToko ?? [])" />
+
+        <!-- Bar Aksi Massal (Multi-Select Floating Bar) -->
+        <x-bar-aksi-massal 
+            labelItem="toko/proyek" 
+            warna="emerald" 
+            modulIzin="master_customer" 
+            ruteHapusMassal="{{ route('master.toko_bangunan.hapus_massal') }}" 
+            namaInputId="daftar_kode_toko" 
+            pesanPeringatan="Data cabang toko/proyek yang dihapus tidak dapat dipulihkan." 
+        />
     </div>
 
     <!-- ========================================================================= -->
@@ -383,7 +394,7 @@
 
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. HP / Telepon Toko <span class="text-rose-500">*</span></label>
-                        <input type="text" name="no_hp_toko" x-model="formTambah.no_hp_toko" required placeholder="0812-xxxx-xxxx"
+                        <input type="text" name="no_hp_toko" x-model="formTambah.no_hp_toko" required placeholder="0812-xxxx-xxxx" inputmode="numeric" data-hanya-angka="true"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 font-mono">
                     </div>
                 </div>
@@ -510,7 +521,7 @@
 
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. HP / Telepon Toko <span class="text-rose-500">*</span></label>
-                        <input type="text" name="no_hp_toko" x-model="formEdit.no_hp_toko" required
+                        <input type="text" name="no_hp_toko" x-model="formEdit.no_hp_toko" required inputmode="numeric" data-hanya-angka="true"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30 font-mono">
                     </div>
                 </div>

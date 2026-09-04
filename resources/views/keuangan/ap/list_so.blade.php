@@ -85,7 +85,7 @@
     </div>
 
     <!-- 3. Filter & Tabel Monitoring List SO -->
-    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div x-data="tabelPaginasi({ totalData: {{ count($daftarSO ?? []) }}, defaultBaris: 10 })" class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         
         <!-- Filter Bar -->
         <div class="p-4 sm:px-5 sm:py-4 border-b border-[#E2E8F0] dark:border-[#252837] flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -155,7 +155,7 @@
                             $sisa = max(0, $kuota - $ambil);
                             $persen = $kuota > 0 ? min(100, round(($ambil / $kuota) * 100)) : 0;
                         @endphp
-                        <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                        <tr x-show="apakahBarisTampil({{ $loop->index }})" class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
                             <td class="px-4 py-3">
                                 <div class="font-mono font-bold text-indigo-600 dark:text-indigo-400">{{ $so->nomor_so }}</div>
                                 <div class="text-[11px] text-slate-400 font-mono">LO: {{ $so->nomor_lo ?? '-' }}</div>
@@ -212,6 +212,8 @@
                 </tbody>
             </table>
         </div>
+
+        <x-paginasi-tabel :totalData="count($daftarSO ?? [])" />
     </div>
 
 </div>

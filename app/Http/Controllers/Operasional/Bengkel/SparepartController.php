@@ -205,6 +205,36 @@ class SparepartController extends Controller
     }
 
     /**
+     * Hapus banyak data sparepart sekaligus (Hapus Massal).
+     */
+    public function hapusMassal(Request $request)
+    {
+        $daftarId = $request->input('daftar_id', []);
+        if (empty($daftarId) || !is_array($daftarId)) {
+            return redirect()->route('operasional.bengkel.sparepart')->with('error', 'Tidak ada data suku cadang / sparepart yang dipilih untuk dihapus.');
+        }
+
+        $berhasilDihapus = 0;
+
+        DB::beginTransaction();
+        try {
+            foreach ($daftarId as $kode) {
+                $part = Sparepart::find($kode);
+                if ($part) {
+                    $part->delete();
+                    $berhasilDihapus++;
+                }
+            }
+            DB::commit();
+
+            return redirect()->route('operasional.bengkel.sparepart')->with('sukses', "{$berhasilDihapus} data sparepart terpilih berhasil dihapus.");
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect()->route('operasional.bengkel.sparepart')->with('error', 'Terjadi kesalahan saat menghapus data massal: ' . $th->getMessage());
+        }
+    }
+
+    /**
      * Generator Kode Sparepart Otomatis.
      */
     public function buatKodeOtomatis(Request $request)

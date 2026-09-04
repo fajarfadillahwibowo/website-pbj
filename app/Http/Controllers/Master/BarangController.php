@@ -122,4 +122,34 @@ class BarangController extends Controller
 
         return redirect()->route('master.barang.index')->with('sukses', "Produk '{$barang->nama_barang}' berhasil dihapus.");
     }
+
+    /**
+     * Hapus banyak produk semen sekaligus (Hapus Massal).
+     */
+    public function hapusMassal(Request $request)
+    {
+        $daftarId = $request->input('daftar_id', []);
+        if (empty($daftarId) || !is_array($daftarId)) {
+            return redirect()->route('master.barang.index')->with('gagal', 'Tidak ada produk semen yang dipilih untuk dihapus.');
+        }
+
+        $berhasilDihapus = 0;
+
+        DB::beginTransaction();
+        try {
+            foreach ($daftarId as $kode) {
+                $barang = Barang::find($kode);
+                if ($barang) {
+                    $barang->delete();
+                    $berhasilDihapus++;
+                }
+            }
+            DB::commit();
+
+            return redirect()->route('master.barang.index')->with('sukses', "{$berhasilDihapus} produk semen terpilih berhasil dihapus.");
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect()->route('master.barang.index')->with('gagal', 'Terjadi kesalahan saat menghapus data massal: ' . $th->getMessage());
+        }
+    }
 }

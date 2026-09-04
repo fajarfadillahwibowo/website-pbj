@@ -62,7 +62,7 @@
     </div>
 
     <!-- Tabel Data 10 Akun Pengguna -->
-    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div x-data="tabelPaginasi({ totalData: {{ count($semuaAkun ?? []) }}, defaultBaris: 10 })" class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <form method="GET" action="{{ route('superadmin.kelola_akun') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
             <div class="relative w-full sm:w-72">
                 <input type="text" name="cari" value="{{ $kataKunci ?? '' }}" placeholder="Cari username / nama staf..."
@@ -76,7 +76,13 @@
             <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
-                        <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider w-10">No</th>
+                        <th x-show="!apakahReadOnly('superadmin_akun')" class="w-10 px-3 py-2.5 text-center">
+                            <input type="checkbox" 
+                                   @change="togglePilihSemua({{ json_encode(collect($semuaAkun ?? [])->map(fn($a) => is_object($a) ? $a->username : $a['username'])->toArray()) }})"
+                                   :checked="apakahSemuaTerpilih({{ json_encode(collect($semuaAkun ?? [])->map(fn($a) => is_object($a) ? $a->username : $a['username'])->toArray()) }})"
+                                   class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-purple-600 focus:ring-purple-500/30 cursor-pointer">
+                        </th>
+                        <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider w-12">No</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Username</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Nama Pegawai / Pemilik</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Jabatan (Kode Role)</th>
@@ -94,7 +100,15 @@
                             $isSuper = is_object($row) ? ($row->is_super ?? false) : ($row['is_super'] ?? false);
                             $aktif = is_object($row) ? ($row->status_aktif ?? true) : ($row['status_aktif'] ?? true);
                         @endphp
-                        <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                        <tr x-show="apakahBarisTampil({{ $loop->index }})" 
+                            :class="{ 'bg-purple-50/50 dark:bg-purple-950/20': apakahTerpilih('{{ $usr }}') }"
+                            class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                            <td x-show="!apakahReadOnly('superadmin_akun')" class="w-10 px-3 py-3 text-center">
+                                <input type="checkbox" 
+                                       :checked="apakahTerpilih('{{ $usr }}')"
+                                       @change="togglePilih('{{ $usr }}')"
+                                       class="w-4 h-4 rounded border-[#CBD5E1] dark:border-[#334155] text-purple-600 focus:ring-purple-500/30 cursor-pointer">
+                            </td>
                             <td class="px-4 py-3 text-center font-mono text-slate-400">{{ $index + 1 }}</td>
                             <td class="px-4 py-3 font-mono font-medium {{ $isSuper ? 'text-purple-600 dark:text-purple-400 font-bold' : 'text-slate-800 dark:text-slate-200' }}">
                                 {{ $usr }}
@@ -115,34 +129,62 @@
                             </td>
                             <td class="px-4 py-3 text-center">
                                 @if($isSuper)
-                                    <span class="text-slate-400 text-[11px] italic font-medium">Hak Utama (Kunci)</span>
+                                    <x-menu-aksi-tabel 
+                                        :kodeSalin="$usr" 
+                                        labelSalin="Salin User"
+                                        modulIzin="superadmin_akun"
+                                    />
                                 @else
-                                    <div class="inline-flex items-center gap-2">
+                                    <x-menu-aksi-tabel 
+                                        :kodeSalin="$usr" 
+                                        labelSalin="Salin User"
+                                        modulIzin="superadmin_akun"
+                                    >
                                         <form method="POST" action="{{ route('superadmin.kelola_akun.reset_password') }}" onsubmit="return confirm('Reset password akun {{ $usr }} menjadi password123?')">
                                             @csrf
                                             <input type="hidden" name="username" value="{{ $usr }}">
-                                            <button type="submit" class="text-purple-600 dark:text-purple-400 hover:underline font-medium">Reset Sandi</button>
+                                            <button type="submit" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-purple-50 dark:hover:bg-purple-500/10 hover:text-purple-600 dark:hover:text-purple-400 transition-colors text-left">
+                                                <svg class="w-3.5 h-3.5 text-purple-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                                                </svg>
+                                                <span>Reset Sandi</span>
+                                            </button>
                                         </form>
-                                        <span class="text-slate-300 dark:text-slate-700">|</span>
                                         <form method="POST" action="{{ route('superadmin.kelola_akun.toggle_status') }}" onsubmit="return confirm('Ubah status aktif akun {{ $usr }}?')">
                                             @csrf
                                             <input type="hidden" name="username" value="{{ $usr }}">
-                                            <button type="submit" class="{{ $aktif ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400' }} hover:underline font-medium">
-                                                {{ $aktif ? 'Nonaktifkan' : 'Aktifkan' }}
+                                            <button type="submit" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold {{ $aktif ? 'text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10' : 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10' }} transition-colors text-left border-t border-slate-100 dark:border-[#252837]">
+                                                @if($aktif)
+                                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                                                    </svg>
+                                                    <span>Nonaktifkan</span>
+                                                @else
+                                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                    </svg>
+                                                    <span>Aktifkan</span>
+                                                @endif
                                             </button>
                                         </form>
-                                    </div>
+                                    </x-menu-aksi-tabel>
                                 @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-6 text-center text-slate-400">Tidak ada akun yang sesuai dengan kriteria pencarian.</td>
+                            <td colspan="7" class="px-4 py-6 text-center text-slate-400">Tidak ada akun yang sesuai dengan kriteria pencarian.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+        
+        <!-- Paginasi Terpadu -->
+        <x-paginasi-tabel :totalData="count($semuaAkun ?? [])" />
+
+        <!-- Bar Aksi Massal (Multi-Select Floating Bar) -->
+        <x-bar-aksi-massal labelItem="akun pengguna" warna="purple" modulIzin="superadmin_akun" />
     </div>
 
     <!-- Modal Tambah Akun Pengguna -->

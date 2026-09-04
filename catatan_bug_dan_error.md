@@ -37,12 +37,71 @@
 - **[TERSELESAIKAN] Peringatan browser 'Please enter a valid value' saat input angka nominal Rupiah (HTML5 Step Constraint Violation)**:
   - *Penyebab:* Elemen `<input type="number">` memiliki atribut `min="1"` yang dikombinasikan dengan `step="100000"`. Sesuai standar W3C HTML5, rumus validasi browser menghitung nilai valid sebagai $\text{min} + (k \times \text{step}) = 1 + (k \times 100.000)$, sehingga nilai yang diizinkan hanya angka yang berakhiran 1 (seperti 1, 100001, 3500001). Saat pengguna mengetik angka bulat normal seperti `3500000`, peramban menolak dan memunculkan pop-up kesalahan kelipatan.
   - *Solusi:* Memperbaiki seluruh input nominal keuangan (Faktur Penjualan, Pelunasan Piutang, Pembelian SO, Rilisan Uang Jalan, Beban Kas, Jurnal Umum, Deposit, Master Barang, dan Customer) menggunakan atribut `min="0" step="any"`. Input kini menerima nilai nominal bebas tanpa hambatan validasi peramban.
+- **[TERSELESAIKAN] Pembersihan Keseluruhan Warning & Diagnostic Linter IDE (Intelephense, PHP, CSS Tailwind v4)**:
+  - *Penyebab:* 
+    1. Warning *"Trying to get property of non-object of type void"* pada 8 view Blade (`list_piutang`, `faktur_penjualan`, `deposit_customer`, `pengeluaran_kas`, `pembelian_so`, `list_rilisan`, `kode_akun`, `jurnal_umum`, `master/barang`, `master/wilayah`) karena Intelephense memerlukan anotasi tipe PHPDoc pada variabel iterasi loop.
+    2. Warning *"Use of unknown class: DataKendaraan"* pada `KendaraanController.php` karena kurang deklarasi `use App\Models\Operasional\DataKendaraan;`.
+    3. Warning *"Call to unknown method: date::format()"* pada `PerbaikanKendaraan.php` accessor `getTanggalMasukFormatAttribute` dan `getTanggalSelesaiFormatAttribute`.
+    4. Warning *"Argument 1 passed to number_format() is expected to be float, decimal|null given"* pada `aset_perusahaan.blade.php`.
+    5. Warning *"Unknown at rule @source, @theme"* pada `resources/css/app.css` akibat styling Tailwind CSS v4.
+  - *Solusi:*
+    1. Menambahkan anotasi tipe PHPDoc `@php /** @var ModelClass $var */ @endphp` pada seluruh template Blade terkait.
+    2. Menambahkan `use App\Models\Operasional\DataKendaraan;` pada `KendaraanController.php`.
+    3. Memperbarui accessor di `PerbaikanKendaraan.php` menggunakan `\Carbon\Carbon::parse(...)->format('d/m/Y')`.
+    4. Melakukan type cast eksplisit `(float) ...` pada parameter `number_format()` di `aset_perusahaan.blade.php`.
+    5. Membuat file konfigurasi `.vscode/settings.json` dengan `"css.lint.unknownAtRules": "ignore"` untuk menonaktifkan peringatan at-rules Tailwind CSS v4.
+    6. Verifikasi sintaks PHP 8.3 CLI: 0 error / 100% lulus bersih.
+- **[TERSELESAIKAN] Kolom Tanggal Jatuh Tempo Tidak Muncul Kembali Saat Memilih Metode Kredit Tempo di Faktur Penjualan**:
+  - *Penyebab:* Nilai opsi pada dropdown kustom `$opsiMetodeModal` menggunakan `'nilai' => 'Kredit'`, sedangkan state awal dan pengkondisian Alpine.js di Blade memeriksa `x-show="metode === 'Kredit / Piutang'"`. Saat pengguna beralih ke Tunai lalu kembali ke Kredit Tempo, variabel `metode` bernilai `'Kredit'` sehingga kondisi evaluasi tidak terpenuhi dan input jatuh tempo tetap tersembunyi.
+  - *Solusi:*
+    1. Menyelaraskan nilai pilihan `$opsiMetodeModal` menjadi `'nilai' => 'Kredit / Piutang'` dan `'nilai' => 'Potong Deposit'`.
+    2. Memperbarui kondisi Blade menjadi `x-show="metode === 'Kredit / Piutang' || metode === 'Kredit'"` dan penataan grid dinamis (`:class`).
+    3. Menambahkan normalisasi dan validasi ganda pada `FakturPenjualanController@store` agar menerima baik string `'Kredit'` maupun `'Kredit / Piutang'`.
+- **[TERSELESAIKAN] Integrity Constraint Violation 1451 Saat Menghapus Data Aset (Terkendala Foreign Key Riwayat Penyusutan)**:
+  - *Penyebab:* Foreign key `fk_penyusutan_aset` pada tabel `riwayat_penyusutan` memiliki aturan `ON DELETE RESTRICT`. Ketika aset yang pernah memiliki riwayat penyusutan bulanan dihapus, database menolak operasi *delete* karena masih terdapat data anak (*child rows*).
+  - *Solusi:*
+    1. Membuat migrasi database `2026_09_04_000002_cascade_delete_riwayat_penyusutan.php` untuk mengubah aturan foreign key menjadi `ON DELETE CASCADE`.
+    2. Memperbarui method `AsetPerusahaanController@destroy` dengan transaksi atomik `DB::beginTransaction()`: otomatis menghapus riwayat penyusutan, melepas/menghapus relasi unit fisik di `data_kendaraan` secara aman tanpa merusak riwayat surat jalan logistik, lalu menghapus master aset.
+    3. Memperbarui master file `database/skema_database.sql` menjadi `ON DELETE CASCADE`.
 
+- **[TERSELESAIKAN] Penambahan Toolbar Paginasi Terpadu di Seluruh Tabel Aplikasi Sesuai Referensi Desain**:
+  - *Kebutuhan:* Pengguna meminta seluruh datatable di sistem memiliki toolbar kontrol paginasi terpadu yang memuat:
+    1. Info dinamis: *"Menampilkan X sampai Y dari Z data"*.
+    2. Pemilih *"Baris per halaman"* dropdown kustom `[5, 10, 25, 50, 100]` (default 10).
+    3. Indikator *"Halaman X dari Y"*.
+    4. 4 Tombol navigasi: Pertama (`«`), Sebelumnya (`‹`), Berikutnya (`›`), Terakhir (`»`) dengan status disabled dinamis.
+  - *Solusi:*
+    1. Membuat helper global Alpine.js `tabelPaginasi(opsi)` pada `resources/views/layouts/app.blade.php`.
+    2. Membuat komponen Blade modular `<x-paginasi-tabel>` pada `resources/views/components/paginasi-tabel.blade.php`.
+    3. Mengintegrasikan reaktivitas baris `x-show="apakahBarisTampil($loop->index)"` dan `<x-paginasi-tabel>` pada 25 tabel di seluruh modul (Master, Keuangan AR/AP/Akuntansi, Operasional Pengiriman/Gudang/Bengkel/Armada/KSO, dan Superadmin).
+    4. Verifikasi `php artisan view:cache` lulus 100% tanpa error Blade.
+
+- **[TERSELESAIKAN] Menu Aksi Popover Terbuka Bersamaan / Tumpuk dan Ketiadaan Fitur Pilih Lebih Dari Satu Baris (Multi-Select Checkbox)**:
+  - *Penyebab:* 
+    1. Komponen `<x-menu-aksi-tabel>` memiliki state lokal `menuTerbuka` yang terisolasi per baris tanpa listener global, sehingga saat tombol titik tiga pada baris lain diklik, menu sebelumnya tidak tertutup dan menumpuk secara visual di layar.
+    2. Belum adanya fitur seleksi multi-baris (checkbox header *select-all* dan checkbox baris) beserta *floating action bar* untuk aksi massal.
+  - *Solusi:*
+    1. Memberikan identitas unik `idUnik: 'menu-' + Math.random().toString(36).substr(2, 9)` pada setiap instance `<x-menu-aksi-tabel>`.
+    2. Menanamkan event listener global `@tutup-semua-menu.window="if ($event.detail !== idUnik) menuTerbuka = false"` dan memancarkan event `window.dispatchEvent(new CustomEvent('tutup-semua-menu', { detail: this.idUnik }))` setiap kali suatu menu dibuka, memastikan hanya 1 popover yang terbuka di layar pada satu waktu.
+    3. Memperkaya helper global Alpine.js `tabelPaginasi` dengan array `daftarTerpilih: []`, method `apakahTerpilih(id)`, `togglePilih(id)`, `apakahSemuaTerpilih(semuaId)`, `togglePilihSemua(semuaId)`, `kosongkanPilihan()`, `salinTerpilih(pemisah)`, serta `bukaModalHapusMassal()` dan `tutupModalHapusMassal()`.
+    4. Membangun komponen modular `<x-bar-aksi-massal>` (`resources/views/components/bar-aksi-massal.blade.php`) berupa *floating bar* dengan indikator badge jumlah terpilih, tombol Salin Terpilih, tombol Hapus Terpilih (bersyarat izin peran), modal konfirmasi hapus massal, dan tombol Batal Pilih.
+    5. Mengintegrasikan kolom checkbox `<th>`/`<td>` yang terlindungi izin read-only (`x-show="!apakahReadOnly(modulIzin)"`), highlight baris terpilih `:class="{ 'bg-primary-50/50 dark:bg-primary-950/20': apakahTerpilih(...) }"`, dan `<x-bar-aksi-massal>` pada seluruh tabel utama aplikasi.
+    6. Menyederhanakan penulisan copywriting seluruh label aksi menjadi ringkas & padat (`Salin Kode`, `Detail`, `Edit`, `Hapus`, `Cetak`, `Bayar`, `Ubah Status`, `Mutasi Stok`).
+
+- **[TERSELESAIKAN] Integrasi Pengaman Hak Akses RBAC pada Fitur Multi-Select & Hapus Massal Aman (Bulk Delete Safety)**:
+  - *Kebutuhan & Risiko:*
+    1. Pengguna berstatus *Lihat Saja (Read-Only)* tidak boleh memiliki kolom checkbox seleksi ataupun tombol aksi berbahaya di layar.
+    2. Penghapusan massal pada tabel Master & Operasional harus memiliki validasi integritas relasi foreign key dan saldo aktif (misalnya: customer dengan piutang aktif > 0 atau wilayah dengan toko binaan aktif tidak boleh terhapus sembarangan).
+  - *Solusi:*
+    1. Menambahkan pengkondisian `x-show="!apakahReadOnly('modulIzin')"` pada seluruh `<th>` dan `<td>` checkbox di 11 view tabel sehingga kolom checkbox tersembunyi total saat role hanya memiliki izin lihat.
+    2. Menambahkan 9 endpoint rute `POST /.../hapus-massal` dan implementasi method `hapusMassal(Request $request)` di seluruh Controller Master & Operasional terkait dengan transaksi `DB::beginTransaction()`, pengecekan foreign key, dan logging status error.
+    3. Menyesuaikan modul Keuangan AR/AP/Akuntansi agar hanya menyediakan aksi massal **"Salin Terpilih"** demi menjaga audit trail transaksi finansial.
+    4. Pengujian `php artisan route:clear` dan `php artisan view:cache` lulus 100% tanpa error.
 
 ---
 
 ## ⏭️ Progres Terlewati/Tertunda
-*Tidak ada tugas yang tertunda. Seluruh 24 rute sistem distribusi semen, master data relasi 1:N Customer-Toko Bangunan, dan operasional logistik berjalan 100% lancar.*
+*Tidak ada tugas yang tertunda. Seluruh 25 rute sistem distribusi semen, master data relasi 1:N Customer-Toko Bangunan, dan operasional logistik berjalan 100% lancar.*
 
 ---
 
@@ -57,15 +116,17 @@
 | 4 | Master Produk Semen | `/master/barang` | **200 OK** | CRUD semen zak & curah, estimasi margin jual. |
 | 5 | Master Wilayah Distribusi | `/master/wilayah` | **200 OK** | CRUD wilayah, hitung mitra toko terhubung, proteksi relasi data. |
 | 6 | Master Karyawan & Driver | `/master/karyawan` | **200 OK** | CRUD karyawan, kode otomatis per jabatan (`ADM-`, `KEU-`, `SAR-`, `SAP-`, `DSP-`, `DRV-`, dll.). |
-| 7 | Faktur Penjualan (AR) | `/keuangan/ar/faktur-penjualan` | **200 OK** | Dropdown pilihan Toko Bangunan / Proyek tujuan kirim, auto-detect Customer Induk & limit kredit. |
-| 8 | List Piutang (AR) | `/keuangan/ar/list-piutang` | **200 OK** | Monitoring piutang per toko/pemilik, form cicilan pelunasan, mutasi saldo customer. |
-| 9 | Deposit Customer (AR) | `/keuangan/ar/deposit-customer` | **200 OK** | Riwayat mutasi deposit, modal top up saldo deposit toko. |
-| 10 | Pembelian SO Pabrik (AP) | `/keuangan/ap/pembelian-so` | **200 OK** | Penerbitan SO semen ke pabrik, kalkulasi volume & harga, alokasi gudang. |
-| 11 | Pengeluaran Kas (AP) | `/keuangan/ap/pengeluaran-kas` | **200 OK** | Catat kas keluar operasional, BBM & Tol armada, pemotongan rekening sumber & akun COA. |
-| 12 | Rilisan Uang Jalan (AP) | `/keuangan/ap/list-rilisan` | **200 OK** | Rilisan uang jalan supir armada truk terintegrasi akun COA 1107. |
-| 13 | Bagan Akun COA (Akuntansi) | `/keuangan/akuntansi/kode-akun` | **200 OK** | CRUD klasifikasi akun aktiva, kewajiban, modal, pendapatan, beban. |
-| 14 | Jurnal Umum (Akuntansi) | `/keuangan/akuntansi/jurnal-umum` | **200 OK** | Entri double-entry berpasangan debit & kredit otomatis, cek keseimbangan saldo. |
-| 15 | Aset Perusahaan (Akuntansi) | `/keuangan/akuntansi/aset-perusahaan` | **200 OK** | Inventaris armada truk & peralatan gudang, total perolehan nilai aktiva tetap. |
+| 7 | Faktur Penjualan (AR) | `/keuangan/ar/faktur-penjualan` | **200 OK** | Dropdown pilihan Toko Bangunan & Produk Semen, autofill harga standar, live kalkulasi subtotal/netto, dan cetak invoice resmi. |
+| 8 | Dokumen Cetak Faktur (Invoice) | `/keuangan/ar/faktur-penjualan/{nomor}/cetak` | **200 OK** | Dokumen invoice resmi kop PT PBJ dengan rincian nama semen, kuantitas zak, satuan, harga, info rekening, & 3 tanda tangan. |
+| 9 | List Piutang (AR) | `/keuangan/ar/list-piutang` | **200 OK** | Monitoring piutang per toko/pemilik, form cicilan pelunasan, mutasi saldo customer. |
+| 10 | Deposit Customer (AR) | `/keuangan/ar/deposit-customer` | **200 OK** | Riwayat mutasi deposit, modal top up saldo deposit toko. |
+| 11 | Pembelian SO Pabrik (AP) | `/keuangan/ap/pembelian-so` | **200 OK** | Penerbitan SO semen ke pabrik, kalkulasi volume & harga, alokasi gudang. |
+| 12 | Monitoring List SO (AP) | `/keuangan/ap/list-so` | **200 OK** | Monitoring kuota zak semen per nomor SO/LO pabrik SIG vs realisasi pengambilan. |
+| 13 | Pengeluaran Kas (AP) | `/keuangan/ap/pengeluaran-kas` | **200 OK** | Catat kas keluar operasional, BBM & Tol armada, pemotongan rekening sumber & akun COA. |
+| 14 | Rilisan Uang Jalan (AP) | `/keuangan/ap/list-rilisan` | **200 OK** | Rilisan uang jalan supir armada truk terintegrasi akun COA 1107. |
+| 15 | Bagan Akun COA (Akuntansi) | `/keuangan/akuntansi/kode-akun` | **200 OK** | CRUD klasifikasi akun aktiva, kewajiban, modal, pendapatan, beban. |
+| 16 | Jurnal Umum (Akuntansi) | `/keuangan/akuntansi/jurnal-umum` | **200 OK** | Entri double-entry berpasangan debit & kredit otomatis, cek keseimbangan saldo. |
+| 17 | Aset Perusahaan (Akuntansi) | `/keuangan/akuntansi/aset-perusahaan` | **200 OK** | Inventaris armada truk & aktiva tetap, depresiasi amortisasi bulanan PSAK 16. |
 
 ### 2. Modul Operasional, Logistik & Bengkel
 | No | Modul / Fitur | Rute URL | Status HTTP | Keterangan Verifikasi |

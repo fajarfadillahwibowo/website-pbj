@@ -149,6 +149,46 @@ class JenisAsetController extends Controller
     }
 
     /**
+     * Hapus banyak data jenis aset sekaligus (Hapus Massal).
+     */
+    public function hapusMassal(Request $request)
+    {
+        $daftarId = $request->input('daftar_id', []);
+        if (empty($daftarId) || !is_array($daftarId)) {
+            return redirect()->route('master.jenis_aset.index')->with('error', 'Tidak ada kategori jenis aset yang dipilih untuk dihapus.');
+        }
+
+        $berhasilDihapus = 0;
+        $gagalDihapus = 0;
+
+        DB::beginTransaction();
+        try {
+            foreach ($daftarId as $kode) {
+                $jenisAset = JenisAset::where('kode_jenis_aset', $kode)->first();
+                if ($jenisAset) {
+                    $terhubung = Kendaraan::where('kode_jenis_aset', $kode)->count();
+                    if ($terhubung > 0) {
+                        $gagalDihapus++;
+                        continue;
+                    }
+                    $jenisAset->delete();
+                    $berhasilDihapus++;
+                }
+            }
+            DB::commit();
+
+            if ($gagalDihapus > 0) {
+                return redirect()->route('master.jenis_aset.index')->with('sukses', "{$berhasilDihapus} jenis aset berhasil dihapus. {$gagalDihapus} jenis aset dilewati karena masih memiliki armada truk terhubung.");
+            }
+
+            return redirect()->route('master.jenis_aset.index')->with('sukses', "{$berhasilDihapus} data kategori jenis aset terpilih berhasil dihapus.");
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect()->route('master.jenis_aset.index')->with('error', 'Terjadi kesalahan saat menghapus data massal: ' . $th->getMessage());
+        }
+    }
+
+    /**
      * Helper endpoint generator kode jenis aset otomatis (Gap-filling & Acak).
      */
     public function buatKodeOtomatis(Request $request)

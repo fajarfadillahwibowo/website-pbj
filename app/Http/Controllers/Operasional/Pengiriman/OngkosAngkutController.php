@@ -225,6 +225,45 @@ class OngkosAngkutController extends Controller
     }
 
     /**
+     * Hapus banyak data ongkos angkut sekaligus (Hapus Massal).
+     */
+    public function hapusMassal(Request $request)
+    {
+        $daftarId = $request->input('daftar_id', []);
+        if (empty($daftarId) || !is_array($daftarId)) {
+            return redirect()->route('operasional.pengiriman.ongkos_angkut')->with('error', 'Tidak ada data ongkos angkut yang dipilih untuk dihapus.');
+        }
+
+        $berhasilDihapus = 0;
+        $gagalDihapus = 0;
+
+        DB::beginTransaction();
+        try {
+            foreach ($daftarId as $kode) {
+                $oa = OngkosAngkut::find($kode);
+                if ($oa) {
+                    try {
+                        $oa->delete();
+                        $berhasilDihapus++;
+                    } catch (\Throwable $e) {
+                        $gagalDihapus++;
+                    }
+                }
+            }
+            DB::commit();
+
+            if ($gagalDihapus > 0) {
+                return redirect()->route('operasional.pengiriman.ongkos_angkut')->with('sukses', "{$berhasilDihapus} ongkos angkut berhasil dihapus. {$gagalDihapus} ongkos angkut dilewati karena terikat transaksi lain.");
+            }
+
+            return redirect()->route('operasional.pengiriman.ongkos_angkut')->with('sukses', "{$berhasilDihapus} data tarif ongkos angkut terpilih berhasil dihapus.");
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect()->route('operasional.pengiriman.ongkos_angkut')->with('error', 'Terjadi kesalahan saat menghapus data massal: ' . $th->getMessage());
+        }
+    }
+
+    /**
      * Generator kode otomatis OA (Gap-filling & Smart Auto-Number).
      */
     public function buatKodeOtomatis(Request $request)

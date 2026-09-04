@@ -55,7 +55,7 @@
     </div>
 
     <!-- Tabel Data Piutang -->
-    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div x-data="tabelPaginasi({ totalData: {{ count($daftarPiutang ?? []) }}, defaultBaris: 10 })" class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <form method="GET" action="{{ route('keuangan.ar.piutang') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
             @php
                 $opsiFilterStatusPiutang = [
@@ -101,7 +101,8 @@
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarPiutang ?? [] as $piutang)
-                        <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                        @php /** @var \App\Models\Keuangan\Piutang $piutang */ @endphp
+                        <tr x-show="apakahBarisTampil({{ $loop->index }})" class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
                             <td class="px-4 py-3 font-mono font-medium text-blue-600 dark:text-blue-400">
                                 {{ $piutang->penjualan->nomor_faktur ?? "ID-{$piutang->id_penjualan}" }}
                             </td>
@@ -134,19 +135,27 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3 text-center">
-                                @if($piutang->sisa_piutang > 0)
-                                    <button @click="piutangTerpilih = {{ json_encode([
-                                        'id_piutang' => $piutang->id_piutang,
-                                        'nama_toko'  => $piutang->customer->nama_toko_bangunan ?? $piutang->kode_customer,
-                                        'faktur'     => $piutang->penjualan->nomor_faktur ?? "ID-{$piutang->id_penjualan}",
-                                        'sisa'       => $piutang->sisa_piutang
-                                    ]) }}; bukaModalBayar = true" 
-                                            class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 rounded-lg transition-colors border border-emerald-200 dark:border-emerald-500/20">
-                                        Bayar Cicilan
-                                    </button>
-                                @else
-                                    <span class="text-slate-400 font-mono text-[11px]">Selesai</span>
-                                @endif
+                                <x-menu-aksi-tabel 
+                                    :kodeSalin="$piutang->penjualan->nomor_faktur ?? 'PIU-' . $piutang->id_piutang"
+                                    labelSalin="Salin No"
+                                    modulIzin="ar_piutang"
+                                >
+                                    @if($piutang->sisa_piutang > 0)
+                                        <button @click.stop="menuTerbuka = false; piutangTerpilih = {{ json_encode([
+                                            'id_piutang' => $piutang->id_piutang,
+                                            'nama_toko'  => $piutang->customer->nama_toko_bangunan ?? $piutang->kode_customer,
+                                            'faktur'     => $piutang->penjualan->nomor_faktur ?? "ID-{$piutang->id_penjualan}",
+                                            'sisa'       => $piutang->sisa_piutang
+                                        ]) }}; bukaModalBayar = true" 
+                                                type="button"
+                                                class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors text-left font-medium">
+                                            <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                            </svg>
+                                            <span>Bayar</span>
+                                        </button>
+                                    @endif
+                                </x-menu-aksi-tabel>
                             </td>
                         </tr>
                     @empty
@@ -157,6 +166,8 @@
                 </tbody>
             </table>
         </div>
+
+        <x-paginasi-tabel :totalData="count($daftarPiutang ?? [])" />
     </div>
 
     <!-- Modal Catat Pembayaran Piutang -->
@@ -175,8 +186,13 @@
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jumlah Nominal Bayar (Rp) <span class="text-rose-500">*</span></label>
-                    <input type="number" name="jumlah_bayar" :max="piutangTerpilih.sisa" required min="0" step="any" :value="piutangTerpilih.sisa"
-                           class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 font-mono font-semibold text-sm">
+                    <x-input-rupiah 
+                        nama="jumlah_bayar"
+                        modelBind="piutangTerpilih.sisa"
+                        placeholder="0"
+                        :wajib="true"
+                        warnaFokus="emerald"
+                    />
                 </div>
                 <div class="flex items-center justify-end gap-2 pt-2">
                     <button @click="bukaModalBayar = false" type="button" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>

@@ -733,6 +733,159 @@
             }
         }
 
+        // =========================================================================
+        // PENGAMAN GLOBAL: INPUT HANYA ANGKA & FORMAT RUPIAH OTOMATIS
+        // =========================================================================
+        const DAFTAR_FIELD_ANGKA = [
+            'nik', 'no_ktp', 'no_identitas', 'no_hp', 'telepon', 'no_telp', 'no_hp_toko', 
+            'nomor_rekening', 'jumlah_zak', 'stok_sistem', 'stok_fisik', 'stok_tersedia', 
+            'stok_part', 'jumlah_beli', 'jumlah_unit', 'tahun_pembuatan', 'umur_manfaat', 
+            'odometer_km', 'periode_tahun'
+        ];
+
+        function apakahFieldHanyaAngka(target) {
+            if (!target || target.tagName !== 'INPUT') return false;
+            if (target.dataset.inputRupiah === 'true') return false; // Dikelola komponen x-input-rupiah
+            if (target.dataset.hanyaAngka === 'true') return true;
+            if (target.getAttribute('inputmode') === 'numeric') return true;
+            if (target.type === 'number') return true;
+            const namaField = (target.name || '').toLowerCase();
+            return DAFTAR_FIELD_ANGKA.some(field => namaField.includes(field));
+        }
+
+        // 1. Blokir ketikan huruf di tingkat Keydown
+        document.addEventListener('keydown', function(event) {
+            const target = event.target;
+            if (!apakahFieldHanyaAngka(target)) return;
+
+            // Izinkan tombol kontrol dan navigasi
+            const tombolIzin = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Tab', 'Home', 'End', 'Enter', 'Escape'];
+            if (tombolIzin.includes(event.key)) return;
+
+            // Izinkan shortcut keyboard (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+Z, Meta/Cmd)
+            if (event.ctrlKey || event.metaKey) return;
+
+            // Jika bukan angka 0-9, cegah pengetikan huruf
+            if (!/^[0-9]$/.test(event.key)) {
+                event.preventDefault();
+            }
+        }, true);
+
+        // 2. Pembersihan karakter non-angka saat paste / input
+        document.addEventListener('input', function(event) {
+            const target = event.target;
+            if (!apakahFieldHanyaAngka(target)) return;
+
+            if (target.type !== 'number') {
+                const nilaiAwal = target.value;
+                const nilaiBersih = nilaiAwal.replace(/[^0-9]/g, '');
+                if (nilaiAwal !== nilaiBersih) {
+                    target.value = nilaiBersih;
+                    target.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }
+        }, true);
+
+        // =========================================================================
+        // HELPER GLOBAL: PAGINASI TABEL INTERAKTIF REAKTIF & MULTI-SELECT (ALPINE.JS)
+        // =========================================================================
+        function tabelPaginasi(opsi = {}) {
+            return {
+                halamanSekarang: 1,
+                barisPerHalaman: parseInt(opsi.defaultBaris) || 10,
+                totalData: parseInt(opsi.totalData) || 0,
+                daftarTerpilih: [],
+                initPaginasi(total) {
+                    if (typeof total !== 'undefined') {
+                        this.totalData = parseInt(total) || 0;
+                    }
+                },
+                get totalHalaman() {
+                    return Math.max(1, Math.ceil(this.totalData / this.barisPerHalaman));
+                },
+                get barisAwal() {
+                    return this.totalData === 0 ? 0 : (this.halamanSekarang - 1) * this.barisPerHalaman + 1;
+                },
+                get barisAkhir() {
+                    return Math.min(this.totalData, this.halamanSekarang * this.barisPerHalaman);
+                },
+                keHalamanPertama() {
+                    this.halamanSekarang = 1;
+                },
+                keHalamanSebelumnya() {
+                    if (this.halamanSekarang > 1) {
+                        this.halamanSekarang--;
+                    }
+                },
+                keHalamanSelanjutnya() {
+                    if (this.halamanSekarang < this.totalHalaman) {
+                        this.halamanSekarang++;
+                    }
+                },
+                keHalamanTerakhir() {
+                    this.halamanSekarang = this.totalHalaman;
+                },
+                gantiBarisPerHalaman(jumlah) {
+                    this.barisPerHalaman = parseInt(jumlah);
+                    this.halamanSekarang = 1;
+                },
+                apakahBarisTampil(index) {
+                    return index >= (this.halamanSekarang - 1) * this.barisPerHalaman && index < this.halamanSekarang * this.barisPerHalaman;
+                },
+
+                // -----------------------------------------------------------------
+                // FITUR MULTI-SELECT / PILIHAN GANDA BARIS TABEL (BULK SELECTION)
+                // -----------------------------------------------------------------
+                apakahTerpilih(id) {
+                    return this.daftarTerpilih.includes(String(id));
+                },
+                togglePilih(id) {
+                    const strId = String(id);
+                    const idx = this.daftarTerpilih.indexOf(strId);
+                    if (idx > -1) {
+                        this.daftarTerpilih.splice(idx, 1);
+                    } else {
+                        this.daftarTerpilih.push(strId);
+                    }
+                },
+                apakahSemuaTerpilih(daftarSemuaId = []) {
+                    if (!daftarSemuaId || daftarSemuaId.length === 0) return false;
+                    return daftarSemuaId.every(id => this.daftarTerpilih.includes(String(id)));
+                },
+                togglePilihSemua(daftarSemuaId = []) {
+                    if (this.apakahSemuaTerpilih(daftarSemuaId)) {
+                        const targetList = daftarSemuaId.map(String);
+                        this.daftarTerpilih = this.daftarTerpilih.filter(id => !targetList.includes(id));
+                    } else {
+                        daftarSemuaId.forEach(id => {
+                            const strId = String(id);
+                            if (!this.daftarTerpilih.includes(strId)) {
+                                this.daftarTerpilih.push(strId);
+                            }
+                        });
+                    }
+                },
+                kosongkanPilihan() {
+                    this.daftarTerpilih = [];
+                    this.modalHapusMassalTerbuka = false;
+                },
+                salinTerpilih(pemisah = ', ') {
+                    if (this.daftarTerpilih.length === 0) return;
+                    const teks = this.daftarTerpilih.join(pemisah);
+                    navigator.clipboard.writeText(teks);
+                },
+                modalHapusMassalTerbuka: false,
+                bukaModalHapusMassal() {
+                    if (this.daftarTerpilih.length > 0) {
+                        this.modalHapusMassalTerbuka = true;
+                    }
+                },
+                tutupModalHapusMassal() {
+                    this.modalHapusMassalTerbuka = false;
+                }
+            };
+        }
+
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', pulihkanPosisiSidebar);
         } else {

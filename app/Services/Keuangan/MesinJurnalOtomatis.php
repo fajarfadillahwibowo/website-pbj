@@ -393,4 +393,40 @@ class MesinJurnalOtomatis
 
         return self::catatJurnal($nomorRilisan, $tanggal, $barisJurnal, $keteranganLengkap, $pembuat);
     }
+
+    /**
+     * Otomasi Jurnal: Top-up Deposit Masuk Customer (AR)
+     *
+     * Jurnal:
+     * Debit: Kas / Rekening Bank Penerima (1101 / 1102 / 1103 / 1104)
+     * Kredit: Titipan Saldo Deposit Customer (2102 - Kewajiban Lancar)
+     */
+    public static function jurnalTopUpDeposit(
+        string $nomorBuktiDeposit,
+        string $tanggal,
+        float $nominal,
+        ?int $idRekening = null,
+        string $pembuat = 'Staff AR',
+        string $keterangan = ''
+    ): string {
+        $kodeAkunKasBank = self::dapatkanKodeAkunKasBank($idRekening, $idRekening ? 'Transfer' : 'Tunai');
+        $keteranganLengkap = $keterangan ?: "Penerimaan Top-up Deposit Customer {$nomorBuktiDeposit}";
+
+        $barisJurnal = [
+            [
+                'kode_akun'  => $kodeAkunKasBank,
+                'posisi'     => 'Debit',
+                'nominal'    => $nominal,
+                'keterangan' => "Penerimaan Deposit - {$nomorBuktiDeposit}",
+            ],
+            [
+                'kode_akun'  => '2102', // Titipan Saldo Deposit Customer
+                'posisi'     => 'Kredit',
+                'nominal'    => $nominal,
+                'keterangan' => "Titipan Deposit Masuk - {$nomorBuktiDeposit}",
+            ],
+        ];
+
+        return self::catatJurnal($nomorBuktiDeposit, $tanggal, $barisJurnal, $keteranganLengkap, $pembuat);
+    }
 }
