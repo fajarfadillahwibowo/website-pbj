@@ -225,6 +225,36 @@ class TokoBangunanController extends Controller
     }
 
     /**
+     * Hapus banyak data toko bangunan sekaligus (Hapus Massal).
+     */
+    public function hapusMassal(Request $request)
+    {
+        $daftarId = $request->input('daftar_id', []);
+        if (empty($daftarId) || !is_array($daftarId)) {
+            return redirect()->route('master.toko_bangunan.index')->with('gagal', 'Tidak ada toko atau proyek yang dipilih untuk dihapus.');
+        }
+
+        $berhasilDihapus = 0;
+
+        DB::beginTransaction();
+        try {
+            foreach ($daftarId as $kode) {
+                $toko = TokoBangunan::where('kode_toko', $kode)->first();
+                if ($toko) {
+                    $toko->delete();
+                    $berhasilDihapus++;
+                }
+            }
+            DB::commit();
+
+            return redirect()->route('master.toko_bangunan.index')->with('sukses', "{$berhasilDihapus} data toko / proyek terpilih berhasil dihapus.");
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect()->route('master.toko_bangunan.index')->with('gagal', 'Terjadi kesalahan saat menghapus data massal: ' . $th->getMessage());
+        }
+    }
+
+    /**
      * API Generator Kode Otomatis
      */
     public function buatKodeOtomatis(Request $request)

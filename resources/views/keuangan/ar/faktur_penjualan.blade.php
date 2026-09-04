@@ -6,9 +6,26 @@
 <div class="space-y-5" x-data="{ 
     bukaModalTambah: false, 
     metode: 'Kredit / Piutang',
-    bruto: 35000000,
+    kodeBarang: '{{ $daftarBarang->first()->kode_barang ?? '' }}',
+    petaBarang: {{ json_encode($daftarBarang->keyBy('kode_barang')) }},
+    satuanBarang: '{{ $daftarBarang->first()->satuan_barang ?? 'Zak' }}',
+    jumlahZak: 500,
+    hargaSatuan: {{ (float)($daftarBarang->first()->harga_jual_standar ?? 70000) }},
     diskon: 0,
-    hitungNetto() { return Math.max(0, this.bruto - this.diskon); }
+    init() {
+        this.$watch('kodeBarang', val => {
+            if (this.petaBarang && this.petaBarang[val]) {
+                this.hargaSatuan = parseFloat(this.petaBarang[val].harga_jual_standar) || 0;
+                this.satuanBarang = this.petaBarang[val].satuan_barang || 'Zak';
+            }
+        });
+    },
+    hitungBruto() { 
+        return (parseFloat(this.jumlahZak) || 0) * (parseFloat(this.hargaSatuan) || 0); 
+    },
+    hitungNetto() { 
+        return Math.max(0, this.hitungBruto() - (parseFloat(this.diskon) || 0)); 
+    }
 }">
     <!-- Flash Notification -->
     @if(session('sukses'))
@@ -82,7 +99,7 @@
     </div>
 
     <!-- Tabel Data Faktur Penjualan -->
-    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div x-data="tabelPaginasi({ totalData: {{ count($daftarFaktur ?? []) }}, defaultBaris: 10 })" class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <form method="GET" action="{{ route('keuangan.ar.faktur') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
             @php
                 $opsiFilterStatusFaktur = [
@@ -94,21 +111,25 @@
                     ['nilai' => '', 'label' => '-- Semua Metode --'],
                     ['nilai' => 'Tunai', 'label' => 'Tunai Kas'],
                     ['nilai' => 'Transfer', 'label' => 'Transfer Bank'],
-                    ['nilai' => 'Kredit', 'label' => 'Kredit Tempo'],
-                    ['nilai' => 'Deposit', 'label' => 'Potong Deposit'],
+                    ['nilai' => 'Kredit / Piutang', 'label' => 'Kredit Tempo'],
+                    ['nilai' => 'Potong Deposit', 'label' => 'Potong Deposit'],
                 ];
                 $opsiCustomerFaktur = ($daftarCustomer ?? collect())->map(fn($c) => ['nilai' => $c->kode_customer, 'label' => $c->nama_toko_bangunan . ' (' . $c->kode_customer . ')'])->toArray();
-                $opsiBarangFaktur = ($daftarBarang ?? collect())->map(fn($b) => ['nilai' => $b->kode_barang, 'label' => $b->nama_barang . ' - Rp ' . number_format($b->harga_jual_standar, 0, ',', '.')])->toArray();
+                $opsiBarangFaktur = ($daftarBarang ?? collect())->map(fn($b) => [
+                    'nilai' => $b->kode_barang, 
+                    'label' => $b->nama_barang . ' (' . ($b->satuan_barang ?? 'Zak') . ')',
+                    'sub'   => 'Harga: Rp ' . number_format($b->harga_jual_standar, 0, ',', '.') . ' / ' . ($b->satuan_barang ?? 'Zak')
+                ])->toArray();
                 $opsiMetodeModal = [
-                    ['nilai' => 'Kredit', 'label' => 'Kredit Tempo'],
+                    ['nilai' => 'Kredit / Piutang', 'label' => 'Kredit Tempo'],
                     ['nilai' => 'Tunai', 'label' => 'Tunai Kas'],
                     ['nilai' => 'Transfer', 'label' => 'Transfer Bank'],
-                    ['nilai' => 'Deposit', 'label' => 'Potong Deposit'],
+                    ['nilai' => 'Potong Deposit', 'label' => 'Potong Deposit'],
                 ];
             @endphp
             <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                 <div class="relative w-full sm:w-64">
-                    <input type="text" name="cari" value="{{ $kataKunci ?? '' }}" placeholder="Cari no faktur / customer..."
+                    <input type="text" name="cari" value="{{ $kataKunci ?? '' }}" placeholder="Cari no faktur / customer / semen..."
                            class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
                     <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
@@ -145,6 +166,7 @@
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">No. Faktur</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Tanggal</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Customer / Toko</th>
+                        <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Komoditas & Kuantitas</th>
                         <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Total Netto</th>
                         <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Sisa Piutang</th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Metode Bayar</th>
@@ -155,7 +177,9 @@
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarFaktur ?? [] as $faktur)
-                        <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                        @php /** @var \App\Models\Keuangan\FakturPenjualan $faktur */ @endphp
+                        <tr x-show="apakahBarisTampil({{ $loop->index }})" 
+                            class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
                             <td class="px-4 py-3 font-mono font-medium text-blue-600 dark:text-blue-400">
                                 {{ $faktur->nomor_faktur }}
                             </td>
@@ -165,6 +189,13 @@
                             <td class="px-4 py-3">
                                 <div class="font-bold text-slate-900 dark:text-slate-100">{{ $faktur->customer->nama_toko_bangunan ?? $faktur->kode_customer }}</div>
                                 <div class="text-[11px] text-slate-400">{{ $faktur->customer->nama_pemilik ?? '' }}</div>
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="font-semibold text-slate-900 dark:text-slate-100">{{ $faktur->nama_barang ?? ($faktur->barang->nama_barang ?? 'Semen Portland (PCC)') }}</div>
+                                <div class="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                                    {{ number_format($faktur->jumlah_zak ?? 0, 0, ',', '.') }} {{ $faktur->satuan_barang ?? 'Zak' }} 
+                                    @ Rp {{ number_format($faktur->harga_satuan ?? 0, 0, ',', '.') }}
+                                </div>
                             </td>
                             <td class="px-4 py-3 text-right font-mono tabular-nums font-bold text-slate-900 dark:text-slate-100">
                                 Rp {{ number_format($faktur->total_netto, 0, ',', '.') }}
@@ -192,20 +223,25 @@
                                 {{ $faktur->tanggal_jatuh_tempo ? date('d/m/Y', strtotime($faktur->tanggal_jatuh_tempo)) : '-' }}
                             </td>
                             <td class="px-4 py-3 text-center">
-                                <a href="{{ route('keuangan.ar.faktur.cetak', $faktur->nomor_faktur) }}" target="_blank" class="inline-flex items-center gap-1 px-2 py-1 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-500/10 dark:hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 font-semibold text-[10px] rounded-lg border border-indigo-200 dark:border-indigo-500/30 transition-all shadow-2xs" title="Cetak Dokumen Faktur Resmi">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                                    Cetak
-                                </a>
+                                <x-menu-aksi-tabel 
+                                    :kodeSalin="$faktur->nomor_faktur"
+                                    labelSalin="Salin No"
+                                    modulIzin="ar_faktur"
+                                    :urlDetail="route('keuangan.ar.faktur.cetak', $faktur->nomor_faktur)"
+                                    labelDetail="Cetak"
+                                />
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="px-4 py-6 text-center text-slate-400">Belum ada faktur penjualan tercatat.</td>
+                            <td colspan="10" class="px-4 py-6 text-center text-slate-400">Belum ada faktur penjualan tercatat.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+
+        <x-paginasi-tabel :totalData="count($daftarFaktur ?? [])" />
     </div>
 
     <!-- Modal Tambah Faktur Penjualan -->
@@ -217,6 +253,9 @@
             </div>
             <form method="POST" action="{{ route('keuangan.ar.faktur.store') }}" class="p-5 space-y-3.5 text-xs">
                 @csrf
+                <!-- Nilai Bruto Terkalkulasi Otomatis -->
+                <input type="hidden" name="total_bruto" :value="hitungBruto()">
+
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Toko Bangunan / Proyek Tujuan <span class="text-rose-500">*</span></label>
@@ -239,8 +278,62 @@
                         />
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+
+                <!-- Pemilihan Produk Semen & Kuantitas -->
+                <div class="p-3.5 bg-[#F8FAFC] dark:bg-[#1C1E2A] rounded-xl border border-[#E2E8F0] dark:border-[#252837] space-y-3">
                     <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Produk Semen <span class="text-rose-500">*</span></label>
+                        <x-dropdown-kustom 
+                            nama="kode_barang"
+                            placeholder="-- Pilih Jenis Semen --"
+                            :opsi="$opsiBarangFaktur"
+                            :wajib="true"
+                            warnaFokus="emerald"
+                            modelBind="kodeBarang"
+                        />
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 items-end">
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jumlah Kuantitas (<span x-text="satuanBarang">Zak</span>) <span class="text-rose-500">*</span></label>
+                            <div class="relative flex items-center rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/30 transition-all overflow-hidden h-[38px]">
+                                <input type="text"
+                                       name="jumlah_zak"
+                                       inputmode="numeric"
+                                       :value="jumlahZak"
+                                       @input="let val = $event.target.value.replace(/[^0-9]/g, ''); jumlahZak = val ? parseInt(val, 10) : 0;"
+                                       @keydown="if(!/^[0-9]$/.test($event.key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End', 'Enter'].includes($event.key) && !$event.ctrlKey && !$event.metaKey) { $event.preventDefault(); }"
+                                       placeholder="500"
+                                       required
+                                       class="w-full px-3 py-2 text-xs font-mono font-bold text-slate-900 dark:text-slate-100 placeholder-slate-400 bg-transparent border-none focus:outline-none focus:ring-0 text-left">
+                                <span class="px-3 py-2 text-[11px] font-bold text-slate-500 dark:text-slate-400 bg-[#F4F6F9] dark:bg-[#1C1E2A] border-l border-[#E2E8F0] dark:border-[#252837] select-none shrink-0" x-text="satuanBarang">
+                                    Zak
+                                </span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Satuan Jual <span class="text-slate-400 font-normal text-[10px]">(Master Data)</span></label>
+                            <div class="flex items-center justify-between px-3.5 py-2 rounded-xl bg-slate-100/90 dark:bg-[#14161F]/80 border border-slate-200 dark:border-[#252837] text-xs h-[38px]">
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-[10px] font-bold text-slate-400 font-mono">Rp</span>
+                                    <span class="font-mono font-bold text-slate-900 dark:text-slate-100 text-xs" x-text="new Intl.NumberFormat('id-ID').format(hargaSatuan)"></span>
+                                    <span class="text-[10px] text-slate-400 font-medium">/ <span x-text="satuanBarang">Zak</span></span>
+                                </div>
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/30">
+                                    <svg class="w-3 h-3 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                    Otomatis
+                                </span>
+                            </div>
+                            <input type="hidden" name="harga_satuan" :value="hargaSatuan">
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between pt-1.5 text-[11px] text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-[#252837]">
+                        <span>Subtotal Bruto (<span x-text="new Intl.NumberFormat('id-ID').format(jumlahZak)"></span> <span x-text="satuanBarang">Zak</span>):</span>
+                        <span class="font-mono font-bold text-slate-800 dark:text-slate-200">Rp <span x-text="new Intl.NumberFormat('id-ID').format(hitungBruto())"></span></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div :class="(metode === 'Kredit / Piutang' || metode === 'Kredit') ? 'col-span-1' : 'col-span-1 sm:col-span-2'">
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Metode Pembayaran <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="metode_pembayaran"
@@ -251,7 +344,7 @@
                             modelBind="metode"
                         />
                     </div>
-                    <div x-show="metode === 'Kredit / Piutang'">
+                    <div x-show="metode === 'Kredit / Piutang' || metode === 'Kredit'" x-cloak class="col-span-1">
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Jatuh Tempo <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
                         <x-input-tanggal 
                             nama="jatuh_tempo" 
@@ -262,20 +355,20 @@
                         />
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Total Nilai Bruto (Rp) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="total_bruto" x-model.number="bruto" required min="0" step="any" placeholder="3500000"
-                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Potongan Diskon (Rp) <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
-                        <input type="number" name="diskon" x-model.number="diskon" min="0" step="any" placeholder="0"
-                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
-                    </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Potongan Diskon (Rp) <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
+                    <x-input-rupiah 
+                        nama="diskon"
+                        modelBind="diskon"
+                        placeholder="0"
+                        :wajib="false"
+                        warnaFokus="emerald"
+                    />
                 </div>
-                <div class="p-3 bg-[#F8FAFC] dark:bg-[#1C1E2A] rounded-xl border border-[#E2E8F0] dark:border-[#252837] flex items-center justify-between">
-                    <span class="font-semibold text-slate-600 dark:text-slate-400">Total Netto Tagihan Faktur:</span>
+
+                <div class="p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-xl border border-emerald-200 dark:border-emerald-800/30 flex items-center justify-between">
+                    <span class="font-semibold text-emerald-800 dark:text-emerald-300">Total Netto Tagihan Faktur:</span>
                     <span class="font-mono font-bold text-sm text-emerald-600 dark:text-emerald-400">Rp <span x-text="new Intl.NumberFormat('id-ID').format(hitungNetto())"></span></span>
                 </div>
                 <div class="flex items-center justify-end gap-2 pt-2">

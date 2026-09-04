@@ -26,6 +26,7 @@ class PembelianSOController extends Controller
             ->select(
                 'pembelian_so.*',
                 'data_customer.nama_toko_bangunan',
+                'data_customer.nama_pemilik',
                 'list_gudang_so.nama_gudang',
                 'list_gudang_so.plant'
             );
@@ -80,6 +81,8 @@ class PembelianSOController extends Controller
         $totalHarga = $jumlahZak * $hargaSatuan;
         $nomorSO = GeneratorKodeOtomatis::buatKodeTransaksi('pembelian_so', 'nomor_so', 'SO-PBJ-', $request->tanggal_so);
 
+        $pembuat = auth()->user()->username ?? 'spv_keuangan';
+
         DB::beginTransaction();
         try {
             DB::table('pembelian_so')->insert([
@@ -91,7 +94,7 @@ class PembelianSOController extends Controller
                 'harga_satuan'  => $hargaSatuan,
                 'total_harga'   => $totalHarga,
                 'status_so'     => 'disetujui',
-                'dibuat_oleh'   => 'staff_ap',
+                'dibuat_oleh'   => $pembuat,
                 'dibuat_pada'   => now(),
             ]);
 
@@ -102,7 +105,7 @@ class PembelianSOController extends Controller
                 $totalHarga,
                 1,
                 'Transfer',
-                auth()->user()->username ?? 'staff_ap',
+                $pembuat,
                 "Penebusan Semen SO {$nomorSO} ({$jumlahZak} Zak)"
             );
 

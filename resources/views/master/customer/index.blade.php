@@ -113,7 +113,7 @@
     </div>
 
     <!-- 4. Filter & Tabel Data Customer -->
-    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div x-data="tabelPaginasi({ totalData: {{ $daftarCustomer->count() }}, defaultBaris: 10 })" class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         
         <!-- Search & Filter Bar -->
         <div class="p-4 sm:px-5 sm:py-4 border-b border-[#E2E8F0] dark:border-[#252837] flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -147,7 +147,7 @@
             </form>
 
             <div class="text-[11px] text-slate-400 font-mono shrink-0">
-                Menampilkan <span class="font-bold text-slate-700 dark:text-slate-300">{{ $daftarCustomer->count() }}</span> data
+                Total Data: <span class="font-bold text-slate-700 dark:text-slate-300">{{ $daftarCustomer->count() }}</span>
             </div>
         </div>
 
@@ -168,7 +168,8 @@
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarCustomer as $cust)
-                        <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                        <tr x-show="apakahBarisTampil({{ $loop->index }})" 
+                            class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
                             <td class="px-4 py-3 font-mono font-bold text-blue-600 dark:text-blue-400">
                                 {{ $cust->kode_customer }}
                             </td>
@@ -179,7 +180,7 @@
                             <td class="px-4 py-3 text-center">
                                 <button @click="bukaModalDetail('{{ $cust->kode_customer }}')" type="button"
                                         class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 hover:bg-emerald-100 transition-colors">
-                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                                     <span>{{ $cust->toko_bangunan_count ?? 0 }} Toko/Proyek</span>
                                 </button>
                             </td>
@@ -197,35 +198,18 @@
                                 Rp {{ number_format($cust->saldo_deposit, 0, ',', '.') }}
                             </td>
                             <td class="px-4 py-3 text-center">
-                                <div class="flex items-center justify-center gap-2">
-                                    <button @click="bukaModalDetail('{{ $cust->kode_customer }}')" type="button"
-                                            class="p-1.5 text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 rounded-lg transition-colors"
-                                            title="Kinerja 360 Derajat">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                        </svg>
-                                    </button>
-                                    <button @click="bukaModalEdit({{ json_encode($cust) }})" type="button"
-                                            class="p-1.5 text-amber-600 hover:text-amber-800 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 rounded-lg transition-colors"
-                                            title="Ubah Data">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </button>
-                                    <form method="POST" action="{{ route('master.customer.destroy', $cust->kode_customer) }}" class="inline"
-                                          onsubmit="return confirm('Hapus data customer {{ $cust->nama_pemilik }}?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                                class="p-1.5 text-rose-600 hover:text-rose-800 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors"
-                                                title="Hapus Customer">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                        </button>
-                                    </form>
-                                </div>
+                                <x-menu-aksi-tabel 
+                                    :kodeSalin="$cust->kode_customer"
+                                    labelSalin="Salin ID"
+                                    modulIzin="master_customer"
+                                    aksiDetail="bukaModalDetail('{{ $cust->kode_customer }}')"
+                                    labelDetail="Detail"
+                                    aksiEdit="bukaModalEdit({{ json_encode($cust) }})"
+                                    labelEdit="Edit"
+                                    aksiHapus="{{ route('master.customer.destroy', $cust->kode_customer) }}"
+                                    labelHapus="Hapus"
+                                    pesanHapus="Hapus data customer {{ $cust->nama_pemilik }} ({{ $cust->kode_customer }})?"
+                                />
                             </td>
                         </tr>
                     @empty
@@ -238,6 +222,9 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Toolbar Paginasi -->
+        <x-paginasi-tabel :totalData="count($daftarCustomer ?? [])" />
     </div>
 
     <!-- ========================================================================= -->
@@ -303,19 +290,24 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. HP / WhatsApp <span class="text-rose-500">*</span></label>
-                        <input type="text" name="no_hp" x-model="formTambah.no_hp" required placeholder="0812-xxxx-xxxx"
+                        <input type="text" name="no_hp" x-model="formTambah.no_hp" required placeholder="0812-xxxx-xxxx" inputmode="numeric" data-hanya-angka="true"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 font-mono">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Plafon Limit Piutang (Rp) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="plafon_piutang" x-model="formTambah.plafon_piutang" required min="0" step="any"
-                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 font-mono">
+                        <x-input-rupiah 
+                            nama="plafon_piutang"
+                            modelBind="formTambah.plafon_piutang"
+                            placeholder="50.000.000"
+                            :wajib="true"
+                            warnaFokus="blue"
+                        />
                     </div>
                 </div>
 
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">NIK / KTP Pemilik <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
-                    <input type="text" name="no_ktp" x-model="formTambah.no_ktp" placeholder="32160xxxxxxxxxx"
+                    <input type="text" name="no_ktp" x-model="formTambah.no_ktp" placeholder="32160xxxxxxxxxx" inputmode="numeric" data-hanya-angka="true" maxlength="16"
                            class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 font-mono">
                 </div>
 
@@ -368,7 +360,7 @@
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Usaha / Grup <span class="text-rose-500">*</span></label>
                         <input type="text" name="nama_toko_bangunan" x-model="formEdit.nama_toko_bangunan" required
-                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30">
                     </div>
                 </div>
 
@@ -386,20 +378,25 @@
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Plafon Limit Piutang (Rp) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="plafon_piutang" x-model="formEdit.plafon_piutang" required min="0" step="any"
-                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30 font-mono">
+                        <x-input-rupiah 
+                            nama="plafon_piutang"
+                            modelBind="formEdit.plafon_piutang"
+                            placeholder="50.000.000"
+                            :wajib="true"
+                            warnaFokus="amber"
+                        />
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">No. HP / WhatsApp <span class="text-rose-500">*</span></label>
-                        <input type="text" name="no_hp" x-model="formEdit.no_hp" required
+                        <input type="text" name="no_hp" x-model="formEdit.no_hp" required inputmode="numeric" data-hanya-angka="true"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30 font-mono">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">NIK / KTP Pemilik <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>
-                        <input type="text" name="no_ktp" x-model="formEdit.no_ktp"
+                        <input type="text" name="no_ktp" x-model="formEdit.no_ktp" inputmode="numeric" data-hanya-angka="true" maxlength="16"
                                class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30 font-mono">
                     </div>
                 </div>

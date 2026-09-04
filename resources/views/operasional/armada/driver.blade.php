@@ -192,7 +192,7 @@
     </div>
 
     <!-- 4. Tabel Data Driver & Bar Pencarian -->
-    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div x-data="tabelPaginasi({ totalData: {{ count($daftarDriver ?? []) }}, defaultBaris: 10 })" class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <div class="p-4 sm:px-5 sm:py-4 border-b border-[#E2E8F0] dark:border-[#252837] flex flex-col md:flex-row md:items-center justify-between gap-3">
             <form method="GET" action="{{ route('operasional.armada.driver') }}" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-1 max-w-2xl">
                 <!-- Search Input -->
@@ -248,7 +248,7 @@
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarDriver as $driver)
-                        <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors group">
+                        <tr x-show="apakahBarisTampil({{ $loop->index }})" class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors group">
                             
                             <!-- Kode Karyawan -->
                             <td class="px-4 py-3.5 font-mono font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap">
@@ -415,6 +415,9 @@
                 </tbody>
             </table>
         </div>
+        
+        <!-- Paginasi Terpadu -->
+        <x-paginasi-tabel :totalData="count($daftarDriver ?? [])" />
     </div>
 
     <!-- Modal Tambah Driver -->

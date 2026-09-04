@@ -9,6 +9,7 @@ use App\Models\Keuangan\KodeAkun;
 use App\Models\Keuangan\FakturPenjualan;
 use App\Models\Keuangan\Piutang;
 use App\Models\Master\Customer;
+use Carbon\Carbon;
 
 class LaporanEksekutifController extends Controller
 {
@@ -24,15 +25,15 @@ class LaporanEksekutifController extends Controller
         $akunCOA = DB::table('data_kode_akun')->get()->keyBy('kode_akun');
 
         // 1. Aktiva Lancar
-        $kasKecil = (float) ($akunCOA['1101']->saldo_berjalan ?? 25000000.00);
-        $bankBCA = (float) ($akunCOA['1102']->saldo_berjalan ?? 450000000.00);
-        $bankMandiri = (float) ($akunCOA['1103']->saldo_berjalan ?? 280000000.00);
-        $bankBRI = (float) ($akunCOA['1104']->saldo_berjalan ?? 175000000.00);
+        $kasKecil = (float) ($akunCOA['1101']->saldo_berjalan ?? 0.00);
+        $bankBCA = (float) ($akunCOA['1102']->saldo_berjalan ?? 0.00);
+        $bankMandiri = (float) ($akunCOA['1103']->saldo_berjalan ?? 0.00);
+        $bankBRI = (float) ($akunCOA['1104']->saldo_berjalan ?? 0.00);
         $totalKasBank = $kasKecil + $bankBCA + $bankMandiri + $bankBRI;
 
         $totalPiutangUsaha = (float) ($akunCOA['1105']->saldo_berjalan ?? DB::table('data_customer')->sum('saldo_piutang'));
-        $totalPersediaan = (float) ($akunCOA['1106']->saldo_berjalan ?? 625000000.00);
-        $totalUangMukaSupir = (float) ($akunCOA['1107']->saldo_berjalan ?? 18000000.00);
+        $totalPersediaan = (float) ($akunCOA['1106']->saldo_berjalan ?? 0.00);
+        $totalUangMukaSupir = (float) ($akunCOA['1107']->saldo_berjalan ?? 0.00);
         $totalAktivaLancar = $totalKasBank + $totalPiutangUsaha + $totalPersediaan + $totalUangMukaSupir;
 
         // 2. Aktiva Tetap
@@ -42,19 +43,22 @@ class LaporanEksekutifController extends Controller
         }
         $totalAkumulasiPenyusutan = abs((float) DB::table('data_kode_akun')->whereIn('kode_akun', ['1202', '1205', '1207', '1208'])->sum('saldo_berjalan'));
         if ($totalAkumulasiPenyusutan <= 0) {
-            $totalAkumulasiPenyusutan = 220000000.00;
+            $totalAkumulasiPenyusutan = (float) DB::table('riwayat_penyusutan')->sum('beban_penyusutan');
         }
         $totalAktivaTetap = max(0, $totalNilaiAset - $totalAkumulasiPenyusutan);
         $totalAktiva = $totalAktivaLancar + $totalAktivaTetap;
 
         // 3. Kewajiban (Hutang)
-        $totalHutangDagang = abs((float) ($akunCOA['2101']->saldo_berjalan ?? 320000000.00));
+        $totalHutangDagang = abs((float) ($akunCOA['2101']->saldo_berjalan ?? 0.00));
         $totalDepositCustomer = (float) DB::table('data_customer')->sum('saldo_deposit');
-        $totalHutangGaji = abs((float) ($akunCOA['2103']->saldo_berjalan ?? 42000000.00));
+        if ($totalDepositCustomer <= 0 && isset($akunCOA['2102'])) {
+            $totalDepositCustomer = abs((float) $akunCOA['2102']->saldo_berjalan);
+        }
+        $totalHutangGaji = abs((float) ($akunCOA['2103']->saldo_berjalan ?? 0.00));
         $totalKewajiban = $totalHutangDagang + $totalDepositCustomer + $totalHutangGaji;
 
         // 4. Modal & Ekuitas Bersih
-        $modalDisetor = abs((float) ($akunCOA['3101']->saldo_berjalan ?? 2500000000.00));
+        $modalDisetor = abs((float) ($akunCOA['3101']->saldo_berjalan ?? 0.00));
         $totalModal = max(0, $totalAktiva - $totalKewajiban);
         $labaDitahan = max(0, $totalModal - $modalDisetor);
 
@@ -103,7 +107,10 @@ class LaporanEksekutifController extends Controller
             5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
             9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
         ];
-        $namaBulan = $daftarBulan[$bulan] ?? 'September';
+        $namaBulan = $daftarBulan[$bulan] ?? 'Bulan ' . $bulan;
+
+        // Ambil data akun COA real-time
+        $akunCOA = DB::table('data_kode_akun')->get()->keyBy('kode_akun');
 
         // Real-time Penjualan dari DB untuk periode terpilih
         $queryPenjualan = DB::table('penjualan')
@@ -111,19 +118,33 @@ class LaporanEksekutifController extends Controller
         if ($bulan > 0) {
             $queryPenjualan->whereMonth('tanggal_penjualan', $bulan);
         }
-        $realPenjualan = (float)$queryPenjualan->sum('total_netto');
+        $realPenjualan = (float) $queryPenjualan->sum('total_netto');
+        $realDiskon = (float) $queryPenjualan->sum('diskon');
+
+        $saldoPendapatanCOA = (float) ($akunCOA['4101']->saldo_berjalan ?? 0.00);
+        $totalBasisPenjualan = max($realPenjualan, $saldoPendapatanCOA);
 
         // Komposisi Pendapatan Usaha (Revenue)
-        $penjualanSemenZak = ($realPenjualan > 0) ? ($realPenjualan * 0.70 + 520000000.00) : 580000000.00;
-        $penjualanSemenCurah = ($realPenjualan > 0) ? ($realPenjualan * 0.30 + 260000000.00) : 270000000.00;
-        $pendapatanOngkosAngkut = 78000000.00;
-        $potonganPenjualan = 8500000.00;
-        $totalPendapatan = ($penjualanSemenZak + $penjualanSemenCurah + $pendapatanOngkosAngkut) - $potonganPenjualan;
+        $penjualanSemenZak = $totalBasisPenjualan * 0.70;
+        $penjualanSemenCurah = $totalBasisPenjualan * 0.30;
+        $pendapatanOngkosAngkut = (float) ($akunCOA['4201']->saldo_berjalan ?? 0.00);
+        $potonganPenjualan = $realDiskon;
+        $totalPendapatan = max(0, ($penjualanSemenZak + $penjualanSemenCurah + $pendapatanOngkosAngkut) - $potonganPenjualan);
 
         // Harga Pokok Penjualan (HPP / COGS)
-        $pembelianSemenPabrik = ($penjualanSemenZak + $penjualanSemenCurah) * 0.82;
-        $ongkosBongkarMuatPabrik = 18500000.00;
-        $biayaKuliPabrik = 7500000.00;
+        $querySO = DB::table('pembelian_so')->whereYear('tanggal_so', $tahun);
+        if ($bulan > 0) {
+            $querySO->whereMonth('tanggal_so', $bulan);
+        }
+        $totalBeliSO = (float) $querySO->sum('total_harga');
+        $saldoHppCOA = (float) ($akunCOA['5101']->saldo_berjalan ?? 0.00);
+        $pembelianSemenPabrik = max($totalBeliSO, $saldoHppCOA);
+        if ($pembelianSemenPabrik <= 0 && $totalPendapatan > 0) {
+            $pembelianSemenPabrik = $totalPendapatan * 0.80;
+        }
+
+        $ongkosBongkarMuatPabrik = $pembelianSemenPabrik > 0 ? round($pembelianSemenPabrik * 0.02, 2) : 0.00;
+        $biayaKuliPabrik = $pembelianSemenPabrik > 0 ? round($pembelianSemenPabrik * 0.01, 2) : 0.00;
         $totalHpp = $pembelianSemenPabrik + $ongkosBongkarMuatPabrik + $biayaKuliPabrik;
         $labaKotor = $totalPendapatan - $totalHpp;
 
@@ -135,25 +156,43 @@ class LaporanEksekutifController extends Controller
         }
 
         // 1. Beban Armada & Logistik
-        $bebanBBM = 38500000.00; // Solar Truk B35
-        $bebanTolPenyeberangan = 12400000.00;
-        $bebanKirPajakArmada = 4200000.00;
+        $bebanBBM = (float) (clone $queryPengeluaran)->where('kode_akun', '6101')->sum('total_nominal');
+        if ($bebanBBM == 0 && isset($akunCOA['6101'])) {
+            $bebanBBM = (float) $akunCOA['6101']->saldo_berjalan;
+        }
+        $bebanTolPenyeberangan = (float) (clone $queryPengeluaran)->where('kategori_pengeluaran', 'like', '%Tol%')->sum('total_nominal');
+        $bebanKirPajakArmada = (float) (clone $queryPengeluaran)->where(function ($q) {
+            $q->where('kategori_pengeluaran', 'like', '%Pajak%')
+              ->orWhere('kategori_pengeluaran', 'like', '%KIR%');
+        })->sum('total_nominal');
         $subtotalBebanLogistik = $bebanBBM + $bebanTolPenyeberangan + $bebanKirPajakArmada;
 
         // 2. Beban Bengkel & Pemeliharaan
-        $bebanServisBengkel = 14200000.00;
-        $bebanSparepartBan = 9800000.00;
+        $bebanServisBengkel = (float) (clone $queryPengeluaran)->where('kode_akun', '6102')->sum('total_nominal');
+        if ($bebanServisBengkel == 0 && isset($akunCOA['6102'])) {
+            $bebanServisBengkel = (float) $akunCOA['6102']->saldo_berjalan;
+        }
+        $bebanSparepartBan = (float) (clone $queryPengeluaran)->where('kategori_pengeluaran', 'like', '%Sparepart%')->sum('total_nominal');
         $subtotalBebanBengkel = $bebanServisBengkel + $bebanSparepartBan;
 
         // 3. Beban Personalia & Supir
-        $bebanGajiSupir = 32000000.00;
-        $bebanUangJalanSupir = 14500000.00;
-        $bebanGajiManajemen = 20000000.00;
+        $bebanGajiSupir = (float) (clone $queryPengeluaran)->where('kode_akun', '6103')->sum('total_nominal');
+        if ($bebanGajiSupir == 0 && isset($akunCOA['6103'])) {
+            $bebanGajiSupir = (float) $akunCOA['6103']->saldo_berjalan;
+        }
+        $bebanUangJalanSupir = (float) (clone $queryPengeluaran)->where('kategori_pengeluaran', 'like', '%Uang Jalan%')->sum('total_nominal');
+        $bebanGajiManajemen = (float) (clone $queryPengeluaran)->where('kategori_pengeluaran', 'like', '%Manajemen%')->sum('total_nominal');
         $subtotalBebanGaji = $bebanGajiSupir + $bebanUangJalanSupir + $bebanGajiManajemen;
 
         // 4. Beban Kantor & Umum
-        $bebanListrikAir = 4300000.00;
-        $bebanAtkKomunikasi = 2500000.00;
+        $bebanListrikAir = (float) (clone $queryPengeluaran)->where('kode_akun', '6104')->sum('total_nominal');
+        if ($bebanListrikAir == 0 && isset($akunCOA['6104'])) {
+            $bebanListrikAir = (float) $akunCOA['6104']->saldo_berjalan;
+        }
+        $bebanAtkKomunikasi = (float) (clone $queryPengeluaran)->where(function ($q) {
+            $q->where('kategori_pengeluaran', 'like', '%ATK%')
+              ->orWhere('kategori_pengeluaran', 'like', '%Kantor%');
+        })->sum('total_nominal');
         $subtotalBebanKantor = $bebanListrikAir + $bebanAtkKomunikasi;
 
         $totalBebanOperasional = $subtotalBebanLogistik + $subtotalBebanBengkel + $subtotalBebanGaji + $subtotalBebanKantor;
@@ -169,15 +208,34 @@ class LaporanEksekutifController extends Controller
         $marginLabaBersih = $totalPendapatan > 0 ? ($labaBersihSetelahPajak / $totalPendapatan) * 100 : 0;
         $rasioBebanOperasional = $totalPendapatan > 0 ? ($totalBebanOperasional / $totalPendapatan) * 100 : 0;
 
-        // Data Tren 6 Bulan Terakhir
-        $trenBulanan = [
-            ['bulan' => 'Apr', 'pendapatan' => 780000000, 'laba_bersih' => 48000000, 'margin' => 6.1],
-            ['bulan' => 'Mei', 'pendapatan' => 810000000, 'laba_bersih' => 52000000, 'margin' => 6.4],
-            ['bulan' => 'Jun', 'pendapatan' => 845000000, 'laba_bersih' => 55500000, 'margin' => 6.5],
-            ['bulan' => 'Jul', 'pendapatan' => 890000000, 'laba_bersih' => 58000000, 'margin' => 6.5],
-            ['bulan' => 'Agu', 'pendapatan' => 915000000, 'laba_bersih' => 60200000, 'margin' => 6.5],
-            ['bulan' => 'Sep', 'pendapatan' => (int)$totalPendapatan, 'laba_bersih' => (int)$labaBersihSetelahPajak, 'margin' => round($marginLabaBersih, 1)],
-        ];
+        // Data Tren 6 Bulan Terakhir Berbasis Database
+        $trenBulanan = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $tglTarget = Carbon::now()->subMonths($i);
+            $bTarget = $tglTarget->month;
+            $thTarget = $tglTarget->year;
+            $namaB = $daftarBulan[$bTarget] ?? 'Bln';
+            $singkatB = substr($namaB, 0, 3);
+
+            $rev = (float) DB::table('penjualan')->whereYear('tanggal_penjualan', $thTarget)->whereMonth('tanggal_penjualan', $bTarget)->sum('total_netto');
+            if ($rev <= 0 && $bTarget == now()->month) {
+                $rev = $totalPendapatan;
+            }
+            $exp = (float) DB::table('pengeluaran')->whereYear('tanggal_pengeluaran', $thTarget)->whereMonth('tanggal_pengeluaran', $bTarget)->sum('total_nominal');
+            if ($exp <= 0 && $bTarget == now()->month) {
+                $exp = $totalBebanOperasional;
+            }
+            $hppEst = $rev * 0.80;
+            $netProfit = max(0, $rev - $hppEst - $exp);
+            $margin = $rev > 0 ? round(($netProfit / $rev) * 100, 1) : 0;
+
+            $trenBulanan[] = [
+                'bulan'       => $singkatB,
+                'pendapatan'  => (int) $rev,
+                'laba_bersih' => (int) $netProfit,
+                'margin'      => $margin,
+            ];
+        }
 
         return view('laporan.laba_rugi', compact(
             'bulan',
@@ -228,15 +286,21 @@ class LaporanEksekutifController extends Controller
         $bulan = $request->input('bulan', date('m'));
         $tahun = $request->input('tahun', date('Y'));
 
-        $penerimaanCustomer = DB::table('penjualan')->where('status_pembayaran', 'Lunas')->sum('total_netto');
-        $penerimaanCustomer = $penerimaanCustomer > 0 ? $penerimaanCustomer : 650000000.00;
+        $penerimaanCustomer = (float) DB::table('penjualan')->where('status_pembayaran', 'Lunas')->sum('total_netto')
+            + (float) DB::table('list_deposit')->where('tipe_mutasi', 'Masuk')->sum('jumlah_nominal');
 
-        $pengeluaranOperasional = DB::table('pengeluaran')->sum('total_nominal');
-        $pengeluaranOperasional = $pengeluaranOperasional > 0 ? $pengeluaranOperasional : 111500000.00;
+        $pengeluaranOperasional = (float) DB::table('pengeluaran')->sum('total_nominal')
+            + (float) DB::table('pembelian_so')->sum('total_harga');
 
         $arusKasOperasi = $penerimaanCustomer - $pengeluaranOperasional;
-        $saldoAwalKas = 825000000.00;
-        $saldoAkhirKas = $saldoAwalKas + $arusKasOperasi;
+
+        $akunCOA = DB::table('data_kode_akun')->get()->keyBy('kode_akun');
+        $kasKecil = (float) ($akunCOA['1101']->saldo_berjalan ?? 0.00);
+        $bankBCA = (float) ($akunCOA['1102']->saldo_berjalan ?? 0.00);
+        $bankMandiri = (float) ($akunCOA['1103']->saldo_berjalan ?? 0.00);
+        $bankBRI = (float) ($akunCOA['1104']->saldo_berjalan ?? 0.00);
+        $saldoAkhirKas = $kasKecil + $bankBCA + $bankMandiri + $bankBRI;
+        $saldoAwalKas = max(0, $saldoAkhirKas - $arusKasOperasi);
 
         return view('laporan.arus_kas', compact(
             'bulan',

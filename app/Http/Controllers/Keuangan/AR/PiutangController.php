@@ -104,7 +104,7 @@ class PiutangController extends Controller
                 date('Y-m-d'),
                 $jumlahBayar,
                 null,
-                auth()->user()->username ?? 'staff_ar',
+                auth()->user()->username ?? 'spv_keuangan',
                 "Penerimaan Pelunasan/Cicilan Piutang {$nomorFaktur} - {$piutang->customer->nama_pemilik}"
             );
 

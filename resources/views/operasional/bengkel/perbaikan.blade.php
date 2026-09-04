@@ -150,7 +150,7 @@
     </div>
 
     <!-- 4. Tabel SPK Perbaikan & Filter -->
-    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div x-data="tabelPaginasi({ totalData: {{ count($daftarPerbaikan ?? []) }}, defaultBaris: 10 })" class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         
         <!-- Filter Bar -->
         <div class="p-4 sm:px-5 sm:py-4 border-b border-[#E2E8F0] dark:border-[#252837] flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -206,7 +206,7 @@
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarPerbaikan as $spk)
-                        <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                        <tr x-show="apakahBarisTampil({{ $loop->index }})" class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
                             
                             <!-- No SPK & Tanggal Masuk -->
                             <td class="px-4 py-3.5 whitespace-nowrap">
@@ -271,55 +271,51 @@
                                 @endif
                             </td>
 
-                            <!-- Aksi & Cetak SPK -->
+                            <!-- Aksi Popover Modern -->
                             <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                <div class="inline-flex items-center gap-1.5">
+                                <x-menu-aksi-tabel 
+                                    :kodeSalin="$spk->nomor_spk_perbaikan" 
+                                    labelSalin="Salin No"
+                                    modulIzin="ops_perbaikan"
+                                    :aksiDetail="'bukaModalDetail(\'' . $spk->id_perbaikan . '\')'"
+                                    labelDetail="Detail"
+                                    :aksiEdit="'bukaModalEdit(\'' . $spk->id_perbaikan . '\')'"
+                                    labelEdit="Edit"
+                                >
                                     <!-- Cetak SPK -->
-                                    <button @click="cetakSPK('{{ $spk->id_perbaikan }}')"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
-                                            title="Cetak Dokumen Surat Perintah Kerja (SPK)">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <button @click="cetakSPK('{{ $spk->id_perbaikan }}'); terbuka = false" 
+                                            type="button" 
+                                            class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 transition-colors text-left border-b border-slate-100 dark:border-[#252837]">
+                                        <svg class="w-3.5 h-3.5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                                         </svg>
+                                        <span>Cetak</span>
                                     </button>
 
-                                    <!-- Detail -->
-                                    <button @click="bukaModalDetail('{{ $spk->id_perbaikan }}')"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
-                                            title="Lihat Detail SPK">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                        </svg>
-                                    </button>
+                                    @if($spk->status_perbaikan === 'Dalam Proses')
+                                        <template x-if="!apakahReadOnly('ops_perbaikan')">
+                                            <button @click="ubahStatusCepat('{{ $spk->id_perbaikan }}', 'Selesai'); terbuka = false" 
+                                                    type="button" 
+                                                    class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors text-left border-b border-slate-100 dark:border-[#252837]">
+                                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                                <span>Tandai Selesai</span>
+                                            </button>
+                                        </template>
+                                    @endif
 
-                                    <!-- Edit -->
-                                    <button @click="bukaModalEdit('{{ $spk->id_perbaikan }}')"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
-                                            title="Ubah Data SPK">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </button>
-
-                                    <!-- Hapus -->
-                                    <button @click="bukaModalHapus('{{ $spk->id_perbaikan }}', '{{ $spk->nomor_spk_perbaikan }}')"
-                                            class="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
-                                            title="Hapus SPK Perbaikan">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                <!-- Riwayat Diedit Real-Time -->
-                                <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 flex items-center justify-center gap-1 font-mono cursor-help"
-                                     title="Terakhir diperbarui: {{ $spk->terakhir_diedit_waktu }}">
-                                    <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                    <span>{{ $spk->terakhir_diedit_relatif }}</span>
-                                </div>
+                                    <template x-if="!apakahReadOnly('ops_perbaikan')">
+                                        <button @click="bukaModalHapus('{{ $spk->id_perbaikan }}', '{{ $spk->nomor_spk_perbaikan }}'); terbuka = false" 
+                                                type="button" 
+                                                class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors text-left border-t border-slate-100 dark:border-[#252837]">
+                                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                            <span>Hapus</span>
+                                        </button>
+                                    </template>
+                                </x-menu-aksi-tabel>
                             </td>
                         </tr>
                     @empty
@@ -340,6 +336,7 @@
                 </tbody>
             </table>
         </div>
+        <x-paginasi-tabel :totalData="count($daftarPerbaikan ?? [])" />
     </div>
 
     <!-- Modal Tambah SPK Perbaikan -->

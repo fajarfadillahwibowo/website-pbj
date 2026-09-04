@@ -56,7 +56,7 @@
     </div>
 
     <!-- Tabel Data Pembelian SO -->
-    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <div x-data="tabelPaginasi({ totalData: {{ count($daftarSO ?? []) }}, defaultBaris: 10 })" class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <form method="GET" action="{{ route('keuangan.ap.pembelian_so') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
             @php
                 $opsiFilterStatusSO = [
@@ -109,11 +109,13 @@
                         <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Harga Beli / Zak</th>
                         <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Total Biaya</th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Status</th>
+                        <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider w-16">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarSO ?? [] as $so)
-                        <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                        @php /** @var object $so */ @endphp
+                        <tr x-show="apakahBarisTampil({{ $loop->index }})" class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
                             <td class="px-4 py-3 font-mono font-medium text-blue-600 dark:text-blue-400">
                                 {{ $so->nomor_so }}
                             </td>
@@ -121,12 +123,12 @@
                                 {{ date('d/m/Y', strtotime($so->tanggal_so)) }}
                             </td>
                             <td class="px-4 py-3">
-                                <div class="font-bold text-slate-900 dark:text-slate-100">{{ $so->customer->nama_toko_bangunan ?? $so->kode_customer }}</div>
-                                <div class="text-[11px] text-slate-400">{{ $so->customer->nama_pemilik ?? '' }}</div>
+                                <div class="font-bold text-slate-900 dark:text-slate-100">{{ $so->nama_toko_bangunan ?? $so->kode_customer }}</div>
+                                <div class="text-[11px] text-slate-400">{{ $so->nama_pemilik ?? '' }}</div>
                             </td>
                             <td class="px-4 py-3">
-                                <div class="font-medium text-slate-800 dark:text-slate-200">{{ $so->gudang->nama_gudang ?? $so->kode_gudang }}</div>
-                                <div class="text-[11px] text-slate-400">Plant: {{ $so->gudang->plant ?? '-' }}</div>
+                                <div class="font-medium text-slate-800 dark:text-slate-200">{{ $so->nama_gudang ?? $so->kode_gudang }}</div>
+                                <div class="text-[11px] text-slate-400">Plant: {{ $so->plant ?? '-' }}</div>
                             </td>
                             <td class="px-4 py-3 text-right font-mono font-bold text-slate-900 dark:text-slate-100">
                                 {{ number_format($so->jumlah_zak, 0, ',', '.') }} Zak
@@ -156,15 +158,24 @@
                                     </span>
                                 @endif
                             </td>
+                            <td class="px-4 py-3 text-center">
+                                <x-menu-aksi-tabel 
+                                    :kodeSalin="$so->nomor_so" 
+                                    labelSalin="Salin No"
+                                    modulIzin="ap_so"
+                                />
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-4 py-6 text-center text-slate-400">Belum ada transaksi pembelian SO pabrik tercatat.</td>
+                            <td colspan="9" class="px-4 py-6 text-center text-slate-400">Belum ada transaksi pembelian SO pabrik tercatat.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+
+        <x-paginasi-tabel :totalData="count($daftarSO ?? [])" />
     </div>
 
     <!-- Modal Buat Pembelian SO -->
@@ -211,13 +222,18 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Volume Pemesanan (Zak) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="jumlah_zak" x-model.number="jumlahZak" required min="1" step="any" placeholder="200"
-                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
+                        <input type="number" name="jumlah_zak" x-model.number="jumlahZak" required min="1" step="1" placeholder="200" data-hanya-angka="true"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 font-mono font-bold">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Harga Satuan Pabrik (Rp) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="harga_satuan" x-model.number="hargaSatuan" required min="0" step="any" placeholder="55000"
-                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
+                        <x-input-rupiah 
+                            nama="harga_satuan"
+                            modelBind="hargaSatuan"
+                            placeholder="55.000"
+                            :wajib="true"
+                            warnaFokus="blue"
+                        />
                     </div>
                 </div>
                 <div class="p-3 bg-[#F8FAFC] dark:bg-[#1C1E2A] rounded-xl border border-[#E2E8F0] dark:border-[#252837] flex items-center justify-between">

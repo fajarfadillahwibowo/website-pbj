@@ -70,6 +70,7 @@ Route::prefix('master')->name('master.')->group(function () {
     // Customer (Entitas Pemilik & Finansial)
     Route::get('/customer', [CustomerController::class, 'index'])->name('customer.index');
     Route::post('/customer', [CustomerController::class, 'store'])->name('customer.store');
+    Route::post('/customer/hapus-massal', [CustomerController::class, 'hapusMassal'])->name('customer.hapus_massal');
     Route::get('/customer/api/buat-kode', [CustomerController::class, 'buatKodeOtomatis'])->name('customer.buat_kode');
     Route::get('/customer/{kode_customer}/detail', [CustomerController::class, 'ambilDetail'])->name('customer.detail');
     Route::put('/customer/{kode_customer}', [CustomerController::class, 'update'])->name('customer.update');
@@ -78,6 +79,7 @@ Route::prefix('master')->name('master.')->group(function () {
     // Toko Bangunan & Proyek Cabang (1:N Customer)
     Route::get('/toko-bangunan', [TokoBangunanController::class, 'index'])->name('toko_bangunan.index');
     Route::post('/toko-bangunan', [TokoBangunanController::class, 'simpan'])->name('toko_bangunan.simpan');
+    Route::post('/toko-bangunan/hapus-massal', [TokoBangunanController::class, 'hapusMassal'])->name('toko_bangunan.hapus_massal');
     Route::get('/toko-bangunan/api/buat-kode', [TokoBangunanController::class, 'buatKodeOtomatis'])->name('toko_bangunan.buat_kode');
     Route::get('/toko-bangunan/{kode_toko}/detail', [TokoBangunanController::class, 'ambilDetail'])->name('toko_bangunan.detail');
     Route::put('/toko-bangunan/{kode_toko}', [TokoBangunanController::class, 'perbarui'])->name('toko_bangunan.perbarui');
@@ -86,24 +88,28 @@ Route::prefix('master')->name('master.')->group(function () {
     // Barang / Semen
     Route::get('/barang', [BarangController::class, 'index'])->name('barang.index');
     Route::post('/barang', [BarangController::class, 'store'])->name('barang.store');
+    Route::post('/barang/hapus-massal', [BarangController::class, 'hapusMassal'])->name('barang.hapus_massal');
     Route::put('/barang/{kode_barang}', [BarangController::class, 'update'])->name('barang.update');
     Route::delete('/barang/{kode_barang}', [BarangController::class, 'destroy'])->name('barang.destroy');
 
     // Wilayah
     Route::get('/wilayah', [WilayahController::class, 'index'])->name('wilayah.index');
     Route::post('/wilayah', [WilayahController::class, 'store'])->name('wilayah.store');
+    Route::post('/wilayah/hapus-massal', [WilayahController::class, 'hapusMassal'])->name('wilayah.hapus_massal');
     Route::put('/wilayah/{kode_wilayah}', [WilayahController::class, 'update'])->name('wilayah.update');
     Route::delete('/wilayah/{kode_wilayah}', [WilayahController::class, 'destroy'])->name('wilayah.destroy');
 
     // Karyawan
     Route::get('/karyawan', [KaryawanController::class, 'index'])->name('karyawan.index');
     Route::post('/karyawan', [KaryawanController::class, 'store'])->name('karyawan.store');
+    Route::post('/karyawan/hapus-massal', [KaryawanController::class, 'hapusMassal'])->name('karyawan.hapus_massal');
     Route::put('/karyawan/{kode_karyawan}', [KaryawanController::class, 'update'])->name('karyawan.update');
     Route::delete('/karyawan/{kode_karyawan}', [KaryawanController::class, 'destroy'])->name('karyawan.destroy');
     
     // CRUD Master Jenis Aset / Kategori Kendaraan
     Route::get('/jenis-aset', [JenisAsetController::class, 'index'])->name('jenis_aset.index');
     Route::post('/jenis-aset', [JenisAsetController::class, 'simpan'])->name('jenis_aset.simpan');
+    Route::post('/jenis-aset/hapus-massal', [JenisAsetController::class, 'hapusMassal'])->name('jenis_aset.hapus_massal');
     Route::get('/jenis-aset/api/buat-kode', [JenisAsetController::class, 'buatKodeOtomatis'])->name('jenis_aset.buat_kode');
     Route::get('/jenis-aset/{kode_jenis_aset}', [JenisAsetController::class, 'ambilDetail'])->name('jenis_aset.detail');
     Route::put('/jenis-aset/{kode_jenis_aset}', [JenisAsetController::class, 'perbarui'])->name('jenis_aset.perbarui');
@@ -164,6 +170,7 @@ Route::prefix('operasional')->name('operasional.')->group(function () {
         // CRUD Data Gudang & Stok Semen
         Route::get('/stok', [StokGudangController::class, 'index'])->name('stok');
         Route::post('/stok', [StokGudangController::class, 'simpan'])->name('stok.simpan');
+        Route::post('/stok/hapus-massal', [StokGudangController::class, 'hapusMassal'])->name('stok.hapus_massal');
         Route::get('/stok/api/buat-kode', [StokGudangController::class, 'buatKodeOtomatis'])->name('stok.buat_kode');
         Route::get('/stok/{kode_gudang}', [StokGudangController::class, 'ambilDetail'])->name('stok.detail');
         Route::put('/stok/{kode_gudang}', [StokGudangController::class, 'perbarui'])->name('stok.perbarui');
@@ -232,6 +239,7 @@ Route::prefix('operasional')->name('operasional.')->group(function () {
         // CRUD Data Master Ongkos Angkut
         Route::get('/ongkos-angkut', [OngkosAngkutController::class, 'index'])->name('ongkos_angkut');
         Route::post('/ongkos-angkut', [OngkosAngkutController::class, 'simpan'])->name('ongkos_angkut.simpan');
+        Route::post('/ongkos-angkut/hapus-massal', [OngkosAngkutController::class, 'hapusMassal'])->name('ongkos_angkut.hapus_massal');
         Route::get('/ongkos-angkut/api/buat-kode', [OngkosAngkutController::class, 'buatKodeOtomatis'])->name('ongkos_angkut.buat_kode');
         Route::get('/ongkos-angkut/{kode_oa}', [OngkosAngkutController::class, 'ambilDetail'])->name('ongkos_angkut.detail');
         Route::put('/ongkos-angkut/{kode_oa}', [OngkosAngkutController::class, 'perbarui'])->name('ongkos_angkut.perbarui');
@@ -260,6 +268,7 @@ Route::prefix('operasional')->name('operasional.')->group(function () {
         // 3. CRUD Master & Stok Sparepart
         Route::get('/sparepart', [SparepartController::class, 'index'])->name('sparepart');
         Route::post('/sparepart', [SparepartController::class, 'simpan'])->name('sparepart.simpan');
+        Route::post('/sparepart/hapus-massal', [SparepartController::class, 'hapusMassal'])->name('sparepart.hapus_massal');
         Route::get('/sparepart/api/buat-kode', [SparepartController::class, 'buatKodeOtomatis'])->name('sparepart.buat_kode');
         Route::get('/sparepart/{kode_sparepart}', [SparepartController::class, 'ambilDetail'])->name('sparepart.detail');
         Route::put('/sparepart/{kode_sparepart}', [SparepartController::class, 'perbarui'])->name('sparepart.perbarui');

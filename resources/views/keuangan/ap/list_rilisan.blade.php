@@ -46,8 +46,8 @@
         </div>
     </div>
 
-    <!-- Tabel Data Rilisan -->
-    <div class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
+    <!-- Tabel Data Rilisan Kas Bon -->
+    <div x-data="tabelPaginasi({ totalData: {{ count($daftarRilisan ?? []) }}, defaultBaris: 10 })" class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         <form method="GET" action="{{ route('keuangan.ap.rilisan') }}" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#E2E8F0] dark:border-[#252837]">
             <div class="relative w-full sm:w-64">
                 <input type="text" name="cari" value="{{ $kataKunci ?? '' }}" placeholder="Cari nomor bukti / keterangan..."
@@ -67,11 +67,13 @@
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Sumber Dana</th>
                         <th class="px-4 py-2.5 text-right font-semibold uppercase tracking-wider">Nominal Rilis</th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Status Validasi</th>
+                        <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider w-16">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
                     @forelse($daftarRilisan ?? [] as $r)
-                        <tr class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
+                        @php /** @var object $r */ @endphp
+                        <tr x-show="apakahBarisTampil({{ $loop->index }})" class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
                             <td class="px-4 py-3 font-mono font-medium text-rose-600 dark:text-rose-400">
                                 {{ $r->nomor_pengeluaran }}
                             </td>
@@ -92,15 +94,24 @@
                                     Disetujui SPV
                                 </span>
                             </td>
+                            <td class="px-4 py-3 text-center">
+                                <x-menu-aksi-tabel 
+                                    :kodeSalin="$r->nomor_pengeluaran" 
+                                    labelSalin="Salin No"
+                                    modulIzin="ap_rilisan"
+                                />
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-6 text-center text-slate-400">Belum ada riwayat rilisan kas bon.</td>
+                            <td colspan="7" class="px-4 py-6 text-center text-slate-400">Belum ada riwayat rilisan kas bon.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+
+        <x-paginasi-tabel :totalData="count($daftarRilisan ?? [])" />
     </div>
 
     @php
@@ -148,8 +159,12 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nominal Uang Jalan (Rp) <span class="text-rose-500">*</span></label>
-                        <input type="number" name="nominal" required min="0" step="any" placeholder="1500000"
-                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/30 font-mono font-semibold text-sm">
+                        <x-input-rupiah 
+                            nama="nominal"
+                            placeholder="1.500.000"
+                            :wajib="true"
+                            warnaFokus="rose"
+                        />
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Rekening Sumber Kas <span class="text-slate-400 font-normal text-[10px]">(Opsional)</span></label>

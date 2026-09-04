@@ -92,7 +92,7 @@ class PerbaikanKendaraan extends Model
         if (!$this->tanggal_masuk) {
             return '-';
         }
-        return $this->tanggal_masuk->format('d/m/Y');
+        return \Carbon\Carbon::parse($this->tanggal_masuk)->format('d/m/Y');
     }
 
     /**
@@ -103,7 +103,7 @@ class PerbaikanKendaraan extends Model
         if (!$this->tanggal_selesai) {
             return '-';
         }
-        return $this->tanggal_selesai->format('d/m/Y');
+        return \Carbon\Carbon::parse($this->tanggal_selesai)->format('d/m/Y');
     }
 
     /**

@@ -127,7 +127,8 @@
                     <tr class="border-b-2 border-slate-300 text-[11px] font-bold text-slate-700 uppercase">
                         <th class="py-3 px-2 w-10 text-center">No</th>
                         <th class="py-3 px-2">Deskripsi Produk Semen</th>
-                        <th class="py-3 px-2 text-center w-24">Satuan</th>
+                        <th class="py-3 px-2 text-center w-24">Kuantitas</th>
+                        <th class="py-3 px-2 text-center w-20">Satuan</th>
                         <th class="py-3 px-2 text-right w-36">Harga Satuan</th>
                         <th class="py-3 px-2 text-right w-40">Subtotal</th>
                     </tr>
@@ -136,11 +137,12 @@
                     <tr>
                         <td class="py-3.5 px-2 text-center font-mono-angka text-slate-500">1</td>
                         <td class="py-3.5 px-2">
-                            <span class="font-bold text-slate-900 block text-xs">Semen Portland Composite (PCC) SIG / Baturaja</span>
-                            <span class="text-[11px] text-slate-500">Kemasan Zak 50 Kg SNI - Distribusi Resmi Wilayah Sumatera</span>
+                            <span class="font-bold text-slate-900 block text-xs">{{ $faktur->nama_barang ?? ($faktur->barang->nama_barang ?? 'Semen Portland Composite (PCC) SIG / Baturaja') }}</span>
+                            <span class="text-[11px] text-slate-500">Kemasan {{ $faktur->satuan_barang ?? 'Zak' }} SNI - Distribusi Resmi Wilayah Sumatera</span>
                         </td>
-                        <td class="py-3.5 px-2 text-center font-semibold text-slate-600">Zak / Partai</td>
-                        <td class="py-3.5 px-2 text-right font-mono-angka text-slate-700">Rp {{ number_format($faktur->total_bruto, 0, ',', '.') }}</td>
+                        <td class="py-3.5 px-2 text-center font-mono-angka font-bold text-slate-800">{{ number_format($faktur->jumlah_zak ?? 0, 0, ',', '.') }}</td>
+                        <td class="py-3.5 px-2 text-center font-semibold text-slate-600">{{ $faktur->satuan_barang ?? 'Zak' }}</td>
+                        <td class="py-3.5 px-2 text-right font-mono-angka text-slate-700">Rp {{ number_format($faktur->harga_satuan ?? 0, 0, ',', '.') }}</td>
                         <td class="py-3.5 px-2 text-right font-mono-angka font-bold text-slate-900">Rp {{ number_format($faktur->total_bruto, 0, ',', '.') }}</td>
                     </tr>
                 </tbody>

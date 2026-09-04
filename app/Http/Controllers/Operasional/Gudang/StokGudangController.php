@@ -349,7 +349,47 @@ class StokGudangController extends Controller
     }
 
     /**
-     * Logika internal pembuatan kode otomatis untuk Kode Gudang.
+     * Hapus banyak fasilitas gudang sekaligus (Hapus Massal).
+     */
+    public function hapusMassal(Request $request)
+    {
+        $daftarId = $request->input('daftar_id', []);
+        if (empty($daftarId) || !is_array($daftarId)) {
+            return redirect()->route('operasional.gudang.stok')->with('error', 'Tidak ada fasilitas gudang yang dipilih untuk dihapus.');
+        }
+
+        $berhasilDihapus = 0;
+        $gagalDihapus = 0;
+
+        DB::beginTransaction();
+        try {
+            foreach ($daftarId as $kode) {
+                $gudang = Gudang::find($kode);
+                if ($gudang) {
+                    $digunakanSO = DB::table('pembelian_so')->where('kode_gudang', $kode)->exists();
+                    if ($digunakanSO) {
+                        $gagalDihapus++;
+                        continue;
+                    }
+                    $gudang->delete();
+                    $berhasilDihapus++;
+                }
+            }
+            DB::commit();
+
+            if ($gagalDihapus > 0) {
+                return redirect()->route('operasional.gudang.stok')->with('sukses', "{$berhasilDihapus} gudang berhasil dihapus. {$gagalDihapus} gudang dilewati karena terhubung dengan transaksi Sales Order.");
+            }
+
+            return redirect()->route('operasional.gudang.stok')->with('sukses', "{$berhasilDihapus} data fasilitas gudang terpilih berhasil dihapus.");
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect()->route('operasional.gudang.stok')->with('error', 'Terjadi kesalahan saat menghapus data massal: ' . $th->getMessage());
+        }
+    }
+
+    /**
+     * Generator kode otomatis untuk Kode Gudang.
      */
     public function generateKodeGudang(string $mode = 'gap'): string
     {

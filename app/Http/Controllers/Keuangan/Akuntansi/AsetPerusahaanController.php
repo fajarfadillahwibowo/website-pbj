@@ -474,7 +474,7 @@ class AsetPerusahaanController extends Controller
     }
 
     /**
-     * Hapus data aset perusahaan.
+     * Hapus data aset perusahaan beserta riwayat dan sinkronisasi kendaraan.
      */
     public function destroy($kode_aset)
     {
@@ -483,8 +483,36 @@ class AsetPerusahaanController extends Controller
             return redirect()->route('keuangan.akuntansi.aset')->with('error', 'Data aset tidak ditemukan.');
         }
 
-        DB::table('data_aset')->where('kode_aset', $kode_aset)->delete();
+        DB::beginTransaction();
+        try {
+            // 1. Hapus riwayat penyusutan aset jika ada
+            DB::table('riwayat_penyusutan')->where('kode_aset', $kode_aset)->delete();
 
-        return redirect()->route('keuangan.akuntansi.aset')->with('sukses', "Aset {$aset->nama_aset} ({$kode_aset}) berhasil dihapus dari inventaris.");
+            // 2. Periksa apakah terikat ke data_kendaraan
+            $kendaraan = DB::table('data_kendaraan')->where('kode_aset', $kode_aset)->first();
+            if ($kendaraan) {
+                // Periksa apakah kendaraan terikat ke surat jalan / pengiriman atau perbaikan bengkel
+                $adaKirim = DB::table('pengiriman')->where('kode_kendaraan', $kendaraan->kode_kendaraan)->exists();
+                $adaSpk   = DB::table('perbaikan_kendaraan')->where('kode_kendaraan', $kendaraan->kode_kendaraan)->exists();
+                
+                if ($adaKirim || $adaSpk) {
+                    // Lepaskan keterikatan aset agar riwayat operasional tetap utuh
+                    DB::table('data_kendaraan')->where('kode_aset', $kode_aset)->update(['kode_aset' => null]);
+                } else {
+                    // Jika belum ada transaksi operasional, hapus unit kendaraan fisik
+                    DB::table('data_kendaraan')->where('kode_aset', $kode_aset)->delete();
+                }
+            }
+
+            // 3. Hapus data aset dari master data_aset
+            DB::table('data_aset')->where('kode_aset', $kode_aset)->delete();
+
+            DB::commit();
+
+            return redirect()->route('keuangan.akuntansi.aset')->with('sukses', "Aset {$aset->nama_aset} ({$kode_aset}) berhasil dihapus dari inventaris.");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('keuangan.akuntansi.aset')->with('error', 'Gagal menghapus aset: ' . $e->getMessage());
+        }
     }
 }

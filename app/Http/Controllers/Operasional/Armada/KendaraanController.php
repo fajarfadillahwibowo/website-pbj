@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Operasional\Kendaraan;
+use App\Models\Operasional\DataKendaraan;
 use App\Models\Master\JenisAset;
 use App\Helpers\GeneratorKodeOtomatis;
 use Carbon\Carbon;
