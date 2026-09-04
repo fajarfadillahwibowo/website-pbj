@@ -251,41 +251,42 @@
                                 {{ $part->total_valuasi_rupiah }}
                             </td>
 
-                            <!-- Aksi Popover Modern -->
+                            <!-- Aksi Langsung -->
                             <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                <x-menu-aksi-tabel 
-                                    :kodeSalin="$part->kode_sparepart" 
-                                    labelSalin="Salin Kode"
-                                    modulIzin="bengkel_sparepart"
-                                    aksiDetail="bukaModalDetail('{{ $part->kode_sparepart }}')"
-                                    labelDetail="Detail Suku Cadang"
-                                    :aksiCetak="'cetakKartuSparepart(\'' . $part->kode_sparepart . '\')'"
-                                    labelCetak="Cetak Kartu Part"
-                                    :aksiEdit="'bukaModalEdit(\'' . $part->kode_sparepart . '\')'"
-                                    labelEdit="Edit"
-                                >
-                                    <template x-if="!apakahReadOnly('bengkel_sparepart')">
-                                        <button @click.stop="menuTerbuka = false; bukaModalMutasi('{{ $part->kode_sparepart }}', '{{ $part->nama_sparepart }}', {{ $part->stok_part }}, '{{ $part->satuan }}')" 
-                                                type="button" 
-                                                class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors text-left border-b border-slate-100 dark:border-[#252837]">
-                                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
-                                            </svg>
-                                            <span>Mutasi Stok</span>
+                                <div class="flex items-center justify-center gap-1">
+                                    <!-- Edit -->
+                                    <template x-if="!apakahReadOnly('ops_bengkel')">
+                                        <button @click="bukaModalEdit('{{ $part->kode_sparepart }}')"
+                                                type="button"
+                                                class="inline-flex items-center gap-1 px-2 py-1.5 text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 border border-amber-200 dark:border-amber-500/20 rounded-lg transition-all"
+                                                title="Edit Sparepart">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                            <span>Edit</span>
                                         </button>
                                     </template>
 
-                                    <template x-if="!apakahReadOnly('bengkel_sparepart')">
-                                        <button @click.stop="menuTerbuka = false; bukaModalHapus('{{ $part->kode_sparepart }}', '{{ $part->nama_sparepart }}')" 
-                                                type="button" 
-                                                class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors text-left border-t border-slate-100 dark:border-[#252837]">
-                                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
+                                    <!-- Mutasi Stok -->
+                                    <template x-if="!apakahReadOnly('ops_bengkel')">
+                                        <button @click="bukaModalMutasi('{{ $part->kode_sparepart }}', '{{ $part->nama_sparepart }}', {{ $part->stok_part }}, '{{ $part->satuan }}')"
+                                                type="button"
+                                                class="inline-flex items-center gap-1 px-2 py-1.5 text-[10px] font-semibold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/10 hover:bg-sky-100 dark:hover:bg-sky-500/20 border border-sky-200 dark:border-sky-500/20 rounded-lg transition-all"
+                                                title="Mutasi Stok">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                                            <span>Mutasi</span>
+                                        </button>
+                                    </template>
+
+                                    <!-- Hapus -->
+                                    <template x-if="!apakahReadOnly('ops_bengkel')">
+                                        <button @click="bukaModalHapus('{{ $part->kode_sparepart }}', '{{ $part->nama_sparepart }}')"
+                                                type="button"
+                                                class="inline-flex items-center gap-1 px-2 py-1.5 text-[10px] font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 border border-rose-200 dark:border-rose-500/20 rounded-lg transition-all"
+                                                title="Hapus Sparepart">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                             <span>Hapus</span>
                                         </button>
                                     </template>
-                                </x-menu-aksi-tabel>
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -512,112 +513,6 @@
         </div>
     </div>
 
-    <!-- Modal Detail & Lembar Cetak Kartu Suku Cadang -->
-    <div x-show="modalDetailTerbuka" x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-        <div @click.away="modalDetailTerbuka = false"
-             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl my-8">
-            
-            <!-- Header Modal Detail -->
-            <div class="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#252837] bg-slate-50 dark:bg-[#1C1E2A]">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shadow-xs">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h2 class="text-sm font-bold text-slate-900 dark:text-slate-100" x-text="detailPart.nama_sparepart"></h2>
-                        <p class="text-[11px] text-amber-600 dark:text-amber-400 font-mono font-semibold" x-text="detailPart.kode_sparepart"></p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button @click="cetakDokumenSparepart()" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white hover:bg-slate-100 dark:bg-[#14161F] dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors">
-                        <svg class="w-3.5 h-3.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                        <span>Cetak Kartu Part</span>
-                    </button>
-                    <button @click="modalDetailTerbuka = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Konten Lembar Cetak Kartu Suku Cadang -->
-            <div id="areaCetakSparepart" class="p-6 space-y-4 text-xs">
-                <!-- Kop Resmi Khusus Cetak -->
-                <div class="border-b-2 border-slate-900 pb-3 mb-4 flex items-center justify-between">
-                    <div>
-                        <div class="text-base font-black tracking-wide text-slate-900 uppercase">PT PUTRA BALKOM JAYA</div>
-                        <div class="text-[10px] text-slate-600">Divisi Pemeliharaan Bengkel & Logistik Armada Truk</div>
-                        <div class="text-[9px] text-slate-500">Kartu Katalog & Pengendalian Inventaris Suku Cadang Armada</div>
-                    </div>
-                    <div class="text-right">
-                        <span class="inline-block px-2.5 py-1 rounded bg-slate-100 text-[11px] font-mono font-bold text-slate-900 border border-slate-300">
-                            KARTU SUKU CADANG
-                        </span>
-                    </div>
-                </div>
-
-                <div class="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 flex justify-between items-center">
-                    <div>
-                        <span class="text-[10px] text-amber-600 dark:text-amber-400 font-mono block">Kode Suku Cadang</span>
-                        <strong class="text-base font-mono font-bold text-amber-700 dark:text-amber-300" x-text="detailPart.kode_sparepart"></strong>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-[10px] text-slate-400 font-mono block">Kategori Part</span>
-                        <strong class="text-slate-900 dark:text-slate-100" x-text="detailPart.kategori_part"></strong>
-                    </div>
-                </div>
-
-                <div class="space-y-2 border border-slate-200 dark:border-[#252837] rounded-xl p-3.5">
-                    <div class="flex justify-between py-1.5 border-b border-[#E2E8F0] dark:border-[#252837]">
-                        <span class="text-slate-500">Nama Suku Cadang:</span>
-                        <strong class="text-slate-900 dark:text-slate-100" x-text="detailPart.nama_sparepart"></strong>
-                    </div>
-                    <div class="flex justify-between py-1.5 border-b border-[#E2E8F0] dark:border-[#252837]">
-                        <span class="text-slate-500">Satuan Penyimpanan:</span>
-                        <strong class="text-slate-900 dark:text-slate-100" x-text="detailPart.satuan"></strong>
-                    </div>
-                    <div class="flex justify-between py-1.5 border-b border-[#E2E8F0] dark:border-[#252837]">
-                        <span class="text-slate-500">Stok Fisik Tersedia:</span>
-                        <strong class="font-mono text-slate-900 dark:text-slate-100" x-text="(detailPart.stok_part || 0) + ' ' + (detailPart.satuan || '')"></strong>
-                    </div>
-                    <div class="flex justify-between py-1.5 border-b border-[#E2E8F0] dark:border-[#252837]">
-                        <span class="text-slate-500">Harga Beli Satuan:</span>
-                        <strong class="font-mono text-slate-900 dark:text-slate-100" x-text="detailPart.harga_satuan_rupiah || ('Rp ' + Number(detailPart.harga_satuan || 0).toLocaleString('id-ID'))"></strong>
-                    </div>
-                    <div class="flex justify-between py-2 border-b border-[#E2E8F0] dark:border-[#252837] text-sm">
-                        <span class="text-slate-700 dark:text-slate-300 font-bold">Total Valuasi Inventaris:</span>
-                        <strong class="font-mono font-bold text-emerald-600 dark:text-emerald-400" x-text="detailPart.total_valuasi_rupiah || ('Rp ' + (Number(detailPart.stok_part || 0) * Number(detailPart.harga_satuan || 0)).toLocaleString('id-ID'))"></strong>
-                    </div>
-                </div>
-
-                <!-- Tanda Tangan Khusus Cetak -->
-                <div class="pt-6 grid grid-cols-2 gap-8 text-center text-[10px]">
-                    <div>
-                        <div class="text-slate-500 mb-12">Pemeriksa Fisik Bengkel:</div>
-                        <div class="font-bold underline text-slate-900">( ........................................ )</div>
-                        <div class="text-slate-400">Pengawas Kendaraan & Bengkel</div>
-                    </div>
-                    <div>
-                        <div class="text-slate-500 mb-12">Disetujui & Diverifikasi:</div>
-                        <div class="font-bold underline text-slate-900">( ........................................ )</div>
-                        <div class="text-slate-400">SPV Operasional & Logistik</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Footer Modal Detail -->
-            <div class="flex items-center justify-end px-6 py-3.5 border-t border-[#E2E8F0] dark:border-[#252837] bg-slate-50 dark:bg-[#1C1E2A]">
-                <button @click="modalDetailTerbuka = false"
-                        class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] hover:bg-slate-100 rounded-xl transition-colors">
-                    Tutup
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- Modal Konfirmasi Hapus Sparepart -->
     <div x-show="modalHapusTerbuka" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
@@ -659,12 +554,10 @@
         return {
             modalTambahTerbuka: false,
             modalEditTerbuka: false,
-            modalDetailTerbuka: false,
             modalMutasiTerbuka: false,
             modalHapusTerbuka: false,
 
             keteranganKodePart: 'Mode: Daur Ulang Slot Kosong',
-            detailPart: {},
 
             formTambah: {
                 kode_sparepart: '',
@@ -726,37 +619,6 @@
                 } catch (e) {
                     alert('Gagal mengambil data sparepart.');
                 }
-            },
-
-            async bukaModalDetail(kode) {
-                try {
-                    const res = await fetch(`{{ url('operasional/bengkel/sparepart') }}/${kode}`);
-                    const data = await res.json();
-                    if (data.status === 'sukses') {
-                        this.detailPart = data.data;
-                        this.modalDetailTerbuka = true;
-                    }
-                } catch (e) {
-                    alert('Gagal mengambil detail data sparepart.');
-                }
-            },
-
-            async cetakKartuSparepart(kode) {
-                await this.bukaModalDetail(kode);
-                this.$nextTick(() => {
-                    this.cetakDokumenSparepart();
-                });
-            },
-
-            cetakDokumenSparepart() {
-                const isiCetak = document.getElementById('areaCetakSparepart').innerHTML;
-                const jendelaCetak = window.open('', '_blank', 'height=700,width=900');
-                jendelaCetak.document.write('<html><head><title>Kartu Suku Cadang - ' + (this.detailPart.kode_sparepart || '') + '</title>');
-                jendelaCetak.document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">');
-                jendelaCetak.document.write('</head><body class="p-8 bg-white text-slate-900 font-sans" onload="window.print(); window.close();">');
-                jendelaCetak.document.write(isiCetak);
-                jendelaCetak.document.write('</body></html>');
-                jendelaCetak.document.close();
             },
 
             bukaModalMutasi(kode, nama, stok, satuan) {

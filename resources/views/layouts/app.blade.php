@@ -211,7 +211,6 @@
             fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
             colors: {
               surface: { DEFAULT: '#ffffff', dark: '#14161F' },
-              base: { DEFAULT: '#F4F6F9', dark: '#0C0E14' },
               border: { subtle: '#EEF0F4', dark: '#252837' },
             }
           }

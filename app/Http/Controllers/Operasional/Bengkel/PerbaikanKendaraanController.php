@@ -72,6 +72,14 @@ class PerbaikanKendaraanController extends Controller
     public function simpan(Request $request)
     {
         $kodeKndInput = $request->input('kode_kendaraan') ?? $request->input('kode_aset');
+        if ($kodeKndInput) {
+            $kendaraan = Kendaraan::where('kode_kendaraan', $kodeKndInput)
+                ->orWhere('kode_aset', $kodeKndInput)
+                ->first();
+            if ($kendaraan) {
+                $kodeKndInput = $kendaraan->kode_kendaraan;
+            }
+        }
         $request->merge(['kode_kendaraan' => $kodeKndInput]);
 
         if ($request->filled('biaya_jasa')) {
@@ -128,7 +136,7 @@ class PerbaikanKendaraanController extends Controller
                 'tanggal_masuk' => $tanggalMasukPresisi,
                 'tanggal_selesai' => $tanggalSelesaiPresisi,
                 'keluhan_kerusakan' => trim($validated['keluhan_kerusakan']),
-                'tindakan_perbaikan' => $validated['tindakan_perbaikan'] ? trim($validated['tindakan_perbaikan']) : null,
+                'tindakan_perbaikan' => !empty($validated['tindakan_perbaikan']) ? trim($validated['tindakan_perbaikan']) : null,
                 'biaya_jasa' => $biayaJasa,
                 'biaya_sparepart' => $biayaSparepart,
                 'total_biaya' => $totalBiaya,
@@ -177,6 +185,14 @@ class PerbaikanKendaraanController extends Controller
         $perbaikan = PerbaikanKendaraan::findOrFail($id_perbaikan);
 
         $kodeKndInput = $request->input('kode_kendaraan') ?? $request->input('kode_aset');
+        if ($kodeKndInput) {
+            $kendaraan = Kendaraan::where('kode_kendaraan', $kodeKndInput)
+                ->orWhere('kode_aset', $kodeKndInput)
+                ->first();
+            if ($kendaraan) {
+                $kodeKndInput = $kendaraan->kode_kendaraan;
+            }
+        }
         $request->merge(['kode_kendaraan' => $kodeKndInput]);
 
         if ($request->filled('biaya_jasa')) {
@@ -234,7 +250,7 @@ class PerbaikanKendaraanController extends Controller
                 'tanggal_masuk' => $tanggalMasukPresisi,
                 'tanggal_selesai' => $tanggalSelesai,
                 'keluhan_kerusakan' => trim($validated['keluhan_kerusakan']),
-                'tindakan_perbaikan' => $validated['tindakan_perbaikan'] ? trim($validated['tindakan_perbaikan']) : null,
+                'tindakan_perbaikan' => !empty($validated['tindakan_perbaikan']) ? trim($validated['tindakan_perbaikan']) : null,
                 'biaya_jasa' => $biayaJasa,
                 'biaya_sparepart' => $biayaSparepart,
                 'total_biaya' => $totalBiaya,

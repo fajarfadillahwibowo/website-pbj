@@ -119,53 +119,55 @@
     <div class="wadah-bertingkat grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <!-- Total Mitra KSO -->
         <div class="bg-white dark:bg-[#14161F] p-4 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm flex items-center gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-200/50 dark:border-blue-500/20">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                 </svg>
             </div>
-            <div>
-                <div class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Total Mitra KSO</div>
-                <div class="text-xl font-bold text-slate-900 dark:text-slate-100 font-mono mt-0.5">{{ $totalKso }} <span class="text-xs font-normal text-slate-400 font-sans">Mitra</span></div>
+            <div class="min-w-0 flex-1">
+                <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate" title="Total Mitra KSO">Total Mitra KSO</div>
+                <div class="text-xl font-bold text-slate-900 dark:text-slate-100 font-mono mt-0.5 truncate">{{ $totalKso }} <span class="text-xs font-normal text-slate-400 font-sans">Mitra</span></div>
             </div>
         </div>
 
         <!-- Kontrak Aktif -->
         <div class="bg-white dark:bg-[#14161F] p-4 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm flex items-center gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-200/50 dark:border-emerald-500/20">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
-            <div>
-                <div class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Kontrak Aktif</div>
-                <div class="text-xl font-bold text-emerald-600 dark:text-emerald-400 font-mono mt-0.5">{{ $ksoAktif }} <span class="text-xs font-normal text-slate-400 font-sans">Mitra</span></div>
+            <div class="min-w-0 flex-1">
+                <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate" title="Kontrak Aktif">Kontrak Aktif</div>
+                <div class="text-xl font-bold text-emerald-600 dark:text-emerald-400 font-mono mt-0.5 truncate">{{ $ksoAktif }} <span class="text-xs font-normal text-slate-400 font-sans">Mitra</span></div>
             </div>
         </div>
 
         <!-- Total Rute OA -->
         <div class="bg-white dark:bg-[#14161F] p-4 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm flex items-center gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 border border-purple-200/50 dark:border-purple-500/20">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
                 </svg>
             </div>
-            <div>
-                <div class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Total Rute Ongkos KSO</div>
-                <div class="text-xl font-bold text-purple-600 dark:text-purple-400 font-mono mt-0.5">{{ $totalRuteOa }} <span class="text-xs font-normal text-slate-400 font-sans">Trayek</span></div>
+            <div class="min-w-0 flex-1">
+                <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate" title="Total Rute Ongkos KSO">Total Rute Ongkos KSO</div>
+                <div class="text-xl font-bold text-purple-600 dark:text-purple-400 font-mono mt-0.5 truncate">{{ $totalRuteOa }} <span class="text-xs font-normal text-slate-400 font-sans">Trayek</span></div>
             </div>
         </div>
 
         <!-- Total Nilai Kontrak Aktif -->
         <div class="bg-white dark:bg-[#14161F] p-4 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm flex items-center gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-200/50 dark:border-amber-500/20">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
-            <div>
-                <div class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Total Nilai Kontrak KSO</div>
-                <div class="text-base font-bold text-amber-600 dark:text-amber-400 font-mono mt-0.5">Rp {{ number_format($totalNilaiKontrak, 0, ',', '.') }}</div>
+            <div class="min-w-0 flex-1">
+                <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate" title="Total Nilai Kontrak KSO">Total Nilai Kontrak KSO</div>
+                <div class="text-sm sm:text-base font-bold text-amber-600 dark:text-amber-400 font-mono mt-0.5 whitespace-nowrap truncate" title="Rp {{ number_format($totalNilaiKontrak, 0, ',', '.') }}">
+                    <span class="text-xs font-semibold text-amber-700 dark:text-amber-300 mr-0.5">Rp</span>{{ number_format($totalNilaiKontrak, 0, ',', '.') }}
+                </div>
             </div>
         </div>
     </div>
