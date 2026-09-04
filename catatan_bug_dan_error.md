@@ -1,6 +1,9 @@
 # 📝 Pelacak Bug, Error, & Progres Terlewati Real-time
 
 ## 🔴 Daftar Bug & Error
+- **[TERSELESAIKAN] Resolusi Konflik Git Merge origin/main ke web-dev1 (Modul Bengkel & UI)**:
+  - *Penyebab:* Terjadi bentrok pada 3 berkas view operasional bengkel (`pembelian_sparepart.blade.php`, `perbaikan.blade.php`, `sparepart.blade.php`) akibat perbedaan desain aksi tombol (inline horizontal dari `origin/main` vs popover `<x-menu-aksi-tabel>` dari cabang lokal `web-dev1`).
+  - *Solusi:* Sesuai arahan eksplisit pengguna (*"kodingan lokal mengalah mengikuti data dari main"*), konflik diselesaikan dengan memenangkan versi `origin/main` (`git checkout --theirs`). Seluruh template blade berhasil dikompilasi ulang (`artisan view:cache`) dan suite pengujian QA `test_direktur_manager_and_rbac.php` lulus 100% (22 Lulus, 0 Gagal). Commit merge berhasil diselesaikan (`2496f81`).
 - **[TERSELESAIKAN] Undefined property: stdClass::$nomor_transaksi_pengeluaran pada view `keuangan/ap/pengeluaran_kas.blade.php`**:
   - *Penyebab:* Nama kolom pada tabel `data_pengeluaran_kas` adalah `nomor_pengeluaran`.
   - *Solusi:* Mengubah referensi `$keluar->nomor_transaksi_pengeluaran` menjadi `$keluar->nomor_pengeluaran`.
