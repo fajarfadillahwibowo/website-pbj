@@ -275,6 +275,7 @@
                             </td>
 
                             <!-- Aksi Popover Modern -->
+                            <td class="px-4 py-3.5 text-center whitespace-nowrap">
                                 <x-menu-aksi-tabel 
                                     kodeSalin="{{ $gdg->kode_gudang }}"
                                     labelSalin="Salin Kode Gudang"
