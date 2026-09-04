@@ -467,32 +467,94 @@
                                 </div>
                             </div>
 
-                            <!-- Input Multi-Unit: Rincian Plat & Identitas Per Unit -->
-                            <div x-show="jumlahUnit > 1" class="space-y-2 max-h-56 overflow-y-auto pr-1 pt-1 border-t border-blue-200/60 dark:border-blue-900/40">
-                                <div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Rincian Plat Nomor, Mesin, & Rangka per Unit Truk:</div>
+                            <!-- Input Multi-Unit: Rincian Plat & Identitas Per Unit (Format 3 Kolom Konsisten) -->
+                            <div x-show="jumlahUnit > 1" class="space-y-3 max-h-64 overflow-y-auto pr-1 pt-1 border-t border-blue-200/60 dark:border-blue-900/40">
+                                <div class="flex items-center justify-between">
+                                    <div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Rincian Identitas & Plat Nomor per Unit Truk:</div>
+                                    <span class="text-[10px] text-blue-600 dark:text-blue-400 font-mono font-bold" x-text="jumlahUnit + ' Kartu Unit Truk'"></span>
+                                </div>
                                 <template x-for="(unit, index) in rincianUnit" :key="index">
-                                    <div class="p-2.5 rounded-xl bg-white dark:bg-[#14161F] border border-blue-200 dark:border-blue-900/50 space-y-1.5 shadow-2xs">
-                                        <div class="flex items-center justify-between">
-                                            <span class="font-bold text-blue-700 dark:text-blue-400 font-mono text-[11px]" x-text="'Armada Unit #' + (index + 1)"></span>
-                                            <span class="text-[10px] text-slate-400 font-mono" x-text="'Auto KND-' + (index + 1)"></span>
-                                        </div>
-                                        <div class="grid grid-cols-3 gap-2">
-                                            <div>
-                                                <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-0.5">Plat Nomor</label>
-                                                <input type="text" :name="'rincian_unit[' + index + '][no_polisi]'" x-model="unit.no_polisi" placeholder="B 1234 PBJ"
-                                                       class="w-full px-2.5 py-1.5 rounded-lg bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-slate-200 dark:border-slate-700 font-mono uppercase text-xs focus:ring-1 focus:ring-blue-500">
+                                    <div class="p-3 rounded-2xl bg-white dark:bg-[#14161F] border border-blue-200 dark:border-blue-900/50 space-y-2.5 shadow-2xs">
+                                        <!-- Header Kartu Unit -->
+                                        <div class="flex items-center justify-between pb-1.5 border-b border-slate-100 dark:border-slate-800">
+                                            <div class="flex items-center gap-2">
+                                                <span class="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-mono font-bold text-[10px] flex items-center justify-center" x-text="index + 1"></span>
+                                                <span class="font-bold text-slate-900 dark:text-slate-100 font-mono text-xs" x-text="'Armada Unit #' + (index + 1)"></span>
+                                                <span class="text-[10px] text-slate-400 font-mono" x-text="'(Auto KND-' + (index + 1) + ')'"></span>
                                             </div>
-                                            <div>
-                                                <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-0.5">No. Mesin</label>
-                                                <input type="text" :name="'rincian_unit[' + index + '][no_mesin]'" x-model="unit.no_mesin" placeholder="Opsional"
-                                                       class="w-full px-2.5 py-1.5 rounded-lg bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-slate-200 dark:border-slate-700 font-mono uppercase text-xs">
-                                            </div>
-                                            <div>
-                                                <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-0.5">No. Rangka</label>
-                                                <input type="text" :name="'rincian_unit[' + index + '][no_rangka]'" x-model="unit.no_rangka" placeholder="Opsional"
-                                                       class="w-full px-2.5 py-1.5 rounded-lg bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-slate-200 dark:border-slate-700 font-mono uppercase text-xs">
+                                            
+                                            <!-- Live Plate Badge per Unit -->
+                                            <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#18181B] border border-slate-700 text-white font-mono font-bold text-[10px] tracking-widest shadow-2xs">
+                                                <span class="text-slate-400 text-[8px]">PLAT</span>
+                                                <span x-text="unit.no_polisi || 'B ____ ___'" class="text-emerald-400 font-bold"></span>
                                             </div>
                                         </div>
+
+                                        <!-- Input Tersembunyi untuk backend -->
+                                        <input type="hidden" :name="'rincian_unit[' + index + '][no_polisi]'" :value="unit.no_polisi">
+
+                                        <div class="grid grid-cols-12 gap-3 items-start">
+                                            <!-- 3 Kolom Plat Nomor (Wilayah, Nomor, Seri) - 6 Kolom -->
+                                            <div class="col-span-12 sm:col-span-6 space-y-1">
+                                                <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400">Plat Nomor Polisi Kendaraan</label>
+                                                <div class="grid grid-cols-12 gap-1.5">
+                                                    <!-- Wilayah -->
+                                                    <div class="col-span-3">
+                                                        <div class="relative">
+                                                            <input type="text" 
+                                                                   x-model="unit.wilayah" 
+                                                                   @input="updatePlatUnit(index, 'nomor', $event)" 
+                                                                   maxlength="2" 
+                                                                   placeholder="B"
+                                                                   class="w-full text-center px-1.5 py-1.5 text-xs font-mono font-bold uppercase rounded-lg bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
+                                                            <span class="absolute -bottom-3.5 left-0 right-0 text-center text-[8px] text-slate-400 font-medium">Wilayah</span>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Nomor Seri -->
+                                                    <div class="col-span-5">
+                                                        <div class="relative">
+                                                            <input type="text" 
+                                                                   :id="'input-nomor-' + index"
+                                                                   x-model="unit.nomor" 
+                                                                   @input="updatePlatUnit(index, 'seri', $event)" 
+                                                                   maxlength="4" 
+                                                                   inputmode="numeric"
+                                                                   placeholder="1234"
+                                                                   class="w-full text-center px-1.5 py-1.5 text-xs font-mono font-bold tracking-wider rounded-lg bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
+                                                            <span class="absolute -bottom-3.5 left-0 right-0 text-center text-[8px] text-slate-400 font-medium">Nomor Seri</span>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Seri Huruf -->
+                                                    <div class="col-span-4">
+                                                        <div class="relative">
+                                                            <input type="text" 
+                                                                   :id="'input-seri-' + index"
+                                                                   x-model="unit.seri" 
+                                                                   @input="updatePlatUnit(index, null, $event)" 
+                                                                   maxlength="3" 
+                                                                   placeholder="PBJ"
+                                                                   class="w-full text-center px-1.5 py-1.5 text-xs font-mono font-bold uppercase rounded-lg bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
+                                                            <span class="absolute -bottom-3.5 left-0 right-0 text-center text-[8px] text-slate-400 font-medium">Seri Huruf</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Nomor Mesin & Rangka - 6 Kolom -->
+                                            <div class="col-span-12 sm:col-span-6 grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">No. Mesin</label>
+                                                    <input type="text" :name="'rincian_unit[' + index + '][no_mesin]'" x-model="unit.no_mesin" placeholder="Opsional"
+                                                           class="w-full px-2.5 py-1.5 rounded-lg bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] font-mono uppercase text-xs focus:ring-2 focus:ring-blue-500/30">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">No. Rangka</label>
+                                                    <input type="text" :name="'rincian_unit[' + index + '][no_rangka]'" x-model="unit.no_rangka" placeholder="Opsional"
+                                                           class="w-full px-2.5 py-1.5 rounded-lg bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] font-mono uppercase text-xs focus:ring-2 focus:ring-blue-500/30">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="pt-1"></div>
                                     </div>
                                 </template>
                             </div>
@@ -838,12 +900,16 @@
 
                     <!-- Sisi Kanan: Spesifikasi Fisik & ERD (6 Kolom) -->
                     <div class="lg:col-span-6 space-y-3">
+                        <div x-show="formEdit.kode_jenis_aset === 'AST-TRK'">
+                            <x-input-plat-nomor 
+                                nama="no_polisi" 
+                                modelBind="formEdit.no_polisi" 
+                                :wajib="false" 
+                                label="Plat Nomor Polisi Kendaraan" 
+                            />
+                        </div>
+
                         <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Plat Nomor Polisi</label>
-                                <input type="text" name="no_polisi" x-model="formEdit.no_polisi" placeholder="B 1234 PBJ"
-                                       class="w-full px-3 py-2 rounded-xl font-mono uppercase bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
-                            </div>
                             <div>
                                 <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jenis / Tipe Kendaraan</label>
                                 <select name="jenis_kendaraan" x-model="formEdit.jenis_kendaraan"
@@ -860,22 +926,27 @@
                                     <option value="Kendaraan Operasional Kantor">Kendaraan Operasional Kantor</option>
                                 </select>
                             </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Merek Pabrikan</label>
                                 <input type="text" name="merek_aset" x-model="formEdit.merek_aset" placeholder="Hino / Isuzu / Fuso"
                                        class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
                             </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kapasitas Muatan</label>
                                 <input type="text" name="muatan" x-model="formEdit.muatan" placeholder="25 Ton / 500 Sak"
                                        class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
                             </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tahun Pembuatan</label>
+                                <input type="number" name="tahun_pembuatan" x-model="formEdit.tahun_pembuatan" placeholder="2023"
+                                       class="w-full px-3 py-2 rounded-xl font-mono bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
+                            </div>
                         </div>
 
-                        <div class="grid grid-cols-3 gap-2">
+                        <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-[10px] font-semibold text-slate-700 dark:text-slate-300 mb-1">No. Mesin</label>
                                 <input type="text" name="no_mesin" x-model="formEdit.no_mesin" placeholder="W04D-xxx"
@@ -886,11 +957,6 @@
                                 <input type="text" name="no_rangka" x-model="formEdit.no_rangka" placeholder="MHK-xxx"
                                        class="w-full px-2.5 py-1.5 rounded-xl font-mono uppercase bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
                             </div>
-                            <div>
-                                <label class="block text-[10px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Tahun Buat</label>
-                                <input type="number" name="tahun_pembuatan" x-model="formEdit.tahun_pembuatan" placeholder="2023"
-                                       class="w-full px-2.5 py-1.5 rounded-xl font-mono bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
-                            </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
@@ -900,31 +966,31 @@
                                        class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
                             </div>
                             <div>
-                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jatuh Tempo Pajak</label>
+                                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Pajak STNK</label>
                                 <input type="date" name="tanggal_pajak" x-model="formEdit.tanggal_pajak"
                                        class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200">
                             </div>
                         </div>
 
                         <div>
-                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Keterangan Aset / Bangunan di Atas Tanah</label>
-                            <textarea name="keterangan" x-model="formEdit.keterangan" rows="2" placeholder="Catatan fasilitas bangunan atau keterangan aset..."
-                                      class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200"></textarea>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Catatan Tambahan / Keterangan</label>
+                            <textarea name="keterangan" x-model="formEdit.keterangan" rows="2" placeholder="Catatan spesifikasi..."
+                                      class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 text-xs"></textarea>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E2E8F0] dark:border-[#252837]">
-                    <button @click="modalEditTerbuka = false" type="button" class="px-5 py-2.5 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl transition-all">Batal</button>
-                    <button type="submit" class="px-6 py-2.5 font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl transition-all shadow-md shadow-amber-600/20">Simpan Perubahan</button>
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-[#E2E8F0] dark:border-[#252837]">
+                    <button @click="modalEditTerbuka = false" type="button" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">Batal</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-md shadow-indigo-600/20">Simpan Perubahan Aset</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal Konfirmasi Hapus Aset -->
+    <!-- Modal 3: Konfirmasi Hapus Aset -->
     <div x-show="modalHapusTerbuka" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-        <div @click.away="modalHapusTerbuka = false" class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md p-6 shadow-2xl">
+        <div @click.away="modalHapusTerbuka = false" class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-sm p-6 shadow-xl">
             <div class="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto mb-4">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
             </div>
@@ -956,7 +1022,7 @@
             tarifSusut: 12.5,
             metodeSusut: 'Garis Lurus',
             jumlahUnit: 1,
-            rincianUnit: [{ no_polisi: '', no_mesin: '', no_rangka: '' }],
+            rincianUnit: [{ wilayah: '', nomor: '', seri: '', no_polisi: '', no_mesin: '', no_rangka: '' }],
             detailAset: {},
             formEdit: {
                 kode_aset: '',
@@ -983,10 +1049,34 @@
                 if (!this.jumlahUnit || this.jumlahUnit < 1) this.jumlahUnit = 1;
                 if (this.jumlahUnit > 50) this.jumlahUnit = 50;
                 while (this.rincianUnit.length < this.jumlahUnit) {
-                    this.rincianUnit.push({ no_polisi: '', no_mesin: '', no_rangka: '' });
+                    this.rincianUnit.push({ wilayah: '', nomor: '', seri: '', no_polisi: '', no_mesin: '', no_rangka: '' });
                 }
                 if (this.rincianUnit.length > this.jumlahUnit) {
                     this.rincianUnit = this.rincianUnit.slice(0, this.jumlahUnit);
+                }
+            },
+
+            updatePlatUnit(index, targetLompat, e) {
+                let u = this.rincianUnit[index];
+                if (!u) return;
+
+                u.wilayah = (u.wilayah || '').replace(/[^A-Za-z]/g, '').toUpperCase().substring(0, 2);
+                u.nomor = (u.nomor || '').replace(/[^0-9]/g, '').substring(0, 4);
+                u.seri = (u.seri || '').replace(/[^A-Za-z]/g, '').toUpperCase().substring(0, 3);
+
+                if (u.wilayah || u.nomor || u.seri) {
+                    u.no_polisi = `${u.wilayah} ${u.nomor} ${u.seri}`.replace(/\s+/g, ' ').trim();
+                } else {
+                    u.no_polisi = '';
+                }
+
+                // Otomatis pindah fokus input saat mengetik atau spasi
+                if (targetLompat === 'nomor' && (u.wilayah.length >= 2 || e?.data === ' ')) {
+                    const el = document.getElementById('input-nomor-' + index);
+                    if (el) el.focus();
+                } else if (targetLompat === 'seri' && (u.nomor.length >= 4 || e?.data === ' ')) {
+                    const el = document.getElementById('input-seri-' + index);
+                    if (el) el.focus();
                 }
             },
 

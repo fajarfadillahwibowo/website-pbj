@@ -98,15 +98,13 @@
     3. Menyesuaikan modul Keuangan AR/AP/Akuntansi agar hanya menyediakan aksi massal **"Salin Terpilih"** demi menjaga audit trail transaksi finansial.
     4. Pengujian `php artisan route:clear` dan `php artisan view:cache` lulus 100% tanpa error.
 
-- **[TERSELESAIKAN] Eliminasi Total Fitur Multi-Select Checkbox & Floating Bar Aksi Massal Demi Mitigasi Risiko Penghapusan Massal**:
-  - *Latar Belakang & Instruksi Pengguna:* Pengguna meminta agar fitur pemilihan multi-baris (checkbox) ditiadakan secara menyeluruh karena aksi hapus massal membawa risiko fatal terjadinya penghapusan data secara tidak sengaja (*accidental data loss*) pada sistem ERP perusahaan.
+- **[TERSELESAIKAN] Standardisasi dan Penyelarasan Konsistensi Input Plat Nomor Kendaraan (Single Unit, Multi Unit, & Modal Edit)**:
+  - *Penyebab Masalah:* Input plat nomor pada pendaftaran aset single unit menggunakan format 3 kolom (`Wilayah`, `Nomor Seri`, `Seri Huruf`) dan badge plat visual live, sedangkan pada pendaftaran multi-unit kartu daftar truk hanya menggunakan 1 kolom text biasa sehingga bentuk penginputannya tidak konsisten.
   - *Solusi Eksekusi:*
-    1. Menghapus elemen checkbox `<th>` (*select all*) dan `<td>` (individual checkbox) dari seluruh 13 tabel datatable sistem.
-    2. Menghapus highlight kelas baris terpilih `:class="{ 'bg-...': apakahTerpilih(...) }"`.
-    3. Menghapus pemanggilan komponen `<x-bar-aksi-massal ... />` dari seluruh tampilan.
-    4. Menyesuaikan `colspan` baris `@empty` pada seluruh tabel agar tetap presisi dan rapi.
-    5. Menjaga popover `<x-menu-aksi-tabel>` (titik tiga `•••`) dan toolbar `<x-paginasi-tabel>` tetap berfungsi 100% secara aman, fokus, dan individual.
-    6. Verifikasi `php artisan view:clear` & `php artisan view:cache` sukses tanpa kendala.
+    1. Mengubah seluruh kartu armada unit di modal multi-unit agar memiliki header elegan dengan nomor unit, live badge pratinjau `PLAT B ____ ___`, dan input plat nomor 3 kolom terpisah (`Wilayah`, `Nomor Seri`, `Seri Huruf`) dengan layout dan navigasi fokus otomatis yang seragam.
+    2. Menghubungkan otomatis pembentukan string lengkap plat nomor ke input hidden untuk dikirim ke backend.
+    3. Memperbarui modal edit aset (`aset_perusahaan.blade.php`) serta modal tambah/edit aset di manajemen armada (`kendaraan.blade.php`) menggunakan `<x-input-plat-nomor>`.
+    4. Pengujian live browser menunjukkan format input 100% konsisten dan reaktif memperbarui visual badge secara real-time.
 
 ---
 

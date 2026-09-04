@@ -1422,12 +1422,14 @@
                            class="w-full px-3 py-2 rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Plat / No. Polisi</label>
-                        <input type="text" name="no_polisi" x-model="formTambahAset.no_polisi" placeholder="B 1234 PBJ"
-                               class="w-full px-3 py-2 rounded-xl font-mono uppercase bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                    </div>
+                <div class="space-y-3">
+                    <x-input-plat-nomor 
+                        nama="no_polisi" 
+                        modelBind="formTambahAset.no_polisi" 
+                        :wajib="false" 
+                        label="Plat / No. Polisi Kendaraan" 
+                    />
+
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Aset</label>
                         <select name="status_aset" x-model="formTambahAset.status_aset"
@@ -1559,12 +1561,14 @@
                     <input type="text" name="nama_aset" x-model="formEditAset.nama_aset" required
                            class="w-full px-3 py-2 rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Plat / No. Polisi</label>
-                        <input type="text" name="no_polisi" x-model="formEditAset.no_polisi" placeholder="B 1234 ABC"
-                               class="w-full px-3 py-2 rounded-xl font-mono uppercase bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                    </div>
+                <div class="space-y-3">
+                    <x-input-plat-nomor 
+                        nama="no_polisi" 
+                        modelBind="formEditAset.no_polisi" 
+                        :wajib="false" 
+                        label="Plat / No. Polisi Kendaraan" 
+                    />
+
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Aset</label>
                         <select name="status_aset" x-model="formEditAset.status_aset"
