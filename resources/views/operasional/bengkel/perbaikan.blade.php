@@ -201,7 +201,7 @@
                         <th class="px-4 py-3 font-semibold uppercase tracking-wider">Keluhan / Tindakan Servis</th>
                         <th class="px-4 py-3 text-right font-semibold uppercase tracking-wider">Rincian & Total Biaya</th>
                         <th class="px-4 py-3 text-center font-semibold uppercase tracking-wider">Status Servis</th>
-                        <th class="px-4 py-3 text-center font-semibold uppercase tracking-wider">Aksi & Cetak</th>
+                        <th class="px-4 py-3 text-center font-semibold uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
@@ -271,48 +271,40 @@
                                 @endif
                             </td>
 
-                            <!-- Aksi Langsung -->
+                            <!-- Aksi Menu Popover -->
                             <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                <div class="flex items-center justify-center gap-1">
-                                    <!-- Detail -->
-                                    <button @click="bukaModalDetail('{{ $spk->id_perbaikan }}')"
-                                            type="button"
-                                            class="inline-flex items-center gap-1 px-2 py-1.5 text-[10px] font-semibold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/10 hover:bg-sky-100 dark:hover:bg-sky-500/20 border border-sky-200 dark:border-sky-500/20 rounded-lg transition-all"
-                                            title="Detail SPK">
-                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                        <span>Detail</span>
-                                    </button>
-
-                                    <!-- Cetak -->
-                                    <button @click="cetakSPK('{{ $spk->id_perbaikan }}')"
-                                            type="button"
-                                            class="inline-flex items-center gap-1 px-2 py-1.5 text-[10px] font-semibold text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 border border-red-200 dark:border-red-500/20 rounded-lg transition-all"
-                                            title="Cetak SPK">
-                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                                        <span>Cetak</span>
-                                    </button>
-
-                                    <!-- Edit -->
+                                <x-menu-aksi-tabel 
+                                    kodeSalin="{{ $spk->nomor_spk_perbaikan }}"
+                                    labelSalin="Salin No. SPK"
+                                    aksiDetail="bukaModalDetail('{{ $spk->id_perbaikan }}')"
+                                    labelDetail="Detail SPK"
+                                    :aksiCetak="'cetakSPK(\'' . $spk->id_perbaikan . '\')'"
+                                    labelCetak="Cetak Dokumen SPK"
+                                    aksiEdit="bukaModalEdit('{{ $spk->id_perbaikan }}')"
+                                    labelEdit="Ubah SPK"
+                                    modulIzin="ops_perbaikan"
+                                >
                                     <template x-if="!apakahReadOnly('ops_perbaikan')">
-                                        <button @click="bukaModalEdit('{{ $spk->id_perbaikan }}')"
-                                                type="button"
-                                                class="inline-flex items-center gap-1 px-2 py-1.5 text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 border border-amber-200 dark:border-amber-500/20 rounded-lg transition-all"
-                                                title="Edit SPK">
-                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                            <span>Edit</span>
-                                        </button>
+                                        <div class="border-t border-slate-100 dark:border-[#252837] pt-1 mt-1">
+                                            <button @click.stop="menuTerbuka = false; bukaModalHapus('{{ $spk->id_perbaikan }}', '{{ $spk->nomor_spk_perbaikan }}')"
+                                                    type="button"
+                                                    class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors text-left font-medium">
+                                                <svg class="w-3.5 h-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                                <span>Hapus SPK</span>
+                                            </button>
+                                        </div>
                                     </template>
+                                </x-menu-aksi-tabel>
 
-                                    <!-- Hapus -->
-                                    <template x-if="!apakahReadOnly('ops_perbaikan')">
-                                        <button @click="bukaModalHapus('{{ $spk->id_perbaikan }}', '{{ $spk->nomor_spk_perbaikan }}')"
-                                                type="button"
-                                                class="inline-flex items-center gap-1 px-2 py-1.5 text-[10px] font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 border border-rose-200 dark:border-rose-500/20 rounded-lg transition-all"
-                                                title="Hapus SPK">
-                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                            <span>Hapus</span>
-                                        </button>
-                                    </template>
+                                <!-- Riwayat Diedit Real-Time -->
+                                <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 flex items-center justify-center gap-1 font-mono cursor-help"
+                                     title="Terakhir diperbarui: {{ $spk->terakhir_diedit_waktu }}">
+                                    <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <span>{{ $spk->terakhir_diedit_relatif }}</span>
                                 </div>
                             </td>
                         </tr>

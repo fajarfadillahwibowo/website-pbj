@@ -467,14 +467,17 @@
             const scripts = kontenEl.querySelectorAll('script');
             scripts.forEach(script => {
                 try {
+                    const s = document.createElement('script');
+                    Array.from(script.attributes).forEach(attr => s.setAttribute(attr.name, attr.value));
                     if (script.src) {
-                        const s = document.createElement('script');
                         s.src = script.src;
                         s.async = false;
-                        document.head.appendChild(s);
                     } else if (script.textContent.trim()) {
-                        window.eval(script.textContent);
+                        s.textContent = script.textContent;
                     }
+                    document.body.appendChild(s);
+                    // Hapus node skrip dari body setelah eksekusi agar DOM tetap bersih
+                    s.remove();
                 } catch (err) {
                     console.warn('Evaluasi skrip dinamis:', err);
                 }

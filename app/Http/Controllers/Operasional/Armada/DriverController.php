@@ -72,6 +72,12 @@ class DriverController extends Controller
                 ->with('error', 'Akses Ditolak! Role SPV Operasional hanya memiliki wewenang Lihat Saja (Read-Only) pada modul Driver.');
         }
 
+        // Fallback cerdas: jika id_jabatan tidak terisi, default ke jabatan driver (PENGAWAS_DRIVER / ID 6)
+        if (!$request->filled('id_jabatan')) {
+            $idDriver = DB::table('jabatan')->where('kode_jabatan', 'PENGAWAS_DRIVER')->value('id_jabatan') ?? 6;
+            $request->merge(['id_jabatan' => $idDriver]);
+        }
+
         // Bersihkan karakter spasi / pemisah pada no_ktp jika ada
         if ($request->has('no_ktp')) {
             $request->merge([
@@ -195,6 +201,11 @@ class DriverController extends Controller
         }
 
         $driver = Driver::where('kode_karyawan', $kode_karyawan)->firstOrFail();
+
+        // Fallback cerdas: jika id_jabatan tidak terisi, gunakan jabatan yang lama atau default 6
+        if (!$request->filled('id_jabatan')) {
+            $request->merge(['id_jabatan' => $driver->id_jabatan ?: 6]);
+        }
 
         // Bersihkan karakter spasi / pemisah pada no_ktp jika ada
         if ($request->has('no_ktp')) {

@@ -132,6 +132,8 @@ class KendaraanController extends Controller
      */
     public function simpan(Request $request)
     {
+        $this->pastikanJenisAsetTersedia();
+
         $jumlahUnit = max(1, min(50, (int) ($request->jumlah_unit ?? 1)));
 
         // Normalisasi input jika form mengirim nama atribut alternatif
@@ -247,9 +249,19 @@ class KendaraanController extends Controller
                 // 1. Catat entitas aset finansial di data_aset jika belum ada
                 $adaAset = DB::table('data_aset')->where('kode_aset', $kodeAset)->exists();
                 if (!$adaAset) {
+                    $kodeAkunAset = DB::table('data_kode_akun')->where('kode_akun', '1201')->exists() ? '1201' : null;
+                    $kodeAkunAkum = DB::table('data_kode_akun')->where('kode_akun', '1202')->exists() ? '1202' : null;
+                    $kodeAkunBeban = DB::table('data_kode_akun')->where('kode_akun', '6105')->exists() ? '6105' : null;
+
+                    $kodeJenisAset = $request->input('kode_jenis_aset', 'AST-TRK');
+                    if (!DB::table('data_jenis_aset')->where('kode_jenis_aset', $kodeJenisAset)->exists()) {
+                        $kodeJenisAset = DB::table('data_jenis_aset')->where('kode_jenis_aset', 'AST-TRK')->value('kode_jenis_aset')
+                            ?? DB::table('data_jenis_aset')->value('kode_jenis_aset');
+                    }
+
                     DB::table('data_aset')->insert([
                         'kode_aset'            => $kodeAset,
-                        'kode_jenis_aset'      => $request->input('kode_jenis_aset', 'AST-TRK'),
+                        'kode_jenis_aset'      => $kodeJenisAset,
                         'nama_aset'            => $namaModel,
                         'tanggal_pembelian'    => $tglBeli,
                         'harga_aset'           => $hargaBeli,
@@ -258,9 +270,9 @@ class KendaraanController extends Controller
                         'umur_manfaat'         => 8,
                         'metode_penyusutan'    => 'Garis Lurus',
                         'tarif_penyusutan'     => 12.50,
-                        'kode_akun_aset'       => '1201',
-                        'kode_akun_akumulasi'  => '1202',
-                        'kode_akun_beban'      => '6105',
+                        'kode_akun_aset'       => $kodeAkunAset,
+                        'kode_akun_akumulasi'  => $kodeAkunAkum,
+                        'kode_akun_beban'      => $kodeAkunBeban,
                         'akumulasi_penyusutan' => 0.00,
                         'nilai_buku'           => $hargaBeli,
                         'status_aset'          => $validated['status_kendaraan'],
@@ -947,6 +959,7 @@ class KendaraanController extends Controller
     private function pastikanJenisAsetTersedia(): void
     {
         $defaultJenis = [
+            ['kode_jenis_aset' => 'AST-TRK', 'jenis_aset' => 'Armada Truk & Tronton', 'keterangan' => 'Truk armada ekspedisi pengangkut semen (umur 8 tahun, tarif 12.5%)'],
             ['kode_jenis_aset' => 'KND-TRN', 'jenis_aset' => 'Truk Tronton Wingbox', 'keterangan' => 'Kapasitas 25 - 30 Ton (500 - 600 Zak Semen)'],
             ['kode_jenis_aset' => 'KND-CDD', 'jenis_aset' => 'Colt Diesel Double (CDD)', 'keterangan' => 'Kapasitas 10 - 15 Ton (200 - 300 Zak Semen)'],
             ['kode_jenis_aset' => 'KND-TKG', 'jenis_aset' => 'Truk Tangki Semen Curah', 'keterangan' => 'Kapasitas 30 - 35 Ton Semen Curah Bulk'],
@@ -1031,5 +1044,35 @@ class KendaraanController extends Controller
                 ]));
             }
         }
+
+        // Sinkronkan armada yang ada di data_aset ke data_kendaraan jika data_kendaraan kosong
+        if (DB::table('data_kendaraan')->count() === 0) {
+            $trukTersedia = DB::table('data_aset')->whereNotNull('no_polisi')->where('no_polisi', '!=', '-')->get();
+            $urutan = 1;
+            foreach ($trukTersedia as $t) {
+                $kdKnd = 'KND-' . str_pad($urutan++, 3, '0', STR_PAD_LEFT);
+                DB::table('data_kendaraan')->updateOrInsert(
+                    ['kode_kendaraan' => $kdKnd],
+                    [
+                        'kode_aset'        => $t->kode_aset,
+                        'no_polisi'        => $t->no_polisi,
+                        'no_mesin'         => $t->no_mesin,
+                        'no_rangka'        => $t->no_rangka,
+                        'merek_kendaraan'  => $t->merek_aset,
+                        'jenis_kendaraan'  => $t->jenis_kendaraan ?? 'Colt Diesel Double',
+                        'tipe_armada'      => $t->jenis_kendaraan ?? 'Colt Diesel Double',
+                        'muatan'           => $t->muatan ?? '200 Zak (8 Ton)',
+                        'tahun_pembuatan'  => $t->tahun_pembuatan,
+                        'tanggal_kir'      => $t->tanggal_kir,
+                        'tanggal_pajak'    => $t->tanggal_pajak,
+                        'status_kendaraan' => $t->status_aset ?? 'aktif',
+                        'nama_pemilik'     => $t->nama_pemilik ?? 'PT Putra Balkom Jaya',
+                        'dibuat_pada'      => now(),
+                        'diperbarui_pada'  => now(),
+                    ]
+                );
+            }
+        }
     }
 }
+

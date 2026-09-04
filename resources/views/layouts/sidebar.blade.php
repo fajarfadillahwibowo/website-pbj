@@ -160,7 +160,7 @@
         </div>
 
         <!-- 4. Keuangan & AR/AP -->
-        <div x-show="bisaAkses('ar_faktur') || bisaAkses('ar_piutang') || bisaAkses('ar_deposit') || bisaAkses('ap_pembelian') || bisaAkses('list_so') || bisaAkses('ap_pengeluaran') || bisaAkses('ap_rilisan') || bisaAkses('akun_coa') || bisaAkses('akun_jurnal') || bisaAkses('akun_aset') || bisaAkses('jenis_aset')">
+        <div x-show="bisaAkses('ar_faktur') || bisaAkses('ar_piutang') || bisaAkses('ar_deposit') || bisaAkses('ap_pembelian') || bisaAkses('list_so') || bisaAkses('ap_pengeluaran') || bisaAkses('ap_rilisan') || bisaAkses('akun_coa') || bisaAkses('akun_jurnal') || bisaAkses('akun_aset')">
             <div x-show="!sidebarTerlipat" class="px-2.5 mb-1.5 flex items-center justify-between">
                 <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Keuangan & AR/AP</span>
             </div>

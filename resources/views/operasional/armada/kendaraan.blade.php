@@ -351,41 +351,32 @@
                                     <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase font-mono border {{ $warnaStatus }}">
                                         {{ $labelStatus }}
                                     </span>
-                                </td>                                 <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                    <div class="inline-flex items-center gap-1.5">
-                                        <button @click="bukaModalDetailKendaraan('{{ $k->kode_kendaraan ?: $k->kode_aset }}')"
-                                                class="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
-                                                title="Lihat Spesifikasi & Detail Truk">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                            </svg>
-                                        </button>
-
-                                        <button @click="cetakDossierKendaraan('{{ $k->kode_kendaraan ?: $k->kode_aset }}')"
-                                                class="p-1.5 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors"
-                                                title="Cetak Dossier / Kartu Armada">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                                            </svg>
-                                        </button>
-
-                                        <button @click="bukaModalEditKendaraan('{{ $k->kode_kendaraan ?: $k->kode_aset }}')"
-                                                class="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
-                                                title="Ubah Data Kendaraan">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                            </svg>
-                                        </button>
-
-                                        <button @click="bukaModalHapusKendaraan('{{ $k->kode_kendaraan ?: $k->kode_aset }}', '{{ addslashes($k->nama_aset) }}', '{{ $k->no_polisi }}')"
-                                                class="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
-                                                title="Hapus Data Kendaraan">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                        </button>
-                                    </div>
+                                </td>
+                                <td class="px-4 py-3.5 text-center whitespace-nowrap">
+                                    <x-menu-aksi-tabel 
+                                        kodeSalin="{{ $k->no_polisi ?: ($k->kode_kendaraan ?: $k->kode_aset) }}"
+                                        labelSalin="Salin Plat / Kode"
+                                        aksiDetail="bukaModalDetailKendaraan('{{ $k->kode_kendaraan ?: $k->kode_aset }}')"
+                                        labelDetail="Detail Truk"
+                                        :aksiCetak="'cetakDossierKendaraan(\'' . ($k->kode_kendaraan ?: $k->kode_aset) . '\')'"
+                                        labelCetak="Cetak Dossier"
+                                        aksiEdit="bukaModalEditKendaraan('{{ $k->kode_kendaraan ?: $k->kode_aset }}')"
+                                        labelEdit="Ubah Kendaraan"
+                                        modulIzin="armada_truk"
+                                    >
+                                        <template x-if="!apakahReadOnly('armada_truk')">
+                                            <div class="border-t border-slate-100 dark:border-[#252837] pt-1 mt-1">
+                                                <button @click.stop="menuTerbuka = false; bukaModalHapusKendaraan('{{ $k->kode_kendaraan ?: $k->kode_aset }}', '{{ addslashes($k->nama_aset) }}', '{{ $k->no_polisi }}')"
+                                                        type="button"
+                                                        class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors text-left font-medium">
+                                                    <svg class="w-3.5 h-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                    <span>Hapus Kendaraan</span>
+                                                </button>
+                                            </div>
+                                        </template>
+                                    </x-menu-aksi-tabel>
 
                                     <!-- Riwayat Diedit Real-Time -->
                                     <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 flex items-center justify-center gap-1 font-mono cursor-help"
@@ -602,32 +593,28 @@
                                 </td>
 
                                 <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                    <div class="inline-flex items-center gap-1.5">
-                                        <button @click="bukaModalDetailAset('{{ $aset->kode_aset }}')"
-                                                class="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
-                                                title="Lihat Detail Aset">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                            </svg>
-                                        </button>
-
-                                        <button @click="bukaModalEditAset('{{ $aset->kode_aset }}')"
-                                                class="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
-                                                title="Ubah Data Aset">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                            </svg>
-                                        </button>
-
-                                        <button @click="bukaModalHapusAset('{{ $aset->kode_aset }}', '{{ addslashes($aset->nama_aset) }}', '{{ $aset->no_polisi }}')"
-                                                class="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
-                                                title="Hapus Aset">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                        </button>
-                                    </div>
+                                    <x-menu-aksi-tabel 
+                                        kodeSalin="{{ $aset->kode_aset }}"
+                                        labelSalin="Salin Kode Aset"
+                                        aksiDetail="bukaModalDetailAset('{{ $aset->kode_aset }}')"
+                                        labelDetail="Detail Aset"
+                                        aksiEdit="bukaModalEditAset('{{ $aset->kode_aset }}')"
+                                        labelEdit="Ubah Data Aset"
+                                        modulIzin="jenis_aset"
+                                    >
+                                        <template x-if="!apakahReadOnly('jenis_aset')">
+                                            <div class="border-t border-slate-100 dark:border-[#252837] pt-1 mt-1">
+                                                <button @click.stop="menuTerbuka = false; bukaModalHapusAset('{{ $aset->kode_aset }}', '{{ addslashes($aset->nama_aset) }}', '{{ $aset->no_polisi }}')"
+                                                        type="button"
+                                                        class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors text-left font-medium">
+                                                    <svg class="w-3.5 h-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                    <span>Hapus Aset</span>
+                                                </button>
+                                            </div>
+                                        </template>
+                                    </x-menu-aksi-tabel>
 
                                     <!-- Riwayat Diedit Real-Time -->
                                     <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 flex items-center justify-center gap-1 font-mono cursor-help"
@@ -695,32 +682,28 @@
                                 </td>
 
                                 <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                    <div class="inline-flex items-center gap-1.5">
-                                        <button @click="bukaModalDetailJenisAset('{{ $j->kode_jenis_aset }}')"
-                                                class="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
-                                                title="Lihat Detail & Daftar Armada">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                            </svg>
-                                        </button>
-
-                                        <button @click="bukaModalEditJenisAset('{{ $j->kode_jenis_aset }}')"
-                                                class="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
-                                                title="Ubah Kategori Jenis Aset">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                            </svg>
-                                        </button>
-
-                                        <button @click="bukaModalHapusJenisAset('{{ $j->kode_jenis_aset }}', '{{ addslashes($j->jenis_aset) }}', {{ $j->kendaraan_count }})"
-                                                class="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
-                                                title="Hapus Kategori">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                        </button>
-                                    </div>
+                                    <x-menu-aksi-tabel 
+                                        kodeSalin="{{ $j->kode_jenis_aset }}"
+                                        labelSalin="Salin Kode Kategori"
+                                        aksiDetail="bukaModalDetailJenisAset('{{ $j->kode_jenis_aset }}')"
+                                        labelDetail="Detail Kategori"
+                                        aksiEdit="bukaModalEditJenisAset('{{ $j->kode_jenis_aset }}')"
+                                        labelEdit="Ubah Kategori"
+                                        modulIzin="jenis_aset"
+                                    >
+                                        <template x-if="!apakahReadOnly('jenis_aset')">
+                                            <div class="border-t border-slate-100 dark:border-[#252837] pt-1 mt-1">
+                                                <button @click.stop="menuTerbuka = false; bukaModalHapusJenisAset('{{ $j->kode_jenis_aset }}', '{{ addslashes($j->jenis_aset) }}', {{ $j->kendaraan_count }})"
+                                                        type="button"
+                                                        class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors text-left font-medium">
+                                                    <svg class="w-3.5 h-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                    <span>Hapus Kategori</span>
+                                                </button>
+                                            </div>
+                                        </template>
+                                    </x-menu-aksi-tabel>
 
                                     <!-- Riwayat Diedit Real-Time -->
                                     <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 flex items-center justify-center gap-1 font-mono cursor-help"

@@ -326,7 +326,34 @@ class PembelianSparepartController extends Controller
     {
         $jumlahBeli = DB::table('pembelian_sparepart')->count();
         if ($jumlahBeli === 0) {
-            $partOli = DB::table('list_sparepart')->value('kode_sparepart') ?? 'PRT-001';
+            // Pastikan master sparepart dasar tersedia sebelum mencatat transaksi pembelian awal
+            if (!DB::table('list_sparepart')->where('kode_sparepart', 'PRT-001')->exists()) {
+                DB::table('list_sparepart')->insert([
+                    'kode_sparepart' => 'PRT-001',
+                    'nama_sparepart' => 'Oli Mesin Meditran S SAE 40 (Drum 200 Liter)',
+                    'kategori_part' => 'Pelumas & Oli',
+                    'stok_part' => 24,
+                    'satuan' => 'Drum (200L)',
+                    'harga_satuan' => 5200000,
+                    'dibuat_pada' => Carbon::now()->subMonths(2),
+                    'diperbarui_pada' => Carbon::now()->subDays(2),
+                ]);
+            }
+
+            if (!DB::table('list_sparepart')->where('kode_sparepart', 'PRT-002')->exists()) {
+                DB::table('list_sparepart')->insert([
+                    'kode_sparepart' => 'PRT-002',
+                    'nama_sparepart' => 'Ban Luar Gajah Tunggal 10.00R20 16PR (Tronton)',
+                    'kategori_part' => 'Ban & Roda',
+                    'stok_part' => 4,
+                    'satuan' => 'Pcs',
+                    'harga_satuan' => 3450000,
+                    'dibuat_pada' => Carbon::now()->subMonths(2),
+                    'diperbarui_pada' => Carbon::now()->subHours(6),
+                ]);
+            }
+
+            $partOli = 'PRT-001';
 
             DB::table('pembelian_sparepart')->insert([
                 [
