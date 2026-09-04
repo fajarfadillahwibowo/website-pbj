@@ -8,14 +8,14 @@
         dropdownRoleTerbuka: false,
         jabatanAktif: (function() {
             @if(session()->has('kode_jabatan'))
-                const roleDariSesi = '{{ session('kode_jabatan') }}';
+                var roleDariSesi = '{{ session('kode_jabatan') }}';
                 try {
                     localStorage.setItem('jabatan_aktif', roleDariSesi);
                 } catch(e) {}
                 return roleDariSesi;
             @else
                 try {
-                    const tersimpan = localStorage.getItem('jabatan_aktif');
+                    var tersimpan = localStorage.getItem('jabatan_aktif');
                     if (tersimpan && tersimpan !== 'null' && tersimpan !== 'undefined') {
                         return tersimpan;
                     }
@@ -103,7 +103,7 @@
 
         bisaAkses(kodeModul) {
           if (!this.kunciRbac) return true;
-          const hak = this.matriksAkses[this.jabatanAktif] || [];
+          var hak = this.matriksAkses[this.jabatanAktif] || [];
           return hak.includes(kodeModul);
         },
 
@@ -113,84 +113,83 @@
           if (this.jabatanAktif === 'DIREKTUR_MANAGER') return true;
           if (this.jabatanAktif === 'SPV_OPERASIONAL' && kodeModul === 'armada_driver') return true;
           if (this.jabatanAktif === 'STAFF_AR') {
-            const hakTulis = ['dashboard', 'master_customer', 'master_barang', 'ar_faktur', 'ar_piutang', 'ar_deposit'];
+            var hakTulis = ['dashboard', 'master_customer', 'master_barang', 'ar_faktur', 'ar_piutang', 'ar_deposit'];
             return !hakTulis.includes(kodeModul);
           }
           if (this.jabatanAktif === 'STAFF_AP') {
-            const hakTulis = ['dashboard', 'ap_pembelian', 'list_so', 'gudang_stok', 'ap_pengeluaran', 'ap_rilisan'];
+            var hakTulis = ['dashboard', 'ap_pembelian', 'list_so', 'gudang_stok', 'ap_pengeluaran', 'ap_rilisan'];
             return !hakTulis.includes(kodeModul);
           }
           return false;
+        },
+
+        init() {
+          var self = this;
+          var inisialisasiSidebar = function() {
+            var lebarLayar = window.innerWidth;
+            if (lebarLayar < 768) {
+              self.sidebarMobileTerbuka = false;
+              self.sidebarTerlipat = true;
+            } else if (lebarLayar < 1024) {
+              self.sidebarTerlipat = true;
+            } else {
+              var tersimpan = localStorage.getItem('sidebar_terlipat');
+              if (tersimpan !== null) {
+                self.sidebarTerlipat = tersimpan === 'true';
+              } else {
+                self.sidebarTerlipat = false;
+              }
+            }
+          };
+          inisialisasiSidebar();
+
+          var tanganiResize = function() {
+            if (window.innerWidth >= 768) {
+              self.sidebarMobileTerbuka = false;
+              document.body.style.overflow = '';
+            }
+            if (window.innerWidth >= 1024) {
+              var tersimpan = localStorage.getItem('sidebar_terlipat');
+              if (tersimpan !== null) {
+                self.sidebarTerlipat = tersimpan === 'true';
+              } else {
+                self.sidebarTerlipat = false;
+              }
+            } else if (window.innerWidth >= 768) {
+              self.sidebarTerlipat = true;
+            }
+          };
+          window.addEventListener('resize', tanganiResize, { passive: true });
+
+          this.$watch('jabatanAktif', function(v) {
+            try { localStorage.setItem('jabatan_aktif', v); } catch(e) {}
+            fetch('{{ route("api.sinkronisasi_role") }}', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+              },
+              body: JSON.stringify({ kode_jabatan: v })
+            }).catch(function() {});
+          });
+
+          this.$watch('sidebarTerlipat', function(v) {
+            if (window.innerWidth >= 1024) {
+              try { localStorage.setItem('sidebar_terlipat', v ? 'true' : 'false'); } catch(e) {}
+            }
+          });
+
+          this.$watch('sidebarMobileTerbuka', function(v) {
+            document.body.style.overflow = v ? 'hidden' : '';
+          });
+
+          this.$nextTick(function() {
+            if (typeof pulihkanPosisiSidebar === 'function') {
+              pulihkanPosisiSidebar();
+            }
+          });
         }
       }"
-      x-init="
-        // Deteksi ukuran layar untuk initial state sidebar
-        const initSidebarState = () => {
-          const lebarLayar = window.innerWidth;
-          if (lebarLayar < 768) {
-            // Mobile: sidebar tersembunyi (drawer)
-            sidebarMobileTerbuka = false;
-            sidebarTerlipat = true;
-          } else if (lebarLayar < 1024) {
-            // Tablet: sidebar collapsed (icon-only)
-            sidebarTerlipat = true;
-          } else {
-            // Desktop: ambil dari preferensi tersimpan
-            const tersimpan = localStorage.getItem('sidebar_terlipat');
-            if (tersimpan !== null) {
-              sidebarTerlipat = tersimpan === 'true';
-            } else {
-              sidebarTerlipat = false;
-            }
-          }
-        };
-        initSidebarState();
-
-        // Auto-tutup drawer mobile saat resize ke desktop
-        const handleResize = () => {
-          if (window.innerWidth >= 768) {
-            sidebarMobileTerbuka = false;
-            document.body.style.overflow = '';
-          }
-          if (window.innerWidth >= 1024) {
-            const tersimpan = localStorage.getItem('sidebar_terlipat');
-            if (tersimpan !== null) {
-              sidebarTerlipat = tersimpan === 'true';
-            } else {
-              sidebarTerlipat = false;
-            }
-          } else if (window.innerWidth >= 768) {
-            sidebarTerlipat = true;
-          }
-        };
-        window.addEventListener('resize', handleResize, { passive: true });
-
-        $watch('jabatanAktif', v => {
-          try { localStorage.setItem('jabatan_aktif', v); } catch(e) {}
-          fetch('{{ route("api.sinkronisasi_role") }}', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({ kode_jabatan: v })
-          }).catch(() => {});
-        });
-        $watch('sidebarTerlipat', v => {
-          // Hanya simpan preferensi di desktop
-          if (window.innerWidth >= 1024) {
-            try { localStorage.setItem('sidebar_terlipat', v ? 'true' : 'false'); } catch(e) {}
-          }
-        });
-        $watch('sidebarMobileTerbuka', v => {
-          document.body.style.overflow = v ? 'hidden' : '';
-        });
-        this.$nextTick(() => {
-          if (typeof pulihkanPosisiSidebar === 'function') {
-            pulihkanPosisiSidebar();
-          }
-        });
-      "
       :class="{ 'dark': modeGelap }">
 <head>
     <meta charset="UTF-8">

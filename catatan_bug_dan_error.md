@@ -7,6 +7,18 @@
 - **[TERSELESAIKAN] Syntax error, unexpected token "\" pada view `operasional/gudang/opname.blade.php:272`**:
   - *Penyebab:* Penggunaan tanda kutip ganda ter-escape `\"` di dalam ekspresi Blade `aksiEdit="{{ $opn->status_konfirmasi === 'draft' ? \"bukaModalEdit('{$opn->id_opname}')\" : null }}"`. Saat compiler Blade mengompilasinya menjadi kode PHP, karakter backslash terbawa dan menyebabkan `ParseError: syntax error, unexpected token "\"`.
   - *Solusi:* Mengubah binding atribut menjadi native Blade binding dengan prefix titik dua `:aksiEdit="$opn->status_konfirmasi === 'draft' ? 'bukaModalEdit(\'' . $opn->id_opname . '\')' : null"`. View berhasil dirender bersih (HTML 247 KB) dan semua aksi modal berfungsi lancar.
+- **[TERSELESAIKAN] Pengecekan & Perbaikan Kolom Aksi Modul Gudang (Stok & Opname)**:
+  - *Modul:* Fasilitas Gudang (`/operasional/gudang/stok`) & Stok Opname (`/operasional/gudang/opname`).
+  - *Status Aksi:*
+    1. Salin Kode / Nomor: Normal (Berfungsi via clipboard & indikator feedback).
+    2. Modal Detail: Normal (Endpoint JSON mengembalikan data valid, modal interaktif terbuka rapi).
+    3. Cetak Dokumen / Kartu Stok / BASO: Normal (Lembar cetak kartu stok & generator dokumen BASO resmi berfungsi).
+    4. Edit / Ubah Data: Normal (Memuat data ke modal edit, submit via PUT).
+    5. Mutasi Stok Fisik: Normal (Modal mutasi terbuka, submit via POST dan stok fisik terupdate).
+    6. Konfirmasi SPV: Normal (Submit PATCH, status berubah ke dikonfirmasi_spv dan stok gudang tersinkron).
+    7. Hapus Data: Normal (Modal konfirmasi hapus terbuka, submit DELETE aman dengan proteksi relasi).
+  - *Hasil Pengujian:* 19 pengujian backend & integrasi Blade lulus 100%, verifikasi live browser interaksi menu aksi terkonfirmasi berfungsi normal.
+  - *Status:* Terselesaikan.
 - **[TERSELESAIKAN] Resolusi Konflik Git Merge origin/main ke web-dev1 (Modul Bengkel & UI)**:
   - *Penyebab:* Terjadi bentrok pada 3 berkas view operasional bengkel (`pembelian_sparepart.blade.php`, `perbaikan.blade.php`, `sparepart.blade.php`) akibat perbedaan desain aksi tombol (inline horizontal dari `origin/main` vs popover `<x-menu-aksi-tabel>` dari cabang lokal `web-dev1`).
   - *Solusi:* Sesuai arahan eksplisit pengguna (*"kodingan lokal mengalah mengikuti data dari main"*), konflik diselesaikan dengan memenangkan versi `origin/main` (`git checkout --theirs`). Seluruh template blade berhasil dikompilasi ulang (`artisan view:cache`) dan suite pengujian QA `test_direktur_manager_and_rbac.php` lulus 100% (22 Lulus, 0 Gagal). Commit merge berhasil diselesaikan (`2496f81`).

@@ -105,7 +105,7 @@
             </div>
             <div>
                 <div class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Total Fasilitas Gudang</div>
-                <div class="text-xl font-bold text-slate-900 dark:text-slate-100 font-mono mt-0.5">{{ $totalGudang }} <span class="text-xs font-normal text-slate-400 font-sans">Lokasi</span></div>
+                <div class="text-xl font-bold text-slate-900 dark:text-slate-100 font-mono mt-0.5">{{ $totalGudang ?? 0 }} <span class="text-xs font-normal text-slate-400 font-sans">Lokasi</span></div>
             </div>
         </div>
 
@@ -118,7 +118,7 @@
             </div>
             <div>
                 <div class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Total Stok Fisik</div>
-                <div class="text-xl font-bold text-sky-600 dark:text-sky-400 font-mono mt-0.5">{{ number_format($totalStokZak, 0, ',', '.') }} <span class="text-xs font-normal text-slate-400 font-sans">Zak</span></div>
+                <div class="text-xl font-bold text-sky-600 dark:text-sky-400 font-mono mt-0.5">{{ number_format($totalStokZak ?? 0, 0, ',', '.') }} <span class="text-xs font-normal text-slate-400 font-sans">Zak</span></div>
             </div>
         </div>
 
@@ -131,7 +131,7 @@
             </div>
             <div>
                 <div class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Stok Menipis (≤ 1.000)</div>
-                <div class="text-xl font-bold text-rose-600 dark:text-rose-400 font-mono mt-0.5">{{ $stokKritis }} <span class="text-xs font-normal text-slate-400 font-sans">Gudang</span></div>
+                <div class="text-xl font-bold text-rose-600 dark:text-rose-400 font-mono mt-0.5">{{ $stokKritis ?? 0 }} <span class="text-xs font-normal text-slate-400 font-sans">Gudang</span></div>
             </div>
         </div>
 
@@ -144,7 +144,7 @@
             </div>
             <div>
                 <div class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Total Valuasi Persediaan</div>
-                <div class="text-base font-bold text-emerald-600 dark:text-emerald-400 font-mono mt-0.5">Rp {{ number_format($totalValuasiStok, 0, ',', '.') }}</div>
+                <div class="text-base font-bold text-emerald-600 dark:text-emerald-400 font-mono mt-0.5">Rp {{ number_format($totalValuasiStok ?? 0, 0, ',', '.') }}</div>
             </div>
         </div>
     </div>
@@ -654,6 +654,8 @@
                         </svg>
                         <span>Terakhir Diedit: <strong x-text="detailGudang.terakhir_diedit_relatif || '-'"></strong></span>
                     </div>
+                </div>
+
                 <!-- Tanda Tangan Khusus Cetak -->
                 <div class="pt-6 border-t border-slate-200 dark:border-slate-800 grid grid-cols-2 gap-8 text-center text-[10px]">
                     <div>
