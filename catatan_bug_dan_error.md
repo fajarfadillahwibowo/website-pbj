@@ -1,6 +1,9 @@
 # 📝 Pelacak Bug, Error, & Progres Terlewati Real-time
 
 ## 🔴 Daftar Bug & Error
+- **[TERSELESAIKAN] Syntax error, unexpected token "\" pada view `operasional/gudang/opname.blade.php:272`**:
+  - *Penyebab:* Penggunaan tanda kutip ganda ter-escape `\"` di dalam ekspresi Blade `aksiEdit="{{ $opn->status_konfirmasi === 'draft' ? \"bukaModalEdit('{$opn->id_opname}')\" : null }}"`. Saat compiler Blade mengompilasinya menjadi kode PHP, karakter backslash terbawa dan menyebabkan `ParseError: syntax error, unexpected token "\"`.
+  - *Solusi:* Mengubah binding atribut menjadi native Blade binding dengan prefix titik dua `:aksiEdit="$opn->status_konfirmasi === 'draft' ? 'bukaModalEdit(\'' . $opn->id_opname . '\')' : null"`. View berhasil dirender bersih (HTML 247 KB) dan semua aksi modal berfungsi lancar.
 - **[TERSELESAIKAN] Resolusi Konflik Git Merge origin/main ke web-dev1 (Modul Bengkel & UI)**:
   - *Penyebab:* Terjadi bentrok pada 3 berkas view operasional bengkel (`pembelian_sparepart.blade.php`, `perbaikan.blade.php`, `sparepart.blade.php`) akibat perbedaan desain aksi tombol (inline horizontal dari `origin/main` vs popover `<x-menu-aksi-tabel>` dari cabang lokal `web-dev1`).
   - *Solusi:* Sesuai arahan eksplisit pengguna (*"kodingan lokal mengalah mengikuti data dari main"*), konflik diselesaikan dengan memenangkan versi `origin/main` (`git checkout --theirs`). Seluruh template blade berhasil dikompilasi ulang (`artisan view:cache`) dan suite pengujian QA `test_direktur_manager_and_rbac.php` lulus 100% (22 Lulus, 0 Gagal). Commit merge berhasil diselesaikan (`2496f81`).
