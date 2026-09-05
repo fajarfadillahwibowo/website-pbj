@@ -219,7 +219,7 @@ Route::prefix('operasional')->name('operasional.')->group(function () {
         Route::get('/driver/api/buat-kode', [DriverController::class, 'buatKodeOtomatis'])->name('driver.buat_kode');
         Route::get('/driver/{kode_karyawan}', [DriverController::class, 'ambilDetail'])->name('driver.detail');
         Route::put('/driver/{kode_karyawan}', [DriverController::class, 'perbarui'])->name('driver.perbarui');
-        Route::delete('/driver/{kode_karyawan}', [DriverController::class, 'hapus'])->name('driver.hapus');
+        Route::delete('/driver/{kode_karyawan?}', [DriverController::class, 'hapus'])->name('driver.hapus');
         Route::delete('/driver/{kode_karyawan}/berkas/{jenis_berkas}', [DriverController::class, 'hapusBerkas'])->name('driver.hapus_berkas');
     });
 

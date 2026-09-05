@@ -130,47 +130,33 @@ assertTest($dataBuatKso['status'] === 'sukses' && !empty($dataBuatKso['kode_otom
 $reqSimpanKso = Request::create('/operasional/kso', 'POST', [
     'kode_kso' => $kodeKsoUji,
     'nama_kso' => 'KSO Mitra Armada Ekspedisi Prima',
-    'pihak_mitra' => 'PT Ekspedisi Prima Nusantara',
-    'tanggal_mulai' => date('Y-m-d'),
-    'tanggal_selesai' => date('Y-m-d', strtotime('+1 year')),
-    'nilai_kontrak' => '750.000.000', // Format dengan titik ribuan
-    'status_kso' => 'Aktif',
-    'keterangan' => 'KSO pengadaan 10 unit tronton wilayah Jawa Barat',
 ]);
 $ksoController->simpanKSO($reqSimpanKso);
 $ksoDibuat = KSO::where('kode_kso', $kodeKsoUji)->first();
 assertTest(
     $ksoDibuat !== null &&
-    (float)$ksoDibuat->nilai_kontrak == 750000000 &&
-    $ksoDibuat->status_kso === 'Aktif',
-    "CREATE Data Mitra KSO ({$kodeKsoUji}) dengan sanitasi Nilai Kontrak berhasil"
+    $ksoDibuat->nama_kso === 'KSO Mitra Armada Ekspedisi Prima',
+    "CREATE Data Mitra KSO ({$kodeKsoUji}) sesuai class diagram berhasil"
 );
 
-// 2.3 READ Detail KSO via JSON API (Validasi Format Tanggal YYYY-MM-DD)
+// 2.3 READ Detail KSO via JSON API
 $respDetailKso = $ksoController->ambilDetailKSO($kodeKsoUji);
 $dataDetailKso = json_decode($respDetailKso->getContent(), true);
 assertTest(
     $dataDetailKso['status'] === 'sukses' &&
     $dataDetailKso['data']['kode_kso'] === $kodeKsoUji &&
-    $dataDetailKso['data']['tanggal_mulai'] === date('Y-m-d'),
-    "READ Detail KSO via API (Format tanggal presisi Y-m-d: {$dataDetailKso['data']['tanggal_mulai']}) berhasil"
+    $dataDetailKso['data']['nama_kso'] === 'KSO Mitra Armada Ekspedisi Prima',
+    "READ Detail KSO via API (Kode: {$dataDetailKso['data']['kode_kso']}) berhasil"
 );
 
 // 2.4 UPDATE Mitra KSO
 $reqUpdateKso = Request::create('/operasional/kso/' . $kodeKsoUji, 'PUT', [
     'nama_kso' => 'KSO Mitra Armada Ekspedisi Prima (Amandemen 1)',
-    'pihak_mitra' => 'PT Ekspedisi Prima Nusantara',
-    'tanggal_mulai' => date('Y-m-d'),
-    'tanggal_selesai' => date('Y-m-d', strtotime('+2 years')),
-    'nilai_kontrak' => '900000000',
-    'status_kso' => 'Aktif',
-    'keterangan' => 'Perpanjangan kontrak dan penambahan alokasi armada',
 ]);
 $ksoController->perbaruiKSO($reqUpdateKso, $kodeKsoUji);
 $ksoDiupdate = KSO::where('kode_kso', $kodeKsoUji)->first();
 assertTest(
-    $ksoDiupdate->nama_kso === 'KSO Mitra Armada Ekspedisi Prima (Amandemen 1)' &&
-    (float)$ksoDiupdate->nilai_kontrak == 900000000,
+    $ksoDiupdate->nama_kso === 'KSO Mitra Armada Ekspedisi Prima (Amandemen 1)',
     "UPDATE Data Mitra KSO berhasil"
 );
 

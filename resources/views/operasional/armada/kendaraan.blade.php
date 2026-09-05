@@ -55,14 +55,14 @@
                 <!-- Tombol Tambah Jenis Aset (Ketika Tab Jenis Aset Aktif) -->
                 <template x-if="tabAktif === 'jenis_aset'">
                     <div class="flex items-center gap-2">
-                        <button x-show="subTabJenisAset === 'aset'" @click="bukaModalTambahAset()"
+                        <button x-show="subTabJenisAset === 'aset' && jabatanAktif !== 'DISPATCHER'" @click="bukaModalTambahAset()"
                                 class="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-95 rounded-xl transition-all shadow-md shadow-indigo-600/20">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                             </svg>
                             <span>Tambah Aset Perusahaan</span>
                         </button>
-                        <button x-show="subTabJenisAset === 'kategori'" @click="bukaModalTambahJenisAset()"
+                        <button x-show="subTabJenisAset === 'kategori' || jabatanAktif === 'DISPATCHER'" @click="bukaModalTambahJenisAset()"
                                 class="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-violet-600 hover:bg-violet-700 active:scale-95 rounded-xl transition-all shadow-md shadow-violet-600/20">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
@@ -96,9 +96,10 @@
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                 </svg>
-                <span>Data Jenis Aset (Aset Perusahaan)</span>
+                <span x-text="jabatanAktif === 'DISPATCHER' ? 'Data Jenis Aset' : 'Data Jenis Aset (Aset Perusahaan)'">Data Jenis Aset (Aset Perusahaan)</span>
                 <span class="px-2 py-0.5 text-[10px] font-mono rounded-md font-bold"
-                      :class="tabAktif === 'jenis_aset' ? 'bg-indigo-800/40 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'">
+                      :class="tabAktif === 'jenis_aset' ? 'bg-indigo-800/40 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'"
+                      x-text="jabatanAktif === 'DISPATCHER' ? '{{ count($daftarJenisAset) }}' : '{{ $totalAset }}'">
                     {{ $totalAset }}
                 </span>
             </button>
@@ -419,8 +420,9 @@
     <div x-show="tabAktif === 'jenis_aset'" class="space-y-6">
         
         <!-- Ringkasan Kartu KPI Aset Perusahaan (Selaras dengan Modul Aset Perusahaan SPV Keuangan) -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <div class="bg-white dark:bg-[#14161F] p-4 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm flex items-center gap-3.5">
+        <!-- Ringkasan Kartu KPI Aset Perusahaan (Selaras dengan Modul Aset Perusahaan SPV Keuangan) -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4" :class="jabatanAktif === 'DISPATCHER' ? 'lg:grid-cols-2' : 'lg:grid-cols-4'">
+            <div x-show="jabatanAktif !== 'DISPATCHER'" class="bg-white dark:bg-[#14161F] p-4 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm flex items-center gap-3.5">
                 <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -434,7 +436,7 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-[#14161F] p-4 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm flex items-center gap-3.5">
+            <div x-show="jabatanAktif !== 'DISPATCHER'" class="bg-white dark:bg-[#14161F] p-4 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm flex items-center gap-3.5">
                 <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
@@ -482,8 +484,8 @@
         <div class="bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
             <div class="p-4 sm:px-5 sm:py-3.5 border-b border-[#E2E8F0] dark:border-[#252837] flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                 
-                <!-- Sub-Tab Switcher (Inventaris Aset vs Master Kategori) -->
-                <div class="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-[#1C1E2A] rounded-xl shrink-0">
+                <!-- Sub-Tab Switcher (Inventaris Aset vs Master Kategori) - Sembunyikan untuk Dispatcher -->
+                <div x-show="jabatanAktif !== 'DISPATCHER'" class="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-[#1C1E2A] rounded-xl shrink-0">
                     <button type="button" @click="subTabJenisAset = 'aset'"
                             :class="subTabJenisAset === 'aset' ? 'bg-white dark:bg-[#14161F] text-indigo-600 dark:text-indigo-400 shadow-xs font-bold' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 font-medium'"
                             class="px-3 py-1.5 rounded-lg text-xs flex items-center gap-2 transition-all">
@@ -505,19 +507,31 @@
                     </button>
                 </div>
 
+                <!-- Label Kategori Truk Khusus Dispatcher (Tanpa Menu Inventaris Aset) -->
+                <div x-show="jabatanAktif === 'DISPATCHER'" class="flex items-center gap-2 shrink-0">
+                    <span class="px-3 py-1.5 rounded-xl bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 text-xs font-bold flex items-center gap-1.5 border border-violet-200 dark:border-violet-500/20">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                        </svg>
+                        <span>Master Kategori Jenis Aset (Tipe Truk)</span>
+                        <span class="px-1.5 py-0.2 rounded text-[10px] font-mono bg-violet-100 dark:bg-violet-900/40 text-violet-800 dark:text-violet-300 font-bold">{{ count($daftarJenisAset) }}</span>
+                    </span>
+                </div>
+
                 <!-- Form Filter & Pencarian -->
                 <form method="GET" action="{{ route('operasional.armada.kendaraan') }}" class="flex flex-wrap items-center gap-2 flex-1 lg:justify-end">
                     <input type="hidden" name="tab" value="jenis_aset">
                     <div class="relative flex-1 min-w-[200px] max-w-sm">
                         <input type="text" name="cari" value="{{ ($tabAktif === 'jenis_aset') ? ($kataKunci ?? '') : '' }}"
-                               placeholder="Cari nama aset, kode, plat nomor..."
+                               :placeholder="jabatanAktif === 'DISPATCHER' ? 'Cari kategori jenis aset...' : 'Cari nama aset, kode, plat nomor...'"
+                               placeholder="Cari kategori jenis aset..."
                                class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
                         <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </div>
 
-                    <div class="w-44">
+                    <div x-show="jabatanAktif !== 'DISPATCHER'" class="w-44">
                         <select name="jenis" onchange="if (typeof this.form.requestSubmit === 'function') { this.form.requestSubmit(); } else { this.form.submit(); }"
                                 class="w-full px-3 py-1.5 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
                             <option value="semua">-- Semua Jenis Aset --</option>
@@ -542,7 +556,7 @@
             </div>
 
             <!-- TAMPILAN 1: TABEL INVENTARIS ASET PERUSAHAAN (SESUAI FITUR SPV KEUANGAN) -->
-            <div x-show="subTabJenisAset === 'aset'" class="overflow-x-auto">
+            <div x-show="subTabJenisAset === 'aset' && jabatanAktif !== 'DISPATCHER'" class="overflow-x-auto">
                 <table class="w-full text-left text-xs">
                     <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500 dark:text-slate-400">
                         <tr>
@@ -646,14 +660,13 @@
             </div>
 
             <!-- TAMPILAN 2: TABEL MASTER KATEGORI JENIS ASET -->
-            <div x-show="subTabJenisAset === 'kategori'" class="overflow-x-auto">
+            <div x-show="subTabJenisAset === 'kategori' || jabatanAktif === 'DISPATCHER'" class="overflow-x-auto">
                 <table class="w-full text-left text-xs">
                     <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500 dark:text-slate-400">
                         <tr>
                             <th class="px-4 py-3 font-semibold uppercase tracking-wider">Kode Jenis Aset</th>
-                            <th class="px-4 py-3 font-semibold uppercase tracking-wider">Nama Kategori Jenis Aset</th>
+                            <th class="px-4 py-3 font-semibold uppercase tracking-wider">Jenis Aset</th>
                             <th class="px-4 py-3 font-semibold uppercase tracking-wider">Deskripsi & Spesifikasi Muatan</th>
-                            <th class="px-4 py-3 text-center font-semibold uppercase tracking-wider">Unit Armada Terdaftar</th>
                             <th class="px-4 py-3 text-center font-semibold uppercase tracking-wider">Aksi</th>
                         </tr>
                     </thead>
@@ -672,13 +685,6 @@
 
                                 <td class="px-4 py-3.5 text-slate-600 dark:text-slate-400 max-w-md">
                                     {{ $j->keterangan ?: '-' }}
-                                </td>
-
-                                <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono font-bold {{ $j->kendaraan_count > 0 ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-400' }}">
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1"/></svg>
-                                        <span>{{ $j->kendaraan_count }} Unit</span>
-                                    </span>
                                 </td>
 
                                 <td class="px-4 py-3.5 text-center whitespace-nowrap">
@@ -717,7 +723,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-4 py-12 text-center text-slate-400">
+                                <td colspan="4" class="px-4 py-12 text-center text-slate-400">
                                     <div class="flex flex-col items-center justify-center">
                                         <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-2">
                                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -1662,7 +1668,7 @@
     function kelolaArmadaTerpadu(initialTab = 'kendaraan') {
         return {
             tabAktif: initialTab,
-            subTabJenisAset: 'aset',
+            subTabJenisAset: '{{ (session('kode_jabatan') === 'DISPATCHER') ? 'kategori' : 'aset' }}',
 
             // Modals Kendaraan
             modalTambahKendaraanTerbuka: false,
@@ -1771,7 +1777,14 @@
             hapusAsetData: { kode: '', nama: '', plat: '' },
 
             initArmada() {
-                // Inisialisasi
+                if (this.jabatanAktif === 'DISPATCHER') {
+                    this.subTabJenisAset = 'kategori';
+                }
+                this.$watch('jabatanAktif', (val) => {
+                    if (val === 'DISPATCHER') {
+                        this.subTabJenisAset = 'kategori';
+                    }
+                });
             },
 
             gantiTab(namaTab) {

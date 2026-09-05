@@ -187,32 +187,17 @@ class LengkapiDataSidebarEmpatRoleSeeder extends Seeder
             [
                 'kode_kso' => 'KSO-001',
                 'nama_kso' => 'KSO Armada Mitra Logistik Cikarang',
-                'pihak_mitra' => 'PT Mitra Logistik Cikarang',
-                'tanggal_mulai' => '2026-01-01',
-                'tanggal_selesai' => '2026-12-31',
-                'nilai_kontrak' => 500000000,
-                'status_kso' => 'Aktif',
-                'keterangan' => 'Kerjasama 5 unit tronton muatan semen zak kantong.',
+                'file_kontrak_kso' => null,
             ],
             [
                 'kode_kso' => 'KSO-002',
                 'nama_kso' => 'KSO Trans Perkasa Mandiri',
-                'pihak_mitra' => 'PT Trans Perkasa Mandiri',
-                'tanggal_mulai' => '2026-02-01',
-                'tanggal_selesai' => '2027-01-31',
-                'nilai_kontrak' => 750000000,
-                'status_kso' => 'Aktif',
-                'keterangan' => 'Armada trailer 30 ton trayek Karawang - Jawa Barat.',
+                'file_kontrak_kso' => null,
             ],
             [
                 'kode_kso' => 'KSO-003',
                 'nama_kso' => 'KSO Berkah Angkutan Nusantara',
-                'pihak_mitra' => 'CV Berkah Angkutan Nusantara',
-                'tanggal_mulai' => '2026-03-01',
-                'tanggal_selesai' => '2026-09-30',
-                'nilai_kontrak' => 450000000,
-                'status_kso' => 'Aktif',
-                'keterangan' => 'Kerjasama logistik Colt Diesel Double (CDD).',
+                'file_kontrak_kso' => null,
             ],
         ];
 
@@ -301,6 +286,70 @@ class LengkapiDataSidebarEmpatRoleSeeder extends Seeder
             DB::table('pembelian_so')->updateOrInsert(
                 ['id_so' => $so['id_so']],
                 array_merge($so, [
+                    'dibuat_pada' => $now,
+                    'diperbarui_pada' => $now
+                ])
+            );
+        }
+
+        // ---------------------------------------------------------------------
+        // 5. MASTER KENDARAAN (data_kendaraan) -> Role: Dispatcher & Pengawas
+        // ---------------------------------------------------------------------
+        $kendaraanTambahan = [
+            [
+                'kode_kendaraan' => 'KND-001',
+                'kode_aset' => 'AST-001',
+                'no_polisi' => 'B 9123 PBJ',
+                'no_mesin' => 'W04D-TN12345',
+                'no_rangka' => 'MHKRD1234567890',
+                'merek_kendaraan' => 'Hino',
+                'jenis_kendaraan' => 'Colt Diesel Double',
+                'tipe_armada' => 'Colt Diesel Double',
+                'muatan' => '200 Zak (8 Ton)',
+                'tahun_pembuatan' => 2023,
+                'tanggal_kir' => '2026-11-20',
+                'tanggal_pajak' => '2026-10-15',
+                'status_kendaraan' => 'aktif',
+                'nama_pemilik' => 'PT Putra Balkom Jaya',
+            ],
+            [
+                'kode_kendaraan' => 'KND-002',
+                'kode_aset' => 'AST-005',
+                'no_polisi' => 'BG 4567 GG',
+                'no_mesin' => '6M60-12890',
+                'no_rangka' => 'MHKRD1234567890',
+                'merek_kendaraan' => 'Mitsubishi',
+                'jenis_kendaraan' => 'Tronton',
+                'tipe_armada' => 'Tronton 10 Roda',
+                'muatan' => '25 Ton (500 Zak)',
+                'tahun_pembuatan' => 2024,
+                'tanggal_kir' => '2026-12-10',
+                'tanggal_pajak' => '2026-12-10',
+                'status_kendaraan' => 'aktif',
+                'nama_pemilik' => 'PT Putra Balkom Jaya',
+            ],
+            [
+                'kode_kendaraan' => 'KND-003',
+                'kode_aset' => 'TRK-001',
+                'no_polisi' => 'B 9789 PBJ',
+                'no_mesin' => 'J08E-WD54321',
+                'no_rangka' => 'MHKFL9876543210',
+                'merek_kendaraan' => 'Hino',
+                'jenis_kendaraan' => 'Tronton Wingbox',
+                'tipe_armada' => 'Tronton 10 Roda',
+                'muatan' => '25 Ton (500 Zak)',
+                'tahun_pembuatan' => 2024,
+                'tanggal_kir' => '2027-01-15',
+                'tanggal_pajak' => '2027-01-15',
+                'status_kendaraan' => 'aktif',
+                'nama_pemilik' => 'PT Putra Balkom Jaya',
+            ],
+        ];
+
+        foreach ($kendaraanTambahan as $knd) {
+            DB::table('data_kendaraan')->updateOrInsert(
+                ['kode_kendaraan' => $knd['kode_kendaraan']],
+                array_merge($knd, [
                     'dibuat_pada' => $now,
                     'diperbarui_pada' => $now
                 ])

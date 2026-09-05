@@ -256,12 +256,6 @@ CREATE TABLE `data_kso` (
     `kode_kso` VARCHAR(30) NOT NULL,
     `nama_kso` VARCHAR(100) NOT NULL,
     `file_kontrak_kso` VARCHAR(255) DEFAULT NULL,
-    `status_kso` ENUM('Aktif', 'Selesai', 'Ditangguhkan') NOT NULL DEFAULT 'Aktif',
-    `pihak_mitra` VARCHAR(100) NOT NULL,
-    `tanggal_mulai` DATE NOT NULL,
-    `tanggal_selesai` DATE NOT NULL,
-    `nilai_kontrak` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
-    `keterangan` TEXT DEFAULT NULL,
     `dibuat_pada` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `diperbarui_pada` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`kode_kso`)
@@ -713,7 +707,7 @@ CREATE TABLE `pengiriman` (
     `nomor_surat_jalan` VARCHAR(50) NOT NULL,
     `id_so` INT NOT NULL,
     `kode_kendaraan` VARCHAR(30) NOT NULL,
-    `kode_driver` VARCHAR(30) NOT NULL,
+    `kode_driver` VARCHAR(30) DEFAULT NULL,
     `tanggal_kirim` DATETIME NOT NULL,
     `status_pengiriman` ENUM('menunggu', 'dalam_perjalanan', 'terkirim', 'retur') NOT NULL DEFAULT 'menunggu',
     `keterangan` TEXT DEFAULT NULL,
@@ -732,7 +726,7 @@ CREATE TABLE `pengiriman` (
         ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT `fk_kirim_driver` FOREIGN KEY (`kode_driver`) 
         REFERENCES `data_karyawan` (`kode_karyawan`) 
-        ON DELETE RESTRICT ON UPDATE CASCADE
+        ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 7.2 Rilisan (Berita Acara Penerimaan Barang)

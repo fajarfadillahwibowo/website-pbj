@@ -23,19 +23,13 @@ class KSOController extends Controller
 
         // 1. Query Data Mitra KSO
         $cariKso = $request->input('cari_kso');
-        $statusKsoFilter = $request->input('status_kso', 'semua');
 
         $queryKso = KSO::with('daftarOngkosKso');
         if (!empty($cariKso)) {
             $queryKso->where(function ($q) use ($cariKso) {
                 $q->where('kode_kso', 'like', "%{$cariKso}%")
-                  ->orWhere('nama_kso', 'like', "%{$cariKso}%")
-                  ->orWhere('pihak_mitra', 'like', "%{$cariKso}%")
-                  ->orWhere('keterangan', 'like', "%{$cariKso}%");
+                  ->orWhere('nama_kso', 'like', "%{$cariKso}%");
             });
-        }
-        if ($statusKsoFilter !== 'semua' && !empty($statusKsoFilter)) {
-            $queryKso->where('status_kso', $statusKsoFilter);
         }
         $daftarKso = $queryKso->orderBy('diperbarui_pada', 'desc')->get();
 
@@ -51,8 +45,7 @@ class KSOController extends Controller
                   ->orWhere('muatan', 'like', "%{$cariOa}%")
                   ->orWhere('kode_kso', 'like', "%{$cariOa}%")
                   ->orWhereHas('mitraKso', function ($qM) use ($cariOa) {
-                      $qM->where('nama_kso', 'like', "%{$cariOa}%")
-                         ->orWhere('pihak_mitra', 'like', "%{$cariOa}%");
+                      $qM->where('nama_kso', 'like', "%{$cariOa}%");
                   });
             });
         }
@@ -64,9 +57,9 @@ class KSOController extends Controller
         // 3. 4 Kartu KPI Ringkasan KSO
         $semuaKso = KSO::all();
         $totalKso = $semuaKso->count();
-        $ksoAktif = $semuaKso->where('status_kso', 'Aktif')->count();
+        $totalKontrakAda = $semuaKso->whereNotNull('file_kontrak_kso')->count();
         $totalRuteOa = OngkosKSO::count();
-        $totalNilaiKontrak = $semuaKso->where('status_kso', 'Aktif')->sum('nilai_kontrak');
+        $rataOngkosKso = OngkosKSO::avg('ongkos_angkut') ?? 0;
 
         // Master KSO untuk dropdown
         $pilihanMitraKso = KSO::orderBy('nama_kso', 'asc')->get();
@@ -76,13 +69,12 @@ class KSOController extends Controller
             'daftarKso',
             'daftarOngkosKso',
             'cariKso',
-            'statusKsoFilter',
             'cariOa',
             'filterKso',
             'totalKso',
-            'ksoAktif',
+            'totalKontrakAda',
             'totalRuteOa',
-            'totalNilaiKontrak',
+            'rataOngkosKso',
             'pilihanMitraKso'
         ));
     }
@@ -96,19 +88,10 @@ class KSOController extends Controller
      */
     public function simpanKSO(Request $request)
     {
-        if ($request->has('nilai_kontrak')) {
-            $raw = (string) $request->input('nilai_kontrak');
-            $request->merge(['nilai_kontrak' => preg_replace('/[^0-9]/', '', $raw)]);
-        }
-
         $pesanKustom = [
             'kode_kso.required' => 'Kode KSO wajib diisi.',
             'kode_kso.unique' => 'Kode KSO sudah terdaftar.',
             'nama_kso.required' => 'Nama KSO wajib diisi.',
-            'pihak_mitra.required' => 'Nama pihak mitra KSO wajib diisi.',
-            'tanggal_mulai.required' => 'Tanggal mulai kontrak wajib diisi.',
-            'tanggal_selesai.required' => 'Tanggal selesai kontrak wajib diisi.',
-            'status_kso.required' => 'Status KSO wajib dipilih.',
             'file_kontrak_kso.mimes' => 'File kontrak harus berformat PDF, DOC, DOCX, JPG, atau PNG.',
             'file_kontrak_kso.max' => 'Ukuran file kontrak maksimal 5MB.',
         ];
@@ -116,12 +99,6 @@ class KSOController extends Controller
         $validated = $request->validate([
             'kode_kso' => 'required|string|max:30|unique:data_kso,kode_kso',
             'nama_kso' => 'required|string|max:100',
-            'pihak_mitra' => 'required|string|max:100',
-            'tanggal_mulai' => 'required|date',
-            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-            'nilai_kontrak' => 'nullable|numeric|min:0',
-            'status_kso' => 'required|in:Aktif,Selesai,Ditangguhkan',
-            'keterangan' => 'nullable|string',
             'file_kontrak_kso' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
         ], $pesanKustom);
 
@@ -130,20 +107,11 @@ class KSOController extends Controller
             $pathFileKontrak = $request->file('file_kontrak_kso')->store('kontrak_kso', 'public');
         }
 
-        $tanggalMulai = Carbon::parse($validated['tanggal_mulai'])->format('Y-m-d');
-        $tanggalSelesai = Carbon::parse($validated['tanggal_selesai'])->format('Y-m-d');
-
         DB::beginTransaction();
         try {
             $kso = KSO::create([
                 'kode_kso' => strtoupper(trim($validated['kode_kso'])),
                 'nama_kso' => trim($validated['nama_kso']),
-                'pihak_mitra' => trim($validated['pihak_mitra']),
-                'tanggal_mulai' => $tanggalMulai,
-                'tanggal_selesai' => $tanggalSelesai,
-                'nilai_kontrak' => $validated['nilai_kontrak'] ?? 0,
-                'status_kso' => $validated['status_kso'],
-                'keterangan' => $validated['keterangan'] ? trim($validated['keterangan']) : null,
                 'file_kontrak_kso' => $pathFileKontrak,
             ]);
 
@@ -188,29 +156,14 @@ class KSOController extends Controller
     {
         $kso = KSO::findOrFail($kode_kso);
 
-        if ($request->has('nilai_kontrak')) {
-            $raw = (string) $request->input('nilai_kontrak');
-            $request->merge(['nilai_kontrak' => preg_replace('/[^0-9]/', '', $raw)]);
-        }
-
         $pesanKustom = [
             'nama_kso.required' => 'Nama KSO wajib diisi.',
-            'pihak_mitra.required' => 'Nama pihak mitra KSO wajib diisi.',
-            'tanggal_mulai.required' => 'Tanggal mulai kontrak wajib diisi.',
-            'tanggal_selesai.required' => 'Tanggal selesai kontrak wajib diisi.',
-            'status_kso.required' => 'Status KSO wajib dipilih.',
             'file_kontrak_kso.mimes' => 'File kontrak harus berformat PDF, DOC, DOCX, JPG, atau PNG.',
             'file_kontrak_kso.max' => 'Ukuran file kontrak maksimal 5MB.',
         ];
 
         $validated = $request->validate([
             'nama_kso' => 'required|string|max:100',
-            'pihak_mitra' => 'required|string|max:100',
-            'tanggal_mulai' => 'required|date',
-            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-            'nilai_kontrak' => 'nullable|numeric|min:0',
-            'status_kso' => 'required|in:Aktif,Selesai,Ditangguhkan',
-            'keterangan' => 'nullable|string',
             'file_kontrak_kso' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
         ], $pesanKustom);
 
@@ -223,19 +176,10 @@ class KSOController extends Controller
             $fileBaruDiunggah = true;
         }
 
-        $tanggalMulai = Carbon::parse($validated['tanggal_mulai'])->format('Y-m-d');
-        $tanggalSelesai = Carbon::parse($validated['tanggal_selesai'])->format('Y-m-d');
-
         DB::beginTransaction();
         try {
             $kso->update([
                 'nama_kso' => trim($validated['nama_kso']),
-                'pihak_mitra' => trim($validated['pihak_mitra']),
-                'tanggal_mulai' => $tanggalMulai,
-                'tanggal_selesai' => $tanggalSelesai,
-                'nilai_kontrak' => $validated['nilai_kontrak'] ?? 0,
-                'status_kso' => $validated['status_kso'],
-                'keterangan' => $validated['keterangan'] ? trim($validated['keterangan']) : null,
                 'file_kontrak_kso' => $pathFileKontrak,
                 'diperbarui_pada' => now(),
             ]);
@@ -568,24 +512,14 @@ class KSOController extends Controller
                 [
                     'kode_kso' => 'KSO-001',
                     'nama_kso' => 'KSO Angkutan Semen Mitra Logistik Sentosa',
-                    'pihak_mitra' => 'PT Mitra Logistik Sentosa',
-                    'status_kso' => 'Aktif',
-                    'tanggal_mulai' => '2026-01-01',
-                    'tanggal_selesai' => '2026-12-31',
-                    'nilai_kontrak' => 850000000,
-                    'keterangan' => 'Kerja sama sewa armada tronton dan distribusi semen sak area Jawa Barat & Banten.',
+                    'file_kontrak_kso' => null,
                     'dibuat_pada' => Carbon::now()->subMonths(2),
                     'diperbarui_pada' => Carbon::now()->subDays(3),
                 ],
                 [
                     'kode_kso' => 'KSO-002',
                     'nama_kso' => 'KSO Armada Ekspedisi Berkah Bersama',
-                    'pihak_mitra' => 'CV Berkah Bersama Trans',
-                    'status_kso' => 'Aktif',
-                    'tanggal_mulai' => '2026-02-15',
-                    'tanggal_selesai' => '2027-02-14',
-                    'nilai_kontrak' => 450000000,
-                    'keterangan' => 'KSO pengadaan truk colt diesel double untuk pengiriman toko bangunan Jabodetabek.',
+                    'file_kontrak_kso' => null,
                     'dibuat_pada' => Carbon::now()->subMonths(1),
                     'diperbarui_pada' => Carbon::now()->subHours(5),
                 ],

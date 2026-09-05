@@ -67,9 +67,14 @@ class DriverController extends Controller
      */
     public function simpan(Request $request)
     {
-        if (session('kode_jabatan') === 'SPV_OPERASIONAL') {
+        $roleAktif = $request->input('kode_jabatan') ?: session('kode_jabatan');
+        if ($roleAktif === 'SPV_OPERASIONAL') {
             return redirect()->route('operasional.armada.driver')
                 ->with('error', 'Akses Ditolak! Role SPV Operasional hanya memiliki wewenang Lihat Saja (Read-Only) pada modul Driver.');
+        }
+
+        if ($roleAktif) {
+            session(['kode_jabatan' => $roleAktif]);
         }
 
         // Fallback cerdas: jika id_jabatan tidak terisi, default ke jabatan driver (PENGAWAS_DRIVER / ID 6)
@@ -195,9 +200,14 @@ class DriverController extends Controller
      */
     public function perbarui(Request $request, $kode_karyawan)
     {
-        if (session('kode_jabatan') === 'SPV_OPERASIONAL') {
+        $roleAktif = $request->input('kode_jabatan') ?: session('kode_jabatan');
+        if ($roleAktif === 'SPV_OPERASIONAL') {
             return redirect()->route('operasional.armada.driver')
                 ->with('error', 'Akses Ditolak! Role SPV Operasional hanya memiliki wewenang Lihat Saja (Read-Only) pada modul Driver.');
+        }
+
+        if ($roleAktif) {
+            session(['kode_jabatan' => $roleAktif]);
         }
 
         $driver = Driver::where('kode_karyawan', $kode_karyawan)->firstOrFail();
@@ -322,20 +332,50 @@ class DriverController extends Controller
     /**
      * Hapus data driver dari database & hapus berkas fisik dari storage.
      */
-    public function hapus($kode_karyawan)
+    public function hapus($request = null, $kode_karyawan = null)
     {
-        if (session('kode_jabatan') === 'SPV_OPERASIONAL') {
+        $roleAktif = null;
+        if ($request instanceof Request) {
+            $roleAktif = $request->input('kode_jabatan');
+        }
+        $roleAktif = $roleAktif ?: request()->input('kode_jabatan') ?: session('kode_jabatan');
+
+        if ($roleAktif === 'SPV_OPERASIONAL') {
             return redirect()->route('operasional.armada.driver')
                 ->with('error', 'Akses Ditolak! Role SPV Operasional hanya memiliki wewenang Lihat Saja (Read-Only) pada modul Driver.');
         }
 
-        $driver = Driver::where('kode_karyawan', $kode_karyawan)->firstOrFail();
+        if ($roleAktif) {
+            session(['kode_jabatan' => $roleAktif]);
+        }
+
+        if ($request instanceof Request) {
+            $targetKode = $kode_karyawan ?: $request->input('kode_karyawan');
+        } else {
+            $targetKode = $request ?: ($kode_karyawan ?: request()->input('kode_karyawan'));
+        }
+
+        if (!$targetKode) {
+            return redirect()->route('operasional.armada.driver')
+                ->with('error', 'Kode supir driver tidak ditemukan atau belum dipilih.');
+        }
+
+        $driver = Driver::where('kode_karyawan', $targetKode)->first();
+
+        if (!$driver) {
+            return redirect()->route('operasional.armada.driver')
+                ->with('error', "Data driver [{$targetKode}] tidak ditemukan atau sudah dihapus sebelumnya.");
+        }
+
         $namaDriver = $driver->nama_karyawan;
         $fotoKtp = $driver->foto_ktp;
         $fileKontrak = $driver->file_kontrak;
 
         DB::beginTransaction();
         try {
+            // Lepas keterikatan dokumen pengiriman (set null) agar riwayat dokumen operasional tetap aman
+            DB::table('pengiriman')->where('kode_driver', $targetKode)->update(['kode_driver' => null]);
+
             $driver->delete();
             DB::commit();
 
@@ -348,12 +388,7 @@ class DriverController extends Controller
             }
 
             return redirect()->route('operasional.armada.driver')
-                ->with('sukses', "Data driver {$namaDriver} ({$kode_karyawan}) berhasil dihapus dari sistem! Nomor slot kode ini sekarang siap didaur ulang.");
-        } catch (\Illuminate\Database\QueryException $e) {
-            DB::rollBack();
-            // Penanganan bila supir masih terikat relasi transaksi (misal: surat_jalan)
-            return redirect()->route('operasional.armada.driver')
-                ->with('error', "Gagal menghapus driver {$namaDriver}! Data supir ini masih terikat dengan dokumen operasional/transaksi lain di database.");
+                ->with('sukses', "Data driver {$namaDriver} ({$targetKode}) berhasil dihapus dari sistem! Nomor slot kode ini sekarang siap didaur ulang.");
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->route('operasional.armada.driver')

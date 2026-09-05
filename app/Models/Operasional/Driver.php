@@ -25,6 +25,7 @@ class Driver extends Model
         'id_jabatan',
         'kategori_karyawan',
         'no_identitas',
+        'no_ktp',
         'alamat',
         'no_hp',
         'foto_ktp',

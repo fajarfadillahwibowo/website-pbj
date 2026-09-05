@@ -52,7 +52,7 @@
         </div>
 
         <div class="flex items-center gap-2.5">
-            <template x-if="jabatanAktif !== 'SPV_OPERASIONAL'">
+            <template x-if="!apakahReadOnly('armada_driver')">
                 <button @click="bukaModalTambah()"
                         class="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 rounded-xl transition-all shadow-md shadow-blue-600/20">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -61,7 +61,7 @@
                     <span>Tambah Driver Baru</span>
                 </button>
             </template>
-            <template x-if="jabatanAktif === 'SPV_OPERASIONAL'">
+            <template x-if="apakahReadOnly('armada_driver')">
                 <span class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 shadow-xs">
                     <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -361,21 +361,10 @@
                                     labelCetak="Cetak Biodata"
                                     aksiEdit="bukaModalEdit('{{ $driver->kode_karyawan }}')"
                                     labelEdit="Ubah Data Supir"
+                                    :aksiHapusKlik="'bukaModalHapus(\'' . $driver->kode_karyawan . '\', \'' . addslashes($driver->nama_karyawan) . '\')'"
+                                    labelHapus="Hapus Supir"
                                     modulIzin="armada_driver"
-                                >
-                                    <template x-if="jabatanAktif !== 'SPV_OPERASIONAL'">
-                                        <div class="border-t border-slate-100 dark:border-[#252837] pt-1 mt-1">
-                                            <button @click.stop="menuTerbuka = false; bukaModalHapus('{{ $driver->kode_karyawan }}', '{{ addslashes($driver->nama_karyawan) }}')"
-                                                    type="button"
-                                                    class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors text-left font-medium">
-                                                <svg class="w-3.5 h-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                </svg>
-                                                <span>Hapus Supir</span>
-                                            </button>
-                                        </div>
-                                    </template>
-                                </x-menu-aksi-tabel>
+                                />
 
                                 <!-- Riwayat Terakhir Diedit Real-Time -->
                                 <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 flex items-center justify-center gap-1 font-mono cursor-help"
@@ -419,6 +408,7 @@
             </div>
             <form action="{{ route('operasional.armada.driver.simpan') }}" method="POST" enctype="multipart/form-data" class="p-5 space-y-3.5 text-xs">
                 @csrf
+                <input type="hidden" name="kode_jabatan" :value="jabatanAktif || localStorage.getItem('jabatan_aktif') || 'PENGAWAS_DRIVER'">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <div class="flex items-center justify-between mb-1">
@@ -612,6 +602,7 @@
             <form :action="'{{ url('operasional/armada/driver') }}/' + formEdit.kode_karyawan" method="POST" enctype="multipart/form-data" class="p-5 space-y-3.5 text-xs">
                 @csrf
                 @method('PUT')
+                <input type="hidden" name="kode_jabatan" :value="jabatanAktif || localStorage.getItem('jabatan_aktif') || 'PENGAWAS_DRIVER'">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap Driver <span class="text-rose-500">*</span></label>
@@ -1011,6 +1002,8 @@
                             </template>
                         </div>
                     </div>
+                </div>
+
                 <!-- Tanda Tangan & Pernyataan Khusus Cetak -->
                 <div class="pt-6 border-t border-slate-200 dark:border-slate-800 grid grid-cols-2 gap-8 text-center text-[10px]">
                     <div>
@@ -1059,6 +1052,8 @@
             <form :action="'{{ url('operasional/armada/driver') }}/' + hapusData.kode" method="POST" class="mt-6 flex items-center justify-center gap-2.5">
                 @csrf
                 @method('DELETE')
+                <input type="hidden" name="kode_karyawan" :value="hapusData.kode">
+                <input type="hidden" name="kode_jabatan" :value="jabatanAktif || localStorage.getItem('jabatan_aktif') || 'PENGAWAS_DRIVER'">
 
                 <button type="button" @click="modalHapusTerbuka = false"
                         class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
@@ -1066,7 +1061,7 @@
                 </button>
                 <button type="submit"
                         class="px-5 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 active:scale-95 rounded-xl transition-all shadow-md shadow-rose-600/20">
-                    Ya, Hapus Data
+                    Ya, Hapus Driver
                 </button>
             </form>
         </div>
@@ -1136,14 +1131,13 @@
             },
 
             initDriver() {
-                // Inisialisasi awal jika dibutuhkan
+                var self = this;
+                window.bukaModalHapusDriver = function(kode, nama) {
+                    self.bukaModalHapus(kode, nama);
+                };
             },
 
             bukaModalTambah() {
-                if (this.jabatanAktif === 'SPV_OPERASIONAL') {
-                    alert('Akses Ditolak: SPV Operasional hanya memiliki hak akses Lihat Saja (Read-Only).');
-                    return;
-                }
                 this.pratinjauFotoUrl = null;
                 this.namaFileKontrakTambah = '';
                 this.formTambah.nama_karyawan = '';
@@ -1240,10 +1234,6 @@
             },
 
             async bukaModalEdit(kode) {
-                if (this.jabatanAktif === 'SPV_OPERASIONAL') {
-                    alert('Akses Ditolak: SPV Operasional hanya memiliki hak akses Lihat Saja (Read-Only).');
-                    return;
-                }
                 this.pratinjauFotoEditUrl = null;
                 this.namaFileKontrakEdit = '';
                 try {
@@ -1311,10 +1301,6 @@
             },
 
             bukaModalHapus(kode, nama) {
-                if (this.jabatanAktif === 'SPV_OPERASIONAL') {
-                    alert('Akses Ditolak: SPV Operasional hanya memiliki hak akses Lihat Saja (Read-Only).');
-                    return;
-                }
                 this.hapusData.kode = kode;
                 this.hapusData.nama = nama;
                 this.modalHapusTerbuka = true;

@@ -7,6 +7,12 @@
         kunciRbac: true,
         dropdownRoleTerbuka: false,
         jabatanAktif: (function() {
+            try {
+                var tersimpan = localStorage.getItem('jabatan_aktif');
+                if (tersimpan && tersimpan !== 'null' && tersimpan !== 'undefined') {
+                    return tersimpan;
+                }
+            } catch (e) {}
             @if(session()->has('kode_jabatan'))
                 var roleDariSesi = '{{ session('kode_jabatan') }}';
                 try {
@@ -14,12 +20,6 @@
                 } catch(e) {}
                 return roleDariSesi;
             @else
-                try {
-                    var tersimpan = localStorage.getItem('jabatan_aktif');
-                    if (tersimpan && tersimpan !== 'null' && tersimpan !== 'undefined') {
-                        return tersimpan;
-                    }
-                } catch (e) {}
                 return 'SPV_OPERASIONAL';
             @endif
         })(),
@@ -172,6 +172,18 @@
               body: JSON.stringify({ kode_jabatan: v })
             }).catch(function() {});
           });
+
+          // Sinkronisasi awal role jabatan aktif ke sesi backend
+          if (self.jabatanAktif) {
+            fetch('{{ route("api.sinkronisasi_role") }}', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+              },
+              body: JSON.stringify({ kode_jabatan: self.jabatanAktif })
+            }).catch(function() {});
+          }
 
           this.$watch('sidebarTerlipat', function(v) {
             if (window.innerWidth >= 1024) {

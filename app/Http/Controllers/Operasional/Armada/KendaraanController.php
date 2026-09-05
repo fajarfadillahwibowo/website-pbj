@@ -808,21 +808,53 @@ class KendaraanController extends Controller
         ], $pesanKustom);
 
         $tglBeliAset = Carbon::parse($validated['tanggal_pembelian'])->format('Y-m-d');
+        $nominalHarga = (float) $validated['harga_aset'];
+
+        // Tentukan akun aset dan parameter penyusutan default berdasarkan jenis aset
+        $kodeAkunAset = null;
+        $kodeAkunAkum = null;
+        $kodeAkunBeban = null;
+        $umurManfaat = 8;
+        $tarifSusut = 12.50;
+
+        if ($validated['kode_jenis_aset'] === 'AST-TRK') {
+            $kodeAkunAset = DB::table('data_kode_akun')->where('kode_akun', '1201')->exists() ? '1201' : null;
+            $kodeAkunAkum = DB::table('data_kode_akun')->where('kode_akun', '1202')->exists() ? '1202' : null;
+            $kodeAkunBeban = DB::table('data_kode_akun')->where('kode_akun', '6105')->exists() ? '6105' : null;
+            $umurManfaat = 8;
+            $tarifSusut = 12.50;
+        } elseif ($validated['kode_jenis_aset'] === 'AST-GDG') {
+            $kodeAkunAset = DB::table('data_kode_akun')->where('kode_akun', '1203')->exists() ? '1203' : null;
+            $kodeAkunAkum = DB::table('data_kode_akun')->where('kode_akun', '1208')->exists() ? '1208' : null;
+            $kodeAkunBeban = DB::table('data_kode_akun')->where('kode_akun', '6107')->exists() ? '6107' : null;
+            $umurManfaat = 20;
+            $tarifSusut = 5.00;
+        }
 
         DB::table('data_aset')->insert([
-            'kode_aset'         => strtoupper(trim($validated['kode_aset'])),
-            'kode_jenis_aset'   => $validated['kode_jenis_aset'],
-            'nama_aset'         => trim($validated['nama_aset']),
-            'tanggal_pembelian' => $tglBeliAset,
-            'harga_aset'        => $validated['harga_aset'],
-            'no_polisi'         => !empty($validated['no_polisi']) ? strtoupper(trim($validated['no_polisi'])) : '-',
-            'merek_aset'        => $request->merek_aset ?? '-',
-            'jenis_kendaraan'   => $request->jenis_kendaraan ?? '-',
-            'muatan'            => $request->muatan ?? '-',
-            'status_aset'       => $request->status_aset ?? 'aktif',
-            'nama_pemilik'      => $request->nama_pemilik ?? 'PT Putra Balkom Jaya',
-            'dibuat_pada'       => now(),
-            'diperbarui_pada'   => now(),
+            'kode_aset'            => strtoupper(trim($validated['kode_aset'])),
+            'kode_jenis_aset'      => $validated['kode_jenis_aset'],
+            'nama_aset'            => trim($validated['nama_aset']),
+            'tanggal_pembelian'    => $tglBeliAset,
+            'harga_aset'           => $nominalHarga,
+            'harga_perolehan'      => $nominalHarga,
+            'nilai_residu'         => 0.00,
+            'umur_manfaat'         => $umurManfaat,
+            'metode_penyusutan'    => 'Garis Lurus',
+            'tarif_penyusutan'     => $tarifSusut,
+            'kode_akun_aset'       => $kodeAkunAset,
+            'kode_akun_akumulasi'  => $kodeAkunAkum,
+            'kode_akun_beban'      => $kodeAkunBeban,
+            'akumulasi_penyusutan' => 0.00,
+            'nilai_buku'           => $nominalHarga,
+            'no_polisi'            => !empty($validated['no_polisi']) ? strtoupper(trim($validated['no_polisi'])) : '-',
+            'merek_aset'           => $request->merek_aset ?? '-',
+            'jenis_kendaraan'      => $request->jenis_kendaraan ?? '-',
+            'muatan'               => $request->muatan ?? '-',
+            'status_aset'          => $request->status_aset ?? 'aktif',
+            'nama_pemilik'         => $request->nama_pemilik ?? 'PT Putra Balkom Jaya',
+            'dibuat_pada'          => now(),
+            'diperbarui_pada'      => now(),
         ]);
 
         return redirect()->route('operasional.armada.kendaraan', ['tab' => 'jenis_aset'])
@@ -894,12 +926,15 @@ class KendaraanController extends Controller
         ], $pesanKustom);
 
         $tglBeliAset = Carbon::parse($validated['tanggal_pembelian'])->format('Y-m-d');
+        $nominalHarga = (float) $validated['harga_aset'];
 
         DB::table('data_aset')->where('kode_aset', $kode_aset)->update([
             'kode_jenis_aset'   => $validated['kode_jenis_aset'],
             'nama_aset'         => trim($validated['nama_aset']),
             'tanggal_pembelian' => $tglBeliAset,
-            'harga_aset'        => $validated['harga_aset'],
+            'harga_aset'        => $nominalHarga,
+            'harga_perolehan'   => $nominalHarga,
+            'nilai_buku'        => DB::raw('GREATEST(0, ' . $nominalHarga . ' - akumulasi_penyusutan)'),
             'no_polisi'         => !empty($validated['no_polisi']) ? strtoupper(trim($validated['no_polisi'])) : '-',
             'status_aset'       => $validated['status_aset'] ?? 'aktif',
             'diperbarui_pada'   => now(),
