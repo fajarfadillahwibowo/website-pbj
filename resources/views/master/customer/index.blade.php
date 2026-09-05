@@ -117,6 +117,16 @@
         
         <!-- Search & Filter Bar -->
         <div class="p-4 sm:px-5 sm:py-4 border-b border-[#E2E8F0] dark:border-[#252837] flex flex-col md:flex-row md:items-center justify-between gap-3">
+            @php
+                $opsiFilterWilayah = array_merge([
+                    ['nilai' => '', 'label' => '-- Semua Wilayah Domisili --']
+                ], ($daftarWilayah ?? collect())->map(fn($w) => [
+                    'nilai' => $w->kode_wilayah,
+                    'label' => $w->nama_wilayah,
+                    'sub'   => 'Kode: ' . $w->kode_wilayah
+                ])->toArray());
+                $jumlahFilterAktif = (!empty($kataKunci) ? 1 : 0) + (!empty($filterWilayah) ? 1 : 0);
+            @endphp
             <form method="GET" action="{{ route('master.customer.index') }}" class="flex flex-wrap items-center gap-2.5 flex-1">
                 <div class="relative flex-1 min-w-[220px]">
                     <input type="text" name="cari" value="{{ $kataKunci ?? '' }}"
@@ -127,22 +137,29 @@
                     </svg>
                 </div>
 
-                <select name="wilayah" onchange="this.form.submit()" class="px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
-                    <option value="">-- Semua Wilayah Domisili --</option>
-                    @foreach($daftarWilayah as $w)
-                        <option value="{{ $w->kode_wilayah }}" {{ ($filterWilayah ?? '') == $w->kode_wilayah ? 'selected' : '' }}>
-                            {{ $w->nama_wilayah }}
-                        </option>
-                    @endforeach
-                </select>
+                <div class="w-full sm:w-64">
+                    <x-dropdown-kustom 
+                        nama="wilayah" 
+                        :nilaiAwal="$filterWilayah ?? ''" 
+                        placeholder="-- Semua Wilayah Domisili --" 
+                        :opsi="$opsiFilterWilayah" 
+                        warnaFokus="blue"
+                        classTombol="py-2"
+                        :submitOnChange="true" 
+                    />
+                </div>
 
-                <button type="submit" class="px-3.5 py-2 text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition-colors">
-                    Filter
-                </button>
-                @if(!empty($kataKunci) || !empty($filterWilayah))
-                    <a href="{{ route('master.customer.index') }}" class="text-xs font-semibold text-rose-600 dark:text-rose-400 hover:underline">
-                        Reset
-                    </a>
+                @if($jumlahFilterAktif > 0)
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20">
+                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                            {{ $jumlahFilterAktif }} Filter Aktif
+                        </span>
+                        <a href="{{ route('master.customer.index') }}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 border border-dashed border-slate-300 dark:border-slate-700 transition-colors" title="Bersihkan semua filter">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            Reset
+                        </a>
+                    </div>
                 @endif
             </form>
 
@@ -152,7 +169,7 @@
         </div>
 
         <!-- Tabel Data -->
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto min-h-[260px] pb-12">
             <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>

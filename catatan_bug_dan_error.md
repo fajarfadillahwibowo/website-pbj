@@ -1,5 +1,14 @@
 # 📝 Pelacak Bug, Error, & Progres Terlewati Real-time
 
+- **[TERSELESAIKAN] Penghapusan Tombol Filter Statis & Standarisasi UI Filter Master Customer & Toko Bangunan**:
+  - *Penyebab:* Pada modul [Master Customer](file:///c:/laragon/www/laravel1/resources/views/master/customer/index.blade.php) dan [Master Toko Bangunan](file:///c:/laragon/www/laravel1/resources/views/master/toko_bangunan/index.blade.php), terdapat tombol abu-abu `<button type="submit">Filter</button>` statis. Tombol ini terkesan tidak berfungsi karena dropdown filter di sampingnya sudah memiliki fungsi auto-submit saat dipilih dan input pencarian teks otomatis submit saat menekan tombol Enter. Selain itu, belum ada badge indikator visual filter aktif maupun tombol Reset cepat yang seragam.
+  - *Solusi:*
+    1. Menghapus tombol submit statis "Filter" yang membingungkan dan redundan.
+    2. Mengganti elemen `<select>` native dengan komponen modern `<x-dropdown-kustom :submitOnChange="true">` untuk filter wilayah domisili dan filter customer pemilik.
+    3. Menambahkan lencana dinamis `X Filter Aktif` serta tombol `Reset` cepat yang otomatis muncul saat ada filter atau kata kunci aktif.
+    4. Menambahkan `min-h-[260px] pb-12` pada pembungkus tabel agar menu popover aksi baris bawah tidak terpotong.
+  - *Hasil Verifikasi:* Kompilasi Blade berhasil (`artisan view:cache` lolos), tampilan antarmuka selaras dengan seluruh modul sistem, dan kontrol reset berfungsi instan.
+
 - **[TERSELESAIKAN] Standardisasi Filter Data Tabel Seluruh Modul SPV Keuangan (AR, AP, Akuntansi) & Perbaikan Inline Handler Cetak Memorial**:
   - *Penyebab:*
     1. Filter tabel pada modul-modul SPV Keuangan (`faktur_penjualan`, `list_piutang`, `deposit_customer`, `pengeluaran_kas`, `list_rilisan`, `pembelian_so`, `jurnal_umum`) sebelumnya tidak seragam: sebagian hanya memiliki kolom pencarian kata kunci teks, belum memiliki filter rentang tanggal terstandar, belum ada filter akun COA / pabrik gudang / sumber dana rekening, serta tidak memiliki indikator visual jumlah filter aktif dan tombol reset cepat.
