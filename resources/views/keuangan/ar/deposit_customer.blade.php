@@ -100,11 +100,44 @@
                         :submitOnChange="true" 
                     />
                 </div>
+                <div class="w-full sm:w-44">
+                    <x-dropdown-kustom 
+                        nama="periode" 
+                        :nilaiAwal="$filterPeriode ?? ''" 
+                        placeholder="-- Semua Periode --" 
+                        :opsi="$opsiPeriode ?? []" 
+                        warnaFokus="sky"
+                        classTombol="py-1.5"
+                        :submitOnChange="true" 
+                    />
+                </div>
+                @if(($filterPeriode ?? '') === 'kustom')
+                    <div class="flex items-center gap-1.5 w-full sm:w-auto mt-1 sm:mt-0">
+                        <input type="date" name="tgl_mulai" value="{{ $filterTglMulai ?? '' }}" 
+                               class="px-2.5 py-1.5 text-xs rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500/30" title="Tanggal Mulai">
+                        <span class="text-xs text-slate-400">s/d</span>
+                        <input type="date" name="tgl_selesai" value="{{ $filterTglSelesai ?? '' }}" 
+                               class="px-2.5 py-1.5 text-xs rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500/30" title="Tanggal Selesai">
+                        <button type="submit" class="px-3 py-1.5 text-xs font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-all shadow-xs">Terapkan</button>
+                    </div>
+                @endif
             </div>
-            <span class="text-xs text-slate-400 font-mono">Tabel: list_deposit</span>
+            <div class="flex items-center gap-2">
+                @if(($jumlahFilterAktif ?? 0) > 0)
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800/40">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                        <span>{{ $jumlahFilterAktif }} Filter Aktif</span>
+                    </span>
+                    <a href="{{ route('keuangan.ar.deposit') }}" class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 hover:bg-rose-100 dark:hover:bg-rose-900/40 border border-rose-200 dark:border-rose-800/40 rounded-lg transition-colors" title="Bersihkan seluruh filter">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        <span>Reset</span>
+                    </a>
+                @endif
+                <span class="text-xs text-slate-400 font-mono hidden md:inline">Tabel: list_deposit</span>
+            </div>
         </form>
 
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto min-h-[260px] pb-12">
             <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>

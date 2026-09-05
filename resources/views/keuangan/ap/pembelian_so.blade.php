@@ -72,6 +72,12 @@
                     ['nilai' => 'dikirim', 'label' => 'Dikirim'],
                     ['nilai' => 'selesai', 'label' => 'Selesai'],
                 ];
+                $opsiFilterGudangSO = array_merge([
+                    ['nilai' => '', 'label' => '-- Semua Pabrik / Gudang --']
+                ], ($daftarGudang ?? collect())->map(fn($g) => [
+                    'nilai' => $g->kode_gudang,
+                    'label' => $g->nama_gudang . ' (' . $g->plant . ')'
+                ])->toArray());
                 $opsiCustomerSO = ($daftarCustomer ?? collect())->map(fn($c) => [
                     'nilai' => $c->kode_customer,
                     'label' => $c->nama_toko_bangunan
@@ -83,12 +89,12 @@
                 ])->toArray();
             @endphp
             <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                <div class="relative w-full sm:w-64">
-                    <input type="text" name="cari" value="{{ $kataKunci ?? '' }}" placeholder="Cari no SO / customer / gudang..."
+                <div class="relative w-full sm:w-56">
+                    <input type="text" name="cari" value="{{ $kataKunci ?? '' }}" placeholder="Cari no SO / toko / gudang..."
                            class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
                     <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
-                <div class="w-full sm:w-44">
+                <div class="w-full sm:w-36">
                     <x-dropdown-kustom 
                         nama="status" 
                         :nilaiAwal="$filterStatus ?? ''" 
@@ -99,8 +105,55 @@
                         :submitOnChange="true" 
                     />
                 </div>
+                <div class="w-full sm:w-48">
+                    <x-dropdown-kustom 
+                        nama="gudang" 
+                        :nilaiAwal="$filterGudang ?? ''" 
+                        placeholder="-- Semua Pabrik / Gudang --" 
+                        :opsi="$opsiFilterGudangSO" 
+                        warnaFokus="blue"
+                        classTombol="py-1.5"
+                        :submitOnChange="true" 
+                    />
+                </div>
+                <div class="w-full sm:w-40">
+                    <x-dropdown-kustom 
+                        nama="periode" 
+                        :nilaiAwal="$filterPeriode ?? ''" 
+                        placeholder="-- Semua Periode --" 
+                        :opsi="$opsiPeriode ?? []" 
+                        warnaFokus="blue"
+                        classTombol="py-1.5"
+                        :submitOnChange="true" 
+                    />
+                </div>
+                @if(($filterPeriode ?? '') === 'kustom')
+                <div class="flex items-center gap-1 bg-[#F8FAFC] dark:bg-[#1C1E2A] p-1 rounded-xl border border-[#E2E8F0] dark:border-[#252837]">
+                    <input type="date" name="tgl_mulai" value="{{ $filterTglMulai ?? '' }}" class="px-2 py-1 text-xs rounded-lg bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300">
+                    <span class="text-xs text-slate-400">-</span>
+                    <input type="date" name="tgl_selesai" value="{{ $filterTglSelesai ?? '' }}" class="px-2 py-1 text-xs rounded-lg bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300">
+                    <button type="submit" class="px-2.5 py-1 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">
+                        Terapkan
+                    </button>
+                </div>
+                @endif
             </div>
-            <span class="text-xs text-slate-400 font-mono">Tabel: pembelian_so</span>
+
+            <div class="flex items-center gap-3">
+                @if(($jumlahFilterAktif ?? 0) > 0)
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20">
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                        {{ $jumlahFilterAktif }} Filter Aktif
+                    </span>
+                    <a href="{{ route('keuangan.ap.pembelian_so') }}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 border border-dashed border-slate-300 dark:border-slate-700 transition-colors" title="Bersihkan semua filter">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        Reset
+                    </a>
+                </div>
+                @endif
+                <span class="text-xs text-slate-400 font-mono hidden md:inline">Tabel: pembelian_so</span>
+            </div>
         </form>
 
         <div class="overflow-x-auto min-h-[260px] pb-12">

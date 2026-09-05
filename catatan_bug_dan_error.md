@@ -1,5 +1,22 @@
 # 📝 Pelacak Bug, Error, & Progres Terlewati Real-time
 
+- **[TERSELESAIKAN] Standardisasi Filter Data Tabel Seluruh Modul SPV Keuangan (AR, AP, Akuntansi) & Perbaikan Inline Handler Cetak Memorial**:
+  - *Penyebab:*
+    1. Filter tabel pada modul-modul SPV Keuangan (`faktur_penjualan`, `list_piutang`, `deposit_customer`, `pengeluaran_kas`, `list_rilisan`, `pembelian_so`, `jurnal_umum`) sebelumnya tidak seragam: sebagian hanya memiliki kolom pencarian kata kunci teks, belum memiliki filter rentang tanggal terstandar, belum ada filter akun COA / pabrik gudang / sumber dana rekening, serta tidak memiliki indikator visual jumlah filter aktif dan tombol reset cepat.
+    2. Pada berkas `jurnal_umum.blade.php`, pemanggilan fungsi `cetakVoucherJurnal` melalui string JSON ter-encode di atribut Blade memicu syntax error Alpine.js (`missing ) after argument list`) akibat bentrokan tanda kutip ganda/karakter enter.
+  - *Solusi:*
+    1. Membuat helper bersama `app/Helpers/FilterKeuanganHelper.php` yang menyediakan opsi periode terstandar (`hari_ini`, `bulan_ini`, `30_hari`, `kustom`), penanganan query tanggal otomatis, dan penghitung filter aktif `hitungFilterAktif()`.
+    2. Menyelaraskan seluruh 7 controller dan view Blade SPV Keuangan:
+       - Modul 1: Faktur Penjualan AR (`/keuangan/ar/faktur`) -> filter status bayar, periode, badge aktif, reset, min-h-[260px] pb-12.
+       - Modul 2: List Piutang Pelanggan AR (`/keuangan/ar/list-piutang`) -> filter status lunas, jatuh tempo (lewat tempo, bulan ini, 30 hari ke depan, kustom), badge aktif, reset, min-h-[260px] pb-12.
+       - Modul 3: List Deposit Pelanggan AR (`/keuangan/ar/deposit`) -> filter tipe mutasi, periode, badge aktif, reset, min-h-[260px] pb-12.
+       - Modul 4: Pengeluaran Kas AP (`/keuangan/ap/pengeluaran-kas`) -> filter kategori, sumber rekening/tunai, periode, badge aktif, reset, min-h-[260px] pb-12.
+       - Modul 5: Rilisan Uang Jalan Supir AP (`/keuangan/ap/list-rilisan`) -> perbaikan query grouping kategori, filter rekening/tunai, periode, badge aktif, reset, min-h-[260px] pb-12.
+       - Modul 6: Pembelian SO Pabrik AP (`/keuangan/ap/pembelian-so`) -> filter status SO, gudang/plant semen, periode, badge aktif, reset, min-h-[260px] pb-12.
+       - Modul 7: Buku Jurnal Umum Akuntansi (`/keuangan/akuntansi/jurnal-umum`) -> filter posisi debit/kredit, akun COA, periode, badge aktif, reset, min-h-[260px] pb-12.
+    3. Mengubah handler cetak memorial pada `jurnal_umum.blade.php` agar menggunakan atribut dataset HTML `data-*` dan `$el.dataset` yang bebas benturan quote JavaScript.
+  - *Hasil Verifikasi:* Seluruh modul lulus pengujian live browser (Autonomous Browser Subagent), filter auto-submit berjalan responsif, badge filter aktif dan tombol reset bekerja presisi, serta modal cetak memorial terbuka lengkap dengan data tanpa error JavaScript.
+
 - **[TERSELESAIKAN] Pemotongan Popover Menu Aksi Baris Atas, Teks Aksi Terlalu Panjang, dan Kerusakan Cetak Kartu Aset**:
   - *Penyebab:*
     1. Logika perhitungan `bukaKeAtas` di [menu-aksi-tabel.blade.php](file:///c:/laragon/www/laravel1/resources/views/components/menu-aksi-tabel.blade.php) memicu `bukaKeAtas = true` jika `ruangBawahKontainer < 180`. Pada tabel berbaris sedikit (1-3 baris), baris pertama berada tepat di bawah header tabel (ruang atas hanya ~40px). Saat dipaksa buka ke atas, menu mencuat melewati batas atas kontainer `overflow-x-auto` sehingga terpotong (*clipped* di ceiling).

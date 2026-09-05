@@ -12,6 +12,7 @@ use App\Models\Master\Customer;
 use App\Models\Master\TokoBangunan;
 use App\Models\Master\Barang;
 use App\Helpers\GeneratorKodeOtomatis;
+use App\Helpers\FilterKeuanganHelper;
 use App\Services\Keuangan\MesinJurnalOtomatis;
 
 class FakturPenjualanController extends Controller
@@ -24,6 +25,9 @@ class FakturPenjualanController extends Controller
         $kataKunci = $request->input('cari');
         $filterStatus = $request->input('status');
         $filterMetode = $request->input('metode');
+        $filterPeriode = $request->input('periode');
+        $filterTglMulai = $request->input('tgl_mulai');
+        $filterTglSelesai = $request->input('tgl_selesai');
 
         $query = FakturPenjualan::with(['customer', 'tokoBangunan', 'barang']);
 
@@ -40,6 +44,9 @@ class FakturPenjualanController extends Controller
                 $query->where('metode_pembayaran', $filterMetode);
             }
         }
+
+        // Terapkan filter periode tanggal terpadu
+        FilterKeuanganHelper::terapkanFilterTanggal($query, 'tanggal_penjualan', $filterPeriode, $filterTglMulai, $filterTglSelesai);
 
         if ($kataKunci) {
             $query->where(function ($q) use ($kataKunci) {
@@ -64,6 +71,17 @@ class FakturPenjualanController extends Controller
             'sub'   => 'Customer Induk: ' . ($t->customer->nama_pemilik ?? '-') . ' | PIC: ' . $t->penanggung_jawab
         ])->toArray();
 
+        // Opsi Periode Standar
+        $opsiPeriode = FilterKeuanganHelper::opsiPeriode();
+        $jumlahFilterAktif = FilterKeuanganHelper::hitungFilterAktif([
+            'cari'        => $kataKunci,
+            'status'      => $filterStatus,
+            'metode'      => $filterMetode,
+            'periode'     => $filterPeriode,
+            'tgl_mulai'   => $filterTglMulai,
+            'tgl_selesai' => $filterTglSelesai,
+        ]);
+
         // Statistik Penjualan
         $totalPenjualan = FakturPenjualan::sum('total_netto');
         $totalLunas = FakturPenjualan::where('status_pembayaran', 'Lunas')->sum('total_netto');
@@ -79,6 +97,11 @@ class FakturPenjualanController extends Controller
             'kataKunci',
             'filterStatus',
             'filterMetode',
+            'filterPeriode',
+            'filterTglMulai',
+            'filterTglSelesai',
+            'opsiPeriode',
+            'jumlahFilterAktif',
             'totalPenjualan',
             'totalLunas',
             'totalPiutang',

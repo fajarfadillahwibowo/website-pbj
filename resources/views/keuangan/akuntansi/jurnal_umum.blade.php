@@ -66,6 +66,13 @@
                     ['nilai' => 'Debit', 'label' => 'Debit'],
                     ['nilai' => 'Kredit', 'label' => 'Kredit'],
                 ];
+                $opsiFilterAkunJurnal = array_merge([
+                    ['nilai' => '', 'label' => '-- Semua Akun COA --']
+                ], ($daftarAkun ?? collect())->map(fn($a) => [
+                    'nilai' => $a->kode_akun,
+                    'label' => $a->kode_akun . ' - ' . $a->nama_akun,
+                    'sub'   => 'Tipe: ' . ($a->tipe_akun ?? '-')
+                ])->toArray());
                 $opsiAkunJurnal = ($daftarAkun ?? collect())->map(fn($a) => [
                     'nilai' => $a->kode_akun,
                     'label' => $a->nama_akun,
@@ -73,12 +80,12 @@
                 ])->toArray();
             @endphp
             <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                <div class="relative w-full sm:w-64">
-                    <input type="text" name="cari" value="{{ $kataKunci ?? '' }}" placeholder="Cari no jurnal / akun / keterangan..."
+                <div class="relative w-full sm:w-56">
+                    <input type="text" name="cari" value="{{ $kataKunci ?? '' }}" placeholder="Cari no / akun / ket..."
                            class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30">
                     <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
-                <div class="w-full sm:w-40">
+                <div class="w-full sm:w-36">
                     <x-dropdown-kustom 
                         nama="posisi" 
                         :nilaiAwal="$filterPosisi ?? ''" 
@@ -89,11 +96,58 @@
                         :submitOnChange="true" 
                     />
                 </div>
+                <div class="w-full sm:w-48">
+                    <x-dropdown-kustom 
+                        nama="akun" 
+                        :nilaiAwal="$filterAkun ?? ''" 
+                        placeholder="-- Semua Akun COA --" 
+                        :opsi="$opsiFilterAkunJurnal" 
+                        warnaFokus="teal"
+                        classTombol="py-1.5"
+                        :submitOnChange="true" 
+                    />
+                </div>
+                <div class="w-full sm:w-40">
+                    <x-dropdown-kustom 
+                        nama="periode" 
+                        :nilaiAwal="$filterPeriode ?? ''" 
+                        placeholder="-- Semua Periode --" 
+                        :opsi="$opsiPeriode ?? []" 
+                        warnaFokus="teal"
+                        classTombol="py-1.5"
+                        :submitOnChange="true" 
+                    />
+                </div>
+                @if(($filterPeriode ?? '') === 'kustom')
+                <div class="flex items-center gap-1 bg-[#F8FAFC] dark:bg-[#1C1E2A] p-1 rounded-xl border border-[#E2E8F0] dark:border-[#252837]">
+                    <input type="date" name="tgl_mulai" value="{{ $filterTglMulai ?? '' }}" class="px-2 py-1 text-xs rounded-lg bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300">
+                    <span class="text-xs text-slate-400">-</span>
+                    <input type="date" name="tgl_selesai" value="{{ $filterTglSelesai ?? '' }}" class="px-2 py-1 text-xs rounded-lg bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300">
+                    <button type="submit" class="px-2.5 py-1 text-xs font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors">
+                        Terapkan
+                    </button>
+                </div>
+                @endif
             </div>
-            <span class="text-xs text-slate-400 font-mono">Tabel: jurnal_umum</span>
+
+            <div class="flex items-center gap-3">
+                @if(($jumlahFilterAktif ?? 0) > 0)
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-teal-50 dark:bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-200 dark:border-teal-500/20">
+                        <span class="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse"></span>
+                        {{ $jumlahFilterAktif }} Filter Aktif
+                    </span>
+                    <a href="{{ route('keuangan.akuntansi.jurnal') }}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-500/10 border border-dashed border-slate-300 dark:border-slate-700 transition-colors" title="Bersihkan semua filter">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        Reset
+                    </a>
+                </div>
+                @endif
+                <span class="text-xs text-slate-400 font-mono hidden md:inline">Tabel: jurnal_umum</span>
+            </div>
         </form>
 
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto min-h-[260px] pb-12">
             <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
@@ -131,18 +185,24 @@
                             <td class="px-4 py-3 text-center">
                                 <x-menu-aksi-tabel 
                                     :kodeSalin="$jurnal->nomor_jurnal" 
-                                    labelSalin="Salin"
+                                    labelSalin="Salin No"
                                     modulIzin="akun_jurnal"
-                                    :aksiCetak="'cetakVoucherJurnal(' . json_encode([
-                                        'nomor' => $jurnal->nomor_jurnal,
-                                        'tanggal' => date('d/m/Y', strtotime($jurnal->tanggal_transaksi)),
-                                        'akun' => ($jurnal->kode_akun . ' - ' . ($jurnal->nama_akun ?? '')),
-                                        'keterangan' => $jurnal->keterangan,
-                                        'posisi' => $jurnal->posisi ?? 'Debit',
-                                        'nominal' => number_format($jurnal->nominal, 0, ',', '.')
-                                    ]) . ')'"
-                                    labelCetak="Cetak Memorial"
-                                />
+                                >
+                                    <button @click.stop="menuTerbuka = false; cetakVoucherJurnal($el.dataset)" 
+                                            data-nomor="{{ $jurnal->nomor_jurnal }}"
+                                            data-tanggal="{{ date('d/m/Y', strtotime($jurnal->tanggal_transaksi)) }}"
+                                            data-akun="{{ $jurnal->kode_akun }} - {{ $jurnal->nama_akun ?? '' }}"
+                                            data-keterangan="{{ $jurnal->keterangan }}"
+                                            data-posisi="{{ $jurnal->posisi ?? 'Debit' }}"
+                                            data-nominal="{{ number_format($jurnal->nominal, 0, ',', '.') }}"
+                                            type="button" 
+                                            class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-[#F8FAFC] dark:hover:bg-[#1C1E2A] transition-colors text-left group">
+                                        <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                                        </svg>
+                                        <span>Cetak Memorial</span>
+                                    </button>
+                                </x-menu-aksi-tabel>
                             </td>
                         </tr>
                     @empty
