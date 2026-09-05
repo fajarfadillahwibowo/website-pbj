@@ -3,7 +3,7 @@
 @section('judul', 'Master Data Toko Bangunan & Proyek - PT Putra Balkom Jaya')
 
 @section('konten')
-<div x-data="kelolaTokoBangunan()" x-init="initToko()" class="space-y-6">
+<div x-data="kelolaTokoBangunan()" x-init="initToko()" @buka-edit-toko.window="bukaModalEdit($event.detail)" class="space-y-6">
 
     <!-- 1. Header Modul & Tombol Aksi -->
     <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#14161F] p-4 sm:p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
@@ -243,7 +243,7 @@
                                     modulIzin="master_customer"
                                     aksiDetail="bukaModalDetail('{{ $toko->kode_toko }}')"
                                     labelDetail="Detail"
-                                    aksiEdit="bukaModalEdit({{ json_encode($toko) }})"
+                                    aksiEdit="$dispatch('buka-edit-toko', '{{ $toko->kode_toko }}')"
                                     labelEdit="Edit"
                                     aksiHapus="{{ route('master.toko_bangunan.hapus', $toko->kode_toko) }}"
                                     labelHapus="Hapus"
@@ -629,6 +629,7 @@ function kelolaTokoBangunan() {
             status_toko: '',
         },
         detailData: {},
+        semuaToko: @js($daftarToko->keyBy('kode_toko')),
 
         initToko() {
             // Inisialisasi
@@ -638,9 +639,16 @@ function kelolaTokoBangunan() {
             this.modalTambahTerbuka = true;
         },
 
-        bukaModalEdit(toko) {
-            this.formEdit = Object.assign({}, toko);
-            this.modalEditTerbuka = true;
+        bukaModalEdit(param) {
+            const toko = (typeof param === 'object' && param !== null) ? param : (this.semuaToko ? this.semuaToko[param] : null);
+            if (toko) {
+                this.formEdit = Object.assign({}, toko);
+                this.modalEditTerbuka = true;
+                window.dispatchEvent(new CustomEvent('set-nilai-kode_customer', { detail: toko.kode_customer }));
+                window.dispatchEvent(new CustomEvent('set-nilai-kode_wilayah', { detail: toko.kode_wilayah }));
+                window.dispatchEvent(new CustomEvent('set-nilai-tipe_lokasi', { detail: toko.tipe_lokasi }));
+                window.dispatchEvent(new CustomEvent('set-nilai-status_toko', { detail: toko.status_toko }));
+            }
         },
 
         async bukaModalDetail(kodeToko) {

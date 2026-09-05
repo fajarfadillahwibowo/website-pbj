@@ -3,7 +3,22 @@
 @section('judul', 'Bagan Akun Standar (COA)')
 
 @section('konten')
-<div class="space-y-5" x-data="{ bukaModalTambah: false, bukaModalEdit: false, editData: {} }">
+<div class="space-y-5" 
+     x-data="{ 
+         bukaModalTambah: false, 
+         bukaModalEdit: false, 
+         editData: {},
+         semuaAkun: @js($daftarAkun->keyBy('kode_akun')),
+         bukaEditAkun(kode) {
+             if (this.semuaAkun && this.semuaAkun[kode]) {
+                 this.editData = Object.assign({}, this.semuaAkun[kode]);
+                 this.bukaModalEdit = true;
+                 window.dispatchEvent(new CustomEvent('set-nilai-tipe_akun', { detail: this.editData.tipe_akun }));
+                 window.dispatchEvent(new CustomEvent('set-nilai-saldo_normal', { detail: this.editData.saldo_normal }));
+             }
+         }
+     }"
+     @buka-edit-akun.window="bukaEditAkun($event.detail)">
     <!-- Flash Notification -->
     @if(session('sukses'))
         <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-center justify-between">
@@ -142,7 +157,7 @@
                                     :kodeSalin="$acc->kode_akun"
                                     labelSalin="Salin Kode"
                                     modulIzin="akun_coa"
-                                    aksiEdit="editData = {{ json_encode($acc) }}; bukaModalEdit = true"
+                                    aksiEdit="$dispatch('buka-edit-akun', '{{ $acc->kode_akun }}')"
                                     labelEdit="Edit"
                                 />
                             </td>

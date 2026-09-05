@@ -1,6 +1,17 @@
 # 📝 Pelacak Bug, Error, & Progres Terlewati Real-time
 
 ## 🔴 Daftar Bug & Error
+- **[TERSELESAIKAN] Modal Edit tidak bisa terbuka pada Bagan Akun (COA) dan Master Data (Customer, Toko & Proyek, Barang, Wilayah, Karyawan) serta dropdown Rilisan terpotong**:
+  - *Penyebab:* 
+    1. Terjadi *double HTML-escaping* tanda kutip JSON (`" -> &quot; -> &amp;quot;`) akibat evaluasi bertingkat `{{ json_encode(...) }}` pada Blade dan `{{ $aksiEdit }}` di dalam `<x-menu-aksi-tabel>`. Saat dirender ke peramban, Alpine.js menerima teks bertanda entitas HTML mentah dan melempar `SyntaxError: Unexpected token '&'` sehingga modal edit tidak pernah terpanggil. Selain itu, mutasi langsung properti dari dalam komponen anak `menu-aksi-tabel` tidak tersinkron ke *root scope* penampung modal.
+    2. Dropdown menu aksi pada riwayat rilisan kas bon terpotong karena batas bawah kontainer `overflow-x-auto` pada tabel yang berbaris sedikit, serta rumus `bukaKeAtas` di `menu-aksi-tabel` belum memperhitungkan jarak batas kontainer tabel terdekat.
+    3. Teks label tombol aksi terlalu panjang untuk ruang popover.
+  - *Solusi:*
+    1. Mengubah pencetakan ekspresi JS di [menu-aksi-tabel.blade.php](file:///c:/laragon/www/laravel1/resources/views/components/menu-aksi-tabel.blade.php) menjadi raw tag `{!! $aksiEdit !!}`.
+    2. Menstandarkan pembukaan modal edit menggunakan arsitektur event dispatch `$dispatch('buka-edit-...', 'KODE')` yang membaca dataset Javascript ter-lookup aman tanpa interpolasi JSON atribut mentah.
+    3. Menambahkan logika deteksi batas kontainer bawah `ruangBawahKontainer < 180` pada fungsi `toggleMenu()` di `menu-aksi-tabel` agar popover otomatis membuka ke atas saat mendekati batas kontainer, serta menambahkan `min-h-[260px]` pada kontainer tabel rilisan.
+    4. Menyingkat teks label tombol aksi menjadi ringkas dan padat: `Cetak Voucher` dan `Cetak Lembar SO`.
+  - *Hasil Verifikasi:* Lulus inspeksi live browser 100% pada kelima halaman Master Data & Akun, modal edit terbuka responsif dan terisi data, serta dropdown rilisan membuka rapi ke atas tanpa terpotong.
 - **[TERSELESAIKAN] Tombol aksi popover dan timestamp melayang di atas tabel pada `operasional/gudang/stok.blade.php:278`**:
   - *Penyebab:* Hilangnya tag pembuka `<td class="px-4 py-3.5 text-center whitespace-nowrap">` yang membungkus komponen `<x-menu-aksi-tabel>`. Sesuai spesifikasi HTML parser browser (*foster parenting rule*), elemen non-tabel yang berada langsung di dalam baris `<tr>` tanpa dibungkus `<td>` atau `<th>` otomatis dikeluarkan dan ditempatkan di atas tabel `<table>`, menyebabkan kolom 'AKSI & MUTASI' kosong dan tombol aksi melayang di atas header tabel.
   - *Solusi:* Menambahkan kembali tag pembuka `<td class="px-4 py-3.5 text-center whitespace-nowrap">` sebelum `<x-menu-aksi-tabel>`. Tampilan tabel kembali presisi, kolom 'Aksi & Mutasi' sejajar rapi di setiap baris gudang, dan popover berfungsi normal.

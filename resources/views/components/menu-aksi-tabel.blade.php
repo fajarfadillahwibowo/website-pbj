@@ -35,7 +35,13 @@
             this.$nextTick(() => {
                 const rect = this.$el.getBoundingClientRect();
                 const ruangBawah = window.innerHeight - rect.bottom;
-                this.bukaKeAtas = ruangBawah < 220;
+                const kontainerScroll = this.$el.closest('.overflow-x-auto');
+                let ruangBawahKontainer = 999;
+                if (kontainerScroll) {
+                    const rectKontainer = kontainerScroll.getBoundingClientRect();
+                    ruangBawahKontainer = rectKontainer.bottom - rect.bottom;
+                }
+                this.bukaKeAtas = ruangBawah < 220 || ruangBawahKontainer < 180;
             });
         } else {
             this.menuTerbuka = false;
@@ -102,7 +108,7 @@ class="relative inline-block text-left">
 
         <!-- 2. Opsi Lihat Detail -->
         @if($aksiDetail)
-            <button @click.stop="menuTerbuka = false; {{ $aksiDetail }}" 
+            <button @click.stop="menuTerbuka = false; {!! $aksiDetail !!}" 
                     type="button" 
                     class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-[#F8FAFC] dark:hover:bg-[#1C1E2A] transition-colors text-left group">
                 <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -125,7 +131,7 @@ class="relative inline-block text-left">
 
         <!-- 3. Opsi Cetak Dokumen Resmi -->
         @if($aksiCetak)
-            <button @click.stop="menuTerbuka = false; {{ $aksiCetak }}" 
+            <button @click.stop="menuTerbuka = false; {!! $aksiCetak !!}" 
                     type="button" 
                     class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-[#F8FAFC] dark:hover:bg-[#1C1E2A] transition-colors text-left group">
                 <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -157,7 +163,7 @@ class="relative inline-block text-left">
             @endphp
             <div x-show="{{ $kondisiRbacEdit }}">
                 @if($aksiEdit)
-                    <button @click.stop="menuTerbuka = false; {{ $aksiEdit }}" 
+                    <button @click.stop="menuTerbuka = false; {!! $aksiEdit !!}" 
                             type="button" 
                             class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-[#F8FAFC] dark:hover:bg-[#1C1E2A] transition-colors text-left group">
                         <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

@@ -3,7 +3,7 @@
 @section('judul', 'Master Data Customer (Entitas Pemilik & Finansial) - PT Putra Balkom Jaya')
 
 @section('konten')
-<div x-data="kelolaCustomer()" x-init="initCustomer()" class="space-y-6">
+<div x-data="kelolaCustomer()" x-init="initCustomer()" @buka-edit-customer.window="bukaModalEdit($event.detail)" class="space-y-6">
 
     <!-- 1. Header Modul & Tombol Tambah -->
     <div class="animasi-masuk flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#14161F] p-4 sm:p-6 rounded-2xl border border-[#E2E8F0] dark:border-[#252837] shadow-sm">
@@ -204,7 +204,7 @@
                                     modulIzin="master_customer"
                                     aksiDetail="bukaModalDetail('{{ $cust->kode_customer }}')"
                                     labelDetail="Detail"
-                                    aksiEdit="bukaModalEdit({{ json_encode($cust) }})"
+                                    aksiEdit="$dispatch('buka-edit-customer', '{{ $cust->kode_customer }}')"
                                     labelEdit="Edit"
                                     aksiHapus="{{ route('master.customer.destroy', $cust->kode_customer) }}"
                                     labelHapus="Hapus"
@@ -528,6 +528,7 @@ function kelolaCustomer() {
             alamat: '',
         },
         detailData: {},
+        semuaCustomer: @js($daftarCustomer->keyBy('kode_customer')),
 
         initCustomer() {
             // Inisialisasi
@@ -537,9 +538,12 @@ function kelolaCustomer() {
             this.modalTambahTerbuka = true;
         },
 
-        bukaModalEdit(cust) {
-            this.formEdit = Object.assign({}, cust);
-            this.modalEditTerbuka = true;
+        bukaModalEdit(param) {
+            const cust = (typeof param === 'object' && param !== null) ? param : (this.semuaCustomer ? this.semuaCustomer[param] : null);
+            if (cust) {
+                this.formEdit = Object.assign({}, cust);
+                this.modalEditTerbuka = true;
+            }
         },
 
         async bukaModalDetail(kodeCust) {

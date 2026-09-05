@@ -65,7 +65,7 @@
             <span class="text-xs text-slate-400 font-mono">Tabel: pengeluaran (Akun 1107)</span>
         </form>
 
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto min-h-[260px] pb-10">
             <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
@@ -121,7 +121,7 @@
                                         <svg class="w-3.5 h-3.5 text-rose-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                                         </svg>
-                                        <span>Cetak Voucher Uang Jalan</span>
+                                        <span>Cetak Voucher</span>
                                     </button>
                                 </x-menu-aksi-tabel>
                             </td>

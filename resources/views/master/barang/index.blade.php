@@ -3,7 +3,21 @@
 @section('judul', 'Master Data Produk & Semen')
 
 @section('konten')
-<div class="space-y-5" x-data="{ bukaModalTambah: false, bukaModalEdit: false, editData: {} }">
+<div class="space-y-5" 
+     x-data="{ 
+         bukaModalTambah: false, 
+         bukaModalEdit: false, 
+         editData: {},
+         semuaBarang: @js($daftarBarang->keyBy('kode_barang')),
+         bukaEditBarang(kode) {
+             if (this.semuaBarang && this.semuaBarang[kode]) {
+                 this.editData = Object.assign({}, this.semuaBarang[kode]);
+                 this.bukaModalEdit = true;
+                 window.dispatchEvent(new CustomEvent('set-nilai-jenis_barang', { detail: this.editData.jenis_barang }));
+             }
+         }
+     }"
+     @buka-edit-barang.window="bukaEditBarang($event.detail)">
     <!-- Flash Notification -->
     @if(session('sukses'))
         <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-center justify-between">
@@ -140,7 +154,7 @@
                                     :kodeSalin="$b->kode_barang"
                                     labelSalin="Salin Kode"
                                     modulIzin="master_barang"
-                                    aksiEdit="editData = {{ json_encode($b) }}; bukaModalEdit = true"
+                                    aksiEdit="$dispatch('buka-edit-barang', '{{ $b->kode_barang }}')"
                                     labelEdit="Edit"
                                     aksiHapus="{{ route('master.barang.destroy', $b->kode_barang) }}"
                                     labelHapus="Hapus"

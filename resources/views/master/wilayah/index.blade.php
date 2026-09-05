@@ -3,7 +3,20 @@
 @section('judul', 'Master Data Wilayah & Zonasi')
 
 @section('konten')
-<div class="space-y-5" x-data="{ bukaModalTambah: false, bukaModalEdit: false, editData: {} }">
+<div class="space-y-5" 
+     x-data="{ 
+         bukaModalTambah: false, 
+         bukaModalEdit: false, 
+         editData: {},
+         semuaWilayah: @js($daftarWilayah->keyBy('kode_wilayah')),
+         bukaEditWilayah(kode) {
+             if (this.semuaWilayah && this.semuaWilayah[kode]) {
+                 this.editData = Object.assign({}, this.semuaWilayah[kode]);
+                 this.bukaModalEdit = true;
+             }
+         }
+     }"
+     @buka-edit-wilayah.window="bukaEditWilayah($event.detail)">
     <!-- Flash Notification -->
     @if(session('sukses'))
         <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-center justify-between">
@@ -95,7 +108,7 @@
                                     :kodeSalin="$w->kode_wilayah" 
                                     labelSalin="Salin Kode"
                                     modulIzin="master_wilayah"
-                                    :aksiEdit="'editData = ' . json_encode($w) . '; bukaModalEdit = true'"
+                                    aksiEdit="$dispatch('buka-edit-wilayah', '{{ $w->kode_wilayah }}')"
                                     :aksiHapus="route('master.wilayah.destroy', $w->kode_wilayah)"
                                     :pesanHapus="'Hapus data wilayah ' . $w->nama_wilayah . '?'"
                                 />
