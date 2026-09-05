@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Keuangan\Piutang;
 use App\Models\Keuangan\FakturPenjualan;
 use App\Models\Master\Customer;
+use App\Helpers\FilterKeuanganHelper;
 use App\Services\Keuangan\MesinJurnalOtomatis;
+use Carbon\Carbon;
 
 class PiutangController extends Controller
 {
@@ -19,11 +21,34 @@ class PiutangController extends Controller
     {
         $kataKunci = $request->input('cari');
         $filterStatus = $request->input('status');
+        $filterPeriode = $request->input('periode');
+        $filterTglMulai = $request->input('tgl_mulai');
+        $filterTglSelesai = $request->input('tgl_selesai');
 
         $query = Piutang::with(['customer', 'penjualan']);
 
         if ($filterStatus) {
             $query->where('status_piutang', $filterStatus);
+        }
+
+        // Filter Jatuh Tempo / Periode
+        if ($filterPeriode === 'overdue') {
+            $query->whereDate('tanggal_jatuh_tempo', '<', Carbon::today())
+                  ->where('sisa_piutang', '>', 0);
+        } elseif ($filterPeriode === '30_hari') {
+            $query->whereBetween('tanggal_jatuh_tempo', [Carbon::today(), Carbon::today()->addDays(30)]);
+        } elseif ($filterPeriode === 'bulan_ini') {
+            $query->whereMonth('tanggal_jatuh_tempo', Carbon::now()->month)
+                  ->whereYear('tanggal_jatuh_tempo', Carbon::now()->year);
+        } elseif ($filterPeriode === 'kustom') {
+            if (!empty($filterTglMulai) && !empty($filterTglSelesai)) {
+                $query->whereDate('tanggal_jatuh_tempo', '>=', $filterTglMulai)
+                      ->whereDate('tanggal_jatuh_tempo', '<=', $filterTglSelesai);
+            } elseif (!empty($filterTglMulai)) {
+                $query->whereDate('tanggal_jatuh_tempo', '>=', $filterTglMulai);
+            } elseif (!empty($filterTglSelesai)) {
+                $query->whereDate('tanggal_jatuh_tempo', '<=', $filterTglSelesai);
+            }
         }
 
         if ($kataKunci) {
@@ -39,6 +64,22 @@ class PiutangController extends Controller
 
         $daftarPiutang = $query->orderBy('id_piutang', 'desc')->get();
 
+        $opsiPeriodePiutang = [
+            ['nilai' => '', 'label' => '-- Semua Jatuh Tempo --'],
+            ['nilai' => 'overdue', 'label' => 'Lewat Jatuh Tempo (Overdue)'],
+            ['nilai' => 'bulan_ini', 'label' => 'Jatuh Tempo Bulan Ini'],
+            ['nilai' => '30_hari', 'label' => '30 Hari ke Depan'],
+            ['nilai' => 'kustom', 'label' => 'Rentang Kustom'],
+        ];
+
+        $jumlahFilterAktif = FilterKeuanganHelper::hitungFilterAktif([
+            'cari'        => $kataKunci,
+            'status'      => $filterStatus,
+            'periode'     => $filterPeriode,
+            'tgl_mulai'   => $filterTglMulai,
+            'tgl_selesai' => $filterTglSelesai,
+        ]);
+
         $totalPiutang = Piutang::sum('jumlah_piutang');
         $totalSisa = Piutang::sum('sisa_piutang');
         $totalTerbayar = max(0, $totalPiutang - $totalSisa);
@@ -48,6 +89,11 @@ class PiutangController extends Controller
             'daftarPiutang',
             'kataKunci',
             'filterStatus',
+            'filterPeriode',
+            'filterTglMulai',
+            'filterTglSelesai',
+            'opsiPeriodePiutang',
+            'jumlahFilterAktif',
             'totalPiutang',
             'totalSisa',
             'totalTerbayar',

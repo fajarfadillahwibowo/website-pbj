@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Keuangan\DepositCustomer;
 use App\Models\Master\Customer;
 use App\Helpers\GeneratorKodeOtomatis;
+use App\Helpers\FilterKeuanganHelper;
 use App\Services\Keuangan\MesinJurnalOtomatis;
 
 class DepositCustomerController extends Controller
@@ -19,12 +20,18 @@ class DepositCustomerController extends Controller
     {
         $kataKunci = $request->input('cari');
         $filterTipe = $request->input('tipe');
+        $filterPeriode = $request->input('periode');
+        $filterTglMulai = $request->input('tgl_mulai');
+        $filterTglSelesai = $request->input('tgl_selesai');
 
         $query = DepositCustomer::with('customer');
 
         if ($filterTipe) {
             $query->where('tipe_mutasi', $filterTipe);
         }
+
+        // Terapkan filter tanggal terpadu
+        FilterKeuanganHelper::terapkanFilterTanggal($query, 'tanggal_transaksi', $filterPeriode, $filterTglMulai, $filterTglSelesai);
 
         if ($kataKunci) {
             $query->where(function ($q) use ($kataKunci) {
@@ -56,6 +63,15 @@ class DepositCustomerController extends Controller
             ];
         })->toArray();
 
+        $opsiPeriode = FilterKeuanganHelper::opsiPeriode();
+        $jumlahFilterAktif = FilterKeuanganHelper::hitungFilterAktif([
+            'cari'        => $kataKunci,
+            'tipe'        => $filterTipe,
+            'periode'     => $filterPeriode,
+            'tgl_mulai'   => $filterTglMulai,
+            'tgl_selesai' => $filterTglSelesai,
+        ]);
+
         $totalDepositAktif = Customer::sum('saldo_deposit');
         $totalMasuk = DepositCustomer::where('tipe_mutasi', 'Masuk')->sum('jumlah_nominal');
         $totalTerpakai = DepositCustomer::where('tipe_mutasi', 'Keluar / Terpakai')->sum('jumlah_nominal');
@@ -69,6 +85,11 @@ class DepositCustomerController extends Controller
             'opsiRekeningDeposit',
             'kataKunci',
             'filterTipe',
+            'filterPeriode',
+            'filterTglMulai',
+            'filterTglSelesai',
+            'opsiPeriode',
+            'jumlahFilterAktif',
             'totalDepositAktif',
             'totalMasuk',
             'totalTerpakai',

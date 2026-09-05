@@ -34,8 +34,18 @@
     init() {
         this.$watch('formTambah.id_jabatan', () => this.sinkronkanKodeOtomatis());
         this.$watch('formTambah.kategori_karyawan', () => this.sinkronkanKodeOtomatis());
+    },
+    semuaKaryawan: @js($daftarKaryawan->keyBy('kode_karyawan')),
+    bukaEditKaryawan(kode) {
+        if (this.semuaKaryawan && this.semuaKaryawan[kode]) {
+            this.editData = Object.assign({}, this.semuaKaryawan[kode]);
+            this.bukaModalEdit = true;
+            window.dispatchEvent(new CustomEvent('set-nilai-kategori_karyawan_edit', { detail: this.editData.kategori_karyawan }));
+            window.dispatchEvent(new CustomEvent('set-nilai-id_jabatan_edit', { detail: this.editData.id_jabatan }));
+            window.dispatchEvent(new CustomEvent('set-nilai-status_karyawan_edit', { detail: this.editData.status_karyawan }));
+        }
     }
-}">
+}" @buka-edit-karyawan.window="bukaEditKaryawan($event.detail)">
     <!-- Flash Notification -->
     @if(session('sukses'))
         <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-center justify-between">
@@ -168,7 +178,7 @@
                                     :kodeSalin="$karyawan->kode_karyawan" 
                                     labelSalin="Salin ID"
                                     modulIzin="master_karyawan"
-                                    :aksiEdit="'editData = ' . json_encode($karyawan) . '; bukaModalEdit = true'"
+                                    aksiEdit="$dispatch('buka-edit-karyawan', '{{ $karyawan->kode_karyawan }}')"
                                     :aksiHapus="route('master.karyawan.destroy', $karyawan->kode_karyawan)"
                                     :pesanHapus="'Hapus karyawan ' . $karyawan->nama_karyawan . '?'"
                                 />

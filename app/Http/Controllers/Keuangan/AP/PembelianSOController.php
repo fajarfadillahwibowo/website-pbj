@@ -8,6 +8,7 @@ use App\Models\Keuangan\PembelianSO;
 use App\Models\Master\Customer;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\GeneratorKodeOtomatis;
+use App\Helpers\FilterKeuanganHelper;
 use App\Services\Keuangan\MesinJurnalOtomatis;
 
 class PembelianSOController extends Controller
@@ -19,6 +20,10 @@ class PembelianSOController extends Controller
     {
         $kataKunci = $request->input('cari');
         $filterStatus = $request->input('status');
+        $filterGudang = $request->input('gudang');
+        $filterPeriode = $request->input('periode');
+        $filterTglMulai = $request->input('tgl_mulai');
+        $filterTglSelesai = $request->input('tgl_selesai');
 
         $query = DB::table('pembelian_so')
             ->leftJoin('data_customer', 'pembelian_so.kode_customer', '=', 'data_customer.kode_customer')
@@ -34,6 +39,12 @@ class PembelianSOController extends Controller
         if ($filterStatus) {
             $query->where('pembelian_so.status_so', $filterStatus);
         }
+
+        if ($filterGudang) {
+            $query->where('pembelian_so.kode_gudang', $filterGudang);
+        }
+
+        FilterKeuanganHelper::terapkanFilterTanggal($query, 'pembelian_so.tanggal_so', $filterPeriode, $filterTglMulai, $filterTglSelesai);
 
         if ($kataKunci) {
             $query->where(function ($q) use ($kataKunci) {
@@ -51,12 +62,28 @@ class PembelianSOController extends Controller
         $totalNilaiSO = DB::table('pembelian_so')->sum('total_harga');
         $totalZak = DB::table('pembelian_so')->sum('jumlah_zak');
 
+        $opsiPeriode = FilterKeuanganHelper::opsiPeriode();
+        $jumlahFilterAktif = FilterKeuanganHelper::hitungFilterAktif([
+            'cari' => $kataKunci,
+            'status' => $filterStatus,
+            'gudang' => $filterGudang,
+            'periode' => $filterPeriode,
+            'tgl_mulai' => $filterTglMulai,
+            'tgl_selesai' => $filterTglSelesai,
+        ]);
+
         return view('keuangan.ap.pembelian_so', compact(
             'daftarSO',
             'daftarCustomer',
             'daftarGudang',
             'kataKunci',
             'filterStatus',
+            'filterGudang',
+            'filterPeriode',
+            'filterTglMulai',
+            'filterTglSelesai',
+            'opsiPeriode',
+            'jumlahFilterAktif',
             'totalSO',
             'totalNilaiSO',
             'totalZak'

@@ -371,18 +371,56 @@
         border-radius: 4px;
       }
 
-      /* Print optimasi */
-      @media print {
-        aside.sidebar-panel,
-        header,
-        #indikatorLoadingHalaman {
-          display: none !important;
+        /* Print optimasi */
+        @media print {
+          aside.sidebar-panel,
+          header,
+          #indikatorLoadingHalaman,
+          #wadahToastGlobal {
+            display: none !important;
+          }
+          main {
+            padding: 0 !important;
+            overflow: visible !important;
+          }
         }
-        main {
-          padding: 0 !important;
-          overflow: visible !important;
+
+        /* ============================================================
+           TRANSISI & PENCEGAHAN GETARAN LAYOUT SHIFT (SMOOTH SPA)
+        ============================================================ */
+
+        /* Transisi halus area konten utama */
+        #kontenUtama {
+          transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+          will-change: opacity;
         }
-      }
+
+        /* Animasi masuk elemen yang lembut tanpa lompatan posisi kasar */
+        @keyframes fade-masuk-halus {
+          from {
+            opacity: 0;
+            transform: translateY(3px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animasi-masuk {
+          animation: fade-masuk-halus 0.2s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+        }
+
+        /* Hilangkan delay bertingkat yang bikin baris tabel lompat-lompat / bergetar */
+        .tabel-bertingkat tbody tr {
+          animation: none !important;
+          transform: none !important;
+        }
+
+        .wadah-bertingkat > * {
+          animation: fade-masuk-halus 0.18s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+          animation-delay: 0ms !important;
+        }
     </style>
     @stack('gaya_tambahan')
 </head>
@@ -392,6 +430,66 @@
     <div id="indikatorLoadingHalaman" 
          class="fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500 z-50 transition-all duration-300 pointer-events-none opacity-0" 
          style="width: 0%;"></div>
+
+    {{-- Toast Notifikasi Melayang Global (Floating Alert Toast - Tanpa Menggeser Layout) --}}
+    <div id="wadahToastGlobal" 
+         x-data="{
+             tampil: false,
+             tipe: 'sukses',
+             pesan: '',
+             timer: null,
+             buka(pesan, tipe = 'sukses') {
+                 if (!pesan) return;
+                 this.pesan = pesan;
+                 this.tipe = tipe;
+                 this.tampil = true;
+                 if (this.timer) clearTimeout(this.timer);
+                 this.timer = setTimeout(() => { this.tampil = false; }, 4000);
+             }
+         }"
+         x-init="
+             @if(session('sukses'))
+                 buka(@js(session('sukses')), 'sukses');
+             @elseif(session('gagal'))
+                 buka(@js(session('gagal')), 'gagal');
+             @elseif(session('error'))
+                 buka(@js(session('error')), 'gagal');
+             @endif
+         "
+         @tampilkan-toast.window="buka($event.detail.pesan, $event.detail.tipe || 'sukses')"
+         x-show="tampil"
+         x-cloak
+         x-transition:enter="transition ease-out duration-300 transform"
+         x-transition:enter-start="opacity-0 -translate-y-3 scale-95"
+         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+         x-transition:leave="transition ease-in duration-200 transform"
+         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+         x-transition:leave-end="opacity-0 -translate-y-3 scale-95"
+         class="fixed top-5 right-5 sm:right-6 z-[9999] max-w-sm w-full pointer-events-auto select-none">
+        <div class="p-3.5 rounded-2xl shadow-2xl border flex items-center justify-between gap-3 backdrop-blur-md transition-colors"
+             :class="{
+                 'bg-white/95 dark:bg-[#14161F]/95 border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300': tipe === 'sukses',
+                 'bg-white/95 dark:bg-[#14161F]/95 border-rose-200 dark:border-rose-500/30 text-rose-800 dark:text-rose-300': tipe === 'gagal',
+                 'bg-white/95 dark:bg-[#14161F]/95 border-blue-200 dark:border-blue-500/30 text-blue-800 dark:text-blue-300': tipe === 'info'
+             }">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <template x-if="tipe === 'sukses'">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                </template>
+                <template x-if="tipe === 'gagal'">
+                    <div class="w-8 h-8 rounded-xl bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </div>
+                </template>
+                <div class="text-xs font-semibold leading-snug break-words" x-text="pesan"></div>
+            </div>
+            <button type="button" @click="tampil = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 shrink-0">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+    </div>
 
     {{-- Overlay Backdrop Mobile (klik di luar sidebar untuk menutup) --}}
     <div x-show="sidebarMobileTerbuka"
@@ -525,8 +623,31 @@
             });
         }
 
-        // Mesin Pemutakhiran Konten Parsial (SPA Swap)
-        async function muatKontenDinamis(url, targetLink = null, pushKeHistory = true) {
+        // Helper menutup seluruh modal Alpine secara bersih
+        function tutupSemuaModal() {
+            document.querySelectorAll('[x-data]').forEach(el => {
+                const data = el._x_dataStack ? el._x_dataStack[0] : null;
+                if (data) {
+                    if (typeof data.bukaModalTambah !== 'undefined') data.bukaModalTambah = false;
+                    if (typeof data.bukaModalEdit !== 'undefined') data.bukaModalEdit = false;
+                    if (typeof data.bukaModalHapus !== 'undefined') data.bukaModalHapus = false;
+                    if (typeof data.bukaModalDetail !== 'undefined') data.bukaModalDetail = false;
+                    if (typeof data.modalBuka !== 'undefined') data.modalBuka = false;
+                    if (typeof data.modalTambahBuka !== 'undefined') data.modalTambahBuka = false;
+                    if (typeof data.modalEditBuka !== 'undefined') data.modalEditBuka = false;
+                    if (typeof data.modalHapusBuka !== 'undefined') data.modalHapusBuka = false;
+                    if (typeof data.modalDetailBuka !== 'undefined') data.modalDetailBuka = false;
+                    if (typeof data.tampilModal !== 'undefined') data.tampilModal = false;
+                    if (typeof data.bukaModal !== 'undefined') data.bukaModal = false;
+                    if (typeof data.buka !== 'undefined' && (el.classList.contains('fixed') || el.closest('.fixed'))) data.buka = false;
+                }
+            });
+            document.body.classList.remove('overflow-hidden');
+            document.body.style.overflow = '';
+        }
+
+        // Mesin Pemutakhiran Konten Parsial (SPA Swap Tanpa Getaran)
+        async function muatKontenDinamis(url, targetLink = null, pushKeHistory = true, htmlSudahAda = null) {
             const kontenUtama = document.getElementById('kontenUtama');
             if (!kontenUtama) {
                 window.location.href = url;
@@ -539,24 +660,33 @@
             }
             abortControllerNavigasi = new AbortController();
 
+            // Kunci tinggi kontainer agar layout tidak loncat/bergetar saat konten diganti
+            const tinggiSaatIni = kontenUtama.offsetHeight;
+            if (tinggiSaatIni > 100) {
+                kontenUtama.style.minHeight = tinggiSaatIni + 'px';
+            }
+
             mulaiIndikatorLoading();
-            kontenUtama.style.opacity = '0.5';
+            kontenUtama.style.opacity = '0.6';
 
             try {
-                const response = await fetch(url, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-PBJ-SPA': 'true'
-                    },
-                    signal: abortControllerNavigasi.signal
-                });
+                let html = htmlSudahAda;
+                if (!html) {
+                    const response = await fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-PBJ-SPA': 'true'
+                        },
+                        signal: abortControllerNavigasi.signal
+                    });
 
-                if (!response.ok) {
-                    window.location.href = url;
-                    return;
+                    if (!response.ok) {
+                        window.location.href = url;
+                        return;
+                    }
+                    html = await response.text();
                 }
 
-                const html = await response.text();
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
 
@@ -584,13 +714,15 @@
                 }
 
                 // 3. Perbarui URL browser tanpa me-refresh halaman
-                if (pushKeHistory) {
+                if (pushKeHistory && url) {
                     window.history.pushState({ url: url }, judulBaru, url);
                 }
 
                 // 4. Sinkronkan status aktif sidebar secara visual (SIDEBAR TIDAK PERNAH DI-REFRESH / DI-RELOAD)
                 const sidebarBaru = doc.getElementById('navigasiSidebar');
-                sinkronkanSidebarAktif(sidebarBaru);
+                if (sidebarBaru) {
+                    sinkronkanSidebarAktif(sidebarBaru);
+                }
 
                 // 5. Ganti konten dan eksekusi skrip baru
                 kontenUtama.innerHTML = kontenBaru.innerHTML;
@@ -608,7 +740,32 @@
                 // 7. Kembalikan scroll konten ke bagian paling atas
                 kontenUtama.scrollTop = 0;
 
-                // 8. Beri notifikasi global bahwa halaman telah berganti
+                // 8. Ekstrak pesan toast dari respons baru jika ada
+                const toastDalamDoc = doc.getElementById('wadahToastGlobal');
+                let adaToast = false;
+                if (toastDalamDoc) {
+                    const xInitText = toastDalamDoc.getAttribute('x-init') || '';
+                    const match = xInitText.match(/buka\((['"])(.*?)\1,\s*(['"])(.*?)\3\)/);
+                    if (match && match[2]) {
+                        window.dispatchEvent(new CustomEvent('tampilkan-toast', {
+                            detail: { pesan: match[2], tipe: match[4] || 'sukses' }
+                        }));
+                        adaToast = true;
+                    }
+                }
+                if (!adaToast) {
+                    const wadahError = doc.querySelector('.bg-rose-50, .alert-danger');
+                    if (wadahError) {
+                        const pesanError = wadahError.querySelector('li')?.innerText || wadahError.innerText.trim();
+                        if (pesanError) {
+                            window.dispatchEvent(new CustomEvent('tampilkan-toast', {
+                                detail: { pesan: pesanError.substring(0, 120), tipe: 'gagal' }
+                            }));
+                        }
+                    }
+                }
+
+                // 9. Beri notifikasi global bahwa halaman telah berganti
                 window.dispatchEvent(new CustomEvent('konten-halaman-berubah', { detail: { url: url } }));
 
             } catch (error) {
@@ -620,6 +777,9 @@
             } finally {
                 kontenUtama.style.opacity = '1';
                 selesaikanIndikatorLoading();
+                setTimeout(() => {
+                    if (kontenUtama) kontenUtama.style.minHeight = '';
+                }, 250);
             }
         }
 
@@ -659,34 +819,101 @@
             muatKontenDinamis(url, el);
         }
 
-
         // Tangani navigasi tombol Back / Forward browser
         window.addEventListener('popstate', function(event) {
             muatKontenDinamis(window.location.href, null, false);
         });
 
-        // Tangani form GET (Filter / Pencarian di dalam konten utama) agar tidak me-refresh sidebar
+        // Tangani form GET (Filter) & Form Mutasi (POST/PUT/DELETE) secara mulus tanpa getaran layout
         document.addEventListener('submit', function(event) {
+            if (event.defaultPrevented) return;
+
             const form = event.target;
             if (!form || !form.closest('#kontenUtama')) return;
 
-            const method = (form.getAttribute('method') || 'GET').toUpperCase();
-            if (method !== 'GET') return; // Form POST/PUT/DELETE tetap berjalan normal dengan token CSRF
-
+            // Abaikan form khusus yang harus diproses secara browser native
             const action = form.getAttribute('action') || window.location.href;
-            const url = new URL(action, window.location.origin);
-            const formData = new FormData(form);
-            const params = new URLSearchParams();
-
-            for (const [key, value] of formData.entries()) {
-                if (value !== '') {
-                    params.append(key, value);
-                }
+            if (form.hasAttribute('data-native') || 
+                form.getAttribute('target') === '_blank' || 
+                action.includes('/logout') ||
+                action.includes('/export') ||
+                action.includes('/cetak') ||
+                action.includes('/download')) {
+                return;
             }
-            url.search = params.toString();
 
-            event.preventDefault();
-            muatKontenDinamis(url.href);
+            const method = (form.getAttribute('method') || 'GET').toUpperCase();
+
+            // 1. Form GET (Filter & Pencarian Tabel)
+            if (method === 'GET') {
+                event.preventDefault();
+                const url = new URL(action, window.location.origin);
+                const formData = new FormData(form);
+                const params = new URLSearchParams();
+
+                for (const [key, value] of formData.entries()) {
+                    if (value !== '') {
+                        params.append(key, value);
+                    }
+                }
+                url.search = params.toString();
+                muatKontenDinamis(url.href);
+                return;
+            }
+
+            // 2. Form Mutasi Data (POST / PUT / DELETE)
+            if (method === 'POST') {
+                event.preventDefault();
+
+                const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-60', 'cursor-wait');
+                }
+
+                mulaiIndikatorLoading();
+                const formData = new FormData(form);
+
+                fetch(action, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-PBJ-SPA': 'true'
+                    },
+                    body: formData
+                })
+                .then(async response => {
+                    tutupSemuaModal();
+                    if (response.redirected || response.ok) {
+                        const html = await response.text();
+                        muatKontenDinamis(response.url || window.location.href, null, true, html);
+                    } else if (response.status === 422) {
+                        const contentType = response.headers.get('content-type') || '';
+                        if (contentType.includes('application/json')) {
+                            const data = await response.json();
+                            const pesanError = Object.values(data.errors || {})[0]?.[0] || data.message || 'Validasi data gagal';
+                            window.dispatchEvent(new CustomEvent('tampilkan-toast', { detail: { pesan: pesanError, tipe: 'gagal' } }));
+                        } else {
+                            const html = await response.text();
+                            muatKontenDinamis(response.url || window.location.href, null, false, html);
+                        }
+                    } else {
+                        // Fallback reload jika error 500
+                        window.location.reload();
+                    }
+                })
+                .catch(err => {
+                    console.error('Mutasi data SPA gagal, beralih ke submit native:', err);
+                    form.submit();
+                })
+                .finally(() => {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('opacity-60', 'cursor-wait');
+                    }
+                    selesaikanIndikatorLoading();
+                });
+            }
         });
 
         // Interseptor tautan internal di dalam konten utama (seperti pintasan dashboard / navigasi antar modul)
@@ -949,7 +1176,12 @@
                     if (this.submitOtomatis) {
                         this.$nextTick(() => {
                             if (this.$el && this.$el.closest('form')) {
-                                this.$el.closest('form').submit();
+                                const form = this.$el.closest('form');
+                                if (typeof form.requestSubmit === 'function') {
+                                    form.requestSubmit();
+                                } else {
+                                    form.submit();
+                                }
                             }
                         });
                     }

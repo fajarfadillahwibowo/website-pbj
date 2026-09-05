@@ -68,6 +68,13 @@
                     ['nilai' => 'Operasional Kantor', 'label' => 'Operasional Kantor'],
                     ['nilai' => 'Servis Truk', 'label' => 'Servis Truk'],
                 ];
+                $opsiFilterRekening = array_merge([
+                    ['nilai' => '', 'label' => '-- Semua Sumber Dana --'],
+                    ['nilai' => 'tunai', 'label' => 'Kas Tunai Brankas']
+                ], ($daftarRekening ?? collect())->map(fn($r) => [
+                    'nilai' => (string) $r->id_rekening,
+                    'label' => $r->nama_bank . ' (' . $r->nomor_rekening . ')'
+                ])->toArray());
                 $opsiKategoriModal = [
                     ['nilai' => 'BBM & Tol Armada', 'label' => 'BBM & Tol Armada'],
                     ['nilai' => 'Operasional Kantor', 'label' => 'Operasional Kantor / ATK'],
@@ -86,12 +93,12 @@
                 ])->toArray());
             @endphp
             <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                <div class="relative w-full sm:w-64">
-                    <input type="text" name="cari" value="{{ $kataKunci ?? '' }}" placeholder="Cari nomor bukti / keterangan..."
+                <div class="relative w-full sm:w-56">
+                    <input type="text" name="cari" value="{{ $kataKunci ?? '' }}" placeholder="Cari bukti / keterangan..."
                            class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500/30">
                     <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
-                <div class="w-full sm:w-48">
+                <div class="w-full sm:w-44">
                     <x-dropdown-kustom 
                         nama="kategori" 
                         :nilaiAwal="$filterKategori ?? ''" 
@@ -102,11 +109,58 @@
                         :submitOnChange="true" 
                     />
                 </div>
+                <div class="w-full sm:w-48">
+                    <x-dropdown-kustom 
+                        nama="rekening" 
+                        :nilaiAwal="$filterRekening ?? ''" 
+                        placeholder="-- Semua Sumber Dana --" 
+                        :opsi="$opsiFilterRekening" 
+                        warnaFokus="rose"
+                        classTombol="py-1.5"
+                        :submitOnChange="true" 
+                    />
+                </div>
+                <div class="w-full sm:w-40">
+                    <x-dropdown-kustom 
+                        nama="periode" 
+                        :nilaiAwal="$filterPeriode ?? ''" 
+                        placeholder="-- Semua Periode --" 
+                        :opsi="$opsiPeriode ?? []" 
+                        warnaFokus="rose"
+                        classTombol="py-1.5"
+                        :submitOnChange="true" 
+                    />
+                </div>
+                @if(($filterPeriode ?? '') === 'kustom')
+                <div class="flex items-center gap-1 bg-[#F8FAFC] dark:bg-[#1C1E2A] p-1 rounded-xl border border-[#E2E8F0] dark:border-[#252837]">
+                    <input type="date" name="tgl_mulai" value="{{ $filterTglMulai ?? '' }}" class="px-2 py-1 text-xs rounded-lg bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300">
+                    <span class="text-xs text-slate-400">-</span>
+                    <input type="date" name="tgl_selesai" value="{{ $filterTglSelesai ?? '' }}" class="px-2 py-1 text-xs rounded-lg bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-700 dark:text-slate-300">
+                    <button type="submit" class="px-2.5 py-1 text-xs font-medium text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors">
+                        Terapkan
+                    </button>
+                </div>
+                @endif
             </div>
-            <span class="text-xs text-slate-400 font-mono">Tabel: pengeluaran</span>
+
+            <div class="flex items-center gap-3">
+                @if(($jumlahFilterAktif ?? 0) > 0)
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20">
+                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                        {{ $jumlahFilterAktif }} Filter Aktif
+                    </span>
+                    <a href="{{ route('keuangan.ap.pengeluaran') }}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 border border-dashed border-slate-300 dark:border-slate-700 transition-colors" title="Bersihkan semua filter">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        Reset
+                    </a>
+                </div>
+                @endif
+                <span class="text-xs text-slate-400 font-mono hidden md:inline">Tabel: pengeluaran</span>
+            </div>
         </form>
 
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto min-h-[260px] pb-12">
             <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
@@ -168,7 +222,7 @@
                                         <svg class="w-3.5 h-3.5 text-rose-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                                         </svg>
-                                        <span>Cetak Bukti Kas Keluar (BKK)</span>
+                                        <span>Cetak Bukti Kas</span>
                                     </button>
                                 </x-menu-aksi-tabel>
                             </td>

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Keuangan\JurnalUmum;
 use App\Helpers\GeneratorKodeOtomatis;
+use App\Helpers\FilterKeuanganHelper;
 
 class JurnalUmumController extends Controller
 {
@@ -17,6 +18,10 @@ class JurnalUmumController extends Controller
     {
         $kataKunci = $request->input('cari');
         $filterPosisi = $request->input('posisi');
+        $filterAkun = $request->input('akun');
+        $filterPeriode = $request->input('periode');
+        $filterTglMulai = $request->input('tgl_mulai');
+        $filterTglSelesai = $request->input('tgl_selesai');
 
         $query = DB::table('jurnal_umum')
             ->leftJoin('data_kode_akun', 'jurnal_umum.kode_akun', '=', 'data_kode_akun.kode_akun')
@@ -25,6 +30,12 @@ class JurnalUmumController extends Controller
         if ($filterPosisi) {
             $query->where('jurnal_umum.posisi', $filterPosisi);
         }
+
+        if ($filterAkun) {
+            $query->where('jurnal_umum.kode_akun', $filterAkun);
+        }
+
+        FilterKeuanganHelper::terapkanFilterTanggal($query, 'jurnal_umum.tanggal_transaksi', $filterPeriode, $filterTglMulai, $filterTglSelesai);
 
         if ($kataKunci) {
             $query->where(function ($q) use ($kataKunci) {
@@ -41,11 +52,27 @@ class JurnalUmumController extends Controller
         $totalKredit = DB::table('jurnal_umum')->where('posisi', 'Kredit')->sum('nominal');
         $isBalance = abs($totalDebit - $totalKredit) < 0.01;
 
+        $opsiPeriode = FilterKeuanganHelper::opsiPeriode();
+        $jumlahFilterAktif = FilterKeuanganHelper::hitungFilterAktif([
+            'cari' => $kataKunci,
+            'posisi' => $filterPosisi,
+            'akun' => $filterAkun,
+            'periode' => $filterPeriode,
+            'tgl_mulai' => $filterTglMulai,
+            'tgl_selesai' => $filterTglSelesai,
+        ]);
+
         return view('keuangan.akuntansi.jurnal_umum', compact(
             'daftarJurnal',
             'daftarAkun',
             'kataKunci',
             'filterPosisi',
+            'filterAkun',
+            'filterPeriode',
+            'filterTglMulai',
+            'filterTglSelesai',
+            'opsiPeriode',
+            'jumlahFilterAktif',
             'totalDebit',
             'totalKredit',
             'isBalance'

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Master\Karyawan;
 use App\Helpers\GeneratorKodeOtomatis;
+use App\Helpers\FilterKeuanganHelper;
 use App\Services\Keuangan\MesinJurnalOtomatis;
 
 class HutangSupplierController extends Controller
@@ -17,32 +18,63 @@ class HutangSupplierController extends Controller
     public function index(Request $request)
     {
         $kataKunci = $request->input('cari');
+        $filterRekening = $request->input('rekening');
+        $filterPeriode = $request->input('periode');
+        $filterTglMulai = $request->input('tgl_mulai');
+        $filterTglSelesai = $request->input('tgl_selesai');
 
         $query = DB::table('pengeluaran')
-            ->where('kategori_pengeluaran', 'like', '%Kas Bon%')
-            ->orWhere('kategori_pengeluaran', 'like', '%BBM%')
+            ->where(function ($q) {
+                $q->where('pengeluaran.kategori_pengeluaran', 'like', '%Kas Bon%')
+                  ->orWhere('pengeluaran.kategori_pengeluaran', 'like', '%BBM%');
+            })
             ->leftJoin('data_rekening', 'pengeluaran.id_rekening_sumber', '=', 'data_rekening.id_rekening')
             ->select('pengeluaran.*', 'data_rekening.nama_bank');
 
+        if ($filterRekening !== null && $filterRekening !== '') {
+            if ($filterRekening === 'tunai') {
+                $query->whereNull('pengeluaran.id_rekening_sumber');
+            } else {
+                $query->where('pengeluaran.id_rekening_sumber', $filterRekening);
+            }
+        }
+
+        FilterKeuanganHelper::terapkanFilterTanggal($query, 'pengeluaran.tanggal_pengeluaran', $filterPeriode, $filterTglMulai, $filterTglSelesai);
+
         if ($kataKunci) {
             $query->where(function ($q) use ($kataKunci) {
-                $q->where('nomor_pengeluaran', 'like', "%{$kataKunci}%")
-                  ->orWhere('keterangan', 'like', "%{$kataKunci}%");
+                $q->where('pengeluaran.nomor_pengeluaran', 'like', "%{$kataKunci}%")
+                  ->orWhere('pengeluaran.keterangan', 'like', "%{$kataKunci}%");
             });
         }
 
-        $daftarRilisan = $query->orderBy('id_pengeluaran', 'desc')->get();
+        $daftarRilisan = $query->orderBy('pengeluaran.id_pengeluaran', 'desc')->get();
         $daftarDriver = Karyawan::where('kategori_karyawan', 'driver')->orderBy('nama_karyawan')->get();
         $daftarRekening = DB::table('data_rekening')->orderBy('nama_bank')->get();
 
         $totalRilisan = $daftarRilisan->sum('total_nominal');
         $jumlahTransaksi = $daftarRilisan->count();
 
+        $opsiPeriode = FilterKeuanganHelper::opsiPeriode();
+        $jumlahFilterAktif = FilterKeuanganHelper::hitungFilterAktif([
+            'cari' => $kataKunci,
+            'rekening' => $filterRekening,
+            'periode' => $filterPeriode,
+            'tgl_mulai' => $filterTglMulai,
+            'tgl_selesai' => $filterTglSelesai,
+        ]);
+
         return view('keuangan.ap.list_rilisan', compact(
             'daftarRilisan',
             'daftarDriver',
             'daftarRekening',
             'kataKunci',
+            'filterRekening',
+            'filterPeriode',
+            'filterTglMulai',
+            'filterTglSelesai',
+            'opsiPeriode',
+            'jumlahFilterAktif',
             'totalRilisan',
             'jumlahTransaksi'
         ));

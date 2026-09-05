@@ -34,8 +34,25 @@
             this.menuTerbuka = true;
             this.$nextTick(() => {
                 const rect = this.$el.getBoundingClientRect();
-                const ruangBawah = window.innerHeight - rect.bottom;
-                this.bukaKeAtas = ruangBawah < 220;
+                const ruangBawahJendela = window.innerHeight - rect.bottom;
+                const ruangAtasJendela = rect.top;
+                const kontainerScroll = this.$el.closest('.overflow-x-auto');
+                
+                let ruangBawahKontainer = ruangBawahJendela;
+                let ruangAtasKontainer = ruangAtasJendela;
+                
+                if (kontainerScroll) {
+                    const rectKontainer = kontainerScroll.getBoundingClientRect();
+                    ruangBawahKontainer = rectKontainer.bottom - rect.bottom;
+                    ruangAtasKontainer = rect.top - rectKontainer.top;
+                }
+                
+                // Menu hanya boleh buka ke atas jika ruang di atas benar-benar cukup (minimal 170px)
+                // Jika baris pertama dekat header tabel (ruang atas < 170px), wajib buka ke bawah agar tidak terpotong
+                const cukupRuangAtas = ruangAtasKontainer >= 170 && ruangAtasJendela >= 170;
+                const sempitDiBawah = ruangBawahJendela < 200 || ruangBawahKontainer < 160;
+                
+                this.bukaKeAtas = cukupRuangAtas && sempitDiBawah;
             });
         } else {
             this.menuTerbuka = false;
@@ -75,7 +92,7 @@ class="relative inline-block text-left">
          x-transition:leave-start="transform opacity-100 scale-100"
          x-transition:leave-end="transform opacity-0 scale-95"
          :class="bukaKeAtas ? 'bottom-full mb-1 origin-bottom-right' : 'top-full mt-1 origin-top-right'"
-         class="absolute {{ $kelasPosisiX }} z-50 w-44 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] shadow-2xl p-1 text-xs space-y-0.5 select-none font-medium">
+         class="absolute {{ $kelasPosisiX }} z-50 w-48 min-w-[180px] rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] shadow-2xl p-1 text-xs space-y-0.5 select-none font-medium">
 
         <!-- Header Aksi -->
         <div class="px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase text-slate-400 border-b border-slate-100 dark:border-[#252837] mb-1 flex items-center justify-between">
@@ -102,7 +119,7 @@ class="relative inline-block text-left">
 
         <!-- 2. Opsi Lihat Detail -->
         @if($aksiDetail)
-            <button @click.stop="menuTerbuka = false; {{ $aksiDetail }}" 
+            <button @click.stop="menuTerbuka = false; {!! $aksiDetail !!}" 
                     type="button" 
                     class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-[#F8FAFC] dark:hover:bg-[#1C1E2A] transition-colors text-left group">
                 <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -125,7 +142,7 @@ class="relative inline-block text-left">
 
         <!-- 3. Opsi Cetak Dokumen Resmi -->
         @if($aksiCetak)
-            <button @click.stop="menuTerbuka = false; {{ $aksiCetak }}" 
+            <button @click.stop="menuTerbuka = false; {!! $aksiCetak !!}" 
                     type="button" 
                     class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-[#F8FAFC] dark:hover:bg-[#1C1E2A] transition-colors text-left group">
                 <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -157,7 +174,7 @@ class="relative inline-block text-left">
             @endphp
             <div x-show="{{ $kondisiRbacEdit }}">
                 @if($aksiEdit)
-                    <button @click.stop="menuTerbuka = false; {{ $aksiEdit }}" 
+                    <button @click.stop="menuTerbuka = false; {!! $aksiEdit !!}" 
                             type="button" 
                             class="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-[#F8FAFC] dark:hover:bg-[#1C1E2A] transition-colors text-left group">
                         <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

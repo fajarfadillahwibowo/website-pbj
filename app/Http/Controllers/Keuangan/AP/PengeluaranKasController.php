@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Keuangan\PengeluaranKas;
 use App\Helpers\GeneratorKodeOtomatis;
+use App\Helpers\FilterKeuanganHelper;
 use App\Services\Keuangan\MesinJurnalOtomatis;
 
 class PengeluaranKasController extends Controller
@@ -18,6 +19,10 @@ class PengeluaranKasController extends Controller
     {
         $kataKunci = $request->input('cari');
         $filterKategori = $request->input('kategori');
+        $filterRekening = $request->input('rekening');
+        $filterPeriode = $request->input('periode');
+        $filterTglMulai = $request->input('tgl_mulai');
+        $filterTglSelesai = $request->input('tgl_selesai');
 
         $query = DB::table('pengeluaran')
             ->leftJoin('data_kode_akun', 'pengeluaran.kode_akun', '=', 'data_kode_akun.kode_akun')
@@ -32,6 +37,16 @@ class PengeluaranKasController extends Controller
         if ($filterKategori) {
             $query->where('pengeluaran.kategori_pengeluaran', $filterKategori);
         }
+
+        if ($filterRekening !== null && $filterRekening !== '') {
+            if ($filterRekening === 'tunai') {
+                $query->whereNull('pengeluaran.id_rekening_sumber');
+            } else {
+                $query->where('pengeluaran.id_rekening_sumber', $filterRekening);
+            }
+        }
+
+        FilterKeuanganHelper::terapkanFilterTanggal($query, 'pengeluaran.tanggal_pengeluaran', $filterPeriode, $filterTglMulai, $filterTglSelesai);
 
         if ($kataKunci) {
             $query->where(function ($q) use ($kataKunci) {
@@ -52,12 +67,28 @@ class PengeluaranKasController extends Controller
         $totalBBM = DB::table('pengeluaran')->where('kategori_pengeluaran', 'like', '%BBM%')->sum('total_nominal');
         $totalKantor = DB::table('pengeluaran')->where('kategori_pengeluaran', 'like', '%Kantor%')->sum('total_nominal');
 
+        $opsiPeriode = FilterKeuanganHelper::opsiPeriode();
+        $jumlahFilterAktif = FilterKeuanganHelper::hitungFilterAktif([
+            'cari' => $kataKunci,
+            'kategori' => $filterKategori,
+            'rekening' => $filterRekening,
+            'periode' => $filterPeriode,
+            'tgl_mulai' => $filterTglMulai,
+            'tgl_selesai' => $filterTglSelesai,
+        ]);
+
         return view('keuangan.ap.pengeluaran_kas', compact(
             'daftarPengeluaran',
             'daftarAkunBeban',
             'daftarRekening',
             'kataKunci',
             'filterKategori',
+            'filterRekening',
+            'filterPeriode',
+            'filterTglMulai',
+            'filterTglSelesai',
+            'opsiPeriode',
+            'jumlahFilterAktif',
             'totalPengeluaran',
             'totalBBM',
             'totalKantor'

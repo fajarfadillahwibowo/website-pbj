@@ -3,7 +3,20 @@
 @section('judul', 'Master Data Wilayah & Zonasi')
 
 @section('konten')
-<div class="space-y-5" x-data="{ bukaModalTambah: false, bukaModalEdit: false, editData: {} }">
+<div class="space-y-5" 
+     x-data="{ 
+         bukaModalTambah: false, 
+         bukaModalEdit: false, 
+         editData: {},
+         semuaWilayah: @js($daftarWilayah->keyBy('kode_wilayah')),
+         bukaEditWilayah(kode) {
+             if (this.semuaWilayah && this.semuaWilayah[kode]) {
+                 this.editData = Object.assign({}, this.semuaWilayah[kode]);
+                 this.bukaModalEdit = true;
+             }
+         }
+     }"
+     @buka-edit-wilayah.window="bukaEditWilayah($event.detail)">
     <!-- Flash Notification -->
     @if(session('sukses'))
         <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-center justify-between">
@@ -64,13 +77,13 @@
             </div>
         </form>
 
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto min-h-[260px] pb-12">
             <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Kode Wilayah</th>
                         <th class="px-4 py-2.5 text-left font-semibold uppercase tracking-wider">Nama Wilayah & Zonasi</th>
-                        <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Jumlah Mitra Toko</th>
+                        <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Keterikatan Mitra</th>
                         <th class="px-4 py-2.5 text-center font-semibold uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
@@ -86,17 +99,24 @@
                                 {{ $w->nama_wilayah }}
                             </td>
                             <td class="px-4 py-3 text-center">
-                                <span class="px-2 py-0.5 rounded text-[11px] font-semibold font-mono {{ $w->daftar_customer_count > 0 ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-500' }}">
-                                    {{ $w->daftar_customer_count ?? 0 }} Toko
-                                </span>
+                                <div class="inline-flex flex-col items-center gap-0.5">
+                                    <span class="px-2 py-0.5 rounded text-[11px] font-semibold font-mono {{ ($w->daftar_toko_count > 0 || $w->daftar_customer_count > 0) ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-500' }}">
+                                        {{ $w->daftar_toko_count ?? 0 }} Toko Cabang
+                                    </span>
+                                    <span class="text-[10px] text-slate-400 font-medium">
+                                        {{ $w->daftar_customer_count ?? 0 }} Customer Pemilik
+                                    </span>
+                                </div>
                             </td>
                             <td class="px-4 py-3 text-center">
                                 <x-menu-aksi-tabel 
                                     :kodeSalin="$w->kode_wilayah" 
                                     labelSalin="Salin Kode"
                                     modulIzin="master_wilayah"
-                                    :aksiEdit="'editData = ' . json_encode($w) . '; bukaModalEdit = true'"
+                                    aksiEdit="$dispatch('buka-edit-wilayah', '{{ $w->kode_wilayah }}')"
+                                    labelEdit="Edit"
                                     :aksiHapus="route('master.wilayah.destroy', $w->kode_wilayah)"
+                                    labelHapus="Hapus"
                                     :pesanHapus="'Hapus data wilayah ' . $w->nama_wilayah . '?'"
                                 />
                             </td>
@@ -154,6 +174,11 @@
             <form :action="'{{ url('master/wilayah') }}/' + editData.kode_wilayah" method="POST" class="p-5 space-y-3.5 text-xs">
                 @csrf
                 @method('PUT')
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Kode Wilayah</label>
+                    <input type="text" :value="editData.kode_wilayah" disabled
+                           class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 font-mono font-semibold cursor-not-allowed">
+                </div>
                 <div>
                     <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Wilayah / Zonasi Distribusi <span class="text-rose-500">*</span></label>
                     <input type="text" name="nama_wilayah" x-model="editData.nama_wilayah" required

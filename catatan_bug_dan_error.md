@@ -1,6 +1,75 @@
 # 📝 Pelacak Bug, Error, & Progres Terlewati Real-time
 
-## 🔴 Daftar Bug & Error
+- **[TERSELESAIKAN] Getaran Layout Shift Saat Refresh/Filter/Navigasi & Transisi Mulus Full SPA**:
+  - *Penyebab:*
+    1. Pembaruan filter via `<x-dropdown-kustom>` memanggil `form.submit()` native JavaScript yang menurut standar W3C mem-bypass event listener `submit`, sehingga interceptor SPA tidak menangkapnya dan browser melakukan full page reload (layar berkedip putih dan seluruh dokumen dimuat ulang).
+    2. Event listener `submit` pada `resources/views/layouts/app.blade.php` sebelumnya hanya menangani `method === 'GET'`, sehingga pengiriman form tambah/edit modal (POST/PUT/DELETE) tetap memicu reload halaman penuh.
+    3. Pada `app.css`, kelas animasi bertingkat `.tabel-bertingkat tbody tr:nth-child(1..10)` menerapkan stagger delay dengan `translateY(10px)` yang membuat baris-baris tabel melompat satu per satu saat dimuat, ditambah collapse tinggi kontainer Alpine yang menyebabkan efek "bergetar" (*layout shift*).
+  - *Solusi:*
+    1. Mengubah pemanggilan submit di `komponenDropdownKustom` menjadi `form.requestSubmit()` agar memicu event submit DOM dan tertangkap secara otomatis oleh engine SPA.
+    2. Menghapus animasi bertingkat kasar pada baris tabel (`.tabel-bertingkat tbody tr { animation: none !important; }`) dan menggantinya dengan transisi lembut `fade-masuk-halus` (`translateY(3px)`).
+    3. Memperbarui engine SPA `muatKontenDinamis()` dengan penguncian tinggi kontainer (`min-height`) sebelum swap dilakukan agar kontainer tabel tidak loncat, serta menambahkan transisi opacity `0.6` ke `1.0`.
+    4. Menambahkan dukungan form mutasi (POST/PUT/DELETE) di latar belakang via Fetch API dengan penutupan modal otomatis (`tutupSemuaModal()`), pembersihan dan inisialisasi ulang Alpine tree, serta ekstraksi pesan alert session ke komponen **Floating Toast Notification** di pojok kanan atas tanpa menggeser tata letak tabel.
+    5. Menyelaraskan event select pada `operasional/armada/kendaraan.blade.php` agar menggunakan `requestSubmit()`.
+  - *Hasil Verifikasi:* Lulus uji browser live mandiri (Autonomous Browser Subagent). Filter dropdown pada Toko Bangunan beralih secara instan dan mulus tanpa reload, URL tersinkron via History API, total baris tabel ter-update presisi, navigasi menu sidebar berjalan lancar tanpa me-reload frame sidebar, dan modal tambah/edit bekerja rapi tanpa getaran/flicker.
+
+- **[TERSELESAIKAN] Penghapusan Tombol Filter Statis & Standarisasi UI Filter Master Customer & Toko Bangunan**:
+  - *Penyebab:* Pada modul [Master Customer](file:///c:/laragon/www/laravel1/resources/views/master/customer/index.blade.php) dan [Master Toko Bangunan](file:///c:/laragon/www/laravel1/resources/views/master/toko_bangunan/index.blade.php), terdapat tombol abu-abu `<button type="submit">Filter</button>` statis. Tombol ini terkesan tidak berfungsi karena dropdown filter di sampingnya sudah memiliki fungsi auto-submit saat dipilih dan input pencarian teks otomatis submit saat menekan tombol Enter. Selain itu, belum ada badge indikator visual filter aktif maupun tombol Reset cepat yang seragam.
+  - *Solusi:*
+    1. Menghapus tombol submit statis "Filter" yang membingungkan dan redundan.
+    2. Mengganti elemen `<select>` native dengan komponen modern `<x-dropdown-kustom :submitOnChange="true">` untuk filter wilayah domisili dan filter customer pemilik.
+    3. Menambahkan lencana dinamis `X Filter Aktif` serta tombol `Reset` cepat yang otomatis muncul saat ada filter atau kata kunci aktif.
+    4. Menambahkan `min-h-[260px] pb-12` pada pembungkus tabel agar menu popover aksi baris bawah tidak terpotong.
+  - *Hasil Verifikasi:* Kompilasi Blade berhasil (`artisan view:cache` lolos), tampilan antarmuka selaras dengan seluruh modul sistem, dan kontrol reset berfungsi instan.
+
+- **[TERSELESAIKAN] Standardisasi Filter Data Tabel Seluruh Modul SPV Keuangan (AR, AP, Akuntansi) & Perbaikan Inline Handler Cetak Memorial**:
+  - *Penyebab:*
+    1. Filter tabel pada modul-modul SPV Keuangan (`faktur_penjualan`, `list_piutang`, `deposit_customer`, `pengeluaran_kas`, `list_rilisan`, `pembelian_so`, `jurnal_umum`) sebelumnya tidak seragam: sebagian hanya memiliki kolom pencarian kata kunci teks, belum memiliki filter rentang tanggal terstandar, belum ada filter akun COA / pabrik gudang / sumber dana rekening, serta tidak memiliki indikator visual jumlah filter aktif dan tombol reset cepat.
+    2. Pada berkas `jurnal_umum.blade.php`, pemanggilan fungsi `cetakVoucherJurnal` melalui string JSON ter-encode di atribut Blade memicu syntax error Alpine.js (`missing ) after argument list`) akibat bentrokan tanda kutip ganda/karakter enter.
+  - *Solusi:*
+    1. Membuat helper bersama `app/Helpers/FilterKeuanganHelper.php` yang menyediakan opsi periode terstandar (`hari_ini`, `bulan_ini`, `30_hari`, `kustom`), penanganan query tanggal otomatis, dan penghitung filter aktif `hitungFilterAktif()`.
+    2. Menyelaraskan seluruh 7 controller dan view Blade SPV Keuangan:
+       - Modul 1: Faktur Penjualan AR (`/keuangan/ar/faktur`) -> filter status bayar, periode, badge aktif, reset, min-h-[260px] pb-12.
+       - Modul 2: List Piutang Pelanggan AR (`/keuangan/ar/list-piutang`) -> filter status lunas, jatuh tempo (lewat tempo, bulan ini, 30 hari ke depan, kustom), badge aktif, reset, min-h-[260px] pb-12.
+       - Modul 3: List Deposit Pelanggan AR (`/keuangan/ar/deposit`) -> filter tipe mutasi, periode, badge aktif, reset, min-h-[260px] pb-12.
+       - Modul 4: Pengeluaran Kas AP (`/keuangan/ap/pengeluaran-kas`) -> filter kategori, sumber rekening/tunai, periode, badge aktif, reset, min-h-[260px] pb-12.
+       - Modul 5: Rilisan Uang Jalan Supir AP (`/keuangan/ap/list-rilisan`) -> perbaikan query grouping kategori, filter rekening/tunai, periode, badge aktif, reset, min-h-[260px] pb-12.
+       - Modul 6: Pembelian SO Pabrik AP (`/keuangan/ap/pembelian-so`) -> filter status SO, gudang/plant semen, periode, badge aktif, reset, min-h-[260px] pb-12.
+       - Modul 7: Buku Jurnal Umum Akuntansi (`/keuangan/akuntansi/jurnal-umum`) -> filter posisi debit/kredit, akun COA, periode, badge aktif, reset, min-h-[260px] pb-12.
+    3. Mengubah handler cetak memorial pada `jurnal_umum.blade.php` agar menggunakan atribut dataset HTML `data-*` dan `$el.dataset` yang bebas benturan quote JavaScript.
+  - *Hasil Verifikasi:* Seluruh modul lulus pengujian live browser (Autonomous Browser Subagent), filter auto-submit berjalan responsif, badge filter aktif dan tombol reset bekerja presisi, serta modal cetak memorial terbuka lengkap dengan data tanpa error JavaScript.
+
+- **[TERSELESAIKAN] Pemotongan Popover Menu Aksi Baris Atas, Teks Aksi Terlalu Panjang, dan Kerusakan Cetak Kartu Aset**:
+  - *Penyebab:*
+    1. Logika perhitungan `bukaKeAtas` di [menu-aksi-tabel.blade.php](file:///c:/laragon/www/laravel1/resources/views/components/menu-aksi-tabel.blade.php) memicu `bukaKeAtas = true` jika `ruangBawahKontainer < 180`. Pada tabel berbaris sedikit (1-3 baris), baris pertama berada tepat di bawah header tabel (ruang atas hanya ~40px). Saat dipaksa buka ke atas, menu mencuat melewati batas atas kontainer `overflow-x-auto` sehingga terpotong (*clipped* di ceiling).
+    2. Teks label tombol cetak terlalu panjang (`Cetak Bukti Kas Keluar (BKK)`, `Cetak Surat Pesanan (PO)`, `Cetak Lembar SO`) sehingga terpotong elipsis di dalam popover.
+    3. Fungsi `cetakDokumenAset()` di modul aset perusahaan menyalin innerHTML mentah ke jendela baru dan memuat stylesheet Tailwind CDN eksternal via CDN yang lambat/tidak ter-reset, sehingga tag SVG armada truk mengembang menjadi grafik hitam raksasa tak terkendali dan tombol 'Tutup' ikut tercetak.
+  - *Solusi:*
+    1. Menstandarkan formula arah popover: popover HANYA boleh buka ke atas jika `ruangAtasKontainer >= 170px` dan ruang bawah sempit (`< 160px`). Jika di baris atas, menu wajib membuka ke bawah.
+    2. Menambahkan `min-h-[260px] pb-12` pada seluruh kontainer `overflow-x-auto` tabel transaksi (`list_piutang`, `pengeluaran_kas`, `pembelian_so`, `list_so`, `aset_perusahaan`) dan memperlebar popover menjadi `w-48 min-w-[180px]`.
+    3. Menyingkat teks aksi: `Cetak Bukti Kas Keluar (BKK)` -> `Cetak Bukti Kas`, `Cetak Surat Pesanan (PO)` -> `Cetak PO`, `Cetak Lembar SO` -> `Cetak SO`, dan `Cetak Kartu Aset` -> `Cetak Kartu`.
+    4. Mengganti generator cetak aset dengan template dokumen cetak mandiri A4 berstandar resmi PBJ (kop surat resmi, tabel data aktiva tetap PSAK 16, tabel spesifikasi fisik armada logistik, tanda tangan berimbang, CSS inline tanpa dependensi CDN, serta menyembunyikan tombol modal).
+  - *Hasil Verifikasi:* Lolos pengujian live browser mandiri (100% Passed) di kelima halaman: popover baris 1 membuka ke bawah tanpa terpotong batas tabel, teks label proporsional, dan lembar cetak dokumen berformat rapi.
+- **[TERSELESAIKAN] Audit & Penguatan CRUD Master Data Wilayah & Zonasi**:
+  - *Penyebab:*
+    1. Facade `DB` tidak di-import di `WilayahController.php` sehingga metode `hapusMassal` berpotensi memicu fatal error `Class "App\Http\Controllers\Master\DB" not found`.
+    2. Metode `destroy()` dan `hapusMassal()` hanya memeriksa keterikatan `daftarCustomer`, padahal tabel `data_toko_bangunan` memiliki foreign key aktif `fk_toko_wilayah` yang akan memicu integrity constraint violation MySQL jika ada toko cabang yang terhubung ke wilayah tersebut.
+    3. Kolom "Jumlah Mitra Toko" sebelumnya hanya menghitung customer dan belum merinci data fisik toko bangunan / proyek cabang.
+  - *Solusi:*
+    1. Mengimpor facade `use Illuminate\Support\Facades\DB;` pada `WilayahController.php`.
+    2. Menambahkan relasi `daftarToko()` pada model `Wilayah.php` (`hasMany(TokoBangunan::class)`) dan memperkuat validasi penghapusan di controller untuk memeriksa relasi customer dan toko fisik secara bersamaan dengan pesan peringatan yang informatif.
+    3. Memperbarui tabel view untuk menampilkan rincian keterikatan Toko Cabang dan Customer Pemilik, menambahkan `min-h-[260px] pb-12`, serta menambahkan field `Kode Wilayah` readonly pada modal edit wilayah.
+  - *Hasil Verifikasi:* Siklus penuh Create (tambah data otomatis WLY-004), Read (pencarian responsif), Update (ubah nama wilayah), dan Delete (hapus data) teruji dan lulus 100% di browser live.
+
+    1. Terjadi *double HTML-escaping* tanda kutip JSON (`" -> &quot; -> &amp;quot;`) akibat evaluasi bertingkat `{{ json_encode(...) }}` pada Blade dan `{{ $aksiEdit }}` di dalam `<x-menu-aksi-tabel>`. Saat dirender ke peramban, Alpine.js menerima teks bertanda entitas HTML mentah dan melempar `SyntaxError: Unexpected token '&'` sehingga modal edit tidak pernah terpanggil. Selain itu, mutasi langsung properti dari dalam komponen anak `menu-aksi-tabel` tidak tersinkron ke *root scope* penampung modal.
+    2. Dropdown menu aksi pada riwayat rilisan kas bon terpotong karena batas bawah kontainer `overflow-x-auto` pada tabel yang berbaris sedikit, serta rumus `bukaKeAtas` di `menu-aksi-tabel` belum memperhitungkan jarak batas kontainer tabel terdekat.
+    3. Teks label tombol aksi terlalu panjang untuk ruang popover.
+  - *Solusi:*
+    1. Mengubah pencetakan ekspresi JS di [menu-aksi-tabel.blade.php](file:///c:/laragon/www/laravel1/resources/views/components/menu-aksi-tabel.blade.php) menjadi raw tag `{!! $aksiEdit !!}`.
+    2. Menstandarkan pembukaan modal edit menggunakan arsitektur event dispatch `$dispatch('buka-edit-...', 'KODE')` yang membaca dataset Javascript ter-lookup aman tanpa interpolasi JSON atribut mentah.
+    3. Menambahkan logika deteksi batas kontainer bawah `ruangBawahKontainer < 180` pada fungsi `toggleMenu()` di `menu-aksi-tabel` agar popover otomatis membuka ke atas saat mendekati batas kontainer, serta menambahkan `min-h-[260px]` pada kontainer tabel rilisan.
+    4. Menyingkat teks label tombol aksi menjadi ringkas dan padat: `Cetak Voucher` dan `Cetak Lembar SO`.
+  - *Hasil Verifikasi:* Lulus inspeksi live browser 100% pada kelima halaman Master Data & Akun, modal edit terbuka responsif dan terisi data, serta dropdown rilisan membuka rapi ke atas tanpa terpotong.
 - **[TERSELESAIKAN] Tombol aksi popover dan timestamp melayang di atas tabel pada `operasional/gudang/stok.blade.php:278`**:
   - *Penyebab:* Hilangnya tag pembuka `<td class="px-4 py-3.5 text-center whitespace-nowrap">` yang membungkus komponen `<x-menu-aksi-tabel>`. Sesuai spesifikasi HTML parser browser (*foster parenting rule*), elemen non-tabel yang berada langsung di dalam baris `<tr>` tanpa dibungkus `<td>` atau `<th>` otomatis dikeluarkan dan ditempatkan di atas tabel `<table>`, menyebabkan kolom 'AKSI & MUTASI' kosong dan tombol aksi melayang di atas header tabel.
   - *Solusi:* Menambahkan kembali tag pembuka `<td class="px-4 py-3.5 text-center whitespace-nowrap">` sebelum `<x-menu-aksi-tabel>`. Tampilan tabel kembali presisi, kolom 'Aksi & Mutasi' sejajar rapi di setiap baris gudang, dan popover berfungsi normal.

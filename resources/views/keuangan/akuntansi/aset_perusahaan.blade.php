@@ -153,7 +153,7 @@
             <span class="text-xs text-slate-400 font-mono">Master Aktiva Tetap & Nilai Buku</span>
         </form>
 
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto min-h-[260px] pb-12">
             <table class="tabel-bertingkat w-full text-xs">
                 <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
                     <tr>
@@ -222,7 +222,7 @@
                                     aksiDetail="bukaDetail('{{ $aset->kode_aset }}')"
                                     labelDetail="Detail"
                                     :aksiCetak="'cetakKartuAset(\'' . $aset->kode_aset . '\')'"
-                                    labelCetak="Cetak Kartu Aset"
+                                    labelCetak="Cetak Kartu"
                                     aksiEdit="bukaEdit('{{ $aset->kode_aset }}')"
                                     labelEdit="Edit"
                                     aksiHapus="{{ route('keuangan.akuntansi.aset.destroy', $aset->kode_aset) }}"
@@ -781,7 +781,7 @@
                 <div class="p-4 bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 rounded-2xl space-y-3"
                      x-show="detailAset.kode_jenis_aset === 'AST-TRK' || detailAset.no_polisi !== '-'">
                     <div class="flex items-center gap-1.5 text-blue-900 dark:text-blue-300 font-bold text-xs">
-                        <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                        <svg class="w-4 h-4 text-blue-600 shrink-0" width="16" height="16" style="width: 16px; height: 16px; max-width: 16px; min-width: 16px; display: inline-block; vertical-align: middle;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
                         <span>Data Spesifikasi Armada Fisik Kendaraan (ERD)</span>
                     </div>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -843,7 +843,7 @@
                     </div>
                 </div>
 
-                <div class="flex justify-end pt-2">
+                <div class="flex justify-end pt-2 print:hidden">
                     <button @click="modalDetailTerbuka = false" class="px-5 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Tutup</button>
                 </div>
             </div>
@@ -1192,16 +1192,267 @@
             },
 
             cetakDokumenAset() {
-                const isiCetak = document.getElementById('areaCetakAset').innerHTML;
-                const jendelaCetak = window.open('', '_blank', 'height=700,width=900');
-                jendelaCetak.document.write('<html><head><title>Kartu Inventaris Aset - ' + (this.detailAset.kode_aset || '') + '</title>');
-                jendelaCetak.document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">');
-                jendelaCetak.document.write('</head><body class="p-8 bg-white text-slate-900 font-sans" onload="window.print(); window.close();">');
-                jendelaCetak.document.write(isiCetak);
-                jendelaCetak.document.write('</body></html>');
+                const a = this.detailAset;
+                const nomorAset = a.kode_aset || '-';
+                const namaAset = a.nama_aset || '-';
+                const golonganAset = a.jenis_aset || a.kode_jenis_aset || '-';
+                const hargaAset = 'Rp ' + Number(a.harga_aset || 0).toLocaleString('id-ID');
+                const akumulasiSusut = 'Rp ' + Number(a.akumulasi_penyusutan || 0).toLocaleString('id-ID');
+                const nilaiBuku = 'Rp ' + Number(a.nilai_buku || a.harga_aset || 0).toLocaleString('id-ID');
+                const tglBeli = a.tanggal_pembelian ? a.tanggal_pembelian.substring(0, 10) : '-';
+                const metode = (a.metode_penyusutan || 'Garis Lurus') + ' (' + (a.umur_manfaat || 0) + ' Tahun)';
+                const tarif = (a.tarif_penyusutan || 0) + '% / Tahun';
+                const pemilik = a.nama_pemilik || 'PT Putra Balkom Jaya';
+                const status = (a.status_aset || 'aktif').toUpperCase();
+                const keterangan = a.keterangan || '-';
+
+                let spesifikasiArmada = '';
+                if (a.kode_jenis_aset === 'AST-TRK' || (a.no_polisi && a.no_polisi !== '-')) {
+                    spesifikasiArmada = `
+                    <div style="margin-top: 14px; margin-bottom: 6px; font-weight: bold; font-size: 11px; color: #1e3a8a; border-bottom: 1.5px solid #bfdbfe; padding-bottom: 3px;">
+                        DATA SPESIFIKASI ARMADA FISIK LOGISTIK (KENDARAAN TRUK)
+                    </div>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 11px;">
+                        <tr>
+                            <td style="width: 25%; background-color: #f8fafc; font-weight: bold; border: 1px solid #cbd5e1; padding: 6px 10px;">Plat Nomor Polisi</td>
+                            <td style="width: 25%; font-family: monospace; font-weight: bold; color: #1d4ed8; border: 1px solid #cbd5e1; padding: 6px 10px;">${a.no_polisi || '-'}</td>
+                            <td style="width: 25%; background-color: #f8fafc; font-weight: bold; border: 1px solid #cbd5e1; padding: 6px 10px;">Jenis / Tipe Armada</td>
+                            <td style="width: 25%; border: 1px solid #cbd5e1; padding: 6px 10px;">${a.jenis_kendaraan || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #f8fafc; font-weight: bold; border: 1px solid #cbd5e1; padding: 6px 10px;">Merek Truk</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 10px;">${a.merek_aset || '-'}</td>
+                            <td style="background-color: #f8fafc; font-weight: bold; border: 1px solid #cbd5e1; padding: 6px 10px;">Kapasitas Muatan</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 10px;">${a.muatan || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #f8fafc; font-weight: bold; border: 1px solid #cbd5e1; padding: 6px 10px;">Nomor Mesin</td>
+                            <td style="font-family: monospace; border: 1px solid #cbd5e1; padding: 6px 10px;">${a.no_mesin || '-'}</td>
+                            <td style="background-color: #f8fafc; font-weight: bold; border: 1px solid #cbd5e1; padding: 6px 10px;">Nomor Rangka</td>
+                            <td style="font-family: monospace; border: 1px solid #cbd5e1; padding: 6px 10px;">${a.no_rangka || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #f8fafc; font-weight: bold; border: 1px solid #cbd5e1; padding: 6px 10px;">Berlaku Uji KIR</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 10px;">${a.tanggal_kir ? a.tanggal_kir.substring(0, 10) : '-'}</td>
+                            <td style="background-color: #f8fafc; font-weight: bold; border: 1px solid #cbd5e1; padding: 6px 10px;">Jatuh Tempo Pajak</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 10px;">${a.tanggal_pajak ? a.tanggal_pajak.substring(0, 10) : '-'}</td>
+                        </tr>
+                    </table>
+                    `;
+                }
+
+                const kontenHtml = `
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <title>Kartu Inventaris Aset - ${nomorAset}</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 15mm;
+        }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11px;
+            color: #0f172a;
+            line-height: 1.4;
+            margin: 0;
+            padding: 20px;
+            background: #fff;
+        }
+        .header-kop {
+            border-bottom: 2px solid #0f172a;
+            padding-bottom: 10px;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .judul-pt {
+            font-size: 14px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #020617;
+        }
+        .subjudul {
+            font-size: 10px;
+            color: #475569;
+            margin-top: 1px;
+        }
+        .badge-kartu {
+            border: 1px solid #94a3b8;
+            background-color: #f8fafc;
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .tabel-data {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+            font-size: 11px;
+        }
+        .tabel-data th, .tabel-data td {
+            border: 1px solid #cbd5e1;
+            padding: 6px 10px;
+            vertical-align: middle;
+        }
+        .tabel-data th {
+            background-color: #f1f5f9;
+            text-align: left;
+            font-weight: bold;
+            color: #334155;
+            width: 25%;
+        }
+        .tabel-data td {
+            width: 25%;
+        }
+        .nilai-uang {
+            font-family: monospace;
+            font-weight: bold;
+        }
+        .bagian-ttd {
+            margin-top: 36px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            text-align: center;
+        }
+        .kolom-ttd {
+            width: 42%;
+        }
+        .garis-ttd {
+            margin-top: 55px;
+            border-bottom: 1px solid #0f172a;
+            font-weight: bold;
+            padding-bottom: 2px;
+        }
+        .jabatan-ttd {
+            font-size: 10px;
+            color: #64748b;
+            margin-top: 3px;
+        }
+        @media print {
+            body { padding: 0; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header-kop">
+        <div>
+            <div class="judul-pt">PT PUTRA BALKOM JAYA</div>
+            <div class="subjudul">Departemen Akuntansi Keuangan & Aktiva Tetap</div>
+            <div class="subjudul">Kartu Inventaris Aset Tetap & Parameter Depresiasi PSAK 16</div>
+        </div>
+        <div style="text-align: right;">
+            <div class="badge-kartu">KARTU AKTIVA TETAP</div>
+            <div style="font-size: 9px; color: #64748b; margin-top: 3px; font-family: monospace;">Kode: ${nomorAset}</div>
+        </div>
+    </div>
+
+    <table class="tabel-data">
+        <tr>
+            <th>Kode Aset</th>
+            <td style="font-family: monospace; font-weight: bold; color: #4338ca;">${nomorAset}</td>
+            <th>Status Aset</th>
+            <td style="font-weight: bold; color: ${status === 'AKTIF' ? '#047857' : '#b45309'};">${status}</td>
+        </tr>
+        <tr>
+            <th>Nama Aset</th>
+            <td style="font-weight: bold;">${namaAset}</td>
+            <th>Golongan / Kategori</th>
+            <td>${golonganAset}</td>
+        </tr>
+        <tr>
+            <th>Harga Perolehan</th>
+            <td class="nilai-uang" style="color: #4338ca;">${hargaAset}</td>
+            <th>Tanggal Perolehan</th>
+            <td style="font-family: monospace;">${tglBeli}</td>
+        </tr>
+        <tr>
+            <th>Akumulasi Susut</th>
+            <td class="nilai-uang" style="color: #be123c;">${akumulasiSusut}</td>
+            <th>Metode Depresiasi</th>
+            <td>${metode}</td>
+        </tr>
+        <tr>
+            <th>Nilai Buku Saat Ini</th>
+            <td class="nilai-uang" style="color: #047857; font-size: 12px;">${nilaiBuku}</td>
+            <th>Tarif Penyusutan</th>
+            <td style="font-family: monospace;">${tarif}</td>
+        </tr>
+        <tr>
+            <th>Entitas Pemilik</th>
+            <td colspan="3">${pemilik}</td>
+        </tr>
+        <tr>
+            <th>Keterangan Aset</th>
+            <td colspan="3" style="color: #334155; font-style: italic;">${keterangan}</td>
+        </tr>
+    </table>
+
+    ${spesifikasiArmada}
+
+    <div class="bagian-ttd">
+        <div class="kolom-ttd">
+            <div style="color: #64748b; font-size: 10px;">Diverifikasi Oleh (Inventaris / Logistik):</div>
+            <div class="garis-ttd">( .................................................... )</div>
+            <div class="jabatan-ttd">Pengawas / Penanggung Jawab Fisik</div>
+        </div>
+        <div class="kolom-ttd">
+            <div style="color: #64748b; font-size: 10px;">Disetujui Oleh (Keuangan & Akuntansi):</div>
+            <div class="garis-ttd">( .................................................... )</div>
+            <div class="jabatan-ttd">Kepala Bagian Keuangan / Akuntansi</div>
+        </div>
+    </div>
+</body>
+</html>
+                `;
+
+                const jendelaCetak = window.open('', '_blank', 'height=750,width=850');
+                if (!jendelaCetak) {
+                    alert('Pop-up cetak diblokir oleh browser. Silakan izinkan pop-up.');
+                    return;
+                }
+                jendelaCetak.document.open();
+                jendelaCetak.document.write(kontenHtml);
                 jendelaCetak.document.close();
+                setTimeout(() => {
+                    jendelaCetak.focus();
+                    jendelaCetak.print();
+                }, 300);
             }
         };
     }
 </script>
+
+<style>
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #areaCetakAset, #areaCetakAset * {
+        visibility: visible;
+    }
+    #areaCetakAset {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 20px;
+        background: #fff !important;
+        color: #000 !important;
+    }
+    #areaCetakAset button, #areaCetakAset .print\:hidden {
+        display: none !important;
+    }
+}
+</style>
 @endsection
