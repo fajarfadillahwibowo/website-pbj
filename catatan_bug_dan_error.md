@@ -1,7 +1,17 @@
 # 📝 Pelacak Bug, Error, & Progres Terlewati Real-time
 
-## 🔴 Daftar Bug & Error
-- **[TERSELESAIKAN] Modal Edit tidak bisa terbuka pada Bagan Akun (COA) dan Master Data (Customer, Toko & Proyek, Barang, Wilayah, Karyawan) serta dropdown Rilisan terpotong**:
+- **[TERSELESAIKAN] Pemotongan Popover Menu Aksi Baris Atas, Teks Aksi Terlalu Panjang, dan Kerusakan Cetak Kartu Aset**:
+  - *Penyebab:*
+    1. Logika perhitungan `bukaKeAtas` di [menu-aksi-tabel.blade.php](file:///c:/laragon/www/laravel1/resources/views/components/menu-aksi-tabel.blade.php) memicu `bukaKeAtas = true` jika `ruangBawahKontainer < 180`. Pada tabel berbaris sedikit (1-3 baris), baris pertama berada tepat di bawah header tabel (ruang atas hanya ~40px). Saat dipaksa buka ke atas, menu mencuat melewati batas atas kontainer `overflow-x-auto` sehingga terpotong (*clipped* di ceiling).
+    2. Teks label tombol cetak terlalu panjang (`Cetak Bukti Kas Keluar (BKK)`, `Cetak Surat Pesanan (PO)`, `Cetak Lembar SO`) sehingga terpotong elipsis di dalam popover.
+    3. Fungsi `cetakDokumenAset()` di modul aset perusahaan menyalin innerHTML mentah ke jendela baru dan memuat stylesheet Tailwind CDN eksternal via CDN yang lambat/tidak ter-reset, sehingga tag SVG armada truk mengembang menjadi grafik hitam raksasa tak terkendali dan tombol 'Tutup' ikut tercetak.
+  - *Solusi:*
+    1. Menstandarkan formula arah popover: popover HANYA boleh buka ke atas jika `ruangAtasKontainer >= 170px` dan ruang bawah sempit (`< 160px`). Jika di baris atas, menu wajib membuka ke bawah.
+    2. Menambahkan `min-h-[260px] pb-12` pada seluruh kontainer `overflow-x-auto` tabel transaksi (`list_piutang`, `pengeluaran_kas`, `pembelian_so`, `list_so`, `aset_perusahaan`) dan memperlebar popover menjadi `w-48 min-w-[180px]`.
+    3. Menyingkat teks aksi: `Cetak Bukti Kas Keluar (BKK)` -> `Cetak Bukti Kas`, `Cetak Surat Pesanan (PO)` -> `Cetak PO`, `Cetak Lembar SO` -> `Cetak SO`, dan `Cetak Kartu Aset` -> `Cetak Kartu`.
+    4. Mengganti generator cetak aset dengan template dokumen cetak mandiri A4 berstandar resmi PBJ (kop surat resmi, tabel data aktiva tetap PSAK 16, tabel spesifikasi fisik armada logistik, tanda tangan berimbang, CSS inline tanpa dependensi CDN, serta menyembunyikan tombol modal).
+  - *Hasil Verifikasi:* Lolos pengujian live browser mandiri (100% Passed) di kelima halaman: popover baris 1 membuka ke bawah tanpa terpotong batas tabel, teks label proporsional, dan lembar cetak dokumen berformat rapi.
+
   - *Penyebab:* 
     1. Terjadi *double HTML-escaping* tanda kutip JSON (`" -> &quot; -> &amp;quot;`) akibat evaluasi bertingkat `{{ json_encode(...) }}` pada Blade dan `{{ $aksiEdit }}` di dalam `<x-menu-aksi-tabel>`. Saat dirender ke peramban, Alpine.js menerima teks bertanda entitas HTML mentah dan melempar `SyntaxError: Unexpected token '&'` sehingga modal edit tidak pernah terpanggil. Selain itu, mutasi langsung properti dari dalam komponen anak `menu-aksi-tabel` tidak tersinkron ke *root scope* penampung modal.
     2. Dropdown menu aksi pada riwayat rilisan kas bon terpotong karena batas bawah kontainer `overflow-x-auto` pada tabel yang berbaris sedikit, serta rumus `bukaKeAtas` di `menu-aksi-tabel` belum memperhitungkan jarak batas kontainer tabel terdekat.
