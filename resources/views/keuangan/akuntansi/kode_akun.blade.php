@@ -152,7 +152,7 @@
                             <td class="px-4 py-3 text-right font-mono tabular-nums font-bold text-slate-900 dark:text-slate-100">
                                 Rp {{ number_format($acc->saldo_berjalan ?? 0, 0, ',', '.') }}
                             </td>
-                            <td class="px-4 py-3 text-center">
+                            <td class="px-4 py-3 text-center whitespace-nowrap">
                                 <x-menu-aksi-tabel 
                                     :kodeSalin="$acc->kode_akun"
                                     labelSalin="Salin Kode"
@@ -160,6 +160,8 @@
                                     aksiEdit="$dispatch('buka-edit-akun', '{{ $acc->kode_akun }}')"
                                     labelEdit="Edit"
                                 />
+
+                                <x-waktu-relatif :diperbaruiPada="$acc->diperbarui_pada ?? null" :dibuatPada="$acc->dibuat_pada ?? null" />
                             </td>
                         </tr>
                     @empty

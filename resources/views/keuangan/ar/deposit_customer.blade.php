@@ -185,7 +185,7 @@
                             <td class="px-4 py-3 text-slate-500 dark:text-slate-400 truncate max-w-xs">
                                 {{ $dep->keterangan ?? '-' }}
                             </td>
-                            <td class="px-4 py-3 text-center">
+                            <td class="px-4 py-3 text-center whitespace-nowrap">
                                 <x-menu-aksi-tabel 
                                     :kodeSalin="$dep->nomor_bukti_deposit" 
                                     labelSalin="Salin No"
@@ -202,6 +202,8 @@
                                     ]) . ')'"
                                     labelCetak="Cetak Kwitansi"
                                 />
+
+                                <x-waktu-relatif :diperbaruiPada="$dep->diperbarui_pada ?? null" :dibuatPada="$dep->dibuat_pada ?? null" />
                             </td>
                         </tr>
                     @empty

@@ -1,12 +1,18 @@
 # 📝 Pelacak Bug, Error, & Progres Terlewati Real-time
 
-- **[TERSELESAIKAN] Indikator Riwayat Waktu Dibuat / Diedit Real-Time pada Buku Jurnal Umum Akuntansi**:
-  - *Kebutuhan:* Menambahkan penanda visual kapan ayat jurnal umum dicatat atau diperbarui dengan format relatif waktu ramah pengguna (contoh: ikon jam dengan teks `3 hari yang lalu`, `2 jam yang lalu`, atau `Baru`), seragam dengan modul Armada Kendaraan, Driver, dan Aset Perusahaan.
+- **[TERSELESAIKAN] Standarisasi Indikator Riwayat Waktu Relatif Dibuat / Diedit Real-Time di Seluruh Tabel Sistem**:
+  - *Kebutuhan:* Menambahkan penanda visual kapan data dibuat atau diperbarui di seluruh tabel sistem secara konsisten menggunakan komponen terstandarisasi, menampilkan ikon jam SVG dan format relatif ramah pengguna (contoh: `🕒 3 hari yang lalu`, `1 jam yang lalu`, atau `Baru`), serta tooltip atribut `title` dengan tanggal dan jam presisi (`d/m/Y H:i:s`).
   - *Solusi:*
-    1. Membuat migrasi database `2026_09_05_000003_tambah_diperbarui_pada_tabel_jurnal_umum.php` untuk menambahkan kolom `diperbarui_pada` (nullable timestamp) pada tabel `jurnal_umum`.
-    2. Memperbarui model [JurnalUmum.php](file:///c:/laragon/www/laravel1/app/Models/Keuangan/JurnalUmum.php) dengan konstanta `UPDATED_AT = 'diperbarui_pada'`, casts tanggal, serta accessor `terakhir_diedit_relatif` dan `terakhir_diedit_waktu`.
-    3. Memperbarui view [jurnal_umum.blade.php](file:///c:/laragon/www/laravel1/resources/views/keuangan/akuntansi/jurnal_umum.blade.php) pada kolom AKSI untuk menampilkan ikon jam SVG dan teks relatif waktu `diffForHumans()` di bawah tombol popover tiga titik (`•••`), lengkap dengan tooltip atribut `title` yang memuat tanggal dan jam presisi.
-  - *Hasil Verifikasi:* Lolos pengujian browser live mandiri (Autonomous Browser Subagent). Indikator waktu relatif muncul presisi di setiap baris jurnal (contoh: `2 hari yang lalu` untuk jurnal sekuensial) dengan tooltip tanggal-jam lengkap dan tanpa error konsol.
+    1. Membuat komponen reusable Blade `<x-waktu-relatif :diperbaruiPada="..." :dibuatPada="..." />` (`resources/views/components/waktu-relatif.blade.php`) dengan kalkulasi otomatis `Carbon::locale('id')->diffForHumans()`, fallback ke `dibuatPada` atau `'Baru'`, tooltip presisi, serta ikon jam SVG profesional tanpa emoji teks Unicode.
+    2. Menambahkan migrasi database `2026_09_05_000003_tambah_diperbarui_pada_tabel_jurnal_umum.php` untuk kolom `diperbarui_pada` pada tabel `jurnal_umum`, serta pemutakhiran model `JurnalUmum`.
+    3. Menerapkan `<x-waktu-relatif>` pada seluruh tabel di kolom AKSI:
+       - Modul Keuangan AR: Faktur Penjualan (`faktur_penjualan.blade.php`), List Piutang (`list_piutang.blade.php`), Deposit Customer (`deposit_customer.blade.php`).
+       - Modul Keuangan AP: Pengeluaran Kas (`pengeluaran_kas.blade.php`), List Rilisan Uang Jalan (`list_rilisan.blade.php`), Pembelian SO Pabrik (`pembelian_so.blade.php`), List SO (`list_so.blade.php`).
+       - Modul Keuangan Akuntansi: Jurnal Umum (`jurnal_umum.blade.php`), Kode Akun COA (`kode_akun.blade.php`), Aset Perusahaan (`aset_perusahaan.blade.php`).
+       - Modul Master Data: Wilayah (`master/wilayah/index.blade.php`), Toko Bangunan (`master/toko_bangunan/index.blade.php`), Customer (`master/customer/index.blade.php`), Barang Semen (`master/barang/index.blade.php`), Karyawan (`master/karyawan/index.blade.php`), Jenis Aset (`master/jenis_aset/index.blade.php`).
+       - Modul Operasional: Surat Jalan (`operasional/pengiriman/surat_jalan.blade.php`), dan tabel lainnya yang sudah terpasang struktur identik.
+       - Modul Superadmin: Kelola Akun (`superadmin/kelola_akun.blade.php`) beserta penambahan field `diperbarui_pada` & `dibuat_pada` pada `KelolaAkunController`.
+  - *Hasil Verifikasi:* Seluruh view lolos kompilasi Blade (`php artisan view:cache` lolos dengan 0 error) dan lolos inspeksi live browser mandiri (Autonomous Browser Subagent) pada modul AR & AP. Badge waktu relatif tampil presisi, rapi di bawah tombol popover aksi tanpa merusak tata letak, dan tanpa error konsol.
 
 - **[TERSELESAIKAN] Getaran Layout Shift Saat Refresh/Filter/Navigasi & Transisi Mulus Full SPA**:
   - *Penyebab:*

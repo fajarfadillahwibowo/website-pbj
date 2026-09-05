@@ -243,6 +243,8 @@
                                         <span>Cetak PO</span>
                                     </button>
                                 </x-menu-aksi-tabel>
+
+                                <x-waktu-relatif :diperbaruiPada="$so->diperbarui_pada ?? null" :dibuatPada="$so->dibuat_pada ?? null" />
                             </td>
                         </tr>
                     @empty

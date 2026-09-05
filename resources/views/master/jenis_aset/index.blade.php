@@ -225,6 +225,8 @@
                                         </button>
                                     </template>
                                 </x-menu-aksi-tabel>
+
+                                <x-waktu-relatif :diperbaruiPada="$j->diperbarui_pada ?? null" :dibuatPada="$j->dibuat_pada ?? null" />
                             </td>
                         </tr>
                     @empty

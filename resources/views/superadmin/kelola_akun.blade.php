@@ -93,6 +93,8 @@
                             $kode = is_object($row) ? $row->kode_jabatan : $row['kode'];
                             $isSuper = is_object($row) ? ($row->is_super ?? false) : ($row['is_super'] ?? false);
                             $aktif = is_object($row) ? ($row->status_aktif ?? true) : ($row['status_aktif'] ?? true);
+                            $diperbarui = is_object($row) ? ($row->diperbarui_pada ?? null) : ($row['diperbarui_pada'] ?? null);
+                            $dibuat = is_object($row) ? ($row->dibuat_pada ?? null) : ($row['dibuat_pada'] ?? null);
                         @endphp
                         <tr x-show="apakahBarisTampil({{ $loop->index }})" 
                             class="hover:bg-[#F8FAFC] dark:hover:bg-[#252837]/50 transition-colors">
@@ -114,7 +116,7 @@
                                     <span>{{ $aktif ? 'Aktif' : 'Non-Aktif' }}</span>
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-center">
+                            <td class="px-4 py-3 text-center whitespace-nowrap">
                                 @if($isSuper)
                                     <x-menu-aksi-tabel 
                                         :kodeSalin="$usr" 
@@ -156,6 +158,8 @@
                                         </form>
                                     </x-menu-aksi-tabel>
                                 @endif
+
+                                <x-waktu-relatif :diperbaruiPada="$diperbarui" :dibuatPada="$dibuat" />
                             </td>
                         </tr>
                     @empty

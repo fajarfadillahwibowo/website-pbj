@@ -29,12 +29,14 @@ class KelolaAkunController extends Controller
 
         $superAdminList = $superAdminQuery->get()->map(function ($s) {
             return (object) [
-                'username'     => $s->username,
-                'nama_pegawai' => $s->nama_pemilik,
-                'nama_jabatan' => 'Super Admin',
-                'kode_jabatan' => 'SUPER_ADMIN',
-                'status_aktif' => true,
-                'is_super'     => true,
+                'username'        => $s->username,
+                'nama_pegawai'    => $s->nama_pemilik,
+                'nama_jabatan'    => 'Super Admin',
+                'kode_jabatan'    => 'SUPER_ADMIN',
+                'status_aktif'    => true,
+                'is_super'        => true,
+                'diperbarui_pada' => $s->diperbarui_pada ?? null,
+                'dibuat_pada'     => $s->tanggal_create ?? null,
             ];
         });
 
@@ -50,12 +52,14 @@ class KelolaAkunController extends Controller
 
         $penggunaList = $penggunaQuery->get()->map(function ($p) {
             return (object) [
-                'username'     => $p->username,
-                'nama_pegawai' => $p->karyawan->nama_karyawan ?? $p->username,
-                'nama_jabatan' => $p->jabatan->nama_jabatan ?? 'Staf Operasional',
-                'kode_jabatan' => $p->jabatan->kode_jabatan ?? 'STAF',
-                'status_aktif' => (bool) $p->status_aktif,
-                'is_super'     => false,
+                'username'        => $p->username,
+                'nama_pegawai'    => $p->karyawan->nama_karyawan ?? $p->username,
+                'nama_jabatan'    => $p->jabatan->nama_jabatan ?? 'Staf Operasional',
+                'kode_jabatan'    => $p->jabatan->kode_jabatan ?? 'STAF',
+                'status_aktif'    => (bool) $p->status_aktif,
+                'is_super'        => false,
+                'diperbarui_pada' => $p->diperbarui_pada ?? null,
+                'dibuat_pada'     => $p->tanggal_create ?? null,
             ];
         });
 

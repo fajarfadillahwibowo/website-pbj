@@ -227,6 +227,9 @@
                                     labelHapus="Hapus"
                                     pesanHapus="Hapus data customer {{ $cust->nama_pemilik }} ({{ $cust->kode_customer }})?"
                                 />
+
+                                <!-- Riwayat Terakhir Dibuat / Diedit Real-Time -->
+                                <x-waktu-relatif :diperbaruiPada="$cust->diperbarui_pada ?? null" :dibuatPada="$cust->dibuat_pada ?? null" />
                             </td>
                         </tr>
                     @empty

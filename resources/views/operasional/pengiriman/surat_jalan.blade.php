@@ -318,6 +318,9 @@
                                         </button>
                                     </template>
                                 </x-menu-aksi-tabel>
+
+                                <!-- Riwayat Terakhir Dibuat / Diedit Real-Time -->
+                                <x-waktu-relatif :diperbaruiPada="$sj->diperbarui_pada ?? null" :dibuatPada="$sj->dibuat_pada ?? null" />
                             </td>
                         </tr>
                     @empty

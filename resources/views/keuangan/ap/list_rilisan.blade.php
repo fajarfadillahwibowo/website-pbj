@@ -182,6 +182,8 @@
                                         <span>Cetak Voucher</span>
                                     </button>
                                 </x-menu-aksi-tabel>
+
+                                <x-waktu-relatif :diperbaruiPada="$r->diperbarui_pada ?? null" :dibuatPada="$r->dibuat_pada ?? null" />
                             </td>
                         </tr>
                     @empty

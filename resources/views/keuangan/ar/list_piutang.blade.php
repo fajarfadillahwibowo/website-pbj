@@ -191,6 +191,9 @@
                                         </button>
                                     @endif
                                 </x-menu-aksi-tabel>
+
+                                <!-- Riwayat Terakhir Dibuat / Diedit Real-Time -->
+                                <x-waktu-relatif :diperbaruiPada="$piutang->diperbarui_pada ?? null" :dibuatPada="$piutang->dibuat_pada ?? null" />
                             </td>
                         </tr>
                     @empty

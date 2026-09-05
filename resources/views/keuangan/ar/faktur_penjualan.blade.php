@@ -263,6 +263,9 @@
                                     :urlCetak="route('keuangan.ar.faktur.cetak', $faktur->nomor_faktur)"
                                     labelCetak="Cetak Faktur"
                                 />
+
+                                <!-- Riwayat Terakhir Dibuat / Diedit Real-Time -->
+                                <x-waktu-relatif :diperbaruiPada="$faktur->diperbarui_pada ?? null" :dibuatPada="$faktur->dibuat_pada ?? null" />
                             </td>
                         </tr>
                     @empty

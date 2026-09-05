@@ -276,6 +276,9 @@
                                     labelHapus="Hapus"
                                     pesanHapus="Apakah Anda yakin ingin menghapus toko/proyek {{ $toko->nama_toko_bangunan }} ({{ $toko->kode_toko }})?"
                                 />
+
+                                <!-- Riwayat Terakhir Dibuat / Diedit Real-Time -->
+                                <x-waktu-relatif :diperbaruiPada="$toko->diperbarui_pada ?? null" :dibuatPada="$toko->dibuat_pada ?? null" />
                             </td>
                         </tr>
                     @empty

@@ -119,6 +119,9 @@
                                     labelHapus="Hapus"
                                     :pesanHapus="'Hapus data wilayah ' . $w->nama_wilayah . '?'"
                                 />
+
+                                <!-- Riwayat Terakhir Dibuat / Diedit Real-Time -->
+                                <x-waktu-relatif :diperbaruiPada="$w->diperbarui_pada ?? null" :dibuatPada="$w->dibuat_pada ?? null" />
                             </td>
                         </tr>
                     @empty

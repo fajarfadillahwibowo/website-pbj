@@ -182,6 +182,9 @@
                                     :aksiHapus="route('master.karyawan.destroy', $karyawan->kode_karyawan)"
                                     :pesanHapus="'Hapus karyawan ' . $karyawan->nama_karyawan . '?'"
                                 />
+
+                                <!-- Riwayat Terakhir Dibuat / Diedit Real-Time -->
+                                <x-waktu-relatif :diperbaruiPada="$karyawan->diperbarui_pada ?? null" :dibuatPada="$karyawan->dibuat_pada ?? null" />
                             </td>
                         </tr>
                     @empty

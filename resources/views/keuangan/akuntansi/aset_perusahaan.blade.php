@@ -231,10 +231,7 @@
                                 />
 
                                 <!-- Riwayat Diedit Real-Time -->
-                                <div class="text-[9px] text-slate-400 dark:text-slate-500 mt-0.5 flex items-center justify-center gap-0.5 font-mono cursor-help"
-                                     title="Terakhir diperbarui: {{ $aset->diperbarui_pada ? \Carbon\Carbon::parse($aset->diperbarui_pada)->format('d/m/Y H:i:s') : ($aset->dibuat_pada ? \Carbon\Carbon::parse($aset->dibuat_pada)->format('d/m/Y H:i:s') : '-') }}">
-                                    <span>{{ $aset->diperbarui_pada ? \Carbon\Carbon::parse($aset->diperbarui_pada)->locale('id')->diffForHumans() : ($aset->dibuat_pada ? \Carbon\Carbon::parse($aset->dibuat_pada)->locale('id')->diffForHumans() : 'Baru') }}</span>
-                                </div>
+                                <x-waktu-relatif :diperbaruiPada="$aset->diperbarui_pada ?? null" :dibuatPada="$aset->dibuat_pada ?? null" />
                             </td>
                         </tr>
                     @empty

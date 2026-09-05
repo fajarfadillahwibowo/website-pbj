@@ -225,6 +225,8 @@
                                         <span>Cetak Bukti Kas</span>
                                     </button>
                                 </x-menu-aksi-tabel>
+
+                                <x-waktu-relatif :diperbaruiPada="$keluar->diperbarui_pada ?? null" :dibuatPada="$keluar->dibuat_pada ?? null" />
                             </td>
                         </tr>
                     @empty

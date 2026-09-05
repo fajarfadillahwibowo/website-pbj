@@ -160,6 +160,9 @@
                                     labelHapus="Hapus"
                                     pesanHapus="Apakah Anda yakin ingin menghapus produk semen {{ $b->nama_barang }} ({{ $b->kode_barang }})?"
                                 />
+
+                                <!-- Riwayat Terakhir Dibuat / Diedit Real-Time -->
+                                <x-waktu-relatif :diperbaruiPada="$b->diperbarui_pada ?? null" :dibuatPada="$b->dibuat_pada ?? null" />
                             </td>
                         </tr>
                     @empty
