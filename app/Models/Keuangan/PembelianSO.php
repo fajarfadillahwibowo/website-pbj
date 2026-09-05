@@ -41,4 +41,9 @@ class PembelianSO extends Model
     {
         return $this->belongsTo(Gudang::class, 'kode_gudang', 'kode_gudang');
     }
+
+    public function daftarPengiriman()
+    {
+        return $this->hasMany(\App\Models\Operasional\SuratJalan::class, 'id_so', 'id_so');
+    }
 }

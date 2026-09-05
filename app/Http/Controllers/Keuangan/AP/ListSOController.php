@@ -39,10 +39,34 @@ class ListSOController extends Controller
             });
         }
 
-        $daftarSO = $query->orderBy('id_so', 'desc')->get();
+        $daftarSO = $query->with('daftarPengiriman')->orderBy('id_so', 'desc')->get();
+
+        // Sinkronisasi otomatis kuota pengambilan aktual dari pengiriman disetujui
+        foreach ($daftarSO as $so) {
+            $totalPengirimanTerambil = $so->daftarPengiriman
+                ->whereIn('status_pengiriman', ['dalam_perjalanan', 'terkirim'])
+                ->sum('jumlah_zak');
+
+            if ($so->qty_pengambilan != $totalPengirimanTerambil) {
+                $so->qty_pengambilan = $totalPengirimanTerambil;
+                $statusOtomatis = ($totalPengirimanTerambil >= $so->jumlah_zak && $so->jumlah_zak > 0)
+                    ? 'selesai'
+                    : ($totalPengirimanTerambil > 0 ? 'dikirim' : $so->status_so);
+                
+                \Illuminate\Support\Facades\DB::table('pembelian_so')
+                    ->where('id_so', $so->id_so)
+                    ->update([
+                        'qty_pengambilan' => $totalPengirimanTerambil,
+                        'status_so'       => $statusOtomatis,
+                        'diperbarui_pada' => now(),
+                    ]);
+                $so->status_so = $statusOtomatis;
+            }
+        }
+
         $daftarGudang = Gudang::orderBy('nama_gudang')->get();
 
-        // Agregat Statistik Kuota
+        // Agregat Statistik Kuota Real-Time
         $totalSO = PembelianSO::count();
         $totalSOAktif = PembelianSO::whereIn('status_so', ['disetujui', 'diproses', 'dikirim', 'aktif'])->count();
         $totalKuantitasSO = PembelianSO::sum('jumlah_zak');

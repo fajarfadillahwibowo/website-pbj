@@ -6,23 +6,37 @@
 <div x-data="kelolaSuratJalan()" x-init="initSuratJalan()" class="space-y-6">
 
     @php
+        $peranAktif = session('kode_jabatan') ?? (auth()->user()->jabatan->kode_jabatan ?? '');
+
         $opsiStatusFilter = [
             ['nilai' => 'semua', 'label' => 'Semua Status Pengiriman'],
-            ['nilai' => 'menunggu', 'label' => 'Menunggu Muat'],
+            ['nilai' => 'menunggu', 'label' => 'Menunggu Persetujuan SPV'],
             ['nilai' => 'dalam_perjalanan', 'label' => 'Dalam Perjalanan'],
             ['nilai' => 'terkirim', 'label' => 'Terkirim / Selesai'],
-            ['nilai' => 'retur', 'label' => 'Retur / Ditolak'],
+            ['nilai' => 'ditolak', 'label' => 'Ditolak / Revisi'],
+            ['nilai' => 'retur', 'label' => 'Retur Pengiriman'],
         ];
         $opsiStatusPengiriman = [
-            ['nilai' => 'menunggu', 'label' => 'Menunggu Muat di Gudang'],
+            ['nilai' => 'menunggu', 'label' => 'Menunggu Persetujuan SPV (Draf)'],
             ['nilai' => 'dalam_perjalanan', 'label' => 'Dalam Perjalanan (Berangkat)'],
-            ['nilai' => 'terkirim', 'label' => 'Terkirim / Tiba di Lokasi'],
-            ['nilai' => 'retur', 'label' => 'Retur / Ditolak Toko'],
+            ['nilai' => 'terkirim', 'label' => 'Terkirim / Selesai'],
+            ['nilai' => 'ditolak', 'label' => 'Ditolak / Perlu Revisi'],
+            ['nilai' => 'retur', 'label' => 'Retur Pengiriman'],
         ];
+
+        $daftarSOData = ($daftarSO ?? collect())->keyBy('id_so')->map(fn($so) => [
+            'id_so' => $so->id_so,
+            'nomor_so' => $so->nomor_so,
+            'jumlah_zak' => (int) $so->jumlah_zak,
+            'sisa_kuota' => (int) ($so->sisa_kuota ?? $so->jumlah_zak),
+            'customer' => $so->customer->nama_customer ?? 'Customer Umum',
+            'toko' => $so->customer->nama_toko_bangunan ?? '',
+        ])->toJson();
+
         $opsiSO = ($daftarSO ?? collect())->map(fn($so) => [
             'nilai' => $so->id_so,
             'label' => $so->nomor_so . ' — ' . ($so->customer->nama_toko_bangunan ?? $so->customer->nama_customer ?? 'Toko Pelanggan'),
-            'sub'   => ($so->jumlah_zak ?? 0) . ' Zak | ' . ($so->customer->alamat ?? 'Alamat pengiriman')
+            'sub'   => 'Sisa Kuota: ' . number_format($so->sisa_kuota ?? $so->jumlah_zak, 0, ',', '.') . ' Zak (Total: ' . number_format($so->jumlah_zak ?? 0, 0, ',', '.') . ' Zak)'
         ])->toArray();
         $opsiDriver = ($daftarDriver ?? collect())->map(fn($drv) => [
             'nilai' => $drv->kode_karyawan,
@@ -265,39 +279,101 @@
                                 </div>
                             </td>
 
-                            <!-- Armada Truk -->
+                            <!-- Armada Truk & Muatan Zak -->
                             <td class="px-4 py-3.5 whitespace-nowrap">
-                                <div class="font-mono font-bold text-xs text-slate-900 dark:text-slate-100 px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 inline-block">
-                                    {{ $sj->kendaraan->no_polisi ?? '-' }}
+                                <div class="flex items-center gap-2">
+                                    <span class="font-mono font-bold text-xs text-slate-900 dark:text-slate-100 px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 inline-block">
+                                        {{ $sj->kendaraan->no_polisi ?? '-' }}
+                                    </span>
+                                    <span class="px-2 py-0.5 rounded font-mono font-bold text-xs bg-orange-50 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20">
+                                        {{ number_format($sj->jumlah_zak ?? 0, 0, ',', '.') }} Zak
+                                    </span>
                                 </div>
                                 <div class="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">
                                     {{ $sj->kendaraan->nama_aset ?? $sj->kode_aset }}
                                 </div>
                             </td>
 
-                            <!-- Status Pengiriman -->
+                            <!-- Status Pengiriman & Persetujuan -->
                             <td class="px-4 py-3.5 text-center whitespace-nowrap">
                                 @php $badge = $sj->status_badge; @endphp
-                                <button @click="bukaModalStatus('{{ $sj->id_pengiriman }}', '{{ $sj->nomor_surat_jalan }}', '{{ $sj->status_pengiriman }}')"
-                                        class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase font-mono border {{ $badge['bg'] }} hover:opacity-80 transition-opacity"
-                                        title="Klik untuk ubah status perjalanan secara cepat">
-                                    {{ $badge['label'] }} ✎
-                                </button>
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase font-mono border inline-block {{ $badge['bg'] }}">
+                                    {{ $badge['label'] }}
+                                </span>
+                                @if($sj->status_pengiriman === 'ditolak' && !empty($sj->alasan_penolakan))
+                                    <div class="text-[10px] text-rose-600 dark:text-rose-400 mt-1 max-w-[180px] truncate mx-auto font-medium" title="{{ $sj->alasan_penolakan }}">
+                                        Catatan: {{ $sj->alasan_penolakan }}
+                                    </div>
+                                @elseif($sj->status_pengiriman === 'dalam_perjalanan' && !empty($sj->disetujui_oleh))
+                                    <div class="text-[10px] text-slate-400 mt-0.5">
+                                        Disetujui: {{ $sj->disetujui_oleh }}
+                                    </div>
+                                @endif
+
+                                {{-- Tombol Aksi Cepat untuk SPV Operasional --}}
+                                @if($sj->status_pengiriman === 'menunggu')
+                                    <div x-show="jabatanAktif === 'SPV_OPERASIONAL' || '{{ $peranAktif }}' === 'SPV_OPERASIONAL'" class="flex items-center justify-center gap-1.5 mt-2">
+                                        <form action="{{ route('operasional.pengiriman.surat_jalan.setujui', $sj->id_pengiriman) }}" method="POST" class="inline">
+                                            @csrf
+                                            <button type="submit" 
+                                                    class="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 rounded-lg transition-all shadow-xs"
+                                                    title="Setujui Draf & Kurangi Kuota SO">
+                                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                                <span>Setujui</span>
+                                            </button>
+                                        </form>
+
+                                        <button @click="bukaModalTolak('{{ $sj->id_pengiriman }}', '{{ $sj->nomor_surat_jalan }}')" 
+                                                type="button" 
+                                                class="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold text-white bg-rose-600 hover:bg-rose-700 active:scale-95 rounded-lg transition-all shadow-xs"
+                                                title="Tolak / Minta Revisi">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                            <span>Tolak</span>
+                                        </button>
+                                    </div>
+                                @endif
                             </td>
 
                             <!-- Aksi Popover Modern -->
                             <td class="px-4 py-3.5 text-center whitespace-nowrap">
+                                @php
+                                    $bisaCetak = in_array($sj->status_pengiriman, ['dalam_perjalanan', 'terkirim']);
+                                @endphp
                                 <x-menu-aksi-tabel 
                                     :kodeSalin="$sj->nomor_surat_jalan" 
                                     labelSalin="Salin No"
                                     modulIzin="kirim_sj"
-                                    :aksiDetail="'bukaModalCetak(\'' . $sj->id_pengiriman . '\')'"
+                                    :aksiDetail="$bisaCetak ? 'bukaModalCetak(\'' . $sj->id_pengiriman . '\')' : 'alert(\'Dokumen Surat Jalan terkunci! Pengiriman harus disetujui terlebih dahulu oleh SPV Operasional.\')'"
                                     labelDetail="Detail"
-                                    :aksiCetak="'bukaModalCetak(\'' . $sj->id_pengiriman . '\')'"
+                                    :aksiCetak="$bisaCetak ? 'bukaModalCetak(\'' . $sj->id_pengiriman . '\')' : 'alert(\'Surat Jalan berstatus Draf / Belum Disetujui SPV Operasional. Cetak dokumen resmi tidak diperbolehkan.\')'"
                                     labelCetak="Cetak Surat Jalan"
                                     :aksiEdit="'bukaModalEdit(\'' . $sj->id_pengiriman . '\')'"
                                     labelEdit="Edit"
                                 >
+                                    @if($sj->status_pengiriman === 'menunggu')
+                                        <div x-show="jabatanAktif === 'SPV_OPERASIONAL' || '{{ $peranAktif }}' === 'SPV_OPERASIONAL'">
+                                            <form action="{{ route('operasional.pengiriman.surat_jalan.setujui', $sj->id_pengiriman) }}" method="POST" class="border-b border-slate-100 dark:border-[#252837]">
+                                                @csrf
+                                                <button type="submit" 
+                                                        class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors text-left">
+                                                    <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                                    </svg>
+                                                    <span>Setujui Pengiriman</span>
+                                                </button>
+                                            </form>
+
+                                            <button @click.stop="menuTerbuka = false; bukaModalTolak('{{ $sj->id_pengiriman }}', '{{ $sj->nomor_surat_jalan }}')" 
+                                                    type="button" 
+                                                    class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors text-left border-b border-slate-100 dark:border-[#252837]">
+                                                <svg class="w-3.5 h-3.5 text-rose-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                                </svg>
+                                                <span>Tolak / Minta Revisi</span>
+                                            </button>
+                                        </div>
+                                    @endif
+
                                     <button @click.stop="menuTerbuka = false; bukaModalStatus('{{ $sj->id_pengiriman }}', '{{ $sj->nomor_surat_jalan }}', '{{ $sj->status_pengiriman }}')" 
                                             type="button" 
                                             class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-sky-50 dark:hover:bg-sky-500/10 hover:text-sky-600 dark:hover:text-sky-400 transition-colors text-left border-b border-slate-100 dark:border-[#252837]">
@@ -378,6 +454,31 @@
                     </div>
                 </div>
 
+                <!-- Info Kuota SO & Input Muatan Zak Real-Time -->
+                <div class="p-3 bg-slate-50 dark:bg-[#1C1E2A] border border-slate-200 dark:border-[#252837] rounded-xl space-y-2">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-semibold text-slate-700 dark:text-slate-300">Informasi Kuota Sales Order:</span>
+                        <span class="font-mono text-slate-500" x-text="'Total: ' + (infoSOTerpilih.jumlah_zak || 0) + ' Zak'"></span>
+                    </div>
+                    <div class="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-[#14161F] border border-slate-200 dark:border-[#252837]">
+                        <span class="text-slate-500 text-xs">Sisa Kuota Belum Dikirim:</span>
+                        <span class="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm" x-text="(infoSOTerpilih.sisa_kuota || 0) + ' Zak'"></span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 items-center pt-1">
+                        <div>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                                Jumlah Zak Muatan Truk <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="number" name="jumlah_zak" x-model.number="formTambah.jumlah_zak" required min="1" :max="infoSOTerpilih.sisa_kuota || 99999" placeholder="Contoh: 200"
+                                   class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] text-slate-900 dark:text-slate-100 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-sky-500/30">
+                        </div>
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400">
+                            Kuantitas zak muatan fisik yang diangkut oleh armada truk pada pengiriman ini.
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Driver Pengemudi <span class="text-rose-500">*</span></label>
@@ -417,15 +518,12 @@
                     </div>
 
                     <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Keberangkatan <span class="text-rose-500">*</span></label>
-                        <x-dropdown-kustom 
-                            nama="status_pengiriman"
-                            placeholder="-- Pilih Status --"
-                            :opsi="$opsiStatusPengiriman"
-                            :wajib="true"
-                            warnaFokus="sky"
-                            modelBind="formTambah.status_pengiriman"
-                        />
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Alur Pengiriman <span class="text-rose-500">*</span></label>
+                        <div class="px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-800 dark:text-amber-300 font-semibold flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
+                            <span>Menunggu Persetujuan SPV Operasional (Draf)</span>
+                        </div>
+                        <input type="hidden" name="status_pengiriman" value="menunggu">
                     </div>
                 </div>
 
@@ -437,7 +535,7 @@
 
                 <div class="flex items-center justify-end gap-2 pt-2">
                     <button type="button" @click="modalTambahTerbuka = false" class="px-4 py-2 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">Batal</button>
-                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-all shadow-sm">Terbitkan Surat Jalan</button>
+                    <button type="submit" class="px-4 py-2 font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-all shadow-sm">Ajukan Surat Jalan (Draf)</button>
                 </div>
             </form>
         </div>
@@ -476,6 +574,12 @@
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Jumlah Zak Muatan <span class="text-rose-500">*</span></label>
+                        <input type="number" name="jumlah_zak" x-model.number="formEdit.jumlah_zak" required min="1" placeholder="Contoh: 200"
+                               class="w-full px-3 py-2 rounded-xl bg-[#F4F6F9] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-900 dark:text-slate-100 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-amber-500/30">
+                    </div>
+
+                    <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Driver Pengemudi <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
                             nama="kode_driver"
@@ -486,7 +590,9 @@
                             modelBind="formEdit.kode_driver"
                         />
                     </div>
+                </div>
 
+                <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Truk Armada <span class="text-rose-500">*</span></label>
                         <x-dropdown-kustom 
@@ -498,9 +604,7 @@
                             modelBind="formEdit.kode_aset"
                         />
                     </div>
-                </div>
 
-                <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Keberangkatan <span class="text-rose-500">*</span></label>
                         <x-input-tanggal 
@@ -509,18 +613,6 @@
                             placeholder="Pilih Tanggal Kirim"
                             :wajib="true"
                             warnaFokus="amber"
-                        />
-                    </div>
-
-                    <div>
-                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Status Pengiriman <span class="text-rose-500">*</span></label>
-                        <x-dropdown-kustom 
-                            nama="status_pengiriman"
-                            placeholder="-- Pilih Status --"
-                            :opsi="$opsiStatusPengiriman"
-                            :wajib="true"
-                            warnaFokus="amber"
-                            modelBind="formEdit.status_pengiriman"
                         />
                     </div>
                 </div>
@@ -626,7 +718,7 @@
                                     <div class="font-bold text-slate-900">Semen Portland Composite Cement (PCC) 50 Kg</div>
                                     <div class="text-[11px] text-slate-500">Kualitas Standar SNI Pabrik PBJ</div>
                                 </td>
-                                <td class="px-3 py-3 text-right border-r border-slate-300 font-mono font-bold text-sm" x-text="detailPengiriman.sales_order?.jumlah_zak || '0'"></td>
+                                <td class="px-3 py-3 text-right border-r border-slate-300 font-mono font-bold text-sm" x-text="detailPengiriman.jumlah_zak || detailPengiriman.sales_order?.jumlah_zak || '0'"></td>
                                 <td class="px-3 py-3 text-center border-r border-slate-300 font-bold">Zak</td>
                                 <td class="px-3 py-3 text-slate-600 text-[11px]" x-text="detailPengiriman.keterangan || 'Kondisi barang baik & tersegel'"></td>
                             </tr>
@@ -634,22 +726,29 @@
                     </table>
                 </div>
 
-                <!-- Kolom Tanda Tangan 3 Pihak -->
-                <div class="grid grid-cols-3 gap-4 text-center text-xs pt-6">
+                <!-- Kolom Tanda Tangan 4 Pihak -->
+                <div class="grid grid-cols-4 gap-3 text-center text-xs pt-6">
                     <div>
-                        <div class="font-bold uppercase text-slate-600 text-[10px]">Petugas Logistik / Dispatcher</div>
-                        <div class="h-16 border-b border-dashed border-slate-400 mt-2"></div>
-                        <div class="font-bold mt-1.5 text-slate-900">Dispatcher Logistik</div>
+                        <div class="font-bold uppercase text-slate-600 text-[10px]">Petugas Dispatcher</div>
+                        <div class="h-14 border-b border-dashed border-slate-400 mt-2"></div>
+                        <div class="font-bold mt-1 text-slate-900 text-[11px]">Dispatcher Logistik</div>
+                    </div>
+                    <div>
+                        <div class="font-bold uppercase text-slate-600 text-[10px]">SPV Operasional (Approval)</div>
+                        <div class="h-14 border-b border-dashed border-slate-400 mt-2 flex items-center justify-center">
+                            <span class="text-[9px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300" x-show="detailPengiriman.disetujui_oleh" x-text="'DISETUJUI: ' + (detailPengiriman.disetujui_oleh || '')"></span>
+                        </div>
+                        <div class="font-bold mt-1 text-slate-900 text-[11px]" x-text="detailPengiriman.disetujui_oleh || 'SPV Operasional'"></div>
                     </div>
                     <div>
                         <div class="font-bold uppercase text-slate-600 text-[10px]">Sopir / Pengemudi</div>
-                        <div class="h-16 border-b border-dashed border-slate-400 mt-2"></div>
-                        <div class="font-bold mt-1.5 text-slate-900" x-text="detailPengiriman.driver?.nama_karyawan || 'Driver'"></div>
+                        <div class="h-14 border-b border-dashed border-slate-400 mt-2"></div>
+                        <div class="font-bold mt-1 text-slate-900 text-[11px]" x-text="detailPengiriman.driver?.nama_karyawan || 'Driver'"></div>
                     </div>
                     <div>
-                        <div class="font-bold uppercase text-slate-600 text-[10px]">Penerima Barang (Toko/Proyek)</div>
-                        <div class="h-16 border-b border-dashed border-slate-400 mt-2"></div>
-                        <div class="font-bold mt-1.5 text-slate-900">( Tanda Tangan & Stempel )</div>
+                        <div class="font-bold uppercase text-slate-600 text-[10px]">Penerima Barang (Toko/Gudang)</div>
+                        <div class="h-14 border-b border-dashed border-slate-400 mt-2"></div>
+                        <div class="font-bold mt-1 text-slate-900 text-[11px]">( Tanda Tangan & Stempel )</div>
                     </div>
                 </div>
 
@@ -701,7 +800,42 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- 9. MODAL KONFIRMASI HAPUS SURAT JALAN -->
+    <!-- 9. MODAL TOLAK / REVISI PENGIRIMAN OLEH SPV OPERASIONAL -->
+    <!-- ========================================================================= -->
+    <div x-show="modalTolakTerbuka" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div @click.away="modalTolakTerbuka = false"
+             class="animasi-skala bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 text-xs">
+            
+            <div class="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 mx-auto flex items-center justify-center mb-3.5">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            </div>
+
+            <h3 class="text-base font-bold text-slate-900 dark:text-slate-100 text-center">Tolak / Minta Revisi Pengiriman</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 text-center">
+                Surat Jalan <strong class="text-slate-900 dark:text-slate-200 font-bold" x-text="tolakData.nomor_sj"></strong> akan dikembalikan untuk direvisi oleh Dispatcher. Masukkan catatan alasan penolakan.
+            </p>
+
+            <form :action="'{{ url('operasional/pengiriman/surat-jalan') }}/' + tolakData.id + '/tolak'" method="POST" class="mt-4 space-y-4">
+                @csrf
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Alasan Penolakan / Catatan Revisi <span class="text-rose-500">*</span></label>
+                    <textarea name="alasan_penolakan" x-model="tolakData.alasan_penolakan" rows="3" required placeholder="Contoh: Muatan melebihi batas armada truk, atau kuota SO harus diverifikasi kembali..."
+                              class="w-full px-3 py-2 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/30"></textarea>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" @click="modalTolakTerbuka = false" class="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">Batal</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-all shadow-md shadow-rose-600/20">Konfirmasi Penolakan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 10. MODAL KONFIRMASI HAPUS SURAT JALAN -->
     <!-- ========================================================================= -->
     <div x-show="modalHapusTerbuka" x-cloak
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
@@ -746,16 +880,24 @@
             modalCetakTerbuka: false,
             modalStatusTerbuka: false,
             modalHapusTerbuka: false,
+            modalTolakTerbuka: false,
 
             keteranganKodeSJ: 'Mode: Daur Ulang Slot Kosong',
+            daftarSOData: {!! $daftarSOData !!},
+
+            get infoSOTerpilih() {
+                if (!this.formTambah.id_so) return {};
+                return this.daftarSOData[this.formTambah.id_so] || {};
+            },
 
             formTambah: {
                 nomor_surat_jalan: '',
                 id_so: '{{ $daftarSO->first()->id_so ?? "" }}',
+                jumlah_zak: 200,
                 kode_driver: '{{ $daftarDriver->first()->kode_karyawan ?? "" }}',
                 kode_aset: '{{ $daftarKendaraan->first()->kode_kendaraan ?? $daftarKendaraan->first()->kode_aset ?? "" }}',
                 tanggal_kirim: new Date().toISOString().slice(0, 10),
-                status_pengiriman: 'dalam_perjalanan',
+                status_pengiriman: 'menunggu',
                 keterangan: ''
             },
 
@@ -763,6 +905,7 @@
                 id_pengiriman: '',
                 nomor_surat_jalan: '',
                 id_so: '',
+                jumlah_zak: 0,
                 kode_driver: '',
                 kode_aset: '',
                 tanggal_kirim: '',
@@ -772,6 +915,7 @@
 
             detailPengiriman: {},
             statusData: { id: '', nomor_sj: '', status: '' },
+            tolakData: { id: '', nomor_sj: '', alasan_penolakan: '' },
             hapusData: { id: '', nomor_sj: '' },
 
             initSuratJalan() {
@@ -819,6 +963,7 @@
                             id_pengiriman: d.id_pengiriman,
                             nomor_surat_jalan: d.nomor_surat_jalan,
                             id_so: d.id_so,
+                            jumlah_zak: d.jumlah_zak || 0,
                             kode_driver: d.kode_driver,
                             kode_aset: d.kode_kendaraan || d.kode_aset,
                             tanggal_kirim: d.tanggal_kirim ? String(d.tanggal_kirim).split('T')[0] : '',
@@ -839,6 +984,15 @@
                     status: statusSaatIni
                 };
                 this.modalStatusTerbuka = true;
+            },
+
+            bukaModalTolak(id, nomorSJ) {
+                this.tolakData = {
+                    id: id,
+                    nomor_sj: nomorSJ,
+                    alasan_penolakan: ''
+                };
+                this.modalTolakTerbuka = true;
             },
 
             bukaModalHapus(id, nomorSJ) {

@@ -149,6 +149,98 @@
         </div>
     </div>
 
+    <!-- 3.5. Seksi Pengiriman Semen Masuk Menunggu Konfirmasi Fisik (Good Receipt) -->
+    @php
+        $peranGudang = session('kode_jabatan') ?? (auth()->user()->jabatan->kode_jabatan ?? '');
+    @endphp
+    @if(isset($pengirimanMenungguKonfirmasi) && $pengirimanMenungguKonfirmasi->count() > 0)
+        <div class="animasi-masuk bg-white dark:bg-[#14161F] border-2 border-amber-400/60 dark:border-amber-500/40 rounded-2xl overflow-hidden shadow-sm">
+            <div class="p-4 sm:px-5 sm:py-3.5 bg-amber-500/10 border-b border-amber-200 dark:border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-sm font-bold text-slate-900 dark:text-slate-100">Konfirmasi Penerimaan Fisik Pengiriman Semen</h2>
+                            <span class="px-2 py-0.5 text-[10px] font-mono font-bold uppercase rounded bg-amber-500 text-white">
+                                {{ $pengirimanMenungguKonfirmasi->count() }} Armada Truk
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                            Armada telah diberangkatkan dari plant/penyedia. SPV Gudang memverifikasi jumlah fisik semen yang dibongkar untuk menambah stok gudang.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-[#F8FAFC] dark:bg-[#1C1E2A] border-b border-[#E2E8F0] dark:border-[#252837] text-slate-500">
+                        <tr>
+                            <th class="px-4 py-3 font-semibold uppercase tracking-wider">No. Surat Jalan</th>
+                            <th class="px-4 py-3 font-semibold uppercase tracking-wider">Sales Order & Customer</th>
+                            <th class="px-4 py-3 font-semibold uppercase tracking-wider">Armada & Supir</th>
+                            <th class="px-4 py-3 text-right font-semibold uppercase tracking-wider">Muatan Fisik</th>
+                            <th class="px-4 py-3 font-semibold uppercase tracking-wider">Tujuan Gudang</th>
+                            <th class="px-4 py-3 text-center font-semibold uppercase tracking-wider">Aksi Penerimaan</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#EEF0F4] dark:divide-[#252837] text-slate-700 dark:text-slate-300">
+                        @foreach($pengirimanMenungguKonfirmasi as $pMasuk)
+                            <tr class="hover:bg-amber-50/40 dark:hover:bg-amber-500/5 transition-colors">
+                                <td class="px-4 py-3.5 whitespace-nowrap">
+                                    <div class="font-mono font-bold text-sky-600 dark:text-sky-400">{{ $pMasuk->nomor_surat_jalan }}</div>
+                                    <div class="text-[10px] text-slate-400 font-mono mt-0.5">{{ $pMasuk->tanggal_kirim_format }}</div>
+                                </td>
+                                <td class="px-4 py-3.5">
+                                    <div class="font-semibold text-slate-900 dark:text-slate-100">{{ $pMasuk->salesOrder->customer->nama_customer ?? 'Toko Pelanggan' }}</div>
+                                    <div class="text-[10px] text-slate-400 font-mono">{{ $pMasuk->salesOrder->nomor_so ?? '-' }}</div>
+                                </td>
+                                <td class="px-4 py-3.5 whitespace-nowrap">
+                                    <div class="font-mono font-bold text-slate-800 dark:text-slate-200">{{ $pMasuk->kendaraan->no_polisi ?? '-' }}</div>
+                                    <div class="text-[11px] text-slate-500">{{ $pMasuk->driver->nama_karyawan ?? '-' }}</div>
+                                </td>
+                                <td class="px-4 py-3.5 text-right whitespace-nowrap">
+                                    <span class="px-2.5 py-1 rounded-md font-mono font-bold text-xs bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+                                        + {{ number_format($pMasuk->jumlah_zak ?? 0, 0, ',', '.') }} Zak
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3.5 whitespace-nowrap">
+                                    <span class="font-medium text-slate-800 dark:text-slate-200">
+                                        {{ $pMasuk->salesOrder->gudang->nama_gudang ?? 'Gudang Utama' }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3.5 text-center whitespace-nowrap">
+                                    <div x-show="jabatanAktif === 'SPV_GUDANG' || '{{ $peranGudang }}' === 'SPV_GUDANG'">
+                                        <form action="{{ route('operasional.gudang.stok.konfirmasi_penerimaan', $pMasuk->id_pengiriman) }}" method="POST" class="inline">
+                                            @csrf
+                                            <input type="hidden" name="kode_gudang" value="{{ $pMasuk->salesOrder->kode_gudang ?? '' }}">
+                                            <button type="submit" 
+                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 rounded-xl transition-all shadow-sm">
+                                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                                <span>Konfirmasi Terima Fisik</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div x-show="jabatanAktif !== 'SPV_GUDANG' && '{{ $peranGudang }}' !== 'SPV_GUDANG'">
+                                        <span class="text-[11px] font-mono text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-2 py-1 rounded border border-amber-200 dark:border-amber-500/20">
+                                            Menunggu SPV Gudang
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
+
     <!-- 4. Tabel Fasilitas Gudang & Filter -->
     <div x-data="tabelPaginasi({ totalData: {{ count($daftarGudang ?? []) }}, defaultBaris: 10 })" class="animasi-masuk tunda-2 bg-white dark:bg-[#14161F] border border-[#E2E8F0] dark:border-[#252837] rounded-2xl overflow-hidden shadow-sm">
         

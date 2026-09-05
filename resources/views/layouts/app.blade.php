@@ -53,7 +53,7 @@
           } catch(e) {}
           this.dropdownRoleTerbuka = false;
           
-          // Sinkronkan ke sesi backend secara realtime
+          // Sinkronkan ke sesi backend secara realtime lalu muat ulang halaman
           fetch('{{ route("api.sinkronisasi_role") }}', {
             method: 'POST',
             headers: {
@@ -61,7 +61,12 @@
               'X-CSRF-TOKEN': '{{ csrf_token() }}'
             },
             body: JSON.stringify({ kode_jabatan: kode })
-          }).catch(err => console.error('Sinkronisasi role gagal:', err));
+          }).then(() => {
+            window.location.reload();
+          }).catch(err => {
+            console.error('Sinkronisasi role gagal:', err);
+            window.location.reload();
+          });
         },
 
         tutupSidebarMobile() {

@@ -175,6 +175,7 @@ Route::prefix('operasional')->name('operasional.')->group(function () {
         Route::get('/stok/{kode_gudang}', [StokGudangController::class, 'ambilDetail'])->name('stok.detail');
         Route::put('/stok/{kode_gudang}', [StokGudangController::class, 'perbarui'])->name('stok.perbarui');
         Route::post('/stok/{kode_gudang}/mutasi', [StokGudangController::class, 'mutasiStok'])->name('stok.mutasi');
+        Route::post('/stok/konfirmasi-penerimaan/{id_pengiriman}', [StokGudangController::class, 'konfirmasiPenerimaan'])->name('stok.konfirmasi_penerimaan');
         Route::delete('/stok/{kode_gudang}', [StokGudangController::class, 'hapus'])->name('stok.hapus');
 
         // CRUD Stok Opname Fisik Gudang
@@ -234,6 +235,8 @@ Route::prefix('operasional')->name('operasional.')->group(function () {
         Route::get('/surat-jalan/{id_pengiriman}', [SuratJalanController::class, 'ambilDetail'])->name('surat_jalan.detail');
         Route::put('/surat-jalan/{id_pengiriman}', [SuratJalanController::class, 'perbarui'])->name('surat_jalan.perbarui');
         Route::patch('/surat-jalan/{id_pengiriman}/status', [SuratJalanController::class, 'perbaruiStatus'])->name('surat_jalan.perbarui_status');
+        Route::post('/surat-jalan/{id_pengiriman}/setujui', [SuratJalanController::class, 'setujui'])->name('surat_jalan.setujui');
+        Route::post('/surat-jalan/{id_pengiriman}/tolak', [SuratJalanController::class, 'tolak'])->name('surat_jalan.tolak');
         Route::delete('/surat-jalan/{id_pengiriman}', [SuratJalanController::class, 'hapus'])->name('surat_jalan.hapus');
 
         // CRUD Data Master Ongkos Angkut

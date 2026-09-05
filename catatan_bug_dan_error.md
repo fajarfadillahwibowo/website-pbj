@@ -1,6 +1,46 @@
 # 📝 Pelacak Bug, Error, & Progres Terlewati Real-time
 
-- **[TERSELESAIKAN] Standarisasi Indikator Riwayat Waktu Relatif Dibuat / Diedit Real-Time di Seluruh Tabel Sistem**:
+- **[TERSELESAIKAN] Pembenahan Bug Progres 0% Monitoring List SO, Multi-Stage Approval Pengiriman SPV Operasional, & Konfirmasi Fisik SPV Gudang**:
+  - *Kebutuhan & Permasalahan:*
+    1. Pada modul Monitoring List SO (`/keuangan/ap/list-so`), kolom *Terambil* dan *Progres* selalu bernilai `0 Zak` dan `0%`, padahal transaksi pengiriman Surat Jalan telah dibuat.
+    2. Alur penerbitan pengiriman belum memiliki tahapan validasi multi-stage approval: Dispatcher langsung menerbitkan Surat Jalan tanpa persetujuan berjenjang dari staf yang berwenang.
+    3. Belum ada mekanisme konfirmasi fisik barang tiba (Good Receipt) oleh SPV Gudang saat armada membongkar muatan di fasilitas gudang PBJ.
+    4. Pembagian wewenang role RBAC perlu diperketat: Super Admin hanya mengelola akun pengguna, Direktur/Manager hanya melihat laporan keuangan (Neraca & Laba Rugi), dan wewenang approval pengiriman berada mutlak pada SPV Operasional.
+  - *Akar Masalah (Root Cause):*
+    1. Tabel `pengiriman` (Surat Jalan) tidak memiliki kolom `jumlah_zak` muatan dan tidak memiliki relasi atau sinkronisasi balik ke tabel `pembelian_so`. Kolom `qty_pengambilan` pada `pembelian_so` tidak pernah di-update oleh pengiriman apapun.
+    2. Tidak ada status persetujuan draf, kolom verifikator (`disetujui_oleh`, `disetujui_pada`, `alasan_penolakan`), maupun kolom status penerimaan gudang (`status_penerimaan_gudang`).
+    3. Tidak ada guard check kuota SO saat membuat Surat Jalan baru, sehingga muatan berisiko melebihi kuota tebusan pabrik SIG.
+  - *Solusi Menyeluruh:*
+    1. **Migrasi Database (`2026_09_05_000004_tambah_kolom_approval_dan_muatan_pada_pengiriman.php`):**
+       - Menambahkan kolom `jumlah_zak` (integer muatan semen per pengiriman).
+       - Menambahkan kolom `disetujui_oleh` (string username SPV), `disetujui_pada` (datetime), dan `alasan_penolakan` (text).
+       - Menambahkan kolom `status_penerimaan_gudang` (enum: `menunggu_gudang`, `diterima_gudang`).
+       - Memperbarui enum `status_pengiriman` dengan opsi: `menunggu`, `dalam_perjalanan`, `terkirim`, `ditolak`, `retur`.
+    2. **Model Eloquent (`SuratJalan.php` & `PembelianSO.php`):**
+       - Menambahkan atribut `$fillable`, `$casts`, dan status badge dinamis lengkap dengan warna Tailwind semantic (`menunggu` amber, `dalam_perjalanan` blue, `terkirim` emerald, `ditolak` rose).
+       - Menambahkan relasi `daftarPengiriman()` pada model `PembelianSO`.
+    3. **Controller Pengiriman (`SuratJalanController.php`):**
+       - Form simpan Surat Jalan otomatis berstatus default `menunggu` (Draf) dan memvalidasi `jumlah_zak` tidak boleh melebihi sisa kuota SO yang belum dikirim.
+       - Menambahkan method `setujui($id_pengiriman)`: Khusus role `SPV_OPERASIONAL`, memvalidasi sisa kuota SO secara atomik dalam `DB::transaction`, mengubah status ke `dalam_perjalanan`, memotong kuota SO dengan meng-update `pembelian_so.qty_pengambilan`, mengubah `status_so` menjadi `dikirim`/`selesai`, serta mengubah armada truk menjadi `Dalam Pengiriman` dan supir menjadi `Jalan`.
+       - Menambahkan method `tolak(Request $request, $id_pengiriman)`: Khusus role `SPV_OPERASIONAL`, mencatat `alasan_penolakan`, mengembalikan status armada & supir ke `Tersedia`, dan merevisi kuota SO jika sebelumnya disetujui.
+    4. **Controller Monitoring Kuota (`ListSOController.php`):**
+       - Mengintegrasikan eager loading `daftarPengiriman` dan sinkronisasi otomatis kuota pengambilan aktual dari pengiriman disetujui (`whereIn('status_pengiriman', ['dalam_perjalanan', 'terkirim'])`).
+       - Progres persentase dan sisa kuota SO ter-render secara real-time dan akurat.
+    5. **Controller Gudang (`StokGudangController.php`):**
+       - Mengoper daftar pengiriman yang sedang menuju gudang (`$pengirimanMenungguKonfirmasi`) ke view stok gudang.
+       - Menambahkan method `konfirmasiPenerimaan(Request $request, $id_pengiriman)`: Khusus role `SPV_GUDANG`, memverifikasi fisik muatan zak yang tiba, menambahkan kuantitas zak ke `list_gudang_so.stok_tersedia`, menandai `status_penerimaan_gudang = 'diterima_gudang'` & `status_pengiriman = 'terkirim'`, serta melepaskan armada dan driver kembali ke status `Tersedia`.
+    6. **Antarmuka Pengguna (Blade Views):**
+       - `surat_jalan.blade.php`: Menampilkan input `Jumlah Zak Muatan` dengan info kuota SO live, badge status persetujuan, tombol aksi cepat *Setujui* dan *Tolak* khusus SPV Operasional, modal alasan penolakan, penguncian cetak Surat Jalan (hanya dapat dicetak setelah disetujui), serta lembar cetak dokumen resmi berkop dengan 4 kolom tanda tangan pengesahan (Dispatcher, SPV Operasional, Supir, Penerima).
+       - `operasional/gudang/stok.blade.php`: Menambahkan seksi khusus *Konfirmasi Penerimaan Fisik Pengiriman Semen* untuk SPV Gudang dengan tombol 1-klik konfirmasi terima fisik.
+       - `app.blade.php`: Menyelaraskan pergantian role di header dengan reload sesi otomatis ke backend PHP.
+    7. **Dokumentasi Lengkap Alur Hulu-ke-Hilir:**
+       - Membuat panduan komprehensif di `docs/08_panduan_alur_pengiriman_dan_pergudangan.md` lengkap dengan visualisasi Mermaid diagram alur, matriks RACI wewenang peran, skema database, dan 5 skenario pengujian tim QA.
+  - *Hasil Verifikasi Live Browser Mandiri (Autonomous Subagent):*
+    1. Dispatcher menerbitkan SJ-002 sebanyak 200 Zak dari SO-PBJ-20260905-002 (500 Zak) -> Status draf berhasil diterbitkan dengan badge amber `MENUNGGU PERSETUJUAN SPV` dan dokumen cetak terkunci aman.
+    2. Login / beralih ke SPV Operasional -> Tombol hijau `Setujui` dan merah `Tolak` tampil responsif. Setelah disetujui, status berubah menjadi `DALAM PERJALANAN`.
+    3. Cek Monitoring List SO (`/keuangan/ap/list-so`) -> Kolom *Terambil* terbukti bertambah menjadi `200 Zak` dan progres berhasil naik menjadi `40%` (masalah 0% terselesaikan 100%).
+    4. Beralih ke SPV Gudang -> Buka `/operasional/gudang/stok`, seksi konfirmasi fisik menampilkan SJ-002 (+200 Zak). Tombol `Konfirmasi Terima Fisik` ditekan -> Stok fisik Gudang Hub Cikampek otomatis bertambah dari 1.704 Zak menjadi 1.904 Zak, status pengiriman menjadi `Terkirim`, dan armada kembali `Tersedia`.
+
   - *Kebutuhan:* Menambahkan penanda visual kapan data dibuat atau diperbarui di seluruh tabel sistem secara konsisten menggunakan komponen terstandarisasi, menampilkan ikon jam SVG dan format relatif ramah pengguna (contoh: `🕒 3 hari yang lalu`, `1 jam yang lalu`, atau `Baru`), serta tooltip atribut `title` dengan tanggal dan jam presisi (`d/m/Y H:i:s`).
   - *Solusi:*
     1. Membuat komponen reusable Blade `<x-waktu-relatif :diperbaruiPada="..." :dibuatPada="..." />` (`resources/views/components/waktu-relatif.blade.php`) dengan kalkulasi otomatis `Carbon::locale('id')->diffForHumans()`, fallback ke `dibuatPada` atau `'Baru'`, tooltip presisi, serta ikon jam SVG profesional tanpa emoji teks Unicode.

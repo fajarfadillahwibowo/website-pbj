@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Operasional\Gudang;
 use App\Models\Master\Barang;
+use App\Models\Operasional\SuratJalan;
+use App\Models\Operasional\Kendaraan;
+use App\Models\Operasional\Driver;
 use Carbon\Carbon;
 
 class StokGudangController extends Controller
@@ -60,6 +63,21 @@ class StokGudangController extends Controller
         // Master Barang Semen untuk Dropdown Form
         $daftarBarang = Barang::orderBy('nama_barang', 'asc')->get();
 
+        // Pengiriman Semen yang Sedang Menuju Gudang / Menunggu Konfirmasi Penerimaan Fisik
+        $pengirimanMenungguKonfirmasi = SuratJalan::with([
+            'salesOrder.customer',
+            'salesOrder.gudang',
+            'driver',
+            'kendaraan'
+        ])
+        ->whereIn('status_pengiriman', ['dalam_perjalanan', 'terkirim'])
+        ->where(function ($q) {
+            $q->whereNull('status_penerimaan_gudang')
+              ->orWhere('status_penerimaan_gudang', '!=', 'diterima_gudang');
+        })
+        ->orderBy('dibuat_pada', 'desc')
+        ->get();
+
         return view('operasional.gudang.stok', compact(
             'daftarGudang',
             'kataKunci',
@@ -68,7 +86,8 @@ class StokGudangController extends Controller
             'totalStokZak',
             'stokKritis',
             'totalValuasiStok',
-            'daftarBarang'
+            'daftarBarang',
+            'pengirimanMenungguKonfirmasi'
         ));
     }
 
@@ -309,6 +328,68 @@ class StokGudangController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Gagal memproses mutasi stok: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Konfirmasi penerimaan fisik barang semen oleh SPV Gudang.
+     */
+    public function konfirmasiPenerimaan(Request $request, $id_pengiriman)
+    {
+        $peranAktif = session('kode_jabatan') ?? (auth()->user()->jabatan->kode_jabatan ?? '');
+        if ($peranAktif !== 'SPV_GUDANG') {
+            return redirect()->back()->with('error', 'Akses ditolak! Hanya SPV Gudang yang berwenang mengonfirmasi penerimaan fisik barang di gudang.');
+        }
+
+        $pengiriman = SuratJalan::with('salesOrder.gudang')->findOrFail($id_pengiriman);
+
+        if ($pengiriman->status_penerimaan_gudang === 'diterima_gudang') {
+            return redirect()->back()->with('error', 'Pengiriman ini sudah pernah dikonfirmasi penerimaannya oleh gudang.');
+        }
+
+        if (!in_array($pengiriman->status_pengiriman, ['dalam_perjalanan', 'terkirim'])) {
+            return redirect()->back()->with('error', 'Pengiriman belum disetujui atau masih dalam status draf.');
+        }
+
+        // Tentukan gudang tujuan penerimaan
+        $kodeGudang = $request->input('kode_gudang') 
+            ?? ($pengiriman->salesOrder->kode_gudang ?? null) 
+            ?? (Gudang::first()->kode_gudang ?? 'GDG-PUSAT');
+
+        $gudang = Gudang::find($kodeGudang) ?? Gudang::first();
+
+        DB::beginTransaction();
+        try {
+            // Tambahkan stok fisik semen ke fasilitas gudang penerima
+            $gudang->increment('stok_tersedia', $pengiriman->jumlah_zak);
+            $gudang->update(['diperbarui_pada' => now()]);
+
+            // Tandai status penerimaan pengiriman
+            $pengiriman->update([
+                'status_penerimaan_gudang' => 'diterima_gudang',
+                'status_pengiriman'        => 'terkirim',
+                'diperbarui_pada'          => now(),
+            ]);
+
+            // Bebaskan armada truk & supir pengemudi
+            if ($pengiriman->kode_kendaraan) {
+                Kendaraan::where('kode_kendaraan', $pengiriman->kode_kendaraan)
+                    ->update(['status_kendaraan' => 'Tersedia', 'diperbarui_pada' => now()]);
+            }
+            if ($pengiriman->kode_driver) {
+                Driver::where('kode_karyawan', $pengiriman->kode_driver)
+                    ->update(['status_karyawan' => 'Tersedia', 'diperbarui_pada' => now()]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('operasional.gudang.stok')->with(
+                'sukses',
+                "Penerimaan fisik Surat Jalan {$pengiriman->nomor_surat_jalan} sebanyak {$pengiriman->jumlah_zak} Zak berhasil diverifikasi ke {$gudang->nama_gudang}! Armada & supir kini Tersedia kembali."
+            );
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal memproses konfirmasi penerimaan gudang: ' . $e->getMessage());
         }
     }
 

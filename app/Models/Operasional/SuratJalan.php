@@ -21,15 +21,22 @@ class SuratJalan extends Model
     protected $fillable = [
         'nomor_surat_jalan',
         'id_so',
+        'jumlah_zak',
         'kode_kendaraan',
         'kode_driver',
         'tanggal_kirim',
         'status_pengiriman',
+        'disetujui_oleh',
+        'disetujui_pada',
+        'alasan_penolakan',
+        'status_penerimaan_gudang',
         'keterangan',
     ];
 
     protected $casts = [
         'tanggal_kirim' => 'datetime',
+        'disetujui_pada' => 'datetime',
+        'jumlah_zak' => 'integer',
         'dibuat_pada' => 'datetime',
         'diperbarui_pada' => 'datetime',
     ];
@@ -114,13 +121,18 @@ class SuratJalan extends Model
                 'warna' => 'emerald',
                 'bg' => 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20',
             ],
-            'retur' => [
-                'label' => 'Retur / Ditolak',
+            'ditolak' => [
+                'label' => 'Ditolak / Perlu Revisi',
                 'warna' => 'rose',
                 'bg' => 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/20',
             ],
+            'retur' => [
+                'label' => 'Retur Pengiriman',
+                'warna' => 'purple',
+                'bg' => 'bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-500/20',
+            ],
             default => [
-                'label' => 'Menunggu Muat',
+                'label' => 'Menunggu Persetujuan SPV',
                 'warna' => 'amber',
                 'bg' => 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20',
             ],

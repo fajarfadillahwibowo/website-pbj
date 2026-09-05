@@ -66,12 +66,13 @@ class SuratJalanController extends Controller
 
         $daftarPengiriman = $query->orderBy('tanggal_kirim', 'desc')->get();
 
-        // 4 KPI Statistik Pengiriman
+        // 5 KPI Statistik Pengiriman
         $semuaPengiriman = SuratJalan::all();
         $totalPengiriman = $semuaPengiriman->count();
         $pengirimanJalan = $semuaPengiriman->where('status_pengiriman', 'dalam_perjalanan')->count();
         $pengirimanSelesai = $semuaPengiriman->where('status_pengiriman', 'terkirim')->count();
-        $pengirimanMenunggu = $semuaPengiriman->whereIn('status_pengiriman', ['menunggu', 'retur'])->count();
+        $pengirimanMenunggu = $semuaPengiriman->where('status_pengiriman', 'menunggu')->count();
+        $pengirimanDitolak = $semuaPengiriman->where('status_pengiriman', 'ditolak')->count();
 
         // Master Data untuk Dropdown Modal
         $daftarDriver = Driver::where('kategori_karyawan', 'driver')->orderBy('nama_karyawan', 'asc')->get();
@@ -80,7 +81,13 @@ class SuratJalanController extends Controller
         }
 
         $daftarKendaraan = Kendaraan::with(['jenisAset', 'asetPerusahaan'])->orderBy('no_polisi', 'asc')->get();
-        $daftarSO = PembelianSO::with(['customer', 'gudang'])->orderBy('dibuat_pada', 'desc')->get();
+        $daftarSO = PembelianSO::with(['customer', 'gudang'])->orderBy('dibuat_pada', 'desc')->get()->map(function ($so) {
+            $terpakai = SuratJalan::where('id_so', $so->id_so)
+                ->whereIn('status_pengiriman', ['dalam_perjalanan', 'terkirim'])
+                ->sum('jumlah_zak');
+            $so->sisa_kuota = max(0, $so->jumlah_zak - $terpakai);
+            return $so;
+        });
 
         return view('operasional.pengiriman.surat_jalan', compact(
             'daftarPengiriman',
@@ -90,6 +97,7 @@ class SuratJalanController extends Controller
             'pengirimanJalan',
             'pengirimanSelesai',
             'pengirimanMenunggu',
+            'pengirimanDitolak',
             'daftarDriver',
             'daftarKendaraan',
             'daftarSO'
@@ -97,7 +105,7 @@ class SuratJalanController extends Controller
     }
 
     /**
-     * Simpan Surat Jalan baru ke database.
+     * Simpan Surat Jalan baru ke database (Draf Menunggu Persetujuan SPV).
      */
     public function simpan(Request $request)
     {
@@ -115,23 +123,36 @@ class SuratJalanController extends Controller
             'nomor_surat_jalan.unique' => 'Nomor surat jalan sudah terdaftar.',
             'id_so.required' => 'Sales Order (SO) tujuan wajib dipilih.',
             'id_so.exists' => 'Sales Order tidak valid.',
+            'jumlah_zak.required' => 'Kuantitas muatan zak wajib diisi.',
+            'jumlah_zak.integer' => 'Kuantitas muatan zak harus berupa bilangan bulat.',
+            'jumlah_zak.min' => 'Kuantitas muatan zak minimal 1 zak.',
             'kode_driver.required' => 'Driver pengemudi wajib dipilih.',
             'kode_driver.exists' => 'Data driver tidak valid.',
             'kode_kendaraan.required' => 'Armada truk pengiriman wajib dipilih.',
             'kode_kendaraan.exists' => 'Data armada truk tidak valid.',
             'tanggal_kirim.required' => 'Tanggal dan jam keberangkatan wajib diisi.',
-            'status_pengiriman.required' => 'Status pengiriman wajib dipilih.',
         ];
 
         $validated = $request->validate([
             'nomor_surat_jalan' => 'required|string|max:50|unique:pengiriman,nomor_surat_jalan',
             'id_so' => 'required|integer|exists:pembelian_so,id_so',
+            'jumlah_zak' => 'required|integer|min:1',
             'kode_driver' => 'required|string|max:30|exists:data_karyawan,kode_karyawan',
             'kode_kendaraan' => 'required|string|max:30|exists:data_kendaraan,kode_kendaraan',
             'tanggal_kirim' => 'required|date',
-            'status_pengiriman' => 'required|in:menunggu,dalam_perjalanan,terkirim,retur',
             'keterangan' => 'nullable|string',
         ], $pesanKustom);
+
+        // Validasi Strict Guard: Sisa Kuota SO
+        $so = PembelianSO::findOrFail($validated['id_so']);
+        $terpakai = SuratJalan::where('id_so', $so->id_so)
+            ->whereIn('status_pengiriman', ['dalam_perjalanan', 'terkirim'])
+            ->sum('jumlah_zak');
+        $sisaKuota = max(0, $so->jumlah_zak - $terpakai);
+
+        if ($validated['jumlah_zak'] > $sisaKuota) {
+            return redirect()->back()->withInput()->with('error', "Gagal menerbitkan draf! Kuantitas muatan ({$validated['jumlah_zak']} Zak) melebihi sisa kuota SO yang tersedia ({$sisaKuota} Zak).");
+        }
 
         DB::beginTransaction();
         try {
@@ -140,26 +161,21 @@ class SuratJalanController extends Controller
             $suratJalan = SuratJalan::create([
                 'nomor_surat_jalan' => strtoupper(trim($validated['nomor_surat_jalan'])),
                 'id_so' => $validated['id_so'],
+                'jumlah_zak' => (int) $validated['jumlah_zak'],
                 'kode_driver' => $validated['kode_driver'],
                 'kode_kendaraan' => $validated['kode_kendaraan'],
                 'tanggal_kirim' => $tglKirim,
-                'status_pengiriman' => $validated['status_pengiriman'],
+                'status_pengiriman' => 'menunggu', // Wajib status menunggu untuk persetujuan SPV
                 'keterangan' => $validated['keterangan'] ? trim($validated['keterangan']) : null,
             ]);
-
-            // Perbarui status Sales Order menjadi 'dikirim' jika masih draft/disetujui
-            $so = PembelianSO::find($validated['id_so']);
-            if ($so && in_array($so->status_so, ['draft', 'disetujui'])) {
-                $so->update(['status_so' => 'dikirim', 'diperbarui_pada' => now()]);
-            }
 
             DB::commit();
 
             return redirect()->route('operasional.pengiriman.surat_jalan')
-                ->with('sukses', "Surat Jalan {$suratJalan->nomor_surat_jalan} berhasil diterbitkan!");
+                ->with('sukses', "Draf Surat Jalan {$suratJalan->nomor_surat_jalan} ({$suratJalan->jumlah_zak} Zak) berhasil diajukan! Menunggu persetujuan SPV Operasional.");
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->withInput()->with('error', 'Gagal menerbitkan Surat Jalan: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Gagal mengajukan Surat Jalan: ' . $e->getMessage());
         }
     }
 
@@ -214,36 +230,69 @@ class SuratJalanController extends Controller
         $pesanKustom = [
             'id_so.required' => 'Sales Order (SO) tujuan wajib dipilih.',
             'id_so.exists' => 'Sales Order tidak valid.',
+            'jumlah_zak.required' => 'Kuantitas muatan zak wajib diisi.',
+            'jumlah_zak.integer' => 'Kuantitas muatan zak harus berupa bilangan bulat.',
+            'jumlah_zak.min' => 'Kuantitas muatan zak minimal 1 zak.',
             'kode_driver.required' => 'Driver pengemudi wajib dipilih.',
             'kode_driver.exists' => 'Data driver tidak valid.',
             'kode_kendaraan.required' => 'Armada truk pengiriman wajib dipilih.',
             'kode_kendaraan.exists' => 'Data armada truk tidak valid.',
             'tanggal_kirim.required' => 'Tanggal dan jam keberangkatan wajib diisi.',
-            'status_pengiriman.required' => 'Status pengiriman wajib dipilih.',
         ];
 
         $validated = $request->validate([
             'id_so' => 'required|integer|exists:pembelian_so,id_so',
+            'jumlah_zak' => 'required|integer|min:1',
             'kode_driver' => 'required|string|max:30|exists:data_karyawan,kode_karyawan',
             'kode_kendaraan' => 'required|string|max:30|exists:data_kendaraan,kode_kendaraan',
             'tanggal_kirim' => 'required|date',
-            'status_pengiriman' => 'required|in:menunggu,dalam_perjalanan,terkirim,retur',
             'keterangan' => 'nullable|string',
         ], $pesanKustom);
+
+        // Validasi Sisa Kuota SO
+        $so = PembelianSO::findOrFail($validated['id_so']);
+        $terpakai = SuratJalan::where('id_so', $so->id_so)
+            ->where('id_pengiriman', '!=', $suratJalan->id_pengiriman)
+            ->whereIn('status_pengiriman', ['dalam_perjalanan', 'terkirim'])
+            ->sum('jumlah_zak');
+        $sisaKuota = max(0, $so->jumlah_zak - $terpakai);
+
+        if ($validated['jumlah_zak'] > $sisaKuota) {
+            return redirect()->back()->withInput()->with('error', "Kuantitas muatan ({$validated['jumlah_zak']} Zak) melebihi sisa kuota SO yang tersedia ({$sisaKuota} Zak).");
+        }
 
         DB::beginTransaction();
         try {
             $tglKirim = Carbon::parse($validated['tanggal_kirim'])->format('Y-m-d H:i:s');
+            
+            // Jika sebelumnya ditolak dan diedit ulang oleh Dispatcher, status kembali ke 'menunggu'
+            $statusBaru = $suratJalan->status_pengiriman === 'ditolak' ? 'menunggu' : $suratJalan->status_pengiriman;
+            $alasan = $suratJalan->status_pengiriman === 'ditolak' ? null : $suratJalan->alasan_penolakan;
 
             $suratJalan->update([
                 'id_so' => $validated['id_so'],
+                'jumlah_zak' => (int) $validated['jumlah_zak'],
                 'kode_driver' => $validated['kode_driver'],
                 'kode_kendaraan' => $validated['kode_kendaraan'],
                 'tanggal_kirim' => $tglKirim,
-                'status_pengiriman' => $validated['status_pengiriman'],
+                'status_pengiriman' => $statusBaru,
+                'alasan_penolakan' => $alasan,
                 'keterangan' => $validated['keterangan'] ? trim($validated['keterangan']) : null,
                 'diperbarui_pada' => now(),
             ]);
+
+            // Sinkronkan kuota SO jika pengiriman sudah dalam perjalanan / terkirim
+            if (in_array($statusBaru, ['dalam_perjalanan', 'terkirim'])) {
+                $totalTerambil = SuratJalan::where('id_so', $so->id_so)
+                    ->whereIn('status_pengiriman', ['dalam_perjalanan', 'terkirim'])
+                    ->sum('jumlah_zak');
+                $statusSO = ($totalTerambil >= $so->jumlah_zak && $so->jumlah_zak > 0) ? 'selesai' : 'dikirim';
+                $so->update([
+                    'qty_pengambilan' => $totalTerambil,
+                    'status_so' => $statusSO,
+                    'diperbarui_pada' => now(),
+                ]);
+            }
 
             DB::commit();
 
@@ -256,6 +305,134 @@ class SuratJalanController extends Controller
     }
 
     /**
+     * Setujui Draf Surat Jalan oleh SPV Operasional.
+     */
+    public function setujui($id_pengiriman)
+    {
+        $peranAktif = session('kode_jabatan') ?? (auth()->user()->jabatan->kode_jabatan ?? '');
+        if ($peranAktif !== 'SPV_OPERASIONAL') {
+            return redirect()->back()->with('error', 'Akses ditolak! Hanya SPV Operasional yang memiliki wewenang untuk menyetujui pengiriman.');
+        }
+
+        $suratJalan = SuratJalan::findOrFail($id_pengiriman);
+
+        $so = PembelianSO::findOrFail($suratJalan->id_so);
+        $terpakai = SuratJalan::where('id_so', $so->id_so)
+            ->where('id_pengiriman', '!=', $suratJalan->id_pengiriman)
+            ->whereIn('status_pengiriman', ['dalam_perjalanan', 'terkirim'])
+            ->sum('jumlah_zak');
+        $sisaKuota = max(0, $so->jumlah_zak - $terpakai);
+
+        if ($suratJalan->jumlah_zak > $sisaKuota) {
+            return redirect()->back()->with('error', "Gagal menyetujui! Kuantitas muatan ({$suratJalan->jumlah_zak} Zak) melebihi sisa kuota SO yang tersedia saat ini ({$sisaKuota} Zak).");
+        }
+
+        DB::beginTransaction();
+        try {
+            $username = auth()->user()->username ?? 'spv_operasional';
+
+            $suratJalan->update([
+                'status_pengiriman' => 'dalam_perjalanan',
+                'disetujui_oleh'    => $username,
+                'disetujui_pada'    => now(),
+                'alasan_penolakan'  => null,
+                'diperbarui_pada'   => now(),
+            ]);
+
+            // Update real-time kuota SO terambil
+            $totalTerambil = SuratJalan::where('id_so', $so->id_so)
+                ->whereIn('status_pengiriman', ['dalam_perjalanan', 'terkirim'])
+                ->sum('jumlah_zak');
+            
+            $statusSO = ($totalTerambil >= $so->jumlah_zak && $so->jumlah_zak > 0) ? 'selesai' : 'dikirim';
+
+            $so->update([
+                'qty_pengambilan' => $totalTerambil,
+                'status_so'       => $statusSO,
+                'diperbarui_pada' => now(),
+            ]);
+
+            // Update status armada truk & supir
+            if ($suratJalan->kode_kendaraan) {
+                Kendaraan::where('kode_kendaraan', $suratJalan->kode_kendaraan)
+                    ->update(['status_kendaraan' => 'Dalam Pengiriman', 'diperbarui_pada' => now()]);
+            }
+            if ($suratJalan->kode_driver) {
+                Driver::where('kode_karyawan', $suratJalan->kode_driver)
+                    ->update(['status_karyawan' => 'Jalan', 'diperbarui_pada' => now()]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('operasional.pengiriman.surat_jalan')
+                ->with('sukses', "Pengiriman {$suratJalan->nomor_surat_jalan} ({$suratJalan->jumlah_zak} Zak) berhasil disetujui oleh SPV Operasional! Surat Jalan resmi siap dicetak.");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal menyetujui pengiriman: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Tolak / Minta Revisi Draf Surat Jalan oleh SPV Operasional.
+     */
+    public function tolak(Request $request, $id_pengiriman)
+    {
+        $peranAktif = session('kode_jabatan') ?? (auth()->user()->jabatan->kode_jabatan ?? '');
+        if ($peranAktif !== 'SPV_OPERASIONAL') {
+            return redirect()->back()->with('error', 'Akses ditolak! Hanya SPV Operasional yang memiliki wewenang untuk menolak / meminta revisi pengiriman.');
+        }
+
+        $request->validate([
+            'alasan_penolakan' => 'required|string|max:500',
+        ], [
+            'alasan_penolakan.required' => 'Catatan alasan penolakan / revisi wajib diisi.',
+        ]);
+
+        $suratJalan = SuratJalan::findOrFail($id_pengiriman);
+
+        DB::beginTransaction();
+        try {
+            $suratJalan->update([
+                'status_pengiriman' => 'ditolak',
+                'alasan_penolakan'  => trim($request->alasan_penolakan),
+                'diperbarui_pada'   => now(),
+            ]);
+
+            // Rekalkulasi kuota SO jika sebelumnya berstatus dalam_perjalanan
+            $so = PembelianSO::find($suratJalan->id_so);
+            if ($so) {
+                $totalTerambil = SuratJalan::where('id_so', $so->id_so)
+                    ->whereIn('status_pengiriman', ['dalam_perjalanan', 'terkirim'])
+                    ->sum('jumlah_zak');
+                $statusSO = ($totalTerambil >= $so->jumlah_zak && $so->jumlah_zak > 0) ? 'selesai' : ($totalTerambil > 0 ? 'dikirim' : 'disetujui');
+                $so->update([
+                    'qty_pengambilan' => $totalTerambil,
+                    'status_so'       => $statusSO,
+                    'diperbarui_pada' => now(),
+                ]);
+            }
+
+            // Kembalikan armada & driver ke tersedia
+            if ($suratJalan->kode_kendaraan) {
+                Kendaraan::where('kode_kendaraan', $suratJalan->kode_kendaraan)
+                    ->update(['status_kendaraan' => 'Tersedia', 'diperbarui_pada' => now()]);
+            }
+            if ($suratJalan->kode_driver) {
+                Driver::where('kode_karyawan', $suratJalan->kode_driver)
+                    ->update(['status_karyawan' => 'Aktif', 'diperbarui_pada' => now()]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('operasional.pengiriman.surat_jalan')
+                ->with('sukses', "Pengiriman {$suratJalan->nomor_surat_jalan} ditolak dengan status Perlu Revisi.");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal memproses penolakan pengiriman: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Perbarui status pengiriman secara cepat (Quick Status Update).
      */
     public function perbaruiStatus(Request $request, $id_pengiriman)
@@ -263,23 +440,57 @@ class SuratJalanController extends Controller
         $suratJalan = SuratJalan::findOrFail($id_pengiriman);
 
         $validated = $request->validate([
-            'status_pengiriman' => 'required|in:menunggu,dalam_perjalanan,terkirim,retur',
+            'status_pengiriman' => 'required|in:menunggu,dalam_perjalanan,terkirim,ditolak,retur',
         ]);
 
-        $suratJalan->update([
-            'status_pengiriman' => $validated['status_pengiriman'],
-            'diperbarui_pada' => now(),
-        ]);
-
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'status' => 'sukses',
-                'pesan' => "Status Surat Jalan {$suratJalan->nomor_surat_jalan} diperbarui menjadi {$validated['status_pengiriman']}!"
+        DB::beginTransaction();
+        try {
+            $suratJalan->update([
+                'status_pengiriman' => $validated['status_pengiriman'],
+                'diperbarui_pada' => now(),
             ]);
-        }
 
-        return redirect()->route('operasional.pengiriman.surat_jalan')
-            ->with('sukses', "Status Surat Jalan {$suratJalan->nomor_surat_jalan} diperbarui!");
+            // Update kuota SO
+            $so = PembelianSO::find($suratJalan->id_so);
+            if ($so) {
+                $totalTerambil = SuratJalan::where('id_so', $so->id_so)
+                    ->whereIn('status_pengiriman', ['dalam_perjalanan', 'terkirim'])
+                    ->sum('jumlah_zak');
+                $statusSO = ($totalTerambil >= $so->jumlah_zak && $so->jumlah_zak > 0) ? 'selesai' : ($totalTerambil > 0 ? 'dikirim' : 'disetujui');
+                $so->update([
+                    'qty_pengambilan' => $totalTerambil,
+                    'status_so'       => $statusSO,
+                    'diperbarui_pada' => now(),
+                ]);
+            }
+
+            // Jika terkirim atau retur, kembalikan status armada dan driver
+            if (in_array($validated['status_pengiriman'], ['terkirim', 'retur'])) {
+                if ($suratJalan->kode_kendaraan) {
+                    Kendaraan::where('kode_kendaraan', $suratJalan->kode_kendaraan)
+                        ->update(['status_kendaraan' => 'Tersedia', 'diperbarui_pada' => now()]);
+                }
+                if ($suratJalan->kode_driver) {
+                    Driver::where('kode_karyawan', $suratJalan->kode_driver)
+                        ->update(['status_karyawan' => 'Aktif', 'diperbarui_pada' => now()]);
+                }
+            }
+
+            DB::commit();
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'status' => 'sukses',
+                    'pesan' => "Status Surat Jalan {$suratJalan->nomor_surat_jalan} diperbarui menjadi {$validated['status_pengiriman']}!"
+                ]);
+            }
+
+            return redirect()->route('operasional.pengiriman.surat_jalan')
+                ->with('sukses', "Status Surat Jalan {$suratJalan->nomor_surat_jalan} diperbarui!");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal memperbarui status pengiriman: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -289,15 +500,38 @@ class SuratJalanController extends Controller
     {
         $suratJalan = SuratJalan::findOrFail($id_pengiriman);
         $nomorSJ = $suratJalan->nomor_surat_jalan;
+        $idSO = $suratJalan->id_so;
 
+        DB::beginTransaction();
         try {
             $suratJalan->delete();
+
+            // Rekalkulasi kuota SO
+            $so = PembelianSO::find($idSO);
+            if ($so) {
+                $totalTerambil = SuratJalan::where('id_so', $idSO)
+                    ->whereIn('status_pengiriman', ['dalam_perjalanan', 'terkirim'])
+                    ->sum('jumlah_zak');
+                $statusSO = ($totalTerambil >= $so->jumlah_zak && $so->jumlah_zak > 0) ? 'selesai' : ($totalTerambil > 0 ? 'dikirim' : 'disetujui');
+                $so->update([
+                    'qty_pengambilan' => $totalTerambil,
+                    'status_so'       => $statusSO,
+                    'diperbarui_pada' => now(),
+                ]);
+            }
+
+            DB::commit();
 
             return redirect()->route('operasional.pengiriman.surat_jalan')
                 ->with('sukses', "Surat Jalan {$nomorSJ} berhasil dihapus dari sistem!");
         } catch (\Illuminate\Database\QueryException $e) {
+            DB::rollBack();
             return redirect()->route('operasional.pengiriman.surat_jalan')
                 ->with('error', "Gagal menghapus Surat Jalan {$nomorSJ}! Data telah memiliki Berita Acara Penerimaan (Rilisan).");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->route('operasional.pengiriman.surat_jalan')
+                ->with('error', 'Gagal menghapus Surat Jalan: ' . $e->getMessage());
         }
     }
 
