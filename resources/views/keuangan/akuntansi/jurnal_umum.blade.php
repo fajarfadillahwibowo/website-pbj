@@ -182,7 +182,7 @@
                             <td class="px-4 py-3 text-right font-mono tabular-nums font-bold {{ ($jurnal->posisi ?? '') === 'Kredit' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-300 dark:text-slate-700' }}">
                                 {{ ($jurnal->posisi ?? '') === 'Kredit' ? 'Rp ' . number_format($jurnal->nominal, 0, ',', '.') : '-' }}
                             </td>
-                            <td class="px-4 py-3 text-center">
+                            <td class="px-4 py-3 text-center whitespace-nowrap">
                                 <x-menu-aksi-tabel 
                                     :kodeSalin="$jurnal->nomor_jurnal" 
                                     labelSalin="Salin No"
@@ -203,6 +203,21 @@
                                         <span>Cetak Memorial</span>
                                     </button>
                                 </x-menu-aksi-tabel>
+
+                                <!-- Riwayat Terakhir Dibuat / Diedit Real-Time -->
+                                @php
+                                    $waktuJurnal = !empty($jurnal->diperbarui_pada) ? $jurnal->diperbarui_pada : (!empty($jurnal->dibuat_pada) ? $jurnal->dibuat_pada : null);
+                                    $relatifWaktu = $waktuJurnal ? \Carbon\Carbon::parse($waktuJurnal)->locale('id')->diffForHumans() : 'Baru';
+                                    $waktuPresisi = $waktuJurnal ? \Carbon\Carbon::parse($waktuJurnal)->format('d/m/Y H:i:s') : '-';
+                                    $labelTitle = !empty($jurnal->diperbarui_pada) ? 'Terakhir diperbarui: ' : 'Dibuat pada: ';
+                                @endphp
+                                <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 flex items-center justify-center gap-1 font-mono cursor-help"
+                                     title="{{ $labelTitle }}{{ $waktuPresisi }}">
+                                    <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <span>{{ $relatifWaktu }}</span>
+                                </div>
                             </td>
                         </tr>
                     @empty

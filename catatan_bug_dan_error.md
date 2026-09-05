@@ -1,5 +1,13 @@
 # 📝 Pelacak Bug, Error, & Progres Terlewati Real-time
 
+- **[TERSELESAIKAN] Indikator Riwayat Waktu Dibuat / Diedit Real-Time pada Buku Jurnal Umum Akuntansi**:
+  - *Kebutuhan:* Menambahkan penanda visual kapan ayat jurnal umum dicatat atau diperbarui dengan format relatif waktu ramah pengguna (contoh: ikon jam dengan teks `3 hari yang lalu`, `2 jam yang lalu`, atau `Baru`), seragam dengan modul Armada Kendaraan, Driver, dan Aset Perusahaan.
+  - *Solusi:*
+    1. Membuat migrasi database `2026_09_05_000003_tambah_diperbarui_pada_tabel_jurnal_umum.php` untuk menambahkan kolom `diperbarui_pada` (nullable timestamp) pada tabel `jurnal_umum`.
+    2. Memperbarui model [JurnalUmum.php](file:///c:/laragon/www/laravel1/app/Models/Keuangan/JurnalUmum.php) dengan konstanta `UPDATED_AT = 'diperbarui_pada'`, casts tanggal, serta accessor `terakhir_diedit_relatif` dan `terakhir_diedit_waktu`.
+    3. Memperbarui view [jurnal_umum.blade.php](file:///c:/laragon/www/laravel1/resources/views/keuangan/akuntansi/jurnal_umum.blade.php) pada kolom AKSI untuk menampilkan ikon jam SVG dan teks relatif waktu `diffForHumans()` di bawah tombol popover tiga titik (`•••`), lengkap dengan tooltip atribut `title` yang memuat tanggal dan jam presisi.
+  - *Hasil Verifikasi:* Lolos pengujian browser live mandiri (Autonomous Browser Subagent). Indikator waktu relatif muncul presisi di setiap baris jurnal (contoh: `2 hari yang lalu` untuk jurnal sekuensial) dengan tooltip tanggal-jam lengkap dan tanpa error konsol.
+
 - **[TERSELESAIKAN] Getaran Layout Shift Saat Refresh/Filter/Navigasi & Transisi Mulus Full SPA**:
   - *Penyebab:*
     1. Pembaruan filter via `<x-dropdown-kustom>` memanggil `form.submit()` native JavaScript yang menurut standar W3C mem-bypass event listener `submit`, sehingga interceptor SPA tidak menangkapnya dan browser melakukan full page reload (layar berkedip putih dan seluruh dokumen dimuat ulang).
