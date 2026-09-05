@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Master\Wilayah;
 use App\Helpers\GeneratorKodeOtomatis;
 
@@ -16,7 +17,7 @@ class WilayahController extends Controller
     {
         $kataKunci = $request->input('cari');
 
-        $query = Wilayah::withCount('daftarCustomer');
+        $query = Wilayah::withCount(['daftarCustomer', 'daftarToko']);
 
         if ($kataKunci) {
             $query->where(function ($q) use ($kataKunci) {
@@ -85,14 +86,23 @@ class WilayahController extends Controller
     }
 
     /**
-     * Hapus data wilayah jika belum ada customer terhubung.
+     * Hapus data wilayah jika belum ada customer atau toko terhubung.
      */
     public function destroy($kode_wilayah)
     {
-        $wilayah = Wilayah::withCount('daftarCustomer')->findOrFail($kode_wilayah);
+        $wilayah = Wilayah::withCount(['daftarCustomer', 'daftarToko'])->findOrFail($kode_wilayah);
 
-        if ($wilayah->daftar_customer_count > 0) {
-            return redirect()->route('master.wilayah.index')->with('gagal', "Wilayah '{$wilayah->nama_wilayah}' tidak dapat dihapus karena memiliki {$wilayah->daftar_customer_count} data customer toko yang terhubung.");
+        if ($wilayah->daftar_customer_count > 0 || $wilayah->daftar_toko_count > 0) {
+            $detailKeterikatan = [];
+            if ($wilayah->daftar_customer_count > 0) {
+                $detailKeterikatan[] = "{$wilayah->daftar_customer_count} customer pemilik";
+            }
+            if ($wilayah->daftar_toko_count > 0) {
+                $detailKeterikatan[] = "{$wilayah->daftar_toko_count} toko cabang / proyek";
+            }
+            $teksKeterikatan = implode(' dan ', $detailKeterikatan);
+
+            return redirect()->route('master.wilayah.index')->with('gagal', "Wilayah '{$wilayah->nama_wilayah}' tidak dapat dihapus karena masih terhubung dengan {$teksKeterikatan}.");
         }
 
         $wilayah->delete();
@@ -116,9 +126,9 @@ class WilayahController extends Controller
         DB::beginTransaction();
         try {
             foreach ($daftarId as $kode) {
-                $wilayah = Wilayah::withCount('daftarCustomer')->find($kode);
+                $wilayah = Wilayah::withCount(['daftarCustomer', 'daftarToko'])->find($kode);
                 if ($wilayah) {
-                    if ($wilayah->daftar_customer_count > 0) {
+                    if ($wilayah->daftar_customer_count > 0 || $wilayah->daftar_toko_count > 0) {
                         $gagalDihapus++;
                         continue;
                     }
@@ -129,7 +139,7 @@ class WilayahController extends Controller
             DB::commit();
 
             if ($gagalDihapus > 0) {
-                return redirect()->route('master.wilayah.index')->with('sukses', "{$berhasilDihapus} wilayah berhasil dihapus. {$gagalDihapus} wilayah dilewati karena masih memiliki customer toko aktif terhubung.");
+                return redirect()->route('master.wilayah.index')->with('sukses', "{$berhasilDihapus} wilayah berhasil dihapus. {$gagalDihapus} wilayah dilewati karena masih memiliki customer pemilik atau toko cabang terhubung.");
             }
 
             return redirect()->route('master.wilayah.index')->with('sukses', "{$berhasilDihapus} data wilayah terpilih berhasil dihapus.");

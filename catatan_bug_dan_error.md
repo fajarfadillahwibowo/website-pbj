@@ -11,8 +11,17 @@
     3. Menyingkat teks aksi: `Cetak Bukti Kas Keluar (BKK)` -> `Cetak Bukti Kas`, `Cetak Surat Pesanan (PO)` -> `Cetak PO`, `Cetak Lembar SO` -> `Cetak SO`, dan `Cetak Kartu Aset` -> `Cetak Kartu`.
     4. Mengganti generator cetak aset dengan template dokumen cetak mandiri A4 berstandar resmi PBJ (kop surat resmi, tabel data aktiva tetap PSAK 16, tabel spesifikasi fisik armada logistik, tanda tangan berimbang, CSS inline tanpa dependensi CDN, serta menyembunyikan tombol modal).
   - *Hasil Verifikasi:* Lolos pengujian live browser mandiri (100% Passed) di kelima halaman: popover baris 1 membuka ke bawah tanpa terpotong batas tabel, teks label proporsional, dan lembar cetak dokumen berformat rapi.
+- **[TERSELESAIKAN] Audit & Penguatan CRUD Master Data Wilayah & Zonasi**:
+  - *Penyebab:*
+    1. Facade `DB` tidak di-import di `WilayahController.php` sehingga metode `hapusMassal` berpotensi memicu fatal error `Class "App\Http\Controllers\Master\DB" not found`.
+    2. Metode `destroy()` dan `hapusMassal()` hanya memeriksa keterikatan `daftarCustomer`, padahal tabel `data_toko_bangunan` memiliki foreign key aktif `fk_toko_wilayah` yang akan memicu integrity constraint violation MySQL jika ada toko cabang yang terhubung ke wilayah tersebut.
+    3. Kolom "Jumlah Mitra Toko" sebelumnya hanya menghitung customer dan belum merinci data fisik toko bangunan / proyek cabang.
+  - *Solusi:*
+    1. Mengimpor facade `use Illuminate\Support\Facades\DB;` pada `WilayahController.php`.
+    2. Menambahkan relasi `daftarToko()` pada model `Wilayah.php` (`hasMany(TokoBangunan::class)`) dan memperkuat validasi penghapusan di controller untuk memeriksa relasi customer dan toko fisik secara bersamaan dengan pesan peringatan yang informatif.
+    3. Memperbarui tabel view untuk menampilkan rincian keterikatan Toko Cabang dan Customer Pemilik, menambahkan `min-h-[260px] pb-12`, serta menambahkan field `Kode Wilayah` readonly pada modal edit wilayah.
+  - *Hasil Verifikasi:* Siklus penuh Create (tambah data otomatis WLY-004), Read (pencarian responsif), Update (ubah nama wilayah), dan Delete (hapus data) teruji dan lulus 100% di browser live.
 
-  - *Penyebab:* 
     1. Terjadi *double HTML-escaping* tanda kutip JSON (`" -> &quot; -> &amp;quot;`) akibat evaluasi bertingkat `{{ json_encode(...) }}` pada Blade dan `{{ $aksiEdit }}` di dalam `<x-menu-aksi-tabel>`. Saat dirender ke peramban, Alpine.js menerima teks bertanda entitas HTML mentah dan melempar `SyntaxError: Unexpected token '&'` sehingga modal edit tidak pernah terpanggil. Selain itu, mutasi langsung properti dari dalam komponen anak `menu-aksi-tabel` tidak tersinkron ke *root scope* penampung modal.
     2. Dropdown menu aksi pada riwayat rilisan kas bon terpotong karena batas bawah kontainer `overflow-x-auto` pada tabel yang berbaris sedikit, serta rumus `bukaKeAtas` di `menu-aksi-tabel` belum memperhitungkan jarak batas kontainer tabel terdekat.
     3. Teks label tombol aksi terlalu panjang untuk ruang popover.

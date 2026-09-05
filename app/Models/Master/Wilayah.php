@@ -26,4 +26,9 @@ class Wilayah extends Model
     {
         return $this->hasMany(Customer::class, 'kode_wilayah', 'kode_wilayah');
     }
+
+    public function daftarToko()
+    {
+        return $this->hasMany(TokoBangunan::class, 'kode_wilayah', 'kode_wilayah');
+    }
 }
