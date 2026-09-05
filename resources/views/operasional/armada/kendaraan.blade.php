@@ -527,7 +527,7 @@
                     </div>
 
                     <div class="w-44">
-                        <select name="jenis" onchange="this.form.submit()"
+                        <select name="jenis" onchange="if (typeof this.form.requestSubmit === 'function') { this.form.requestSubmit(); } else { this.form.submit(); }"
                                 class="w-full px-3 py-1.5 text-xs rounded-xl bg-[#F8FAFC] dark:bg-[#1C1E2A] border border-[#E2E8F0] dark:border-[#252837] text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
                             <option value="semua">-- Semua Jenis Aset --</option>
                             @foreach($daftarSemuaJenis ?? [] as $j)

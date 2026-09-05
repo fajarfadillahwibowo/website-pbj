@@ -1,5 +1,18 @@
 # 📝 Pelacak Bug, Error, & Progres Terlewati Real-time
 
+- **[TERSELESAIKAN] Getaran Layout Shift Saat Refresh/Filter/Navigasi & Transisi Mulus Full SPA**:
+  - *Penyebab:*
+    1. Pembaruan filter via `<x-dropdown-kustom>` memanggil `form.submit()` native JavaScript yang menurut standar W3C mem-bypass event listener `submit`, sehingga interceptor SPA tidak menangkapnya dan browser melakukan full page reload (layar berkedip putih dan seluruh dokumen dimuat ulang).
+    2. Event listener `submit` pada `resources/views/layouts/app.blade.php` sebelumnya hanya menangani `method === 'GET'`, sehingga pengiriman form tambah/edit modal (POST/PUT/DELETE) tetap memicu reload halaman penuh.
+    3. Pada `app.css`, kelas animasi bertingkat `.tabel-bertingkat tbody tr:nth-child(1..10)` menerapkan stagger delay dengan `translateY(10px)` yang membuat baris-baris tabel melompat satu per satu saat dimuat, ditambah collapse tinggi kontainer Alpine yang menyebabkan efek "bergetar" (*layout shift*).
+  - *Solusi:*
+    1. Mengubah pemanggilan submit di `komponenDropdownKustom` menjadi `form.requestSubmit()` agar memicu event submit DOM dan tertangkap secara otomatis oleh engine SPA.
+    2. Menghapus animasi bertingkat kasar pada baris tabel (`.tabel-bertingkat tbody tr { animation: none !important; }`) dan menggantinya dengan transisi lembut `fade-masuk-halus` (`translateY(3px)`).
+    3. Memperbarui engine SPA `muatKontenDinamis()` dengan penguncian tinggi kontainer (`min-height`) sebelum swap dilakukan agar kontainer tabel tidak loncat, serta menambahkan transisi opacity `0.6` ke `1.0`.
+    4. Menambahkan dukungan form mutasi (POST/PUT/DELETE) di latar belakang via Fetch API dengan penutupan modal otomatis (`tutupSemuaModal()`), pembersihan dan inisialisasi ulang Alpine tree, serta ekstraksi pesan alert session ke komponen **Floating Toast Notification** di pojok kanan atas tanpa menggeser tata letak tabel.
+    5. Menyelaraskan event select pada `operasional/armada/kendaraan.blade.php` agar menggunakan `requestSubmit()`.
+  - *Hasil Verifikasi:* Lulus uji browser live mandiri (Autonomous Browser Subagent). Filter dropdown pada Toko Bangunan beralih secara instan dan mulus tanpa reload, URL tersinkron via History API, total baris tabel ter-update presisi, navigasi menu sidebar berjalan lancar tanpa me-reload frame sidebar, dan modal tambah/edit bekerja rapi tanpa getaran/flicker.
+
 - **[TERSELESAIKAN] Penghapusan Tombol Filter Statis & Standarisasi UI Filter Master Customer & Toko Bangunan**:
   - *Penyebab:* Pada modul [Master Customer](file:///c:/laragon/www/laravel1/resources/views/master/customer/index.blade.php) dan [Master Toko Bangunan](file:///c:/laragon/www/laravel1/resources/views/master/toko_bangunan/index.blade.php), terdapat tombol abu-abu `<button type="submit">Filter</button>` statis. Tombol ini terkesan tidak berfungsi karena dropdown filter di sampingnya sudah memiliki fungsi auto-submit saat dipilih dan input pencarian teks otomatis submit saat menekan tombol Enter. Selain itu, belum ada badge indikator visual filter aktif maupun tombol Reset cepat yang seragam.
   - *Solusi:*
